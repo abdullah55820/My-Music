@@ -17,78 +17,85 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #000;
     }
-    body {
-      /* একটি দারুণ এবং নির্ভরযোগ্য প্রকৃতির ছবি */
-      background: url('https://images.unsplash.com/photo-1540206395-68808572332f?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed;
+    
+    /* ব্যাকগ্রাউন্ড ব্লার পিকচার */
+    .blur-bg {
+      position: fixed;
+      top: -20px;
+      left: -20px;
+      width: calc(100% + 40px);
+      height: calc(100% + 40px);
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed;
       background-size: cover;
+      filter: blur(10px);
+      -webkit-filter: blur(10px);
+      z-index: -1;
+    }
+
+    body {
       display: flex;
       justify-content: center;
       align-items: flex-end;
       padding-bottom: 50px;
     }
     
-    /* Saloon.wtf স্টাইল স্বচ্ছ গ্লাস কার্ড */
-    .player-container {
-      width: 88%;
-      max-width: 380px;
-      background: rgba(18, 18, 18, 0.4); /* আরও স্বচ্ছ কালো */
-      backdrop-filter: blur(15px); /* ব্লার ইফেক্ট */
+    /* সুন্দর গ্লাস মিউজিক কার্ড */
+    .player-card {
+      width: 90%;
+      max-width: 360px;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
-      border-radius: 20px;
-      padding: 14px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      border-radius: 24px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-between;
-      color: white;
     }
 
-    .song-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .song-title {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-
-    .song-sub {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    /* ইউটিউব ভিডিওর থাম্বনেইল লুকানোর কভার */
-    .player-wrapper {
-      width: 140px;
-      height: 42px;
-      overflow: hidden;
-      border-radius: 12px;
-      position: relative;
-    }
-
-    iframe {
+    #player {
       width: 100%;
       height: 100%;
-      border: none;
+      border-radius: 16px;
     }
   </style>
 </head>
 <body>
 
-  <div class="player-container">
-    <div class="song-info">
-      <span class="song-title">Chill & Peace Vibes</span>
-      <span class="song-sub">YouTube Playlist</span>
-    </div>
-    
-    <div class="player-wrapper">
-      <iframe src="https://www.youtube.com/embed/videoseries?list=PLbvY05KVYwoo" allow="autoplay; encrypted-media"></iframe>
-    </div>
+  <!-- ব্লার ব্যাকগ্রাউন্ড -->
+  <div class="blur-bg"></div>
+
+  <!-- মিউজিক প্লেয়ার -->
+  <div class="player-card">
+    <div id="player"></div>
   </div>
 
+  <!-- ইউটিউব আইফ্রেম এপিআই -->
+  <script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+          'listType': 'playlist',
+          'list': 'PLbvY05KVYwoo',
+          'controls': 1,
+          'autoplay': 0,
+          'modestbranding': 1,
+          'rel': 0,
+          'playsinline': 1
+        }
+      });
+    }
+  </script>
 </body>
 </html>
