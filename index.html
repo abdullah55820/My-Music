@@ -1,101 +1,1069 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Shanti Music</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <title>My Music</title>
+
   <style>
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-    }
-    html, body {
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #000;
-    }
-    
-    /* ব্যাকগ্রাউন্ড ব্লার পিকচার */
-    .blur-bg {
-      position: fixed;
-      top: -20px;
-      left: -20px;
-      width: calc(100% + 40px);
-      height: calc(100% + 40px);
-      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed;
-      background-size: cover;
-      filter: blur(10px);
-      -webkit-filter: blur(10px);
-      z-index: -1;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
+    :root {
+      --accent: #ffffff;
+      --glass: rgba(20, 20, 20, 0.48);
+      --border: rgba(255, 255, 255, 0.16);
+    }
+
+    html,
     body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      padding-bottom: 50px;
-    }
-    
-    /* সুন্দর গ্লাস মিউজিক কার্ড */
-    .player-card {
-      width: 90%;
-      max-width: 360px;
-      height: 200px;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-radius: 24px;
-      padding: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #player {
       width: 100%;
       height: 100%;
-      border-radius: 16px;
+      overflow: hidden;
+      background: #080808;
+      color: white;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        sans-serif;
+    }
+
+    /* =========================
+       BLURRED BACKGROUND
+    ========================== */
+
+    .background {
+      position: fixed;
+      inset: -40px;
+      z-index: 0;
+
+      background-image:
+        linear-gradient(
+          rgba(0, 0, 0, 0.32),
+          rgba(0, 0, 0, 0.62)
+        ),
+        url("https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80");
+
+      background-size: cover;
+      background-position: center;
+
+      filter: blur(28px);
+      transform: scale(1.12);
+
+      transition:
+        background-image 0.8s ease,
+        background-position 0.8s ease;
+    }
+
+    .background::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(255,255,255,0.08),
+          transparent 40%
+        ),
+        rgba(0,0,0,0.28);
+    }
+
+    /* =========================
+       DARK OVERLAY
+    ========================== */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.25),
+          rgba(0,0,0,0.12) 35%,
+          rgba(0,0,0,0.65)
+        );
+      pointer-events: none;
+    }
+
+    /* =========================
+       APP
+    ========================== */
+
+    .app {
+      position: relative;
+      z-index: 2;
+
+      width: 100%;
+      height: 100dvh;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      padding: 22px;
+    }
+
+    /* =========================
+       TOP BAR
+    ========================== */
+
+    .topbar {
+      position: absolute;
+      top: 24px;
+      left: 20px;
+      right: 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      pointer-events: none;
+    }
+
+    .brand {
+      pointer-events: auto;
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      padding: 10px 15px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .brand-dot {
+      width: 9px;
+      height: 9px;
+      background: #55e889;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #55e889;
+    }
+
+    .brand span {
+      font-size: 15px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .playlist-button {
+      pointer-events: auto;
+
+      width: 43px;
+      height: 43px;
+
+      border: 1px solid var(--border);
+      border-radius: 50%;
+
+      background: rgba(0,0,0,0.28);
+
+      color: white;
+      font-size: 19px;
+
+      display: grid;
+      place-items: center;
+
+      cursor: pointer;
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    /* =========================
+       PLAYER
+    ========================== */
+
+    .player {
+      width: min(570px, 100%);
+
+      padding: 26px;
+
+      border: 1px solid var(--border);
+      border-radius: 32px;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255,255,255,0.12),
+          rgba(255,255,255,0.045)
+        );
+
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+
+      box-shadow:
+        0 30px 100px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* =========================
+       SONG INFO
+    ========================== */
+
+    .song-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .cover {
+      width: 72px;
+      height: 72px;
+
+      flex-shrink: 0;
+
+      border-radius: 18px;
+
+      object-fit: cover;
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .song-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .song-title {
+      font-size: 21px;
+      font-weight: 700;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-artist {
+      margin-top: 5px;
+
+      font-size: 14px;
+      color: rgba(255,255,255,0.62);
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* =========================
+       PROGRESS
+    ========================== */
+
+    .progress-area {
+      margin-top: 28px;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+
+      margin-bottom: 8px;
+
+      font-size: 12px;
+      color: rgba(255,255,255,0.62);
+    }
+
+    .progress {
+      position: relative;
+
+      width: 100%;
+      height: 5px;
+
+      border-radius: 20px;
+
+      background: rgba(255,255,255,0.18);
+
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+
+      width: 0%;
+      height: 100%;
+
+      border-radius: inherit;
+
+      background: white;
+    }
+
+    .progress-dot {
+      position: absolute;
+
+      top: 50%;
+      left: 0%;
+
+      width: 12px;
+      height: 12px;
+
+      border-radius: 50%;
+
+      background: white;
+
+      transform: translate(-50%, -50%);
+
+      box-shadow: 0 0 12px rgba(255,255,255,0.5);
+    }
+
+    /* =========================
+       CONTROLS
+    ========================== */
+
+    .controls {
+      margin-top: 28px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control {
+      width: 48px;
+      height: 48px;
+
+      border: none;
+      background: transparent;
+
+      color: white;
+
+      display: grid;
+      place-items: center;
+
+      font-size: 21px;
+
+      cursor: pointer;
+
+      opacity: 0.9;
+
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .control:active {
+      transform: scale(0.88);
+    }
+
+    .control:hover {
+      opacity: 1;
+    }
+
+    .play {
+      width: 68px;
+      height: 68px;
+
+      border-radius: 50%;
+
+      border: none;
+
+      background: white;
+      color: black;
+
+      font-size: 22px;
+
+      display: grid;
+      place-items: center;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 12px 30px rgba(0,0,0,0.35);
+    }
+
+    /* =========================
+       YOUTUBE PLAYER
+    ========================== */
+
+    #youtube-player {
+      position: fixed;
+
+      width: 1px;
+      height: 1px;
+
+      left: -10px;
+      bottom: -10px;
+
+      opacity: 0.01;
+
+      pointer-events: none;
+    }
+
+    /* =========================
+       BOTTOM TEXT
+    ========================== */
+
+    .bottom {
+      position: absolute;
+
+      bottom: 22px;
+
+      text-align: center;
+
+      font-size: 11px;
+
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 600px) {
+
+      .app {
+        padding: 16px;
+      }
+
+      .topbar {
+        top: 18px;
+        left: 16px;
+        right: 16px;
+      }
+
+      .player {
+        padding: 22px;
+
+        border-radius: 28px;
+      }
+
+      .cover {
+        width: 62px;
+        height: 62px;
+
+        border-radius: 16px;
+      }
+
+      .song-title {
+        font-size: 18px;
+      }
+
+      .song-artist {
+        font-size: 13px;
+      }
+
+      .controls {
+        margin-top: 25px;
+      }
+
+      .control {
+        width: 42px;
+        height: 42px;
+      }
+
+      .play {
+        width: 62px;
+        height: 62px;
+      }
+    }
+
+    /* =========================
+       SMALL PHONE
+    ========================== */
+
+    @media (max-height: 700px) {
+
+      .player {
+        padding: 18px;
+      }
+
+      .progress-area {
+        margin-top: 20px;
+      }
+
+      .controls {
+        margin-top: 20px;
+      }
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ব্লার ব্যাকগ্রাউন্ড -->
-  <div class="blur-bg"></div>
+  <!-- Background -->
+  <div class="background" id="background"></div>
+  <div class="overlay"></div>
 
-  <!-- মিউজিক প্লেয়ার -->
-  <div class="player-card">
-    <div id="player"></div>
-  </div>
+  <!-- YouTube API Player -->
+  <div id="youtube-player"></div>
 
-  <!-- ইউটিউব আইফ্রেম এপিআই -->
+  <main class="app">
+
+    <!-- Top -->
+    <div class="topbar">
+
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <span>My Music</span>
+      </div>
+
+      <button
+        class="playlist-button"
+        onclick="openPlaylist()"
+        aria-label="Open playlist"
+      >
+        ☰
+      </button>
+
+    </div>
+
+    <!-- Player -->
+    <section class="player">
+
+      <div class="song-info">
+
+        <img
+          id="cover"
+          class="cover"
+          src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80"
+          alt="Album"
+        />
+
+        <div class="song-text">
+
+          <div id="song-title" class="song-title">
+            My Music
+          </div>
+
+          <div id="song-artist" class="song-artist">
+            Loading playlist...
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-area">
+
+        <div class="time-row">
+          <span id="current-time">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+
+        <div
+          class="progress"
+          id="progress"
+          onclick="seek(event)"
+        >
+          <div
+            class="progress-fill"
+            id="progress-fill"
+          ></div>
+
+          <div
+            class="progress-dot"
+            id="progress-dot"
+          ></div>
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+
+        <button
+          class="control"
+          onclick="toggleShuffle()"
+          id="shuffle"
+          aria-label="Shuffle"
+        >
+          🔀
+        </button>
+
+        <button
+          class="control"
+          onclick="previousSong()"
+          aria-label="Previous"
+        >
+          ⏮
+        </button>
+
+        <button
+          class="play"
+          onclick="togglePlay()"
+          id="play"
+          aria-label="Play"
+        >
+          ▶
+        </button>
+
+        <button
+          class="control"
+          onclick="nextSong()"
+          aria-label="Next"
+        >
+          ⏭
+        </button>
+
+        <button
+          class="control"
+          onclick="toggleRepeat()"
+          id="repeat"
+          aria-label="Repeat"
+        >
+          🔁
+        </button>
+
+      </div>
+
+    </section>
+
+    <div class="bottom">
+      YouTube Playlist • My Music
+    </div>
+
+  </main>
+
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    var player;
+    /*
+      ============================
+      YOUR PLAYLIST
+      ============================
+    */
+
+    const PLAYLIST_ID = "PLbvY05KVYwoo";
+
+
+    let player;
+
+    let isPlaying = false;
+
+    let shuffle = false;
+
+    let repeat = false;
+
+    let updateTimer;
+
+
+    /*
+      ============================
+      YOUTUBE PLAYER
+      ============================
+    */
+
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
+
+      player = new YT.Player("youtube-player", {
+
+        height: "1",
+        width: "1",
+
         playerVars: {
-          'listType': 'playlist',
-          'list': 'PLbvY05KVYwoo',
-          'controls': 1,
-          'autoplay': 0,
-          'modestbranding': 1,
-          'rel': 0,
-          'playsinline': 1
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          modestbranding: 1,
+          playsinline: 1,
+
+          listType: "playlist",
+          list: PLAYLIST_ID
+        },
+
+        events: {
+
+          onReady: onPlayerReady,
+
+          onStateChange: onPlayerStateChange
+
         }
+
       });
+
     }
+
+
+    function onPlayerReady() {
+
+      updateSongInfo();
+
+      startProgressUpdater();
+
+    }
+
+
+    /*
+      ============================
+      PLAYER STATE
+      ============================
+    */
+
+    function onPlayerStateChange(event) {
+
+      if (event.data === YT.PlayerState.PLAYING) {
+
+        isPlaying = true;
+
+        document.getElementById("play").innerHTML = "Ⅱ";
+
+        updateSongInfo();
+
+      }
+
+      else if (
+        event.data === YT.PlayerState.PAUSED
+      ) {
+
+        isPlaying = false;
+
+        document.getElementById("play").innerHTML = "▶";
+
+      }
+
+      else if (
+        event.data === YT.PlayerState.ENDED
+      ) {
+
+        if (repeat) {
+
+          player.seekTo(0);
+
+          player.playVideo();
+
+        }
+
+        else {
+
+          nextSong();
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      PLAY / PAUSE
+      ============================
+    */
+
+    function togglePlay() {
+
+      if (!player) return;
+
+      if (isPlaying) {
+
+        player.pauseVideo();
+
+      } else {
+
+        player.playVideo();
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      NEXT
+      ============================
+    */
+
+    function nextSong() {
+
+      if (!player) return;
+
+      if (shuffle) {
+
+        player.setShuffle(true);
+
+      }
+
+      player.nextVideo();
+
+    }
+
+
+    /*
+      ============================
+      PREVIOUS
+      ============================
+    */
+
+    function previousSong() {
+
+      if (!player) return;
+
+      player.previousVideo();
+
+    }
+
+
+    /*
+      ============================
+      SHUFFLE
+      ============================
+    */
+
+    function toggleShuffle() {
+
+      shuffle = !shuffle;
+
+      const button =
+        document.getElementById("shuffle");
+
+      button.style.opacity =
+        shuffle ? "1" : "0.45";
+
+      if (player) {
+
+        player.setShuffle(shuffle);
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      REPEAT
+      ============================
+    */
+
+    function toggleRepeat() {
+
+      repeat = !repeat;
+
+      const button =
+        document.getElementById("repeat");
+
+      button.style.opacity =
+        repeat ? "1" : "0.45";
+
+    }
+
+
+    /*
+      ============================
+      SONG INFO
+      ============================
+    */
+
+    function updateSongInfo() {
+
+      if (!player) return;
+
+      try {
+
+        const data = player.getVideoData();
+
+        if (!data) return;
+
+        const videoId = data.video_id;
+
+        const title = data.title;
+
+        if (videoId) {
+
+          const thumbnail =
+            `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+          document.getElementById("cover").src =
+            thumbnail;
+
+          document.getElementById("background").style.backgroundImage =
+            `
+            linear-gradient(
+              rgba(0,0,0,0.30),
+              rgba(0,0,0,0.65)
+            ),
+            url("${thumbnail}")
+            `;
+
+        }
+
+        if (title) {
+
+          document.getElementById("song-title").textContent =
+            title;
+
+          document.getElementById("song-artist").textContent =
+            "YouTube Playlist";
+
+        }
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      PROGRESS
+      ============================
+    */
+
+    function startProgressUpdater() {
+
+      clearInterval(updateTimer);
+
+      updateTimer = setInterval(() => {
+
+        if (!player) return;
+
+        try {
+
+          const current =
+            player.getCurrentTime();
+
+          const duration =
+            player.getDuration();
+
+          if (!duration) return;
+
+          const percent =
+            (current / duration) * 100;
+
+          document.getElementById(
+            "progress-fill"
+          ).style.width =
+            percent + "%";
+
+          document.getElementById(
+            "progress-dot"
+          ).style.left =
+            percent + "%";
+
+          document.getElementById(
+            "current-time"
+          ).textContent =
+            formatTime(current);
+
+          document.getElementById(
+            "duration"
+          ).textContent =
+            formatTime(duration);
+
+        } catch (error) {}
+
+      }, 500);
+
+    }
+
+
+    /*
+      ============================
+      SEEK
+      ============================
+    */
+
+    function seek(event) {
+
+      if (!player) return;
+
+      const bar =
+        document.getElementById("progress");
+
+      const rect =
+        bar.getBoundingClientRect();
+
+      const percentage =
+        (event.clientX - rect.left) /
+        rect.width;
+
+      const duration =
+        player.getDuration();
+
+      player.seekTo(
+        percentage * duration,
+        true
+      );
+
+    }
+
+
+    /*
+      ============================
+      TIME FORMAT
+      ============================
+    */
+
+    function formatTime(seconds) {
+
+      if (!seconds || isNaN(seconds))
+        return "0:00";
+
+      seconds = Math.floor(seconds);
+
+      const minutes =
+        Math.floor(seconds / 60);
+
+      const secs =
+        seconds % 60;
+
+      return (
+        minutes +
+        ":" +
+        String(secs).padStart(2, "0")
+      );
+
+    }
+
+
+    /*
+      ============================
+      OPEN YOUTUBE PLAYLIST
+      ============================
+    */
+
+    function openPlaylist() {
+
+      window.open(
+        `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`,
+        "_blank"
+      );
+
+    }
+
+
+    /*
+      ============================
+      UPDATE SONG INFO
+      ============================
+    */
+
+    setInterval(() => {
+
+      if (player && isPlaying) {
+
+        updateSongInfo();
+
+      }
+
+    }, 2000);
+
   </script>
+
 </body>
 </html>
