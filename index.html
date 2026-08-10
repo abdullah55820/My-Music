@@ -63,6 +63,36 @@ letter-spacing:.3px;
 
 backdrop-filter:blur(12px);
 -webkit-backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+/* LIVE RED DOT ANIMATION */
+.live-dot{
+width:7px;
+height:7px;
+background-color:#ff3b30;
+border-radius:50%;
+display:inline-block;
+box-shadow:0 0 8px #ff3b30;
+animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+0%{
+opacity:1;
+transform:scale(1);
+}
+50%{
+opacity:0.3;
+transform:scale(0.8);
+}
+100%{
+opacity:1;
+transform:scale(1);
+}
 }
 
 
@@ -394,8 +424,10 @@ padding:4px 9px;
 <div class="bg"></div>
 
 <!-- BANGLADESH LIVE TIME -->
-<div class="bd-time" id="bdTime">
-BD • 00:00:00 AM
+<div class="bd-time">
+  <span>BD</span>
+  <span class="live-dot"></span>
+  <span id="bdTimeVal">--:--:-- --</span>
 </div>
 
 <!-- YOUTUBE PLAYER -->
@@ -562,7 +594,7 @@ const options = {
 
 const timeString = new Intl.DateTimeFormat('en-US', options).format(new Date());
 
-document.getElementById("bdTime").textContent = "BD • " + timeString;
+document.getElementById("bdTimeVal").textContent = timeString;
 
 }
 
