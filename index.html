@@ -148,19 +148,19 @@ backdrop-filter:blur(25px) saturate(130%);
 
 display:flex;
 align-items:center;
-gap:16px;
+gap:18px;
 
 transform:translateY(-12px);
 }
 
 
-/* THUMBNAIL - 137% ZOOM */
+/* THUMBNAIL */
 
 .cover-wrapper{
 position:relative;
 
-width:78px;
-height:78px;
+width:82px;
+height:82px;
 
 flex-shrink:0;
 
@@ -196,8 +196,8 @@ content:"";
 
 position:absolute;
 
-width:16px;
-height:16px;
+width:17px;
+height:17px;
 
 background:rgba(20,20,20,.85);
 
@@ -239,7 +239,7 @@ justify-content:center;
 }
 
 .title{
-font-size:17px;
+font-size:18px;
 font-weight:700;
 
 white-space:nowrap;
@@ -259,7 +259,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
-margin-bottom:8px;
+margin-bottom:9px;
 }
 
 
@@ -277,7 +277,7 @@ background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
-margin-bottom:7px;
+margin-bottom:8px;
 }
 
 .fill{
@@ -332,8 +332,8 @@ transition:transform .1s;
 }
 
 .btn svg{
-width:23px;
-height:23px;
+width:24px;
+height:24px;
 fill:#fff;
 }
 
@@ -341,8 +341,8 @@ fill:#fff;
 /* PLAY */
 
 .play{
-width:56px;
-height:56px;
+width:58px;
+height:58px;
 
 border-radius:50%;
 border:0;
@@ -360,12 +360,12 @@ cursor:pointer;
 }
 
 .play svg{
-width:23px;
-height:23px;
+width:24px;
+height:24px;
 
 fill:#000;
 
-margin-left:2px;
+margin-left:3px;
 }
 
 .play.playing svg{
@@ -384,16 +384,19 @@ transform:scale(.90);
 
 .player{
 height:118px;
+
 padding:10px 14px;
+
 border-radius:59px;
+
 gap:10px;
 
 transform:translateY(-10px);
 }
 
 .cover-wrapper{
-width:68px;
-height:68px;
+width:70px;
+height:70px;
 }
 
 .cover-wrapper::after{
@@ -402,11 +405,14 @@ height:15px;
 }
 
 .title{
-font-size:15px;
+font-size:16px;
 }
 
 .artist{
 font-size:13px;
+
+margin-top:1px;
+margin-bottom:7px;
 }
 
 .seek{
@@ -418,28 +424,28 @@ margin-bottom:6px;
 font-size:11px;
 }
 
+.controls{
+gap:8px;
+}
+
+.btn{
+width:28px;
+height:28px;
+}
+
+.btn svg{
+width:21px;
+height:21px;
+}
+
 .play{
-width:48px;
-height:48px;
+width:50px;
+height:50px;
 }
 
 .play svg{
 width:21px;
 height:21px;
-}
-
-.btn{
-width:27px;
-height:27px;
-}
-
-.btn svg{
-width:20px;
-height:20px;
-}
-
-.controls{
-gap:8px;
 }
 
 .bd-time{
@@ -613,9 +619,7 @@ let player=null;
 let playing=false;
 
 
-/* =
-   BANGLADESH LIVE TIME (AM/PM)
-   = */
+/* BANGLADESH LIVE TIME */
 
 function updateBDTime(){
 
@@ -633,23 +637,27 @@ new Intl.DateTimeFormat(
 options
 ).format(new Date());
 
-document.getElementById("bdTimeVal").textContent =
-timeString;
+document.getElementById(
+"bdTimeVal"
+).textContent=timeString;
 
 }
 
 updateBDTime();
 
-setInterval(updateBDTime,1000);
+setInterval(
+updateBDTime,
+1000
+);
 
 
-/* =
-   YOUTUBE API
-   = */
+/* YOUTUBE API */
 
 function onYouTubeIframeAPIReady(){
 
-player=new YT.Player("yt",{
+player=new YT.Player(
+"yt",
+{
 
 width:"2",
 height:"2",
@@ -693,16 +701,20 @@ onStateChange:state
 
 function ready(){
 
-setTimeout(updateInfo,700);
+setTimeout(
+updateInfo,
+700
+);
 
-setInterval(updateProgress,400);
+setInterval(
+updateProgress,
+400
+);
 
 }
 
 
-/* =
-   PLAYER STATE
-   = */
+/* PLAYER STATE */
 
 function state(e){
 
@@ -716,16 +728,22 @@ const playIcon =
 document.getElementById("play-icon");
 
 
-if(e.data===YT.PlayerState.PLAYING){
+if(
+e.data===YT.PlayerState.PLAYING
+){
 
 playing=true;
 
-playBtn.classList.add("playing");
+playBtn.classList.add(
+"playing"
+);
 
 playIcon.innerHTML =
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add("spinning");
+cover.classList.add(
+"spinning"
+);
 
 updateInfo();
 
@@ -742,12 +760,16 @@ e.data===YT.PlayerState.ENDED
 
 playing=false;
 
-playBtn.classList.remove("playing");
+playBtn.classList.remove(
+"playing"
+);
 
 playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
 
 }
 
@@ -795,9 +817,7 @@ player.previousVideo();
 }
 
 
-/* =
-   SONG INFORMATION
-   = */
+/* SONG INFORMATION */
 
 function updateInfo(){
 
@@ -811,8 +831,10 @@ try{
 const d =
 player.getVideoData();
 
-if(!d || !d.video_id)
-return;
+if(
+!d ||
+!d.video_id
+)return;
 
 const id =
 d.video_id;
@@ -823,17 +845,23 @@ id +
 "/hqdefault.jpg";
 
 
-document.getElementById("cover").src =
-thumb;
+document.getElementById(
+"cover"
+).src=thumb;
 
 
-document.getElementById("title").textContent =
-d.title || "Unknown";
+document.getElementById(
+"title"
+).textContent =
+d.title ||
+"Unknown";
 
 
 if(d.author){
 
-document.getElementById("artist").textContent =
+document.getElementById(
+"artist"
+).textContent =
 d.author;
 
 }
@@ -843,9 +871,7 @@ d.author;
 }
 
 
-/* =
-   PROGRESS
-   = */
+/* PROGRESS */
 
 function updateProgress(){
 
@@ -874,15 +900,21 @@ Math.min(
 );
 
 
-document.getElementById("fill").style.width =
+document.getElementById(
+"fill"
+).style.width =
 p+"%";
 
 
-document.getElementById("current").textContent =
+document.getElementById(
+"current"
+).textContent =
 format(c);
 
 
-document.getElementById("duration").textContent =
+document.getElementById(
+"duration"
+).textContent =
 format(d);
 
 
@@ -934,7 +966,10 @@ true
 
 function format(s){
 
-if(!s || isNaN(s)){
+if(
+!s ||
+isNaN(s)
+){
 
 return "0:00";
 
@@ -946,7 +981,9 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(s%60).padStart(
+String(
+s%60
+).padStart(
 2,
 "0"
 );
