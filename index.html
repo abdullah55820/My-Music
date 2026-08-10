@@ -20,8 +20,8 @@ body{position:relative}
 .bg{
 position:fixed;
 inset:0;
-width:100%;
-height:100%;
+width:100vw;
+height:100dvh;
 background-image:url("background.jpg");
 background-position:center center;
 background-size:cover;
@@ -55,6 +55,7 @@ display:flex;
 align-items:center;
 gap:6px;
 }
+/* LIVE RED DOT ANIMATION */
 .live-dot{
 width:7px;
 height:7px;
@@ -65,9 +66,18 @@ box-shadow:0 0 8px #ff3b30;
 animation:pulse 1.5s infinite;
 }
 @keyframes pulse{
-0%{opacity:1;transform:scale(1)}
-50%{opacity:.3;transform:scale(.8)}
-100%{opacity:1;transform:scale(1)}
+0%{
+opacity:1;
+transform:scale(1);
+}
+50%{
+opacity:0.3;
+transform:scale(0.8);
+}
+100%{
+opacity:1;
+transform:scale(1);
+}
 }
 /* YOUTUBE */
 #yt{
@@ -88,29 +98,28 @@ width:100%;
 display:flex;
 align-items:flex-end;
 justify-content:center;
-padding:0 14px 58px;
+padding:0 14px 52px;
 }
 /* PLAYER */
 .player{
 width:min(520px,100%);
-height:132px;
+height:120px;
 padding:14px 18px 14px 14px;
 border:1px solid rgba(255,255,255,.2);
-border-radius:66px;
+border-radius:60px;
 background:rgba(40,25,20,.72);
 box-shadow:0 20px 50px rgba(0,0,0,.6);
 backdrop-filter:blur(25px) saturate(130%);
 -webkit-backdrop-filter:blur(25px) saturate(130%);
 display:flex;
 align-items:center;
-gap:16px;
-transform:translateY(-10px);
+gap:15px;
 }
-/* THUMBNAIL */
+/* THUMBNAIL - BIGGER */
 .cover-wrapper{
 position:relative;
-width:82px;
-height:82px;
+width:88px;
+height:88px;
 flex-shrink:0;
 display:flex;
 align-items:center;
@@ -133,8 +142,8 @@ animation-play-state:paused;
 .cover-wrapper::after{
 content:"";
 position:absolute;
-width:17px;
-height:17px;
+width:18px;
+height:18px;
 background:rgba(20,20,20,.85);
 border:2px solid rgba(255,255,255,.3);
 border-radius:50%;
@@ -147,8 +156,12 @@ z-index:2;
 animation-play-state:running;
 }
 @keyframes spin{
-from{transform:rotate(0deg)}
-to{transform:rotate(360deg)}
+from{
+transform:rotate(0deg);
+}
+to{
+transform:rotate(360deg);
+}
 }
 /* SONG INFO */
 .middle{
@@ -159,7 +172,7 @@ flex-direction:column;
 justify-content:center;
 }
 .title{
-font-size:18px;
+font-size:20px;
 font-weight:700;
 white-space:nowrap;
 overflow:hidden;
@@ -167,19 +180,19 @@ text-overflow:ellipsis;
 color:#fff;
 }
 .artist{
-font-size:15px;
+font-size:16px;
 color:rgba(255,255,255,.65);
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 margin-top:2px;
-margin-bottom:9px;
+margin-bottom:10px;
 }
 /* SEEK BAR */
 .seek{
 position:relative;
 width:100%;
-height:6px;
+height:7px;
 border-radius:10px;
 background:rgba(255,255,255,.2);
 cursor:pointer;
@@ -195,7 +208,7 @@ background:#fff;
 border-radius:10px;
 }
 .time-display{
-font-size:13px;
+font-size:14px;
 color:rgba(255,255,255,.6);
 font-variant-numeric:tabular-nums;
 }
@@ -203,12 +216,12 @@ font-variant-numeric:tabular-nums;
 .controls{
 display:flex;
 align-items:center;
-gap:14px;
+gap:16px;
 flex-shrink:0;
 }
 .btn{
-width:36px;
-height:36px;
+width:38px;
+height:38px;
 border:0;
 background:transparent;
 color:rgba(255,255,255,.9);
@@ -220,14 +233,14 @@ padding:0;
 transition:transform .1s;
 }
 .btn svg{
-width:25px;
-height:25px;
+width:27px;
+height:27px;
 fill:#fff;
 }
 /* PLAY */
 .play{
-width:60px;
-height:60px;
+width:64px;
+height:64px;
 border-radius:50%;
 border:0;
 background:#fff;
@@ -239,8 +252,8 @@ box-shadow:0 4px 15px rgba(0,0,0,.3);
 cursor:pointer;
 }
 .play svg{
-width:25px;
-height:25px;
+width:27px;
+height:27px;
 fill:#000;
 margin-left:3px;
 }
@@ -251,56 +264,55 @@ margin-left:0;
 .play:active{
 transform:scale(.90);
 }
-/* MOBILE — SAME LARGE ELEMENTS */
+/* MOBILE */
 @media(max-width:480px){
 .player{
-height:126px;
-padding:12px 14px;
-border-radius:63px;
-gap:11px;
-transform:translateY(-10px);
+height:120px;
+padding:10px 13px;
+border-radius:60px;
+gap:9px;
 }
 .cover-wrapper{
-width:78px;
-height:78px;
+width:82px;
+height:82px;
 }
 .cover-wrapper::after{
-width:16px;
-height:16px;
+width:17px;
+height:17px;
 }
 .title{
-font-size:17px;
+font-size:18px;
 }
 .artist{
-font-size:14px;
+font-size:15px;
 margin-top:2px;
-margin-bottom:8px;
+margin-bottom:9px;
 }
 .seek{
-height:5px;
-margin-bottom:7px;
+height:6px;
+margin-bottom:8px;
 }
 .time-display{
-font-size:12px;
+font-size:13px;
 }
 .controls{
 gap:8px;
 }
 .btn{
-width:32px;
-height:32px;
+width:34px;
+height:34px;
 }
 .btn svg{
-width:23px;
-height:23px;
+width:25px;
+height:25px;
 }
 .play{
-width:56px;
-height:56px;
+width:60px;
+height:60px;
 }
 .play svg{
-width:23px;
-height:23px;
+width:25px;
+height:25px;
 }
 .bd-time{
 top:10px;
@@ -311,15 +323,19 @@ padding:4px 9px;
 </style>
 </head>
 <body>
+<!-- BACKGROUND IMAGE -->
 <div class="bg"></div>
+<!-- BANGLADESH LIVE TIME -->
 <div class="bd-time">
   <span>BD</span>
   <span class="live-dot"></span>
   <span id="bdTimeVal">--:--:-- --</span>
 </div>
+<!-- YOUTUBE PLAYER -->
 <div id="yt"></div>
 <div class="app">
 <section class="player">
+<!-- THUMBNAIL -->
 <div class="cover-wrapper">
 <img 
 id="cover" 
@@ -327,6 +343,7 @@ class="cover"
 alt="Album art"
 >
 </div>
+<!-- SONG INFORMATION -->
 <div class="middle">
 <div id="title" class="title">
 Loading…
@@ -334,6 +351,7 @@ Loading…
 <div id="artist" class="artist">
 YouTube Playlist
 </div>
+<!-- PROGRESS BAR -->
 <div
 class="seek"
 id="seek"
@@ -344,13 +362,20 @@ class="fill"
 id="fill">
 </div>
 </div>
+<!-- TIME -->
 <div class="time-display">
-<span id="current">0:00</span>
+<span id="current">
+0:00
+</span>
 /
-<span id="duration">0:00</span>
+<span id="duration">
+0:00
+</span>
 </div>
 </div>
+<!-- CONTROLS -->
 <div class="controls">
+<!-- PREVIOUS -->
 <button 
 class="btn" 
 onclick="previousSong()" 
@@ -360,6 +385,7 @@ aria-label="Previous"
 <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
 </svg>
 </button>
+<!-- PLAY / PAUSE -->
 <button 
 class="play" 
 id="play" 
@@ -373,6 +399,7 @@ viewBox="0 0 24 24"
 <path d="M8 5v14l11-7z"/>
 </svg>
 </button>
+<!-- NEXT -->
 <button 
 class="btn" 
 onclick="nextSong()" 
@@ -387,37 +414,31 @@ aria-label="Next"
 </div>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+/* PLAYLIST */
 const PLAYLIST_ID="PLbvY05KVYwoo";
 let player=null;
 let playing=false;
-/* BD TIME */
+/* BANGLADESH LIVE TIME */
 function updateBDTime(){
-const options={
-timeZone:'Asia/Dhaka',
-hour:'2-digit',
-minute:'2-digit',
-second:'2-digit',
-hour12:true
+const options = { 
+  timeZone: 'Asia/Dhaka', 
+  hour: '2-digit', 
+  minute: '2-digit', 
+  second: '2-digit', 
+  hour12: true 
 };
-const timeString=
-new Intl.DateTimeFormat(
+const timeString = new Intl.DateTimeFormat(
 'en-US',
 options
 ).format(new Date());
-document.getElementById(
-"bdTimeVal"
-).textContent=timeString;
+document.getElementById("bdTimeVal").textContent =
+timeString;
 }
 updateBDTime();
-setInterval(
-updateBDTime,
-1000
-);
+setInterval(updateBDTime,1000);
 /* YOUTUBE API */
 function onYouTubeIframeAPIReady(){
-player=new YT.Player(
-"yt",
-{
+player=new YT.Player("yt",{
 width:"2",
 height:"2",
 playerVars:{
@@ -439,33 +460,23 @@ onStateChange:state
 }
 /* READY */
 function ready(){
-setTimeout(
-updateInfo,
-700
-);
-setInterval(
-updateProgress,
-400
-);
+setTimeout(updateInfo,700);
+setInterval(updateProgress,400);
 }
-/* STATE */
+/* PLAYER STATE */
 function state(e){
-const cover=
+const cover =
 document.getElementById("cover");
-const playBtn=
+const playBtn =
 document.getElementById("play");
-const playIcon=
+const playIcon =
 document.getElementById("play-icon");
 if(e.data===YT.PlayerState.PLAYING){
 playing=true;
-playBtn.classList.add(
-"playing"
-);
-playIcon.innerHTML=
+playBtn.classList.add("playing");
+playIcon.innerHTML =
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-cover.classList.add(
-"spinning"
-);
+cover.classList.add("spinning");
 updateInfo();
 }
 else if(
@@ -473,14 +484,10 @@ e.data===YT.PlayerState.PAUSED ||
 e.data===YT.PlayerState.ENDED
 ){
 playing=false;
-playBtn.classList.remove(
-"playing"
-);
-playIcon.innerHTML=
+playBtn.classList.remove("playing");
+playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
 }
 }
 /* PLAY / PAUSE */
@@ -502,39 +509,27 @@ function previousSong(){
 if(!player)return;
 player.previousVideo();
 }
-/* SONG INFO */
+/* SONG INFORMATION */
 function updateInfo(){
 if(
 !player ||
 typeof player.getVideoData!=="function"
 )return;
 try{
-const d=
-player.getVideoData();
-if(
-!d ||
-!d.video_id
-)return;
-const id=
-d.video_id;
+const d=player.getVideoData();
+if(!d || !d.video_id)return;
+const id=d.video_id;
 const thumb=
 "https://i.ytimg.com/vi/"
 +
 id
 +
 "/hqdefault.jpg";
-document.getElementById(
-"cover"
-).src=thumb;
-document.getElementById(
-"title"
-).textContent=
-d.title ||
-"Unknown";
+document.getElementById("cover").src=thumb;
+document.getElementById("title").textContent=
+d.title || "Unknown";
 if(d.author){
-document.getElementById(
-"artist"
-).textContent=
+document.getElementById("artist").textContent=
 d.author;
 }
 }catch(e){}
@@ -546,30 +541,21 @@ if(
 typeof player.getCurrentTime!=="function"
 )return;
 try{
-const c=
-player.getCurrentTime();
-const d=
-player.getDuration();
+const c=player.getCurrentTime();
+const d=player.getDuration();
 if(!d)return;
-const p=
-Math.max(
+const p=Math.max(
 0,
 Math.min(
 100,
 (c/d)*100
 )
 );
-document.getElementById(
-"fill"
-).style.width=
+document.getElementById("fill").style.width=
 p+"%";
-document.getElementById(
-"current"
-).textContent=
+document.getElementById("current").textContent=
 format(c);
-document.getElementById(
-"duration"
-).textContent=
+document.getElementById("duration").textContent=
 format(d);
 if(playing){
 updateInfo();
@@ -586,8 +572,7 @@ const r=
 document
 .getElementById("seek")
 .getBoundingClientRect();
-const p=
-Math.max(
+const p=Math.max(
 0,
 Math.min(
 1,
@@ -599,12 +584,9 @@ p*player.getDuration(),
 true
 );
 }
-/* FORMAT */
+/* FORMAT TIME */
 function format(s){
-if(
-!s ||
-isNaN(s)
-){
+if(!s || isNaN(s)){
 return "0:00";
 }
 s=Math.floor(s);
@@ -612,9 +594,7 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(
-s%60
-).padStart(
+String(s%60).padStart(
 2,
 "0"
 );
