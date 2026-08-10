@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>My Music</title>
+<title>My Music Player</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
 body{position:relative}
 
-/* গানের থাম্বনেইল থেকে তৈরি ডায়নামিক ব্যাকগ্রাউন্ড */
+/* ডায়নামিক ব্লার ব্যাকগ্রাউন্ড */
 .bg{
   position:fixed;inset:-30px;
   background:#1d1310 center/cover no-repeat;
-  filter:blur(35px) brightness(0.6);
+  filter:blur(35px) brightness(0.65);
   transform:scale(1.1);
   transition:background-image 0.8s ease-in-out;
 }
 .bg:after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.6));
+  background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.6));
 }
 
 #yt{
@@ -33,14 +33,14 @@ body{position:relative}
   padding:0 14px 40px;
 }
 
-/* ক্যাপসুল বার */
+/* ক্যাপসুল প্লেয়ার বার */
 .player{
   width:min(520px,100%);
   height:92px;
   padding:12px 18px 12px 14px;
-  border:1px solid rgba(255,255,255,.25);
+  border:1px solid rgba(255,255,255,.2);
   border-radius:46px;
-  background:rgba(30, 20, 18, 0.72);
+  background:rgba(40, 25, 20, 0.72);
   box-shadow:0 20px 50px rgba(0,0,0,.6);
   backdrop-filter:blur(25px) saturate(130%);
   -webkit-backdrop-filter:blur(25px) saturate(130%);
@@ -141,46 +141,68 @@ body{position:relative}
   font-variant-numeric: tabular-nums;
 }
 
+/* বাটন লেআউট */
 .controls{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   flex-shrink:0;
 }
 
 .btn{
-  width:28px;height:28px;
-  border:0;background:transparent;
-  color:#fff;
-  display:grid;
-  place-items:center;
-  font-size:13px;
-  opacity:.85;
+  width:26px;
+  height:26px;
+  border:0;
+  background:transparent;
+  color:rgba(255,255,255,0.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
+  padding:0;
+  transition:transform 0.1s, opacity 0.2s;
+}
+
+.btn svg {
+  width:18px;
+  height:18px;
+  fill:currentColor;
 }
 
 .play{
-  width:48px;height:48px;
+  width:48px;
+  height:48px;
   border-radius:50%;
   border:0;
   background:#fff;
   color:#000;
-  display:grid;
-  place-items:center;
-  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   box-shadow:0 4px 15px rgba(0,0,0,.3);
   cursor:pointer;
 }
 
-.btn:active,.play:active{transform:scale(.92)}
+.play svg {
+  width:18px;
+  height:18px;
+  fill:#000;
+  margin-left:2px;
+}
+
+.play.playing svg {
+  margin-left:0;
+}
+
+.btn:active,.play:active{transform:scale(.90)}
 
 @media(max-width:480px){
   .player{height:84px;padding:10px 14px;border-radius:42px;gap:10px}
   .cover-wrapper{width:58px;height:58px}
   .title{font-size:14px}
   .artist{font-size:12px}
-  .play{width:42px;height:42px;font-size:14px}
-  .btn{width:24px;height:24px;font-size:12px}
+  .play{width:42px;height:42px}
+  .btn{width:22px;height:22px}
 }
 </style>
 </head>
@@ -207,9 +229,20 @@ body{position:relative}
     </div>
 
     <div class="controls">
-      <button class="btn" onclick="previousSong()" aria-label="Previous">◀❚</button>
-      <button class="play" id="play" onclick="togglePlay()" aria-label="Play">▶</button>
-      <button class="btn" onclick="nextSong()" aria-label="Next">❚▶</button>
+      <!-- Previous Button (Image Matched SVG) -->
+      <button class="btn" onclick="previousSong()" aria-label="Previous">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      
+      <!-- Play/Pause Button -->
+      <button class="play" id="play" onclick="togglePlay()" aria-label="Play">
+        <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      
+      <!-- Next Button (Image Matched SVG) -->
+      <button class="btn" onclick="nextSong()" aria-label="Next">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
     </div>
   </section>
 </div>
@@ -238,14 +271,19 @@ function ready(){
 
 function state(e){
   const cover = document.getElementById("cover");
+  const playBtn = document.getElementById("play");
+  const playIcon = document.getElementById("play-icon");
+
   if(e.data===YT.PlayerState.PLAYING){
     playing=true;
-    document.getElementById("play").textContent="❚❚";
+    playBtn.classList.add("playing");
+    playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; // Pause Icon
     cover.classList.add("spinning");
     updateInfo();
   }else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
     playing=false;
-    document.getElementById("play").textContent="▶";
+    playBtn.classList.remove("playing");
+    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; // Play Icon
     cover.classList.remove("spinning");
   }
 }
