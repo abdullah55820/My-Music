@@ -18,7 +18,7 @@ body{position:relative}
 }
 .bg:after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,.75));
+  background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.75));
 }
 
 #yt{
@@ -29,35 +29,56 @@ body{position:relative}
 .app{
   position:relative;z-index:2;height:100dvh;width:100%;
   display:flex;align-items:flex-end;justify-content:center;
-  padding:0 12px 30px;
+  padding:0 14px 40px;
 }
 
-/* স্লিম ১-লাইনার মিউজিক বার */
+/* স্ক্রিনশটের মতো নিখুঁত ক্যাপসুল বার */
 .player{
-  width:min(500px,100%);
-  height:64px;
-  padding:0 12px;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:32px;
-  background:rgba(20,20,20,.65);
-  box-shadow:0 15px 40px rgba(0,0,0,.5);
-  backdrop-filter:blur(25px) saturate(140%);
-  -webkit-backdrop-filter:blur(25px) saturate(140%);
+  width:min(520px,100%);
+  height:92px;
+  padding:12px 18px 12px 14px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:46px; /* Pill Shape */
+  background:rgba(45, 30, 25, 0.65); /* কালচে ব্রাউনিশ ওয়ার্ম গ্লাস */
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  backdrop-filter:blur(30px) saturate(140%);
+  -webkit-backdrop-filter:blur(30px) saturate(140%);
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:14px;
 }
 
-/* ছোট ঘোরানো থাম্বনেইল */
+/* রেকর্ড ডিস্ক থাম্বনেইল */
+.cover-wrapper{
+  position:relative;
+  width:66px;
+  height:66px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
 .cover{
-  width:42px;height:42px;
+  width:100%;
+  height:100%;
   border-radius:50%;
   object-fit:cover;
   background:#222;
-  flex-shrink:0;
-  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  box-shadow:0 4px 15px rgba(0,0,0,.4);
   animation: spin 8s linear infinite;
   animation-play-state: paused;
+}
+
+/* মাঝখানের ভিনাইল রেকর্ড হোল */
+.cover-wrapper::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: rgba(20, 20, 20, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
 }
 
 .cover.spinning {
@@ -69,45 +90,43 @@ body{position:relative}
   to { transform: rotate(360deg); }
 }
 
-/* মাঝের অংশ: টাইটেল ও সিকবার */
+/* টাইটেল, আর্টিস্ট, সিকবার ও টাইম */
 .middle{
   flex:1;
   min-width:0;
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:4px;
 }
 
 .title{
-  font-size:13px;
-  font-weight:600;
+  font-size:16px;
+  font-weight:700;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  color:rgba(255,255,255,.95);
+  color:#fff;
+  letter-spacing:-0.2px;
 }
 
-.seekwrap{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.time{
-  font-size:9px;
-  color:rgba(255,255,255,.5);
-  font-variant-numeric: tabular-nums;
-  flex-shrink:0;
+.artist{
+  font-size:13px;
+  color:rgba(255,255,255,.65);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:1px;
+  margin-bottom:6px;
 }
 
 .seek{
   position:relative;
-  flex:1;
-  height:3px;
+  width:100%;
+  height:4px;
   border-radius:10px;
   background:rgba(255,255,255,.2);
   cursor:pointer;
+  margin-bottom:6px;
 }
 
 .fill{
@@ -119,47 +138,55 @@ body{position:relative}
   border-radius:10px;
 }
 
-/* ডানপাশের ১-লাইনার কন্ট্রোল বাটন */
+.time-display{
+  font-size:11px;
+  color:rgba(255,255,255,.6);
+  font-variant-numeric: tabular-nums;
+  letter-spacing:0.3px;
+}
+
+/* বাটনসমূহ */
 .controls{
   display:flex;
   align-items:center;
-  gap:4px;
+  gap:10px;
   flex-shrink:0;
 }
 
 .btn{
-  width:32px;height:32px;
+  width:28px;height:28px;
   border:0;background:transparent;
   color:#fff;
   display:grid;
   place-items:center;
-  font-size:16px;
+  font-size:13px;
   opacity:.85;
   padding:0;
   cursor:pointer;
 }
 
 .play{
-  width:38px;height:38px;
+  width:48px;height:48px;
   border-radius:50%;
   border:0;
   background:#fff;
-  color:#111;
+  color:#000;
   display:grid;
   place-items:center;
-  font-size:15px;
-  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  font-size:16px;
+  box-shadow:0 4px 15px rgba(0,0,0,.3);
   cursor:pointer;
 }
 
 .btn:active,.play:active{transform:scale(.92)}
 
-@media(max-width:400px){
-  .player{height:58px;padding:0 10px;gap:8px}
-  .cover{width:36px;height:36px}
-  .title{font-size:12px}
-  .play{width:34px;height:34px;font-size:13px}
-  .btn{width:28px;height:28px;font-size:14px}
+@media(max-width:480px){
+  .player{height:84px;padding:10px 14px;border-radius:42px;gap:10px}
+  .cover-wrapper{width:58px;height:58px}
+  .title{font-size:14px}
+  .artist{font-size:12px}
+  .play{width:42px;height:42px;font-size:14px}
+  .btn{width:24px;height:24px;font-size:12px}
 }
 </style>
 </head>
@@ -170,26 +197,28 @@ body{position:relative}
 
 <div class="app">
   <section class="player">
-    <!-- থাম্বনেইল -->
-    <img id="cover" class="cover" alt="Album art">
+    <!-- স্পিনিং ভিনাইল থাম্বনেইল -->
+    <div class="cover-wrapper">
+      <img id="cover" class="cover" alt="Album art">
+    </div>
     
-    <!-- মাঝের গান ও সিকবার -->
+    <!-- তথ্য ও সিকবার -->
     <div class="middle">
       <div id="title" class="title">Loading…</div>
-      <div class="seekwrap">
-        <span id="current" class="time">0:00</span>
-        <div class="seek" id="seek" onclick="seek(event)">
-          <div class="fill" id="fill"></div>
-        </div>
-        <span id="duration" class="time">0:00</span>
+      <div id="artist" class="artist">YouTube Playlist</div>
+      <div class="seek" id="seek" onclick="seek(event)">
+        <div class="fill" id="fill"></div>
+      </div>
+      <div class="time-display">
+        <span id="current">0:00</span> / <span id="duration">0:00</span>
       </div>
     </div>
 
-    <!-- বাটনসমূহ (Previous, Play/Pause, Next) -->
+    <!-- বাটনসমূহ -->
     <div class="controls">
-      <button class="btn" onclick="previousSong()" aria-label="Previous">◀|</button>
+      <button class="btn" onclick="previousSong()" aria-label="Previous">◀❚</button>
       <button class="play" id="play" onclick="togglePlay()" aria-label="Play">▶</button>
-      <button class="btn" onclick="nextSong()" aria-label="Next">|▶</button>
+      <button class="btn" onclick="nextSong()" aria-label="Next">❚▶</button>
     </div>
   </section>
 </div>
@@ -220,7 +249,7 @@ function state(e){
   const cover = document.getElementById("cover");
   if(e.data===YT.PlayerState.PLAYING){
     playing=true;
-    document.getElementById("play").textContent="Ⅱ";
+    document.getElementById("play").textContent="❚❚";
     cover.classList.add("spinning");
     updateInfo();
   }else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
@@ -253,6 +282,7 @@ function updateInfo(){
     document.getElementById("bg").style.backgroundImage=
       'linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.60)),url("'+thumb+'")';
     document.getElementById("title").textContent=d.title||"Unknown";
+    if(d.author) document.getElementById("artist").textContent=d.author;
   }catch(e){}
 }
 function updateProgress(){
