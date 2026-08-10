@@ -395,7 +395,7 @@ padding:4px 9px;
 
 <!-- BANGLADESH LIVE TIME -->
 <div class="bd-time" id="bdTime">
-BD • 00:00:00
+BD • 00:00:00 AM
 </div>
 
 <!-- YOUTUBE PLAYER -->
@@ -547,13 +547,20 @@ let playing=false;
 
 
 /* =========================
-   BANGLADESH LIVE TIME
+   BANGLADESH LIVE TIME (AM/PM)
    ========================= */
 
 function updateBDTime(){
 
-const options = { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-const timeString = new Intl.DateTimeFormat('en-GB', options).format(new Date());
+const options = { 
+  timeZone: 'Asia/Dhaka', 
+  hour: '2-digit', 
+  minute: '2-digit', 
+  second: '2-digit', 
+  hour12: true 
+};
+
+const timeString = new Intl.DateTimeFormat('en-US', options).format(new Date());
 
 document.getElementById("bdTime").textContent = "BD • " + timeString;
 
