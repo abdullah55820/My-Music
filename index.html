@@ -124,7 +124,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 14px 40px;
+padding:0 14px 52px;
 }
 
 
@@ -132,12 +132,12 @@ padding:0 14px 40px;
 
 .player{
 width:min(520px,100%);
-height:130px;
+height:120px;
 
-padding:14px 20px 14px 16px;
+padding:14px 18px 14px 14px;
 
 border:1px solid rgba(255,255,255,.2);
-border-radius:65px;
+border-radius:60px;
 
 background:rgba(40,25,20,.72);
 
@@ -148,19 +148,17 @@ backdrop-filter:blur(25px) saturate(130%);
 
 display:flex;
 align-items:center;
-gap:18px;
-
-transform:translateY(-12px);
+gap:15px;
 }
 
 
-/* THUMBNAIL */
+/* THUMBNAIL - 137% ZOOM */
 
 .cover-wrapper{
 position:relative;
 
-width:82px;
-height:82px;
+width:76px;
+height:76px;
 
 flex-shrink:0;
 
@@ -196,8 +194,8 @@ content:"";
 
 position:absolute;
 
-width:17px;
-height:17px;
+width:16px;
+height:16px;
 
 background:rgba(20,20,20,.85);
 
@@ -239,7 +237,7 @@ justify-content:center;
 }
 
 .title{
-font-size:18px;
+font-size:17px;
 font-weight:700;
 
 white-space:nowrap;
@@ -259,7 +257,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
-margin-bottom:9px;
+margin-bottom:8px;
 }
 
 
@@ -277,7 +275,7 @@ background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
-margin-bottom:8px;
+margin-bottom:7px;
 }
 
 .fill{
@@ -308,13 +306,13 @@ font-variant-numeric:tabular-nums;
 .controls{
 display:flex;
 align-items:center;
-gap:14px;
+gap:13px;
 flex-shrink:0;
 }
 
 .btn{
-width:34px;
-height:34px;
+width:32px;
+height:32px;
 
 border:0;
 background:transparent;
@@ -332,8 +330,8 @@ transition:transform .1s;
 }
 
 .btn svg{
-width:24px;
-height:24px;
+width:22px;
+height:22px;
 fill:#fff;
 }
 
@@ -341,8 +339,8 @@ fill:#fff;
 /* PLAY */
 
 .play{
-width:58px;
-height:58px;
+width:54px;
+height:54px;
 
 border-radius:50%;
 border:0;
@@ -360,12 +358,12 @@ cursor:pointer;
 }
 
 .play svg{
-width:24px;
-height:24px;
+width:22px;
+height:22px;
 
 fill:#000;
 
-margin-left:3px;
+margin-left:2px;
 }
 
 .play.playing svg{
@@ -383,36 +381,28 @@ transform:scale(.90);
 @media(max-width:480px){
 
 .player{
-height:118px;
-
-padding:10px 14px;
-
-border-radius:59px;
-
-gap:10px;
-
-transform:translateY(-10px);
+height:108px;
+padding:10px 13px;
+border-radius:54px;
+gap:9px;
 }
 
 .cover-wrapper{
-width:70px;
-height:70px;
+width:64px;
+height:64px;
 }
 
 .cover-wrapper::after{
-width:15px;
-height:15px;
+width:14px;
+height:14px;
 }
 
 .title{
-font-size:16px;
+font-size:15px;
 }
 
 .artist{
 font-size:13px;
-
-margin-top:1px;
-margin-bottom:7px;
 }
 
 .seek{
@@ -425,27 +415,27 @@ font-size:11px;
 }
 
 .controls{
-gap:8px;
+gap:6px;
 }
 
 .btn{
-width:28px;
-height:28px;
+width:26px;
+height:26px;
 }
 
 .btn svg{
-width:21px;
-height:21px;
+width:20px;
+height:20px;
 }
 
 .play{
-width:50px;
-height:50px;
+width:46px;
+height:46px;
 }
 
 .play svg{
-width:21px;
-height:21px;
+width:20px;
+height:20px;
 }
 
 .bd-time{
@@ -489,6 +479,7 @@ id="cover"
 class="cover" 
 alt="Album art"
 >
+
 
 </div>
 
@@ -631,33 +622,26 @@ const options = {
   hour12: true 
 };
 
-const timeString =
-new Intl.DateTimeFormat(
+const timeString = new Intl.DateTimeFormat(
 'en-US',
 options
 ).format(new Date());
 
-document.getElementById(
-"bdTimeVal"
-).textContent=timeString;
+document.getElementById("bdTimeVal").textContent =
+timeString;
 
 }
 
 updateBDTime();
 
-setInterval(
-updateBDTime,
-1000
-);
+setInterval(updateBDTime,1000);
 
 
 /* YOUTUBE API */
 
 function onYouTubeIframeAPIReady(){
 
-player=new YT.Player(
-"yt",
-{
+player=new YT.Player("yt",{
 
 width:"2",
 height:"2",
@@ -665,21 +649,13 @@ height:"2",
 playerVars:{
 
 autoplay:0,
-
 controls:0,
-
 disablekb:1,
-
 fs:0,
-
 modestbranding:1,
-
 playsinline:1,
-
 rel:0,
-
 listType:"playlist",
-
 list:PLAYLIST_ID
 
 },
@@ -687,7 +663,6 @@ list:PLAYLIST_ID
 events:{
 
 onReady:ready,
-
 onStateChange:state
 
 }
@@ -701,15 +676,9 @@ onStateChange:state
 
 function ready(){
 
-setTimeout(
-updateInfo,
-700
-);
+setTimeout(updateInfo,700);
 
-setInterval(
-updateProgress,
-400
-);
+setInterval(updateProgress,400);
 
 }
 
@@ -728,22 +697,16 @@ const playIcon =
 document.getElementById("play-icon");
 
 
-if(
-e.data===YT.PlayerState.PLAYING
-){
+if(e.data===YT.PlayerState.PLAYING){
 
 playing=true;
 
-playBtn.classList.add(
-"playing"
-);
+playBtn.classList.add("playing");
 
 playIcon.innerHTML =
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add(
-"spinning"
-);
+cover.classList.add("spinning");
 
 updateInfo();
 
@@ -751,25 +714,18 @@ updateInfo();
 
 
 else if(
-
 e.data===YT.PlayerState.PAUSED ||
-
 e.data===YT.PlayerState.ENDED
-
 ){
 
 playing=false;
 
-playBtn.classList.remove(
-"playing"
-);
+playBtn.classList.remove("playing");
 
 playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
 
 }
 
@@ -823,45 +779,34 @@ function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData!=='function'
+typeof player.getVideoData!=="function"
 )return;
 
 try{
 
-const d =
-player.getVideoData();
+const d=player.getVideoData();
 
-if(
-!d ||
-!d.video_id
-)return;
+if(!d || !d.video_id)return;
 
-const id =
-d.video_id;
+const id=d.video_id;
 
-const thumb =
-"https://i.ytimg.com/vi/" +
-id +
+const thumb=
+"https://i.ytimg.com/vi/"
++
+id
++
 "/hqdefault.jpg";
 
 
-document.getElementById(
-"cover"
-).src=thumb;
+document.getElementById("cover").src=thumb;
 
-
-document.getElementById(
-"title"
-).textContent =
-d.title ||
-"Unknown";
+document.getElementById("title").textContent=
+d.title || "Unknown";
 
 
 if(d.author){
 
-document.getElementById(
-"artist"
-).textContent =
+document.getElementById("artist").textContent=
 d.author;
 
 }
@@ -877,21 +822,18 @@ function updateProgress(){
 
 if(
 !player ||
-typeof player.getCurrentTime!=='function'
+typeof player.getCurrentTime!=="function"
 )return;
 
 try{
 
-const c =
-player.getCurrentTime();
+const c=player.getCurrentTime();
 
-const d =
-player.getDuration();
+const d=player.getDuration();
 
 if(!d)return;
 
-const p =
-Math.max(
+const p=Math.max(
 0,
 Math.min(
 100,
@@ -900,21 +842,13 @@ Math.min(
 );
 
 
-document.getElementById(
-"fill"
-).style.width =
+document.getElementById("fill").style.width=
 p+"%";
 
-
-document.getElementById(
-"current"
-).textContent =
+document.getElementById("current").textContent=
 format(c);
 
-
-document.getElementById(
-"duration"
-).textContent =
+document.getElementById("duration").textContent=
 format(d);
 
 
@@ -935,17 +869,16 @@ function seek(e){
 
 if(
 !player ||
-typeof player.getDuration!=='function'
+typeof player.getDuration!=="function"
 )return;
 
-const r =
+const r=
 document
 .getElementById("seek")
 .getBoundingClientRect();
 
 
-const p =
-Math.max(
+const p=Math.max(
 0,
 Math.min(
 1,
@@ -966,10 +899,7 @@ true
 
 function format(s){
 
-if(
-!s ||
-isNaN(s)
-){
+if(!s || isNaN(s)){
 
 return "0:00";
 
@@ -981,9 +911,7 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(
-s%60
-).padStart(
+String(s%60).padStart(
 2,
 "0"
 );
@@ -991,7 +919,6 @@ s%60
 }
 
 </script>
-
 
 </body>
 </html>
