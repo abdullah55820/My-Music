@@ -55,7 +55,6 @@ display:flex;
 align-items:center;
 gap:6px;
 }
-/* LIVE RED DOT */
 .live-dot{
 width:7px;
 height:7px;
@@ -66,18 +65,9 @@ box-shadow:0 0 8px #ff3b30;
 animation:pulse 1.5s infinite;
 }
 @keyframes pulse{
-0%{
-opacity:1;
-transform:scale(1);
-}
-50%{
-opacity:.3;
-transform:scale(.8);
-}
-100%{
-opacity:1;
-transform:scale(1);
-}
+0%{opacity:1;transform:scale(1)}
+50%{opacity:.3;transform:scale(.8)}
+100%{opacity:1;transform:scale(1)}
 }
 /* YOUTUBE */
 #yt{
@@ -98,15 +88,15 @@ width:100%;
 display:flex;
 align-items:flex-end;
 justify-content:center;
-padding:0 14px 52px;
+padding:0 14px 58px;
 }
 /* PLAYER */
 .player{
 width:min(520px,100%);
-height:126px;
+height:132px;
 padding:14px 18px 14px 14px;
 border:1px solid rgba(255,255,255,.2);
-border-radius:63px;
+border-radius:66px;
 background:rgba(40,25,20,.72);
 box-shadow:0 20px 50px rgba(0,0,0,.6);
 backdrop-filter:blur(25px) saturate(130%);
@@ -114,7 +104,7 @@ backdrop-filter:blur(25px) saturate(130%);
 display:flex;
 align-items:center;
 gap:16px;
-transform:translateY(-8px);
+transform:translateY(-10px);
 }
 /* THUMBNAIL */
 .cover-wrapper{
@@ -157,12 +147,8 @@ z-index:2;
 animation-play-state:running;
 }
 @keyframes spin{
-from{
-transform:rotate(0deg);
-}
-to{
-transform:rotate(360deg);
-}
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
 }
 /* SONG INFO */
 .middle{
@@ -265,56 +251,56 @@ margin-left:0;
 .play:active{
 transform:scale(.90);
 }
-/* MOBILE */
+/* MOBILE — SAME LARGE ELEMENTS */
 @media(max-width:480px){
 .player{
-height:114px;
-padding:10px 13px;
-border-radius:57px;
-gap:10px;
-transform:translateY(-8px);
+height:126px;
+padding:12px 14px;
+border-radius:63px;
+gap:11px;
+transform:translateY(-10px);
 }
 .cover-wrapper{
-width:69px;
-height:69px;
+width:78px;
+height:78px;
 }
 .cover-wrapper::after{
-width:15px;
-height:15px;
+width:16px;
+height:16px;
 }
 .title{
-font-size:16px;
+font-size:17px;
 }
 .artist{
-font-size:13px;
-margin-top:1px;
-margin-bottom:7px;
+font-size:14px;
+margin-top:2px;
+margin-bottom:8px;
 }
 .seek{
 height:5px;
-margin-bottom:6px;
+margin-bottom:7px;
 }
 .time-display{
-font-size:11px;
+font-size:12px;
 }
 .controls{
-gap:7px;
+gap:8px;
 }
 .btn{
-width:29px;
-height:29px;
+width:32px;
+height:32px;
 }
 .btn svg{
-width:21px;
-height:21px;
+width:23px;
+height:23px;
 }
 .play{
-width:49px;
-height:49px;
+width:56px;
+height:56px;
 }
 .play svg{
-width:21px;
-height:21px;
+width:23px;
+height:23px;
 }
 .bd-time{
 top:10px;
@@ -359,13 +345,9 @@ id="fill">
 </div>
 </div>
 <div class="time-display">
-<span id="current">
-0:00
-</span>
+<span id="current">0:00</span>
 /
-<span id="duration">
-0:00
-</span>
+<span id="duration">0:00</span>
 </div>
 </div>
 <div class="controls">
@@ -408,27 +390,34 @@ aria-label="Next"
 const PLAYLIST_ID="PLbvY05KVYwoo";
 let player=null;
 let playing=false;
-/* BANGLADESH LIVE TIME */
+/* BD TIME */
 function updateBDTime(){
-const options = { 
-  timeZone: 'Asia/Dhaka', 
-  hour: '2-digit', 
-  minute: '2-digit', 
-  second: '2-digit', 
-  hour12: true 
+const options={
+timeZone:'Asia/Dhaka',
+hour:'2-digit',
+minute:'2-digit',
+second:'2-digit',
+hour12:true
 };
-const timeString = new Intl.DateTimeFormat(
+const timeString=
+new Intl.DateTimeFormat(
 'en-US',
 options
 ).format(new Date());
-document.getElementById("bdTimeVal").textContent =
-timeString;
+document.getElementById(
+"bdTimeVal"
+).textContent=timeString;
 }
 updateBDTime();
-setInterval(updateBDTime,1000);
+setInterval(
+updateBDTime,
+1000
+);
 /* YOUTUBE API */
 function onYouTubeIframeAPIReady(){
-player=new YT.Player("yt",{
+player=new YT.Player(
+"yt",
+{
 width:"2",
 height:"2",
 playerVars:{
@@ -450,20 +439,33 @@ onStateChange:state
 }
 /* READY */
 function ready(){
-setTimeout(updateInfo,700);
-setInterval(updateProgress,400);
+setTimeout(
+updateInfo,
+700
+);
+setInterval(
+updateProgress,
+400
+);
 }
-/* PLAYER STATE */
+/* STATE */
 function state(e){
-const cover=document.getElementById("cover");
-const playBtn=document.getElementById("play");
-const playIcon=document.getElementById("play-icon");
+const cover=
+document.getElementById("cover");
+const playBtn=
+document.getElementById("play");
+const playIcon=
+document.getElementById("play-icon");
 if(e.data===YT.PlayerState.PLAYING){
 playing=true;
-playBtn.classList.add("playing");
-playIcon.innerHTML =
+playBtn.classList.add(
+"playing"
+);
+playIcon.innerHTML=
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-cover.classList.add("spinning");
+cover.classList.add(
+"spinning"
+);
 updateInfo();
 }
 else if(
@@ -471,10 +473,14 @@ e.data===YT.PlayerState.PAUSED ||
 e.data===YT.PlayerState.ENDED
 ){
 playing=false;
-playBtn.classList.remove("playing");
-playIcon.innerHTML =
+playBtn.classList.remove(
+"playing"
+);
+playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
 }
 }
 /* PLAY / PAUSE */
@@ -496,27 +502,39 @@ function previousSong(){
 if(!player)return;
 player.previousVideo();
 }
-/* SONG INFORMATION */
+/* SONG INFO */
 function updateInfo(){
 if(
 !player ||
 typeof player.getVideoData!=="function"
 )return;
 try{
-const d=player.getVideoData();
-if(!d || !d.video_id)return;
-const id=d.video_id;
+const d=
+player.getVideoData();
+if(
+!d ||
+!d.video_id
+)return;
+const id=
+d.video_id;
 const thumb=
 "https://i.ytimg.com/vi/"
 +
 id
 +
 "/hqdefault.jpg";
-document.getElementById("cover").src=thumb;
-document.getElementById("title").textContent=
-d.title || "Unknown";
+document.getElementById(
+"cover"
+).src=thumb;
+document.getElementById(
+"title"
+).textContent=
+d.title ||
+"Unknown";
 if(d.author){
-document.getElementById("artist").textContent=
+document.getElementById(
+"artist"
+).textContent=
 d.author;
 }
 }catch(e){}
@@ -528,21 +546,30 @@ if(
 typeof player.getCurrentTime!=="function"
 )return;
 try{
-const c=player.getCurrentTime();
-const d=player.getDuration();
+const c=
+player.getCurrentTime();
+const d=
+player.getDuration();
 if(!d)return;
-const p=Math.max(
+const p=
+Math.max(
 0,
 Math.min(
 100,
 (c/d)*100
 )
 );
-document.getElementById("fill").style.width=
+document.getElementById(
+"fill"
+).style.width=
 p+"%";
-document.getElementById("current").textContent=
+document.getElementById(
+"current"
+).textContent=
 format(c);
-document.getElementById("duration").textContent=
+document.getElementById(
+"duration"
+).textContent=
 format(d);
 if(playing){
 updateInfo();
@@ -559,7 +586,8 @@ const r=
 document
 .getElementById("seek")
 .getBoundingClientRect();
-const p=Math.max(
+const p=
+Math.max(
 0,
 Math.min(
 1,
@@ -571,9 +599,12 @@ p*player.getDuration(),
 true
 );
 }
-/* FORMAT TIME */
+/* FORMAT */
 function format(s){
-if(!s || isNaN(s)){
+if(
+!s ||
+isNaN(s)
+){
 return "0:00";
 }
 s=Math.floor(s);
@@ -581,7 +612,9 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(s%60).padStart(
+String(
+s%60
+).padStart(
 2,
 "0"
 );
