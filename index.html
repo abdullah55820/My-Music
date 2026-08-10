@@ -1,6 +1,4 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -53,10 +51,29 @@ body{position:relative}
 .top{
   display:flex;align-items:center;gap:14px;
 }
+
+/* কভার আর্ট স্পিন অ্যানিমেশন সেটিংস */
 .cover{
-  width:64px;height:64px;border-radius:15px;object-fit:cover;
-  background:#222;box-shadow:0 8px 25px rgba(0,0,0,.35);
+  width:64px;height:64px;
+  border-radius:50%; /* গান ঘোরার সময় সুন্দর ডিস্কের মতো দেখানোর জন্য গোল শেপ */
+  object-fit:cover;
+  background:#222;
+  box-shadow:0 8px 25px rgba(0,0,0,.35);
+  animation: spin 10s linear infinite;
+  animation-play-state: paused; /* ডিফল্টভাবে ঘোরা বন্ধ থাকবে */
+  transition: border-radius 0.3s ease;
 }
+
+/* প্লে করার সময় ঘোরা শুরু হওয়ার ক্লাস */
+.cover.spinning {
+  animation-play-state: running;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .info{min-width:0;flex:1}
 .title{
   font-size:18px;font-weight:700;line-height:1.2;
@@ -105,7 +122,7 @@ body{position:relative}
 @media(max-width:600px){
   .app{padding:0 12px 38px}
   .player{padding:17px 16px 14px;border-radius:24px}
-  .cover{width:58px;height:58px;border-radius:14px}
+  .cover{width:58px;height:58px}
   .title{font-size:16px}
   .artist{font-size:12px}
   .play{width:54px;height:54px}
@@ -150,12 +167,12 @@ body{position:relative}
     </div>
   </section>
 
-  <div class="playlist">YouTube Playlist • PLbvY05KVYwoo</div>
+  <div class="playlist">YouTube Playlist • PLQHkh385IaNU</div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-const PLAYLIST_ID="PLbvY05KVYwoo";
+const PLAYLIST_ID="PLQHkh385IaNU";
 let player=null, playing=false, shuffle=false, repeat=false;
 
 function onYouTubeIframeAPIReady(){
@@ -176,16 +193,16 @@ function ready(){
 }
 
 function state(e){
+  const cover = document.getElementById("cover");
   if(e.data===YT.PlayerState.PLAYING){
     playing=true;
     document.getElementById("play").textContent="Ⅱ";
+    cover.classList.add("spinning"); // গান চললে থাম্বনেইল ঘোরা শুরু হবে
     updateInfo();
-  }else if(e.data===YT.PlayerState.PAUSED){
+  }else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
     playing=false;
     document.getElementById("play").textContent="▶";
-  }else if(e.data===YT.PlayerState.ENDED){
-    if(repeat){player.seekTo(0,true);player.playVideo()}
-    else nextSong();
+    cover.classList.remove("spinning"); // গান পজ বা শেষ হলে ঘোরা বন্ধ হবে
   }
 }
 
@@ -255,8 +272,3 @@ function openPlaylist(){
 </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/index.html")
-path.write_text(html, encoding="utf-8")
-print(path)
