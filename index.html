@@ -20,6 +20,7 @@ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-se
 
 body{position:relative}
 
+
 /* BACKGROUND */
 
 .bg{
@@ -39,6 +40,7 @@ inset:0;
 background:rgba(0,0,0,.18);
 }
 
+
 /* BD LIVE TIME */
 
 .bd-time{
@@ -47,17 +49,22 @@ top:14px;
 left:50%;
 transform:translateX(-50%);
 z-index:10;
+
 padding:5px 11px;
 border-radius:20px;
+
 background:rgba(0,0,0,.45);
 border:1px solid rgba(255,255,255,.18);
+
 color:rgba(255,255,255,.9);
 font-size:11px;
 font-weight:600;
 letter-spacing:.3px;
+
 backdrop-filter:blur(12px);
 -webkit-backdrop-filter:blur(12px);
 }
+
 
 /* YOUTUBE */
 
@@ -71,74 +78,104 @@ opacity:.01;
 pointer-events:none;
 }
 
+
 /* APP */
 
 .app{
 position:relative;
 z-index:2;
+
 height:100dvh;
 width:100%;
+
 display:flex;
 align-items:flex-end;
 justify-content:center;
+
 padding:0 14px 40px;
 }
+
 
 /* PLAYER */
 
 .player{
 width:min(520px,100%);
 height:92px;
+
 padding:12px 18px 12px 14px;
+
 border:1px solid rgba(255,255,255,.2);
 border-radius:46px;
+
 background:rgba(40,25,20,.72);
+
 box-shadow:0 20px 50px rgba(0,0,0,.6);
+
 backdrop-filter:blur(25px) saturate(130%);
 -webkit-backdrop-filter:blur(25px) saturate(130%);
+
 display:flex;
 align-items:center;
 gap:14px;
 }
 
-/* THUMBNAIL */
+
+/* THUMBNAIL - 134% ZOOM */
 
 .cover-wrapper{
 position:relative;
+
 width:66px;
 height:66px;
+
 flex-shrink:0;
+
 display:flex;
 align-items:center;
 justify-content:center;
+
 border-radius:50%;
 overflow:hidden;
 }
 
 .cover{
-width:130%;
-height:130%;
-margin:-15%;
+width:134%;
+height:134%;
+
+margin:-17%;
+
 border-radius:50%;
+
 object-fit:cover;
 object-position:center;
+
 background:#222;
+
 box-shadow:0 4px 15px rgba(0,0,0,.4);
+
 animation:spin 8s linear infinite;
 animation-play-state:paused;
 }
 
 .cover-wrapper::after{
 content:"";
+
 position:absolute;
+
 width:14px;
 height:14px;
+
 background:rgba(20,20,20,.85);
+
 border:2px solid rgba(255,255,255,.3);
+
 border-radius:50%;
+
 left:50%;
 top:50%;
+
 transform:translate(-50%,-50%);
+
 z-index:2;
 }
 
@@ -147,15 +184,21 @@ animation-play-state:running;
 }
 
 @keyframes spin{
-from{transform:rotate(0deg)}
-to{transform:rotate(360deg)}
+from{
+transform:rotate(0deg);
 }
+to{
+transform:rotate(360deg);
+}
+}
+
 
 /* SONG INFO */
 
 .middle{
 flex:1;
 min-width:0;
+
 display:flex;
 flex-direction:column;
 justify-content:center;
@@ -164,49 +207,67 @@ justify-content:center;
 .title{
 font-size:16px;
 font-weight:700;
+
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
+
 color:#fff;
 }
 
 .artist{
 font-size:13px;
+
 color:rgba(255,255,255,.65);
+
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
+
 margin-top:1px;
 margin-bottom:6px;
 }
 
-/* SEEK */
+
+/* SEEK BAR */
 
 .seek{
 position:relative;
+
 width:100%;
 height:4px;
+
 border-radius:10px;
+
 background:rgba(255,255,255,.2);
+
 cursor:pointer;
+
 margin-bottom:6px;
 }
 
 .fill{
 position:absolute;
+
 left:0;
 top:0;
+
 height:100%;
 width:0;
+
 background:#fff;
+
 border-radius:10px;
 }
 
 .time-display{
 font-size:11px;
+
 color:rgba(255,255,255,.6);
+
 font-variant-numeric:tabular-nums;
 }
+
 
 /* CONTROLS */
 
@@ -220,14 +281,19 @@ flex-shrink:0;
 .btn{
 width:28px;
 height:28px;
+
 border:0;
 background:transparent;
+
 color:rgba(255,255,255,.9);
+
 display:flex;
 align-items:center;
 justify-content:center;
+
 cursor:pointer;
 padding:0;
+
 transition:transform .1s;
 }
 
@@ -237,24 +303,34 @@ height:20px;
 fill:#fff;
 }
 
+
+/* PLAY */
+
 .play{
 width:48px;
 height:48px;
+
 border-radius:50%;
 border:0;
+
 background:#fff;
 color:#000;
+
 display:flex;
 align-items:center;
 justify-content:center;
+
 box-shadow:0 4px 15px rgba(0,0,0,.3);
+
 cursor:pointer;
 }
 
 .play svg{
 width:20px;
 height:20px;
+
 fill:#000;
+
 margin-left:2px;
 }
 
@@ -266,6 +342,7 @@ margin-left:0;
 .play:active{
 transform:scale(.90);
 }
+
 
 /* MOBILE */
 
@@ -313,21 +390,37 @@ padding:4px 9px;
 
 <body>
 
+<!-- BACKGROUND IMAGE -->
 <div class="bg"></div>
 
+<!-- BANGLADESH LIVE TIME -->
 <div class="bd-time" id="bdTime">
 BD • 00:00:00
 </div>
 
+<!-- YOUTUBE PLAYER -->
 <div id="yt"></div>
+
 
 <div class="app">
 
 <section class="player">
 
+
+<!-- THUMBNAIL -->
+
 <div class="cover-wrapper">
-<img id="cover" class="cover" alt="Album art">
+
+<img
+id="cover"
+class="cover"
+alt="Album art"
+>
+
 </div>
+
+
+<!-- SONG INFORMATION -->
 
 <div class="middle">
 
@@ -339,56 +432,97 @@ Loading…
 YouTube Playlist
 </div>
 
-<div class="seek" id="seek" onclick="seek(event)">
-<div class="fill" id="fill"></div>
+
+<!-- PROGRESS BAR -->
+
+<div
+class="seek"
+id="seek"
+onclick="seek(event)"
+>
+
+<div
+class="fill"
+id="fill">
 </div>
+
+</div>
+
+
+<!-- TIME -->
 
 <div class="time-display">
-<span id="current">0:00</span>
+
+<span id="current">
+0:00
+</span>
+
 /
-<span id="duration">0:00</span>
+
+<span id="duration">
+0:00
+</span>
+
 </div>
 
 </div>
+
+
+<!-- CONTROLS -->
 
 <div class="controls">
+
 
 <!-- PREVIOUS -->
 
 <button
 class="btn"
 onclick="previousSong()"
-aria-label="Previous">
+aria-label="Previous"
+>
 
 <svg viewBox="0 0 24 24">
+
 <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+
 </svg>
 
 </button>
 
-<!-- PLAY -->
+
+<!-- PLAY / PAUSE -->
 
 <button
 class="play"
 id="play"
 onclick="togglePlay()"
-aria-label="Play">
+aria-label="Play"
+>
 
-<svg id="play-icon" viewBox="0 0 24 24">
+<svg
+id="play-icon"
+viewBox="0 0 24 24"
+>
+
 <path d="M8 5v14l11-7z"/>
+
 </svg>
 
 </button>
+
 
 <!-- NEXT -->
 
 <button
 class="btn"
 onclick="nextSong()"
-aria-label="Next">
+aria-label="Next"
+>
 
 <svg viewBox="0 0 24 24">
+
 <path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/>
+
 </svg>
 
 </button>
@@ -399,9 +533,12 @@ aria-label="Next">
 
 </div>
 
+
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
+
+/* PLAYLIST */
 
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
@@ -409,7 +546,9 @@ let player=null;
 let playing=false;
 
 
-/* BD LIVE TIME */
+/* =========================
+   BANGLADESH LIVE TIME
+   ========================= */
 
 function updateBDTime(){
 
@@ -422,9 +561,14 @@ now.getTime()+
 const bd=
 new Date(utc+(6*60*60*1000));
 
-let h=String(bd.getHours()).padStart(2,"0");
-let m=String(bd.getMinutes()).padStart(2,"0");
-let s=String(bd.getSeconds()).padStart(2,"0");
+let h=
+String(bd.getHours()).padStart(2,"0");
+
+let m=
+String(bd.getMinutes()).padStart(2,"0");
+
+let s=
+String(bd.getSeconds()).padStart(2,"0");
 
 document.getElementById("bdTime").textContent=
 "BD • "+h+":"+m+":"+s;
@@ -436,7 +580,9 @@ updateBDTime();
 setInterval(updateBDTime,1000);
 
 
-/* YOUTUBE API */
+/* =========================
+   YOUTUBE API
+   ========================= */
 
 function onYouTubeIframeAPIReady(){
 
@@ -446,20 +592,33 @@ width:"2",
 height:"2",
 
 playerVars:{
+
 autoplay:0,
+
 controls:0,
+
 disablekb:1,
+
 fs:0,
+
 modestbranding:1,
+
 playsinline:1,
+
 rel:0,
+
 listType:"playlist",
+
 list:PLAYLIST_ID
+
 },
 
 events:{
+
 onReady:ready,
+
 onStateChange:state
+
 }
 
 });
@@ -478,13 +637,21 @@ setInterval(updateProgress,400);
 }
 
 
-/* PLAYER STATE */
+/* =========================
+   PLAYER STATE
+   ========================= */
 
 function state(e){
 
-const cover=document.getElementById("cover");
-const playBtn=document.getElementById("play");
-const playIcon=document.getElementById("play-icon");
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
+
 
 if(e.data===YT.PlayerState.PLAYING){
 
@@ -501,9 +668,13 @@ updateInfo();
 
 }
 
+
 else if(
+
 e.data===YT.PlayerState.PAUSED ||
+
 e.data===YT.PlayerState.ENDED
+
 ){
 
 playing=false;
@@ -527,9 +698,13 @@ function togglePlay(){
 if(!player)return;
 
 if(playing){
+
 player.pauseVideo();
+
 }else{
+
 player.playVideo();
+
 }
 
 }
@@ -557,7 +732,9 @@ player.previousVideo();
 }
 
 
-/* SONG INFO */
+/* =========================
+   SONG INFORMATION
+   ========================= */
 
 function updateInfo(){
 
@@ -565,21 +742,28 @@ if(!player)return;
 
 try{
 
-const d=player.getVideoData();
+const d=
+player.getVideoData();
 
 if(!d || !d.video_id)return;
 
-const id=d.video_id;
+const id=
+d.video_id;
 
 const thumb=
 "https://i.ytimg.com/vi/"
-+id+
++
+id+
 "/hqdefault.jpg";
 
-document.getElementById("cover").src=thumb;
+
+document.getElementById("cover").src=
+thumb;
+
 
 document.getElementById("title").textContent=
 d.title || "Unknown";
+
 
 if(d.author){
 
@@ -593,7 +777,9 @@ d.author;
 }
 
 
-/* PROGRESS */
+/* =========================
+   PROGRESS
+   ========================= */
 
 function updateProgress(){
 
@@ -601,27 +787,40 @@ if(!player)return;
 
 try{
 
-const c=player.getCurrentTime();
-const d=player.getDuration();
+const c=
+player.getCurrentTime();
+
+const d=
+player.getDuration();
 
 if(!d)return;
 
-const p=Math.max(
+const p=
+Math.max(
 0,
-Math.min(100,(c/d)*100)
+Math.min(
+100,
+(c/d)*100
+)
 );
+
 
 document.getElementById("fill").style.width=
 p+"%";
 
+
 document.getElementById("current").textContent=
 format(c);
+
 
 document.getElementById("duration").textContent=
 format(d);
 
+
 if(playing){
+
 updateInfo();
+
 }
 
 }catch(e){}
@@ -636,16 +835,20 @@ function seek(e){
 if(!player)return;
 
 const r=
-document.getElementById("seek")
+document
+.getElementById("seek")
 .getBoundingClientRect();
 
-const p=Math.max(
+
+const p=
+Math.max(
 0,
 Math.min(
 1,
 (e.clientX-r.left)/r.width
 )
 );
+
 
 player.seekTo(
 p*player.getDuration(),
@@ -655,12 +858,14 @@ true
 }
 
 
-/* FORMAT */
+/* FORMAT TIME */
 
 function format(s){
 
 if(!s || isNaN(s)){
+
 return "0:00";
+
 }
 
 s=Math.floor(s);
@@ -669,7 +874,10 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(s%60).padStart(2,"0");
+String(s%60).padStart(
+2,
+"0"
+);
 
 }
 
