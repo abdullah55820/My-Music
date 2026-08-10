@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>My Music Player</title>
 
 <style>
@@ -120,7 +120,7 @@ gap:14px;
 }
 
 
-/* THUMBNAIL - 134% ZOOM */
+/* THUMBNAIL - 137% ZOOM */
 
 .cover-wrapper{
 position:relative;
@@ -139,10 +139,10 @@ overflow:hidden;
 }
 
 .cover{
-width:134%;
-height:134%;
+width:137%;
+height:137%;
 
-margin:-17%;
+margin:-18.5%;
 
 border-radius:50%;
 
@@ -552,26 +552,10 @@ let playing=false;
 
 function updateBDTime(){
 
-const now=new Date();
+const options = { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+const timeString = new Intl.DateTimeFormat('en-GB', options).format(new Date());
 
-const utc=
-now.getTime()+
-(now.getTimezoneOffset()*60000);
-
-const bd=
-new Date(utc+(6*60*60*1000));
-
-let h=
-String(bd.getHours()).padStart(2,"0");
-
-let m=
-String(bd.getMinutes()).padStart(2,"0");
-
-let s=
-String(bd.getSeconds()).padStart(2,"0");
-
-document.getElementById("bdTime").textContent=
-"BD • "+h+":"+m+":"+s;
+document.getElementById("bdTime").textContent = "BD • " + timeString;
 
 }
 
@@ -738,7 +722,7 @@ player.previousVideo();
 
 function updateInfo(){
 
-if(!player)return;
+if(!player || typeof player.getVideoData !== 'function')return;
 
 try{
 
@@ -783,7 +767,7 @@ d.author;
 
 function updateProgress(){
 
-if(!player)return;
+if(!player || typeof player.getCurrentTime !== 'function')return;
 
 try{
 
@@ -832,7 +816,7 @@ updateInfo();
 
 function seek(e){
 
-if(!player)return;
+if(!player || typeof player.getDuration !== 'function')return;
 
 const r=
 document
