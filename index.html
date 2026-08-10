@@ -18,14 +18,19 @@ color:#fff;
 font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
 }
 
-body{position:relative}
+body{
+position:relative;
+}
 
 
 /* BACKGROUND */
 
 .bg{
 position:fixed;
-inset:0;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background-image:url("background.jpg");
 background-position:center center;
 background-size:cover;
@@ -36,7 +41,10 @@ z-index:0;
 .bg:after{
 content:"";
 position:absolute;
-inset:0;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:rgba(0,0,0,.18);
 }
 
@@ -134,7 +142,7 @@ padding:0 14px 40px;
 width:min(520px,100%);
 height:130px;
 
-padding:12px 20px 12px 16px;
+padding:14px 20px 14px 16px;
 
 border:1px solid rgba(255,255,255,.2);
 border-radius:65px;
@@ -159,8 +167,8 @@ transform:translateY(-12px);
 .cover-wrapper{
 position:relative;
 
-width:82px;
-height:82px;
+width:78px;
+height:78px;
 
 flex-shrink:0;
 
@@ -196,8 +204,8 @@ content:"";
 
 position:absolute;
 
-width:17px;
-height:17px;
+width:16px;
+height:16px;
 
 background:rgba(20,20,20,.85);
 
@@ -341,8 +349,8 @@ fill:#fff;
 /* PLAY */
 
 .play{
-width:58px;
-height:58px;
+width:56px;
+height:56px;
 
 border-radius:50%;
 border:0;
@@ -365,7 +373,7 @@ height:23px;
 
 fill:#000;
 
-margin-left:3px;
+margin-left:2px;
 }
 
 .play.playing svg{
@@ -384,16 +392,19 @@ transform:scale(.90);
 
 .player{
 height:118px;
-padding:10px 15px;
+
+padding:10px 14px;
+
 border-radius:59px;
+
 gap:10px;
 
 transform:translateY(-10px);
 }
 
 .cover-wrapper{
-width:70px;
-height:70px;
+width:68px;
+height:68px;
 }
 
 .cover-wrapper::after{
@@ -407,6 +418,8 @@ font-size:15px;
 
 .artist{
 font-size:13px;
+
+margin-top:1px;
 margin-bottom:6px;
 }
 
@@ -419,28 +432,28 @@ margin-bottom:5px;
 font-size:11px;
 }
 
-.play{
-width:50px;
-height:50px;
-}
-
-.play svg{
-width:21px;
-height:21px;
-}
-
 .controls{
 gap:8px;
 }
 
 .btn{
-width:28px;
-height:28px;
+width:27px;
+height:27px;
 }
 
 .btn svg{
 width:20px;
 height:20px;
+}
+
+.play{
+width:48px;
+height:48px;
+}
+
+.play svg{
+width:21px;
+height:21px;
 }
 
 .bd-time{
@@ -457,16 +470,27 @@ padding:4px 9px;
 <body>
 
 <!-- BACKGROUND IMAGE -->
+
 <div class="bg"></div>
 
+
 <!-- BANGLADESH LIVE TIME -->
+
 <div class="bd-time">
-  <span>BD</span>
-  <span class="live-dot"></span>
-  <span id="bdTimeVal">--:--:-- --</span>
+
+<span>BD</span>
+
+<span class="live-dot"></span>
+
+<span id="bdTimeVal">
+--:--:-- --
+</span>
+
 </div>
 
+
 <!-- YOUTUBE PLAYER -->
+
 <div id="yt"></div>
 
 
@@ -483,7 +507,6 @@ padding:4px 9px;
 id="cover" 
 class="cover" 
 alt="Album art"
-src="background.jpg"
 >
 
 </div>
@@ -620,31 +643,44 @@ let playing=false;
 function updateBDTime(){
 
 const options = { 
-  timeZone: 'Asia/Dhaka', 
-  hour: '2-digit', 
-  minute: '2-digit', 
-  second: '2-digit', 
-  hour12: true 
+
+timeZone:'Asia/Dhaka',
+
+hour:'2-digit',
+minute:'2-digit',
+second:'2-digit',
+
+hour12:true
+
 };
 
 const timeString =
-new Intl.DateTimeFormat('en-US', options).format(new Date());
+new Intl.DateTimeFormat(
+'en-US',
+options
+).format(new Date());
 
-document.getElementById("bdTimeVal").textContent =
-timeString;
+document.getElementById(
+"bdTimeVal"
+).textContent=timeString;
 
 }
 
 updateBDTime();
 
-setInterval(updateBDTime,1000);
+setInterval(
+updateBDTime,
+1000
+);
 
 
 /* YOUTUBE API */
 
 function onYouTubeIframeAPIReady(){
 
-player=new YT.Player("yt",{
+player=new YT.Player(
+"yt",
+{
 
 width:"2",
 height:"2",
@@ -652,14 +688,21 @@ height:"2",
 playerVars:{
 
 autoplay:0,
+
 controls:0,
+
 disablekb:1,
+
 fs:0,
+
 modestbranding:1,
+
 playsinline:1,
+
 rel:0,
 
 listType:"playlist",
+
 list:PLAYLIST_ID
 
 },
@@ -667,6 +710,7 @@ list:PLAYLIST_ID
 events:{
 
 onReady:ready,
+
 onStateChange:state
 
 }
@@ -680,9 +724,15 @@ onStateChange:state
 
 function ready(){
 
-setTimeout(updateInfo,700);
+setTimeout(
+updateInfo,
+700
+);
 
-setInterval(updateProgress,400);
+setInterval(
+updateProgress,
+400
+);
 
 }
 
@@ -691,47 +741,58 @@ setInterval(updateProgress,400);
 
 function state(e){
 
-const cover=
+const cover =
 document.getElementById("cover");
 
-const playBtn=
+const playBtn =
 document.getElementById("play");
 
-const playIcon=
+const playIcon =
 document.getElementById("play-icon");
 
 
-if(e.data===YT.PlayerState.PLAYING){
+if(
+e.data === YT.PlayerState.PLAYING
+){
 
 playing=true;
 
-playBtn.classList.add("playing");
+playBtn.classList.add(
+"playing"
+);
 
-playIcon.innerHTML=
+playIcon.innerHTML =
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add("spinning");
+cover.classList.add(
+"spinning"
+);
 
 updateInfo();
 
 }
 
+
 else if(
 
-e.data===YT.PlayerState.PAUSED ||
+e.data === YT.PlayerState.PAUSED ||
 
-e.data===YT.PlayerState.ENDED
+e.data === YT.PlayerState.ENDED
 
 ){
 
 playing=false;
 
-playBtn.classList.remove("playing");
+playBtn.classList.remove(
+"playing"
+);
 
-playIcon.innerHTML=
+playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
 
 }
 
@@ -783,33 +844,47 @@ player.previousVideo();
 
 function updateInfo(){
 
-if(!player || typeof player.getVideoData!=='function')return;
+if(
+!player ||
+typeof player.getVideoData !== 'function'
+)return;
 
 try{
 
-const d=
+const d =
 player.getVideoData();
 
-if(!d || !d.video_id)return;
+if(
+!d ||
+!d.video_id
+)return;
 
-const id=
+const id =
 d.video_id;
 
-const thumb=
-"https://i.ytimg.com/vi/"
-+
-id+
+const thumb =
+"https://i.ytimg.com/vi/" +
+id +
 "/hqdefault.jpg";
 
-document.getElementById("cover").src=
-thumb;
 
-document.getElementById("title").textContent=
-d.title || "Unknown";
+document.getElementById(
+"cover"
+).src=thumb;
+
+
+document.getElementById(
+"title"
+).textContent =
+d.title ||
+"Unknown";
+
 
 if(d.author){
 
-document.getElementById("artist").textContent=
+document.getElementById(
+"artist"
+).textContent =
 d.author;
 
 }
@@ -823,19 +898,22 @@ d.author;
 
 function updateProgress(){
 
-if(!player || typeof player.getCurrentTime!=='function')return;
+if(
+!player ||
+typeof player.getCurrentTime !== 'function'
+)return;
 
 try{
 
-const c=
+const c =
 player.getCurrentTime();
 
-const d=
+const d =
 player.getDuration();
 
 if(!d)return;
 
-const p=
+const p =
 Math.max(
 0,
 Math.min(
@@ -844,14 +922,24 @@ Math.min(
 )
 );
 
-document.getElementById("fill").style.width=
+
+document.getElementById(
+"fill"
+).style.width =
 p+"%";
 
-document.getElementById("current").textContent=
+
+document.getElementById(
+"current"
+).textContent =
 format(c);
 
-document.getElementById("duration").textContent=
+
+document.getElementById(
+"duration"
+).textContent =
 format(d);
+
 
 if(playing){
 
@@ -868,14 +956,18 @@ updateInfo();
 
 function seek(e){
 
-if(!player || typeof player.getDuration!=='function')return;
+if(
+!player ||
+typeof player.getDuration !== 'function'
+)return;
 
-const r=
+const r =
 document
 .getElementById("seek")
 .getBoundingClientRect();
 
-const p=
+
+const p =
 Math.max(
 0,
 Math.min(
@@ -883,6 +975,7 @@ Math.min(
 (e.clientX-r.left)/r.width
 )
 );
+
 
 player.seekTo(
 p*player.getDuration(),
@@ -896,7 +989,10 @@ true
 
 function format(s){
 
-if(!s || isNaN(s)){
+if(
+!s ||
+isNaN(s)
+){
 
 return "0:00";
 
@@ -908,7 +1004,9 @@ return Math.floor(s/60)
 +
 ":"
 +
-String(s%60).padStart(
+String(
+s%60
+).padStart(
 2,
 "0"
 );
