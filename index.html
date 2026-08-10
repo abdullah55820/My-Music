@@ -2,613 +2,818 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+>
 
 <title>My Music Player</title>
 
 <style>
 
 *{
-box-sizing:border-box
+  box-sizing:border-box;
 }
 
 html,body{
-margin:0;
-width:100%;
-height:100%;
-overflow:hidden;
-background:#050505;
-color:#fff;
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#050505;
+  color:#fff;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "Segoe UI",
+    sans-serif;
 }
 
 body{
-position:relative
+  position:relative;
 }
 
 
-/* BACKGROUND */
+/* =========================
+   BACKGROUND IMAGE
+   ========================= */
 
 .bg{
-position:fixed;
-inset:0;
-background:url("background.jpg") center center/cover no-repeat;
-transform:scale(1.01);
+  position:fixed;
+  inset:0;
+
+  background-image:url("background.jpg");
+  background-position:center center;
+  background-size:cover;
+  background-repeat:no-repeat;
+
+  transform:scale(1.02);
+
+  z-index:0;
 }
 
-.bg:after{
-content:"";
-position:absolute;
-inset:0;
-background:rgba(0,0,0,.18);
+
+/* Dark overlay */
+
+.bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:rgba(0,0,0,.12);
 }
 
 
-/* BD LIVE */
+/* =========================
+   BD LIVE TIME
+   ========================= */
 
 .live-info{
-position:fixed;
-top:14px;
-left:50%;
-transform:translateX(-50%);
-z-index:5;
+  position:fixed;
 
-display:flex;
-align-items:center;
-gap:7px;
+  top:12px;
+  left:50%;
 
-padding:5px 10px;
+  transform:translateX(-50%);
 
-border-radius:14px;
+  z-index:10;
 
-background:rgba(0,0,0,.35);
-border:1px solid rgba(255,255,255,.15);
+  display:flex;
+  align-items:center;
 
-backdrop-filter:blur(8px);
--webkit-backdrop-filter:blur(8px);
+  gap:6px;
 
-font-size:10px;
-font-weight:700;
-letter-spacing:.35px;
-white-space:nowrap;
+  padding:5px 10px;
+
+  border-radius:15px;
+
+  background:rgba(0,0,0,.38);
+
+  border:1px solid rgba(255,255,255,.16);
+
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+
+  font-size:10px;
+  font-weight:700;
+
+  letter-spacing:.3px;
+
+  white-space:nowrap;
 }
 
 .live-dot{
-width:6px;
-height:6px;
-border-radius:50%;
-background:#ff3030;
-box-shadow:0 0 7px rgba(255,48,48,.8);
-animation:livePulse 1.2s infinite;
+  width:6px;
+  height:6px;
+
+  flex-shrink:0;
+
+  border-radius:50%;
+
+  background:#ff3030;
+
+  box-shadow:
+    0 0 7px rgba(255,48,48,.8);
+
+  animation:livePulse 1.2s infinite;
 }
 
 @keyframes livePulse{
-0%,100%{opacity:1}
-50%{opacity:.45}
+
+  0%,100%{
+    opacity:1;
+  }
+
+  50%{
+    opacity:.4;
+  }
+
 }
 
 .live-label{
-color:#fff;
+  color:#fff;
 }
 
 .live-time{
-color:rgba(255,255,255,.75);
-font-variant-numeric:tabular-nums;
+  color:rgba(255,255,255,.78);
+
+  font-variant-numeric:tabular-nums;
 }
 
 
-/* YOUTUBE */
+/* =========================
+   YOUTUBE
+   ========================= */
 
 #yt{
-position:fixed;
-width:2px;
-height:2px;
-left:-10px;
-bottom:-10px;
-opacity:.01;
-pointer-events:none;
+  position:fixed;
+
+  width:2px;
+  height:2px;
+
+  left:-10px;
+  bottom:-10px;
+
+  opacity:.01;
+
+  pointer-events:none;
 }
 
 
-/* APP */
+/* =========================
+   APP
+   ========================= */
 
 .app{
-position:relative;
-z-index:2;
+  position:relative;
 
-height:100dvh;
-width:100%;
+  z-index:2;
 
-display:flex;
-align-items:flex-end;
-justify-content:center;
+  width:100%;
+  height:100dvh;
 
-padding:0 14px 40px;
+  display:flex;
+
+  align-items:flex-end;
+  justify-content:center;
+
+  padding:
+    0
+    14px
+    40px;
 }
 
 
-/* PLAYER */
+/* =========================
+   PLAYER
+   ========================= */
 
 .player{
-width:min(520px,100%);
-height:92px;
 
-padding:12px 18px 12px 14px;
+  width:min(520px,100%);
 
-border:1px solid rgba(255,255,255,.2);
-border-radius:46px;
+  height:92px;
 
-background:rgba(40,25,20,.72);
+  padding:
+    12px
+    18px
+    12px
+    14px;
 
-box-shadow:0 20px 50px rgba(0,0,0,.6);
+  border:
+    1px solid
+    rgba(255,255,255,.2);
 
-backdrop-filter:blur(25px) saturate(130%);
--webkit-backdrop-filter:blur(25px) saturate(130%);
+  border-radius:46px;
 
-display:flex;
-align-items:center;
-gap:14px;
+  background:
+    rgba(40,25,20,.72);
+
+  box-shadow:
+    0 20px 50px
+    rgba(0,0,0,.6);
+
+  backdrop-filter:
+    blur(25px)
+    saturate(130%);
+
+  -webkit-backdrop-filter:
+    blur(25px)
+    saturate(130%);
+
+  display:flex;
+
+  align-items:center;
+
+  gap:14px;
 }
 
 
-/* COVER */
+/* =========================
+   THUMBNAIL
+   ========================= */
 
 .cover-wrapper{
-position:relative;
 
-width:66px;
-height:66px;
+  position:relative;
 
-flex-shrink:0;
+  width:66px;
+  height:66px;
 
-display:flex;
-align-items:center;
-justify-content:center;
+  flex-shrink:0;
 
-border-radius:50%;
+  display:flex;
 
-overflow:hidden;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  overflow:hidden;
 }
+
+
+/* IMPORTANT:
+   2X ZOOM removes black
+   edges from YouTube thumbnail
+*/
 
 .cover{
 
-width:100%;
-height:100%;
+  width:100%;
+  height:100%;
 
-border-radius:50%;
+  border-radius:50%;
 
-object-fit:cover;
+  object-fit:cover;
 
-/* EXTRA ZOOM */
-transform:scale(1.45);
+  transform:scale(2);
 
-background:#222;
+  transform-origin:center center;
 
-box-shadow:0 4px 15px rgba(0,0,0,.4);
+  background:#222;
 
-animation:spin 8s linear infinite;
+  box-shadow:
+    0 4px 15px
+    rgba(0,0,0,.4);
 
-animation-play-state:paused;
+  animation:
+    spin 8s linear infinite;
+
+  animation-play-state:paused;
 }
 
 
-/* CENTER DOT */
+/* Center hole */
 
 .cover-wrapper::after{
-content:"";
 
-position:absolute;
+  content:"";
 
-width:14px;
-height:14px;
+  position:absolute;
 
-background:rgba(20,20,20,.85);
+  width:14px;
+  height:14px;
 
-border:2px solid rgba(255,255,255,.3);
+  background:
+    rgba(20,20,20,.88);
 
-border-radius:50%;
+  border:
+    2px solid
+    rgba(255,255,255,.3);
 
-z-index:2;
+  border-radius:50%;
+
+  z-index:3;
 }
 
 
-/* SPIN */
+/* =========================
+   THUMBNAIL SPIN
+   ========================= */
 
 .cover.spinning{
-animation-play-state:running;
+
+  animation-play-state:running;
+
 }
 
 @keyframes spin{
 
-from{
-transform:scale(1.45) rotate(0deg);
+  from{
+
+    transform:
+      scale(2)
+      rotate(0deg);
+
+  }
+
+  to{
+
+    transform:
+      scale(2)
+      rotate(360deg);
+
+  }
+
 }
 
-to{
-transform:scale(1.45) rotate(360deg);
-}
 
-}
-
-
-/* SONG INFO */
+/* =========================
+   SONG INFORMATION
+   ========================= */
 
 .middle{
-flex:1;
-min-width:0;
 
-display:flex;
-flex-direction:column;
-justify-content:center;
+  flex:1;
+
+  min-width:0;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:center;
 }
+
 
 .title{
-font-size:16px;
-font-weight:700;
 
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
+  font-size:16px;
 
-color:#fff;
+  font-weight:700;
+
+  white-space:nowrap;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+
+  color:#fff;
 }
+
 
 .artist{
-font-size:13px;
 
-color:rgba(255,255,255,.65);
+  font-size:13px;
 
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
+  color:
+    rgba(255,255,255,.65);
 
-margin-top:1px;
-margin-bottom:6px;
+  white-space:nowrap;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+
+  margin-top:1px;
+
+  margin-bottom:6px;
 }
 
 
-/* SEEK BAR */
+/* =========================
+   SEEK BAR
+   ========================= */
 
 .seek{
-position:relative;
 
-width:100%;
-height:4px;
+  position:relative;
 
-border-radius:10px;
+  width:100%;
 
-background:rgba(255,255,255,.2);
+  height:4px;
 
-cursor:pointer;
+  border-radius:10px;
 
-margin-bottom:6px;
+  background:
+    rgba(255,255,255,.2);
+
+  cursor:pointer;
+
+  margin-bottom:6px;
 }
+
 
 .fill{
-position:absolute;
 
-left:0;
-top:0;
+  position:absolute;
 
-height:100%;
-width:0;
+  left:0;
+  top:0;
 
-background:#fff;
+  height:100%;
 
-border-radius:10px;
+  width:0;
+
+  background:#fff;
+
+  border-radius:10px;
 }
+
 
 .time-display{
-font-size:11px;
 
-color:rgba(255,255,255,.6);
+  font-size:11px;
 
-font-variant-numeric:tabular-nums;
+  color:
+    rgba(255,255,255,.6);
+
+  font-variant-numeric:
+    tabular-nums;
 }
 
 
-/* CONTROLS */
+/* =========================
+   CONTROLS
+   ========================= */
 
 .controls{
-display:flex;
-align-items:center;
 
-gap:12px;
+  display:flex;
 
-flex-shrink:0;
+  align-items:center;
+
+  gap:12px;
+
+  flex-shrink:0;
 }
+
 
 .btn{
-width:28px;
-height:28px;
 
-border:0;
+  width:28px;
+  height:28px;
 
-background:transparent;
+  border:0;
 
-color:rgba(255,255,255,.9);
+  background:transparent;
 
-display:flex;
-align-items:center;
-justify-content:center;
+  color:
+    rgba(255,255,255,.9);
 
-cursor:pointer;
+  display:flex;
 
-padding:0;
+  align-items:center;
+  justify-content:center;
 
-transition:transform .1s;
+  cursor:pointer;
+
+  padding:0;
+
+  transition:
+    transform .1s;
 }
+
 
 .btn svg{
-width:20px;
-height:20px;
 
-fill:#fff;
+  width:20px;
+  height:20px;
+
+  fill:#fff;
 }
 
 
-/* PLAY */
+/* =========================
+   PLAY BUTTON
+   ========================= */
 
 .play{
-width:48px;
-height:48px;
 
-border-radius:50%;
+  width:48px;
+  height:48px;
 
-border:0;
+  border-radius:50%;
 
-background:#fff;
+  border:0;
 
-color:#000;
+  background:#fff;
 
-display:flex;
-align-items:center;
-justify-content:center;
+  color:#000;
 
-box-shadow:0 4px 15px rgba(0,0,0,.3);
+  display:flex;
 
-cursor:pointer;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:
+    0 4px 15px
+    rgba(0,0,0,.3);
+
+  cursor:pointer;
 }
+
 
 .play svg{
-width:20px;
-height:20px;
 
-fill:#000;
+  width:20px;
+  height:20px;
 
-margin-left:2px;
+  fill:#000;
+
+  margin-left:2px;
 }
+
 
 .play.playing svg{
-margin-left:0;
+
+  margin-left:0;
 }
+
 
 .btn:active,
 .play:active{
-transform:scale(.90);
+
+  transform:scale(.90);
+
 }
 
 
-/* MOBILE */
+/* =========================
+   MOBILE
+   ========================= */
 
 @media(max-width:480px){
 
-.player{
-height:84px;
+  .player{
 
-padding:10px 14px;
+    height:84px;
 
-border-radius:42px;
+    padding:
+      10px
+      14px;
 
-gap:10px;
-}
+    border-radius:42px;
 
-.cover-wrapper{
-width:58px;
-height:58px;
-}
+    gap:10px;
+  }
 
-.title{
-font-size:14px;
-}
 
-.artist{
-font-size:12px;
-}
+  .cover-wrapper{
 
-.play{
-width:42px;
-height:42px;
-}
+    width:58px;
+    height:58px;
+  }
 
-.btn{
-width:24px;
-height:24px;
-}
 
-.live-info{
-top:10px;
+  .title{
 
-font-size:9px;
+    font-size:14px;
+  }
 
-padding:4px 8px;
-}
+
+  .artist{
+
+    font-size:12px;
+  }
+
+
+  .play{
+
+    width:42px;
+    height:42px;
+  }
+
+
+  .btn{
+
+    width:24px;
+    height:24px;
+  }
+
+
+  .live-info{
+
+    top:9px;
+
+    font-size:9px;
+
+    padding:
+      4px
+      8px;
+  }
 
 }
 
 </style>
 </head>
 
+
 <body>
 
 
-<!-- BACKGROUND -->
+<!-- =========================
+     BACKGROUND
+     ========================= -->
 
 <div class="bg"></div>
 
 
-<!-- BD LIVE -->
+<!-- =========================
+     BD LIVE TIME
+     ========================= -->
 
 <div class="live-info">
 
-<span class="live-dot"></span>
+  <span class="live-dot"></span>
 
-<span class="live-label">
-BD LIVE
-</span>
+  <span class="live-label">
+    BD LIVE
+  </span>
 
-<span class="live-time" id="bdTime">
---:--:--
-</span>
+  <span
+    class="live-time"
+    id="bdTime"
+  >
+    --:--:--
+  </span>
 
 </div>
 
 
-<!-- YOUTUBE -->
+<!-- =========================
+     YOUTUBE PLAYER
+     ========================= -->
 
 <div id="yt"></div>
 
 
-<!-- APP -->
+<!-- =========================
+     MUSIC PLAYER
+     ========================= -->
 
 <div class="app">
 
-<section class="player">
+  <section class="player">
 
 
-<!-- COVER -->
+    <!-- THUMBNAIL -->
 
-<div class="cover-wrapper">
+    <div class="cover-wrapper">
 
-<img
-id="cover"
-class="cover"
-alt="Album art"
->
+      <img
+        id="cover"
+        class="cover"
+        alt="Album art"
+      >
+
+    </div>
+
+
+    <!-- SONG INFO -->
+
+    <div class="middle">
+
+      <div
+        id="title"
+        class="title"
+      >
+        Loading…
+      </div>
+
+
+      <div
+        id="artist"
+        class="artist"
+      >
+        YouTube Playlist
+      </div>
+
+
+      <!-- PROGRESS -->
+
+      <div
+        class="seek"
+        id="seek"
+        onclick="seek(event)"
+      >
+
+        <div
+          class="fill"
+          id="fill"
+        ></div>
+
+      </div>
+
+
+      <!-- SONG TIME -->
+
+      <div class="time-display">
+
+        <span id="current">
+          0:00
+        </span>
+
+        /
+
+        <span id="duration">
+          0:00
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+
+      <!-- PREVIOUS -->
+
+      <button
+        class="btn"
+        onclick="previousSong()"
+        aria-label="Previous"
+      >
+
+        <svg viewBox="0 0 24 24">
+
+          <path
+            d="M6 6h2v12H6zm3.5 6l8.5 6V6z"
+          />
+
+        </svg>
+
+      </button>
+
+
+      <!-- PLAY / PAUSE -->
+
+      <button
+        class="play"
+        id="play"
+        onclick="togglePlay()"
+        aria-label="Play"
+      >
+
+        <svg
+          id="play-icon"
+          viewBox="0 0 24 24"
+        >
+
+          <path
+            d="M8 5v14l11-7z"
+          />
+
+        </svg>
+
+      </button>
+
+
+      <!-- NEXT -->
+
+      <button
+        class="btn"
+        onclick="nextSong()"
+        aria-label="Next"
+      >
+
+        <svg viewBox="0 0 24 24">
+
+          <path
+            d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"
+          />
+
+        </svg>
+
+      </button>
+
+
+    </div>
+
+  </section>
 
 </div>
 
 
-<!-- SONG INFO -->
-
-<div class="middle">
-
-<div
-id="title"
-class="title"
->
-Loading…
-</div>
-
-<div
-id="artist"
-class="artist"
->
-YouTube Playlist
-</div>
-
-
-<!-- SEEK -->
-
-<div
-class="seek"
-id="seek"
-onclick="seek(event)"
->
-
-<div
-class="fill"
-id="fill"
-></div>
-
-</div>
-
-
-<!-- TIME -->
-
-<div class="time-display">
-
-<span id="current">
-0:00
-</span>
-
-/
-
-<span id="duration">
-0:00
-</span>
-
-</div>
-
-</div>
-
-
-<!-- CONTROLS -->
-
-<div class="controls">
-
-
-<!-- PREVIOUS -->
-
-<button
-class="btn"
-onclick="previousSong()"
-aria-label="Previous"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-
-</svg>
-
-</button>
-
-
-<!-- PLAY -->
-
-<button
-class="play"
-id="play"
-onclick="togglePlay()"
-aria-label="Play"
->
-
-<svg
-id="play-icon"
-viewBox="0 0 24 24"
->
-
-<path d="M8 5v14l11-7z"/>
-
-</svg>
-
-</button>
-
-
-<!-- NEXT -->
-
-<button
-class="btn"
-onclick="nextSong()"
-aria-label="Next"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/>
-
-</svg>
-
-</button>
-
-
-</div>
-
-</section>
-
-</div>
-
+<!-- =========================
+     YOUTUBE API
+     ========================= -->
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -616,365 +821,482 @@ aria-label="Next"
 <script>
 
 
-/* PLAYLIST */
+/* =========================
+   PLAYLIST
+   ========================= */
 
-const PLAYLIST_ID="PLbvY05KVYwoo";
-
-let player=null;
-
-let playing=false;
+const PLAYLIST_ID =
+  "PLbvY05KVYwoo";
 
 
-/* BANGLADESH TIME */
+let player = null;
+
+let playing = false;
+
+
+/* =========================
+   BANGLADESH TIME
+   ========================= */
 
 function updateBDTime(){
 
-const now=new Date();
+  const now = new Date();
 
-const time=new Intl.DateTimeFormat(
-"en-US",
-{
-timeZone:"Asia/Dhaka",
 
-hour:"2-digit",
-minute:"2-digit",
-second:"2-digit",
+  const time =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone:"Asia/Dhaka",
 
-hour12:true
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+
+        hour12:true
+      }
+    ).format(now);
+
+
+  document.getElementById(
+    "bdTime"
+  ).textContent = time;
+
 }
-).format(now);
 
-document.getElementById("bdTime").textContent=time;
-
-}
 
 updateBDTime();
 
-setInterval(updateBDTime,1000);
+setInterval(
+  updateBDTime,
+  1000
+);
 
 
-/* YOUTUBE API */
+/* =========================
+   YOUTUBE API READY
+   ========================= */
 
 function onYouTubeIframeAPIReady(){
 
-player=new YT.Player(
-"yt",
-{
+  player =
+    new YT.Player(
+      "yt",
+      {
 
-width:"2",
-height:"2",
+        width:"2",
+        height:"2",
 
-playerVars:{
+        playerVars:{
 
-autoplay:0,
-controls:0,
-disablekb:1,
-fs:0,
-modestbranding:1,
-playsinline:1,
-rel:0,
+          autoplay:0,
 
-listType:"playlist",
-list:PLAYLIST_ID
+          controls:0,
 
-},
+          disablekb:1,
 
-events:{
-onReady:ready,
-onStateChange:state
+          fs:0,
+
+          modestbranding:1,
+
+          playsinline:1,
+
+          rel:0,
+
+          listType:"playlist",
+
+          list:PLAYLIST_ID
+
+        },
+
+        events:{
+
+          onReady:ready,
+
+          onStateChange:state
+
+        }
+
+      }
+    );
+
 }
 
-}
-);
 
-}
-
-
-/* READY */
+/* =========================
+   READY
+   ========================= */
 
 function ready(){
 
-setTimeout(
-updateInfo,
-700
-);
+  setTimeout(
+    updateInfo,
+    700
+  );
 
-setInterval(
-updateProgress,
-400
-);
+
+  setInterval(
+    updateProgress,
+    400
+  );
 
 }
 
 
-/* STATE */
+/* =========================
+   PLAYER STATE
+   ========================= */
 
 function state(e){
 
-const cover=
-document.getElementById("cover");
-
-const playBtn=
-document.getElementById("play");
-
-const playIcon=
-document.getElementById("play-icon");
+  const cover =
+    document.getElementById(
+      "cover"
+    );
 
 
-if(
-e.data===YT.PlayerState.PLAYING
-){
+  const playBtn =
+    document.getElementById(
+      "play"
+    );
 
-playing=true;
 
-playBtn.classList.add(
-"playing"
-);
+  const playIcon =
+    document.getElementById(
+      "play-icon"
+    );
 
-playIcon.innerHTML=
-'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add(
-"spinning"
-);
+  /* PLAYING */
 
-updateInfo();
+  if(
+    e.data ===
+    YT.PlayerState.PLAYING
+  ){
+
+    playing = true;
+
+
+    playBtn.classList.add(
+      "playing"
+    );
+
+
+    playIcon.innerHTML =
+      '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+
+    cover.classList.add(
+      "spinning"
+    );
+
+
+    updateInfo();
+
+  }
+
+
+  /* PAUSED / ENDED */
+
+  else if(
+
+    e.data ===
+    YT.PlayerState.PAUSED
+
+    ||
+
+    e.data ===
+    YT.PlayerState.ENDED
+
+  ){
+
+    playing = false;
+
+
+    playBtn.classList.remove(
+      "playing"
+    );
+
+
+    playIcon.innerHTML =
+      '<path d="M8 5v14l11-7z"/>';
+
+
+    cover.classList.remove(
+      "spinning"
+    );
+
+  }
 
 }
 
 
-else if(
-
-e.data===YT.PlayerState.PAUSED
-
-||
-
-e.data===YT.PlayerState.ENDED
-
-){
-
-playing=false;
-
-playBtn.classList.remove(
-"playing"
-);
-
-playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
-cover.classList.remove(
-"spinning"
-);
-
-}
-
-}
-
-
-/* PLAY / PAUSE */
+/* =========================
+   PLAY / PAUSE
+   ========================= */
 
 function togglePlay(){
 
-if(!player)return;
+  if(!player)
+    return;
 
-if(playing){
 
-player.pauseVideo();
+  if(playing){
 
-}else{
+    player.pauseVideo();
 
-player.playVideo();
+  }
+
+  else{
+
+    player.playVideo();
+
+  }
 
 }
 
-}
 
-
-/* NEXT */
+/* =========================
+   NEXT SONG
+   ========================= */
 
 function nextSong(){
 
-if(!player)return;
+  if(!player)
+    return;
 
-player.nextVideo();
+
+  player.nextVideo();
 
 }
 
 
-/* PREVIOUS */
+/* =========================
+   PREVIOUS SONG
+   ========================= */
 
 function previousSong(){
 
-if(!player)return;
+  if(!player)
+    return;
 
-player.previousVideo();
+
+  player.previousVideo();
 
 }
 
 
-/* SONG INFO */
+/* =========================
+   UPDATE SONG INFO
+   ========================= */
 
 function updateInfo(){
 
-if(!player)return;
-
-try{
-
-const d=
-player.getVideoData();
-
-if(
-!d ||
-!d.video_id
-)return;
-
-const id=
-d.video_id;
-
-const thumb=
-"https://i.ytimg.com/vi/"
-+
-id
-+
-"/hqdefault.jpg";
+  if(!player)
+    return;
 
 
-document.getElementById(
-"cover"
-).src=thumb;
+  try{
+
+    const d =
+      player.getVideoData();
 
 
-document.getElementById(
-"title"
-).textContent=
-d.title ||
-"Unknown";
+    if(
+      !d ||
+      !d.video_id
+    ){
+
+      return;
+
+    }
 
 
-if(d.author){
+    const id =
+      d.video_id;
 
-document.getElementById(
-"artist"
-).textContent=
-d.author;
+
+    const thumb =
+      "https://i.ytimg.com/vi/"
+      +
+      id
+      +
+      "/hqdefault.jpg";
+
+
+    /* COVER */
+
+    document.getElementById(
+      "cover"
+    ).src = thumb;
+
+
+    /* SONG TITLE */
+
+    document.getElementById(
+      "title"
+    ).textContent =
+      d.title ||
+      "Unknown";
+
+
+    /* ARTIST */
+
+    if(d.author){
+
+      document.getElementById(
+        "artist"
+      ).textContent =
+        d.author;
+
+    }
+
+  }
+
+  catch(e){
+
+  }
 
 }
 
-}
 
-catch(e){}
-
-}
-
-
-/* PROGRESS */
+/* =========================
+   UPDATE PROGRESS
+   ========================= */
 
 function updateProgress(){
 
-if(!player)return;
-
-try{
-
-const c=
-player.getCurrentTime();
-
-const d=
-player.getDuration();
-
-if(!d)return;
+  if(!player)
+    return;
 
 
-const p=
-Math.max(
-0,
-Math.min(
-100,
-c/d*100
-)
-);
+  try{
+
+    const c =
+      player.getCurrentTime();
 
 
-document.getElementById(
-"fill"
-).style.width=
-p+"%";
+    const d =
+      player.getDuration();
 
 
-document.getElementById(
-"current"
-).textContent=
-format(c);
+    if(!d)
+      return;
 
 
-document.getElementById(
-"duration"
-).textContent=
-format(d);
+    const p =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          (c / d) * 100
+        )
+      );
+
+
+    document.getElementById(
+      "fill"
+    ).style.width =
+      p + "%";
+
+
+    document.getElementById(
+      "current"
+    ).textContent =
+      format(c);
+
+
+    document.getElementById(
+      "duration"
+    ).textContent =
+      format(d);
+
+  }
+
+  catch(e){
+
+  }
 
 }
 
-catch(e){}
 
-}
-
-
-/* SEEK */
+/* =========================
+   SEEK
+   ========================= */
 
 function seek(e){
 
-if(!player)return;
-
-const r=
-document
-.getElementById("seek")
-.getBoundingClientRect();
+  if(!player)
+    return;
 
 
-const p=
-Math.max(
-0,
-Math.min(
-1,
-(e.clientX-r.left)/
-r.width
-)
-);
+  const r =
+    document
+      .getElementById("seek")
+      .getBoundingClientRect();
 
 
-player.seekTo(
-p*
-player.getDuration(),
-true
-);
+  const p =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (e.clientX - r.left)
+        /
+        r.width
+      )
+    );
+
+
+  player.seekTo(
+    p *
+    player.getDuration(),
+    true
+  );
 
 }
 
 
-/* FORMAT */
+/* =========================
+   TIME FORMAT
+   ========================= */
 
 function format(s){
 
-if(
-!s ||
-isNaN(s)
-){
+  if(
+    !s ||
+    isNaN(s)
+  ){
 
-return "0:00";
+    return "0:00";
 
-}
+  }
 
-s=Math.floor(s);
 
-return Math.floor(s/60)
-+
-":"
-+
-String(
-s%60
-).padStart(
-2,
-"0"
-);
+  s =
+    Math.floor(s);
+
+
+  return (
+
+    Math.floor(
+      s / 60
+    )
+
+    +
+
+    ":"
+
+    +
+
+    String(
+      s % 60
+    ).padStart(
+      2,
+      "0"
+    )
+
+  );
 
 }
 
