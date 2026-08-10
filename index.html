@@ -126,16 +126,16 @@ padding:0 14px 40px;
 }
 
 
-/* PLAYER (এখানে সাইজ ও প্যাডিং বাড়িয়ে মোটা করা হয়েছে) */
+/* PLAYER */
 
 .player{
 width:min(520px,100%);
-height:110px; /* আগে ৯২px ছিল, এখন ১১০px */
+height:92px;
 
-padding:16px 22px; /* প্যাডিং বাড়িয়ে মোটা করা হয়েছে */
+padding:12px 18px 12px 14px;
 
 border:1px solid rgba(255,255,255,.2);
-border-radius:55px;
+border-radius:46px;
 
 background:rgba(40,25,20,.72);
 
@@ -146,7 +146,7 @@ backdrop-filter:blur(25px) saturate(130%);
 
 display:flex;
 align-items:center;
-gap:16px;
+gap:14px;
 }
 
 
@@ -155,8 +155,8 @@ gap:16px;
 .cover-wrapper{
 position:relative;
 
-width:76px; /* অ্যালবাম পিকচার কিছুটা বড় করা হয়েছে */
-height:76px;
+width:66px;
+height:66px;
 
 flex-shrink:0;
 
@@ -265,7 +265,7 @@ margin-bottom:6px;
 position:relative;
 
 width:100%;
-height:5px;
+height:4px;
 
 border-radius:10px;
 
@@ -337,8 +337,8 @@ fill:#fff;
 /* PLAY */
 
 .play{
-width:52px; /* বাটন সামান্য বাড়িয়ে প্রোপোরশনাল করা হয়েছে */
-height:52px;
+width:48px;
+height:48px;
 
 border-radius:50%;
 border:0;
@@ -379,19 +379,19 @@ transform:scale(.90);
 @media(max-width:480px){
 
 .player{
-height:98px; /* মোবাইলেও একটু মোটা রাখা হয়েছে */
-padding:12px 16px;
-border-radius:48px;
-gap:12px;
+height:84px;
+padding:10px 14px;
+border-radius:42px;
+gap:10px;
 }
 
 .cover-wrapper{
-width:66px;
-height:66px;
+width:58px;
+height:58px;
 }
 
 .title{
-font-size:15px;
+font-size:14px;
 }
 
 .artist{
@@ -399,13 +399,13 @@ font-size:12px;
 }
 
 .play{
-width:46px;
-height:46px;
+width:42px;
+height:42px;
 }
 
 .btn{
-width:26px;
-height:26px;
+width:24px;
+height:24px;
 }
 
 .bd-time{
@@ -443,7 +443,13 @@ padding:4px 9px;
 <!-- THUMBNAIL -->
 
 <div class="cover-wrapper">
-  <img id="cover" class="cover" alt="Album art">
+
+<img 
+id="cover" 
+class="cover" 
+alt="Album art"
+
+
 </div>
 
 
@@ -462,15 +468,34 @@ YouTube Playlist
 
 <!-- PROGRESS BAR -->
 
-<div class="seek" id="seek" onclick="seek(event)">
-  <div class="fill" id="fill"></div>
+<div
+class="seek"
+id="seek"
+onclick="seek(event)"
+>
+
+<div
+class="fill"
+id="fill">
+</div>
+
 </div>
 
 
 <!-- TIME -->
 
 <div class="time-display">
-  <span id="current">0:00</span> / <span id="duration">0:00</span>
+
+<span id="current">
+0:00
+</span>
+
+/
+
+<span id="duration">
+0:00
+</span>
+
 </div>
 
 </div>
@@ -483,28 +508,56 @@ YouTube Playlist
 
 <!-- PREVIOUS -->
 
-<button class="btn" onclick="previousSong()" aria-label="Previous">
-  <svg viewBox="0 0 24 24">
-    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-  </svg>
+<button 
+class="btn" 
+onclick="previousSong()" 
+aria-label="Previous"
+
+
+<svg viewBox="0 0 24 24">
+
+<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+
+</svg>
+
 </button>
 
 
 <!-- PLAY / PAUSE -->
 
-<button class="play" id="play" onclick="togglePlay()" aria-label="Play">
-  <svg id="play-icon" viewBox="0 0 24 24">
-    <path d="M8 5v14l11-7z"/>
-  </svg>
+<button 
+class="play" 
+id="play" 
+onclick="togglePlay()" 
+aria-label="Play"
+
+
+<svg 
+id="play-icon" 
+viewBox="0 0 24 24"
+
+
+<path d="M8 5v14l11-7z"/>
+
+</svg>
+
 </button>
 
 
 <!-- NEXT -->
 
-<button class="btn" onclick="nextSong()" aria-label="Next">
-  <svg viewBox="0 0 24 24">
-    <path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/>
-  </svg>
+<button 
+class="btn" 
+onclick="nextSong()" 
+aria-label="Next"
+
+
+<svg viewBox="0 0 24 24">
+
+<path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/>
+
+</svg>
+
 </button>
 
 </div>
@@ -614,12 +667,17 @@ setInterval(updateProgress,400);
 
 function state(e){
 
-const cover=document.getElementById("cover");
-const playBtn=document.getElementById("play");
-const playIcon=document.getElementById("play-icon");
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
 
 
-if(e.data === YT.PlayerState.PLAYING){
+if(e.data=YT.PlayerState.PLAYING){
 
 playing=true;
 
@@ -637,9 +695,9 @@ updateInfo();
 
 else if(
 
-e.data === YT.PlayerState.PAUSED ||
+e.data=YT.PlayerState.PAUSED ||
 
-e.data === YT.PlayerState.ENDED
+e.data=YT.PlayerState.ENDED
 
 ){
 
@@ -704,7 +762,7 @@ player.previousVideo();
 
 function updateInfo(){
 
-if(!player || typeof player.getVideoData !== 'function')return;
+if(!player || typeof player.getVideoData ! 'function')return;
 
 try{
 
@@ -749,7 +807,7 @@ d.author;
 
 function updateProgress(){
 
-if(!player || typeof player.getCurrentTime !== 'function')return;
+if(!player || typeof player.getCurrentTime ! 'function')return;
 
 try{
 
@@ -798,7 +856,7 @@ updateInfo();
 
 function seek(e){
 
-if(!player || typeof player.getDuration !== 'function')return;
+if(!player || typeof player.getDuration ! 'function')return;
 
 const r=
 document
@@ -849,5 +907,5 @@ String(s%60).padStart(
 
 </script>
 
+
 </body>
-</html>
