@@ -13,6 +13,7 @@
 <link rel="icon" type="image/png" href="logo.png">
 
 <style>
+
 *{box-sizing:border-box}
 
 html,body{
@@ -701,11 +702,13 @@ width:170px;
 }
 
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- BACKGROUND -->
 <div class="bg"></div>
 
 
@@ -854,6 +857,8 @@ width:170px;
     </div>
 
 
+    <!-- TIME -->
+
     <div class="time-display">
 
       <span id="current">0:00</span>
@@ -870,7 +875,7 @@ width:170px;
   <div class="controls">
 
 
-    <!-- ORIGINAL PREVIOUS BUTTON -->
+    <!-- ORIGINAL PREVIOUS -->
 
     <button
       class="btn"
@@ -905,7 +910,7 @@ width:170px;
     </button>
 
 
-    <!-- ORIGINAL NEXT BUTTON -->
+    <!-- ORIGINAL NEXT -->
 
     <button
       class="btn"
@@ -1022,7 +1027,7 @@ function ready(){
 }
 
 
-/* STATE */
+/* PLAYER STATE */
 
 function state(e){
 
@@ -1054,11 +1059,11 @@ function state(e){
       "spinning"
     );
 
-    updateInfo();
-
+    /* Don't repeatedly fetch info */
     highlightActiveTrack();
 
   }
+
 
   else if(
     e.data===
@@ -1081,6 +1086,7 @@ function state(e){
     );
 
   }
+
 
   else if(
     e.data===
@@ -1114,24 +1120,90 @@ function togglePlay(){
 }
 
 
-/* NEXT */
+/* =========================
+   FAST NEXT
+   ========================= */
 
 function nextSong(){
 
   if(!player)return;
 
-  player.nextVideo();
+  const list=
+    player.getPlaylist();
+
+  if(
+    !list ||
+    !list.length
+  )return;
+
+
+  const current=
+    player.getPlaylistIndex();
+
+
+  let next=
+    current+1;
+
+
+  if(next>=list.length){
+
+    next=0;
+
+  }
+
+
+  /* Instant UI */
+
+  showTrackPreview(next);
+
+
+  /* Change song */
+
+  player.playVideoAt(next);
 
 }
 
 
-/* PREVIOUS */
+/* =========================
+   FAST PREVIOUS
+   ========================= */
 
 function previousSong(){
 
   if(!player)return;
 
-  player.previousVideo();
+  const list=
+    player.getPlaylist();
+
+  if(
+    !list ||
+    !list.length
+  )return;
+
+
+  const current=
+    player.getPlaylistIndex();
+
+
+  let prev=
+    current-1;
+
+
+  if(prev<0){
+
+    prev=list.length-1;
+
+  }
+
+
+  /* Instant UI */
+
+  showTrackPreview(prev);
+
+
+  /* Change song */
+
+  player.playVideoAt(prev);
 
 }
 
@@ -1166,7 +1238,7 @@ function toggleDrawer(){
 }
 
 
-/* PLAYLIST */
+/* LOAD PLAYLIST */
 
 function loadPlaylistItems(){
 
@@ -1206,13 +1278,19 @@ function loadPlaylistItems(){
       const item=
         document.createElement("div");
 
-      item.className="song-item";
 
-      item.id=`track-${index}`;
+      item.className=
+        "song-item";
 
-      item.onclick=()=>{
-        playSpecificTrack(index);
-      };
+
+      item.id=
+        `track-${index}`;
+
+
+      item.onclick=
+        ()=>{
+          playSpecificTrack(index);
+        };
 
 
       item.innerHTML=`
@@ -1221,7 +1299,8 @@ function loadPlaylistItems(){
           src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
           alt="thumb">
 
-        <div class="song-item-info">
+        <div
+          class="song-item-info">
 
           <div
             class="song-item-title"
@@ -1245,6 +1324,9 @@ function loadPlaylistItems(){
 
 
       listContainer.appendChild(item);
+
+
+      /* Load details once */
 
       fetchSongDetails(
         id,
@@ -1288,15 +1370,19 @@ function fetchSongDetails(
             `title-${index}`
           );
 
+
         const artistEl=
           document.getElementById(
             `artist-${index}`
           );
 
 
-        if(titleEl)
+        if(titleEl){
+
           titleEl.textContent=
             data.title;
+
+        }
 
 
         if(
@@ -1321,15 +1407,161 @@ function fetchSongDetails(
 }
 
 
-/* SPECIFIC TRACK */
+/* =========================
+   INSTANT TRACK PREVIEW
+   ========================= */
+
+function showTrackPreview(index){
+
+  if(
+    !playlistItems ||
+    !playlistItems[index]
+  )return;
+
+
+  const id=
+    playlistItems[index];
+
+
+  /* Instant cover */
+
+  document.getElementById(
+    "cover"
+  ).src=
+    "https://i.ytimg.com/vi/"
+    +
+    id
+    +
+    "/hqdefault.jpg";
+
+
+  /* Instant active item */
+
+  const items=
+    document.querySelectorAll(
+      ".song-item"
+    );
+
+
+  items.forEach(
+    (item,i)=>{
+
+      if(i===index){
+
+        item.classList.add(
+          "active"
+        );
+
+      }else{
+
+        item.classList.remove(
+          "active"
+        );
+
+      }
+
+    }
+  );
+
+
+  /* Instant title */
+
+  const titleEl=
+    document.getElementById(
+      "title-"+index
+    );
+
+
+  const artistEl=
+    document.getElementById(
+      "artist-"+index
+    );
+
+
+  if(titleEl){
+
+    const title=
+      titleEl.textContent;
+
+
+    if(
+      title &&
+      !title.startsWith("Track #")
+    ){
+
+      document.getElementById(
+        "title"
+      ).textContent=
+        title;
+
+    }
+
+  }
+
+
+  if(artistEl){
+
+    const artist=
+      artistEl.textContent;
+
+
+    if(
+      artist &&
+      artist!=="YouTube Music"
+    ){
+
+      document.getElementById(
+        "artist"
+      ).textContent=
+        artist;
+
+    }
+
+  }
+
+
+  /* Reset progress */
+
+  document.getElementById(
+    "fill"
+  ).style.width=
+    "0%";
+
+
+  document.getElementById(
+    "current"
+  ).textContent=
+    "0:00";
+
+
+  document.getElementById(
+    "duration"
+  ).textContent=
+    "0:00";
+
+}
+
+
+/* PLAY SPECIFIC TRACK */
 
 function playSpecificTrack(index){
 
   if(!player)return;
 
-  player.playVideoAt(index);
+
+  /* UI first */
+
+  showTrackPreview(index);
+
+
+  /* Close drawer immediately */
 
   toggleDrawer();
+
+
+  /* Then change song */
+
+  player.playVideoAt(index);
 
 }
 
@@ -1362,11 +1594,15 @@ function highlightActiveTrack(){
         currentIndex
       ){
 
-        item.classList.add("active");
+        item.classList.add(
+          "active"
+        );
 
       }else{
 
-        item.classList.remove("active");
+        item.classList.remove(
+          "active"
+        );
 
       }
 
@@ -1460,7 +1696,7 @@ function updateProgress(){
     if(!d)return;
 
 
-    /* DON'T UPDATE BAR WHILE DRAGGING */
+    /* Don't fight touch seek */
 
     if(!isSeeking){
 
@@ -1489,15 +1725,6 @@ function updateProgress(){
     ).textContent=
       format(d);
 
-
-    if(
-      playing &&
-      !isSeeking
-    ){
-
-      updateInfo();
-
-    }
 
   }catch(e){}
 
@@ -1545,7 +1772,8 @@ function updateSeekPreview(
   percent
 ){
 
-  seekPercent=percent;
+  seekPercent=
+    percent;
 
 
   const duration=
@@ -1635,7 +1863,7 @@ seekBar.addEventListener(
     if(!duration)return;
 
 
-    /* ONLY ONE SEEK */
+    /* ONE REAL SEEK */
 
     player.seekTo(
       seekPercent*duration,
