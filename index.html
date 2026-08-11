@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>My Music Player</title>
 
+<!-- PRELOAD BACKGROUND FOR FAST INITIAL LOAD -->
+<link rel="preload" as="image" href="background.jpg">
+
 <!-- iOS / iPhone Home Screen Icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 
@@ -435,9 +438,9 @@ pointer-events:auto;
 position:fixed;
 top:0;
 right:-100%;
-width:240px; /* SHRUNK DRAWER WIDTH */
+width:240px;
 height:100dvh;
-background:rgba(20, 15, 12, 0.65); /* TRANSPARENT GLASS */
+background:rgba(20, 15, 12, 0.65);
 backdrop-filter:blur(25px) saturate(140%);
 -webkit-backdrop-filter:blur(25px) saturate(140%);
 border-left:1px solid rgba(255,255,255,0.15);
@@ -601,7 +604,7 @@ padding:4px 9px;
 }
 
 .playlist-drawer{
-width:68%; /* COMPACT SIZE ON MOBILE */
+width:68%;
 }
 
 }
@@ -621,7 +624,7 @@ width:68%; /* COMPACT SIZE ON MOBILE */
     <span id="bdTimeVal">--:--:-- --</span>
   </div>
 
-  <!-- PLAYLIST TOGGLE BUTTON (PLACED UNDER TIME) -->
+  <!-- PLAYLIST TOGGLE BUTTON -->
   <button class="playlist-toggle-btn" onclick="toggleDrawer()">
     <svg viewBox="0 0 24 24">
       <path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
@@ -705,10 +708,7 @@ let playing=false;
 let playlistItems = [];
 
 
-/* =========================
-   BANGLADESH LIVE TIME (AM/PM)
-   ========================= */
-
+/* BANGLADESH LIVE TIME */
 function updateBDTime(){
   const options = { 
     timeZone: 'Asia/Dhaka', 
@@ -725,10 +725,7 @@ updateBDTime();
 setInterval(updateBDTime,1000);
 
 
-/* =========================
-   YOUTUBE API
-   ========================= */
-
+/* YOUTUBE API */
 function onYouTubeIframeAPIReady(){
   player=new YT.Player("yt",{
     width:"2",
@@ -752,19 +749,15 @@ function onYouTubeIframeAPIReady(){
 }
 
 
-/* READY */
-
+/* INSTANT READY (NO TIMEOUT DELAY) */
 function ready(){
-  setTimeout(updateInfo,700);
-  setInterval(updateProgress,400);
-  setTimeout(loadPlaylistItems, 1200);
+  updateInfo();
+  loadPlaylistItems();
+  setInterval(updateProgress, 250);
 }
 
 
-/* =========================
-   PLAYER STATE
-   ========================= */
-
+/* PLAYER STATE */
 function state(e){
   const cover=document.getElementById("cover");
   const playBtn=document.getElementById("play");
@@ -784,11 +777,13 @@ function state(e){
     playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
     cover.classList.remove("spinning");
   }
+  else if(e.data===YT.PlayerState.CUED || e.data===-1){
+    updateInfo();
+  }
 }
 
 
 /* PLAY / PAUSE */
-
 function togglePlay(){
   if(!player)return;
   if(playing){
@@ -800,7 +795,6 @@ function togglePlay(){
 
 
 /* NEXT & PREVIOUS */
-
 function nextSong(){
   if(!player)return;
   player.nextVideo();
@@ -812,10 +806,7 @@ function previousSong(){
 }
 
 
-/* =========================
-   DRAWER & PLAYLIST FUNCTIONS
-   ========================= */
-
+/* DRAWER & PLAYLIST FUNCTIONS */
 function toggleDrawer(){
   const drawer = document.getElementById("drawer");
   const overlay = document.getElementById("overlay");
@@ -851,7 +842,7 @@ function loadPlaylistItems(){
     item.innerHTML = `
       <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="thumb">
       <div class="song-item-info">
-        <div class="song-item-title" id="title-${index}">Loading name...</div>
+        <div class="song-item-title" id="title-${index}">Track #${index + 1}</div>
         <div class="song-item-artist" id="artist-${index}">YouTube Music</div>
       </div>
     `;
@@ -863,7 +854,6 @@ function loadPlaylistItems(){
   highlightActiveTrack();
 }
 
-/* FETCH REAL SONG & ARTIST NAME VIA NOEMBED */
 function fetchSongDetails(id, index){
   fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
     .then(res => res.json())
@@ -876,10 +866,7 @@ function fetchSongDetails(id, index){
         if(artistEl && data.author_name) artistEl.textContent = data.author_name;
       }
     })
-    .catch(() => {
-      const titleEl = document.getElementById(`title-${index}`);
-      if(titleEl) titleEl.textContent = `Track #${index + 1}`;
-    });
+    .catch(() => {});
 }
 
 function playSpecificTrack(index){
@@ -904,18 +891,20 @@ function highlightActiveTrack(){
 }
 
 
-/* =========================
-   SONG INFORMATION & PROGRESS
-   ========================= */
-
+/* SONG INFORMATION & PROGRESS */
 function updateInfo(){
   if(!player || typeof player.getVideoData !== 'function')return;
   try{
     const d=player.getVideoData();
     if(!d || !d.video_id)return;
+    
     document.getElementById("cover").src="https://i.ytimg.com/vi/"+d.video_id+"/hqdefault.jpg";
-    document.getElementById("title").textContent=d.title || "Unknown";
-    if(d.author) document.getElementById("artist").textContent=d.author;
+    if(d.title && d.title !== "") {
+      document.getElementById("title").textContent=d.title;
+    }
+    if(d.author && d.author !== "") {
+      document.getElementById("artist").textContent=d.author;
+    }
   }catch(e){}
 }
 
