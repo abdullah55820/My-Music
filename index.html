@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>My Music Player</title>
 
-<!-- iOS / iPhone Home Screen Icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
 
@@ -27,7 +26,6 @@ position:relative;
 overflow-x:hidden !important;
 }
 
-/* BACKGROUND - ALWAYS CLEAR */
 .bg{
 position:fixed;
 inset:0;
@@ -44,7 +42,6 @@ inset:0;
 background:rgba(0,0,0,.15);
 }
 
-/* TOP HEADER WRAPPER */
 .top-widgets{
 position:fixed;
 top:14px;
@@ -57,7 +54,6 @@ align-items:center;
 gap:8px;
 }
 
-/* BD LIVE TIME */
 .bd-time{
 padding:5px 11px;
 border-radius:20px;
@@ -74,7 +70,6 @@ align-items:center;
 gap:6px;
 }
 
-/* LIVE RED DOT ANIMATION */
 .live-dot{
 width:7px;
 height:7px;
@@ -90,7 +85,6 @@ animation:pulse 1.5s infinite;
 100%{opacity:1;transform:scale(1);}
 }
 
-/* PLAYLIST BUTTON */
 .playlist-toggle-btn{
 padding:5px 12px;
 border-radius:20px;
@@ -116,7 +110,6 @@ height:14px;
 fill:#fff;
 }
 
-/* APP */
 .app{
 position:relative;
 z-index:2;
@@ -128,7 +121,6 @@ justify-content:center;
 padding:0 16px 65px;
 }
 
-/* PLAYER */
 .player{
 width:min(400px, 92%);
 height:120px;
@@ -144,7 +136,6 @@ align-items:center;
 gap:14px;
 }
 
-/* THUMBNAIL */
 .cover-wrapper{
 position:relative;
 width:88px;
@@ -189,7 +180,6 @@ from{transform:rotate(0deg);}
 to{transform:rotate(360deg);}
 }
 
-/* SONG INFO */
 .middle{
 flex:1;
 min-width:0;
@@ -215,7 +205,6 @@ margin-top:2px;
 margin-bottom:8px;
 }
 
-/* SEEK BAR */
 .seek{
 position:relative;
 width:100%;
@@ -241,7 +230,6 @@ color:rgba(255,255,255,.65);
 font-variant-numeric:tabular-nums;
 }
 
-/* CONTROLS */
 .controls{
 display:flex;
 align-items:center;
@@ -292,7 +280,6 @@ margin-left:0;
 transform:scale(.90);
 }
 
-/* DRAWER */
 .drawer-overlay{
 position:fixed;
 inset:0;
@@ -365,7 +352,6 @@ padding-right:2px;
 .song-list::-webkit-scrollbar{width:2px;}
 .song-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.3);border-radius:3px;}
 
-/* SONG CARDS */
 .song-item{
 display:flex;
 align-items:center;
@@ -431,8 +417,6 @@ margin-top:0.5px;
 <body>
 
 <div class="bg"></div>
-
-<!-- NATIVE HTML5 AUDIO ENGINE FOR iOS BACKGROUND PLAY -->
 <audio id="native-audio" playsinline preload="auto"></audio>
 
 <div class="top-widgets">
@@ -456,7 +440,7 @@ margin-top:0.5px;
   </div>
   <div class="song-list" id="songList">
     <div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">
-      Connecting to Playlist...
+      Fetching Playlist...
     </div>
   </div>
 </div>
@@ -491,18 +475,7 @@ margin-top:0.5px;
 </div>
 
 <script>
-/* CORE SETTINGS */
 const PLAYLIST_ID = "PLbvY05KVYwoo";
-
-/* INVIDIOUS & PIPED INSTANCE LIST */
-const INVIDIOUS_SERVERS = [
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://yt.chocolatemoo53.com",
-  "https://invidious.tiekoetter.com"
-];
-
-let activeServer = INVIDIOUS_SERVERS[0];
 let playlist = [];
 let currentIndex = 0;
 let isPlaying = false;
@@ -510,7 +483,6 @@ let isAudioReady = false;
 
 const audio = document.getElementById("native-audio");
 
-/* BD TIME updates */
 function updateBDTime(){
   const options = { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
   document.getElementById("bdTimeVal").textContent = new Intl.DateTimeFormat('en-US', options).format(new Date());
@@ -518,30 +490,20 @@ function updateBDTime(){
 updateBDTime();
 setInterval(updateBDTime,1000);
 
-/* FETCH PLAYLIST VIA INVIDIOUS */
 async function fetchPlaylistData() {
-  for (let server of INVIDIOUS_SERVERS) {
-    try {
-      const res = await fetch(`${server}/api/v1/playlists/${PLAYLIST_ID}`);
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data && data.videos && data.videos.length > 0) {
-        activeServer = server;
-        playlist = data.videos.map(v => ({
-          videoId: v.videoId,
-          title: v.title,
-          artist: v.author,
-          thumbnail: v.videoThumbnails ? v.videoThumbnails.find(t => t.quality === "medium")?.url || v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`
-        }));
-        renderPlaylist();
-        prepareTrack(0);
-        return;
-      }
-    } catch(e) {
-      console.warn("Server failed:", server);
+  try {
+    const res = await fetch(`/api/playlist?id=${PLAYLIST_ID}`);
+    const data = await res.json();
+    if (data.success && data.videos.length > 0) {
+      playlist = data.videos;
+      renderPlaylist();
+      prepareTrack(0);
+    } else {
+      document.getElementById("title").textContent = "Playlist Empty";
     }
+  } catch(e) {
+    document.getElementById("title").textContent = "Connection Error";
   }
-  document.getElementById("title").textContent = "Network Error";
 }
 
 function renderPlaylist() {
@@ -563,7 +525,6 @@ function renderPlaylist() {
   });
 }
 
-/* PREPARE TRACK */
 async function prepareTrack(index) {
   currentIndex = index;
   isAudioReady = false;
@@ -576,22 +537,14 @@ async function prepareTrack(index) {
   document.getElementById("current").textContent = "0:00";
   highlightActiveTrack();
 
-  let audioLoaded = false;
-  for (let server of [activeServer, ...INVIDIOUS_SERVERS.filter(s => s !== activeServer)]) {
-    try {
-      const res = await fetch(`${server}/api/v1/videos/${track.videoId}`);
-      if (!res.ok) continue;
-      const data = await res.json();
-      
-      // Filter audio format
-      const audioFormat = data.adaptiveFormats.find(f => f.type.includes("audio/mp4") || f.type.includes("audio/webm"));
-      if (!audioFormat || !audioFormat.url) continue;
-
-      audio.src = audioFormat.url;
+  try {
+    const res = await fetch(`/api/stream?id=${track.videoId}`);
+    const data = await res.json();
+    
+    if (data.success && data.url) {
+      audio.src = data.url;
       audio.load();
       isAudioReady = true;
-      audioLoaded = true;
-      activeServer = server;
 
       if('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -600,21 +553,17 @@ async function prepareTrack(index) {
           artwork: [{ src: track.thumbnail, sizes: '512x512', type: 'image/jpeg' }]
         });
       }
-      break;
-    } catch(e) {
-      console.warn("Audio Fetch Error on:", server);
+    } else {
+      nextSong();
     }
-  }
-
-  if (!audioLoaded) {
-    console.error("All servers failed to load audio for video:", track.videoId);
+  } catch(e) {
     nextSong();
   }
 }
 
 async function playSpecificTrack(index) {
   if (currentIndex !== index || !isAudioReady) {
-    document.getElementById("title").textContent = "Loading...";
+    document.getElementById("title").textContent = "Loading Audio...";
     await prepareTrack(index);
   }
   toggleDrawer();
@@ -643,7 +592,6 @@ function prevSong() {
   });
 }
 
-/* AUDIO EVENT LISTENERS */
 audio.addEventListener("play", () => {
   isPlaying = true;
   document.getElementById("play").classList.add("playing");
@@ -686,7 +634,6 @@ function format(s){
   return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
 }
 
-/* MEDIA SESSION ACTIONS */
 if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('play', togglePlay);
   navigator.mediaSession.setActionHandler('pause', togglePlay);
@@ -694,7 +641,6 @@ if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
 
-/* UI FUNCTIONS */
 function toggleDrawer(){
   const drawer = document.getElementById("drawer");
   const overlay = document.getElementById("overlay");
@@ -710,9 +656,7 @@ function highlightActiveTrack(){
   });
 }
 
-/* INITIALIZE */
 fetchPlaylistData();
-
 </script>
 </body>
 </html>
