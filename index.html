@@ -501,7 +501,7 @@ flex:1;
 overflow-y:auto;
 display:flex;
 flex-direction:column;
-gap:4px; /* OPTIMIZED CARD SPACING */
+gap:4px;
 padding-right:2px;
 }
 
@@ -520,7 +520,7 @@ border-radius:3px;
 display:flex;
 align-items:center;
 gap:6px;
-padding:4px 5px; /* COMPACT PADDING FOR CLEANER LOOK */
+padding:4px 5px;
 border-radius:7px;
 
 background:rgba(255, 255, 255, 0.08);
@@ -553,7 +553,6 @@ flex:1;
 min-width:0;
 }
 
-/* BOLDER TITLE & SOFT SECONDARY TEXT */
 .song-item-title{
 font-size:9.5px;
 font-weight:700;
@@ -778,6 +777,7 @@ function ready(){
   updateInfo();
   loadPlaylistItems();
   setInterval(updateProgress, 250);
+  initMediaSession();
 }
 
 
@@ -794,12 +794,18 @@ function state(e){
     cover.classList.add("spinning");
     updateInfo();
     highlightActiveTrack();
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = "playing";
+    }
   }
   else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
     playing=false;
     playBtn.classList.remove("playing");
     playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
     cover.classList.remove("spinning");
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = "paused";
+    }
   }
   else if(e.data===YT.PlayerState.CUED || e.data===-1){
     updateInfo();
@@ -915,6 +921,17 @@ function highlightActiveTrack(){
 }
 
 
+/* MEDIA SESSION API INTEGRATION */
+function initMediaSession(){
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', () => togglePlay());
+    navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+    navigator.mediaSession.setActionHandler('previoustrack', () => previousSong());
+    navigator.mediaSession.setActionHandler('nexttrack', () => nextSong());
+  }
+}
+
+
 /* SONG INFORMATION & PROGRESS */
 function updateInfo(){
   if(!player || typeof player.getVideoData !== 'function')return;
@@ -922,13 +939,27 @@ function updateInfo(){
     const d=player.getVideoData();
     if(!d || !d.video_id)return;
     
-    document.getElementById("cover").src="https://i.ytimg.com/vi/"+d.video_id+"/hqdefault.jpg";
+    const artworkUrl = "https://i.ytimg.com/vi/"+d.video_id+"/hqdefault.jpg";
+    document.getElementById("cover").src=artworkUrl;
+    
     if(d.title && d.title !== "") {
       document.getElementById("title").textContent=d.title;
     }
     if(d.author && d.author !== "") {
       document.getElementById("artist").textContent=d.author;
     }
+
+    /* UPDATE LOCK SCREEN METADATA */
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: d.title || 'My Playlist',
+        artist: d.author || 'YouTube Music',
+        artwork: [
+          { src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+    }
+
   }catch(e){}
 }
 
