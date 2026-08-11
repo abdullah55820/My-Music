@@ -877,14 +877,193 @@ function fetchTitle(id, index){
     delete window[callbackName];
     document.body.removeChild(script);
   };
+<script src="https://www.youtube.com/iframe_api"></script>
 
-  script.src = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json&callback=${callbackName}`;
-  script.onerror = function() {
-    const el = document.getElementById(`title-${index}`);
-    if(el) el.textContent = `Song #${index + 1}`;
+<script>
+
+/* PLAYLIST */
+const PLAYLIST_ID="PLbvY05KVYwoo";
+
+let player=null;
+let playing=false;
+let playlistItems = [];
+
+
+/* =========================
+   BANGLADESH LIVE TIME (AM/PM)
+   ========================= */
+
+function updateBDTime(){
+  const options = { 
+    timeZone: 'Asia/Dhaka', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit', 
+    hour12: true 
   };
+  const timeString = new Intl.DateTimeFormat('en-US', options).format(new Date());
+  document.getElementById("bdTimeVal").textContent = timeString;
+}
+
+updateBDTime();
+setInterval(updateBDTime,1000);
+
+
+/* =========================
+   YOUTUBE API
+   ========================= */
+
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("yt",{
+    width:"2",
+    height:"2",
+    playerVars:{
+      autoplay:0,
+      controls:0,
+      disablekb:1,
+      fs:0,
+      modestbranding:1,
+      playsinline:1,
+      rel:0,
+      listType:"playlist",
+      list:PLAYLIST_ID
+    },
+    events:{
+      onReady:ready,
+      onStateChange:state
+    }
+  });
+}
+
+
+/* READY */
+
+function ready(){
+  setTimeout(updateInfo,700);
+  setInterval(updateProgress,400);
+  setTimeout(loadPlaylistItems, 1200);
+}
+
+
+/* =========================
+   PLAYER STATE
+   ========================= */
+
+function state(e){
+  const cover=document.getElementById("cover");
+  const playBtn=document.getElementById("play");
+  const playIcon=document.getElementById("play-icon");
+
+  if(e.data===YT.PlayerState.PLAYING){
+    playing=true;
+    playBtn.classList.add("playing");
+    playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+    cover.classList.add("spinning");
+    updateInfo();
+    highlightActiveTrack();
+  }
+  else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
+    playing=false;
+    playBtn.classList.remove("playing");
+    playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+    cover.classList.remove("spinning");
+  }
+}
+
+
+/* PLAY / PAUSE */
+
+function togglePlay(){
+  if(!player)return;
+  if(playing){
+    player.pauseVideo();
+  }else{
+    player.playVideo();
+  }
+}
+
+
+/* NEXT & PREVIOUS */
+
+function nextSong(){
+  if(!player)return;
+  player.nextVideo();
+}
+
+function previousSong(){
+  if(!player)return;
+  player.previousVideo();
+}
+
+
+/* =========================
+   DRAWER & PLAYLIST FUNCTIONS
+   ========================= */
+
+function toggleDrawer(){
+  const drawer = document.getElementById("drawer");
+  const overlay = document.getElementById("overlay");
   
-  document.body.appendChild(script);
+  if(drawer.classList.contains("open")){
+    drawer.classList.remove("open");
+    overlay.classList.remove("active");
+  } else {
+    drawer.classList.add("open");
+    overlay.classList.add("active");
+  }
+}
+
+function loadPlaylistItems(){
+  if(!player || typeof player.getPlaylist !== 'function') return;
+  
+  playlistItems = player.getPlaylist();
+  const listContainer = document.getElementById("songList");
+  
+  if(!playlistItems || playlistItems.length === 0){
+    listContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); font-size:12px; margin-top:20px;">No tracks found</div>';
+    return;
+  }
+  
+  listContainer.innerHTML = "";
+  
+  playlistItems.forEach((id, index) => {
+    const item = document.createElement("div");
+    item.className = "song-item";
+    item.id = `track-${index}`;
+    item.onclick = () => playSpecificTrack(index);
+    
+    item.innerHTML = `
+      <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="thumb">
+      <div class="song-item-info">
+        <div class="song-item-title" id="title-${index}">Loading name...</div>
+        <div class="song-item-artist" id="artist-${index}">YouTube Music</div>
+      </div>
+    `;
+    
+    listContainer.appendChild(item);
+    fetchSongDetails(id, index);
+  });
+  
+  highlightActiveTrack();
+}
+
+/* FETCH REAL SONG & ARTIST NAME VIA NOEMBED */
+function fetchSongDetails(id, index){
+  fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data && data.title) {
+        const titleEl = document.getElementById(`title-${index}`);
+        const artistEl = document.getElementById(`artist-${index}`);
+        
+        if(titleEl) titleEl.textContent = data.title;
+        if(artistEl && data.author_name) artistEl.textContent = data.author_name;
+      }
+    })
+    .catch(() => {
+      const titleEl = document.getElementById(`title-${index}`);
+      if(titleEl) titleEl.textContent = `Track #${index + 1}`;
+    });
 }
 
 function playSpecificTrack(index){
@@ -954,3 +1133,5 @@ function format(s){
 
 </body>
 </html>
+
+  
