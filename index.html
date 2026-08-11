@@ -437,13 +437,13 @@ pointer-events:auto;
 }
 
 
-/* COMPACT TRANSPARENT DRAWER PANEL */
+/* COMPACT GLASS DRAWER PANEL */
 
 .playlist-drawer{
 position:fixed;
 top:0;
 right:-100%;
-width:170px; /* MUCH SMALLER WIDTH */
+width:170px;
 height:100dvh;
 background:transparent !important;
 backdrop-filter:none !important;
@@ -470,24 +470,27 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 padding:5px 8px;
-border-bottom:1px solid rgba(255,255,255,0.15);
+border-bottom:1px solid rgba(255,255,255,0.25);
 margin-bottom:8px;
-background:rgba(0, 0, 0, 0.45);
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+background:rgba(255, 255, 255, 0.12);
+backdrop-filter:blur(20px) saturate(130%);
+-webkit-backdrop-filter:blur(20px) saturate(130%);
+border:1px solid rgba(255,255,255,0.2);
 border-radius:10px;
+box-shadow:0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .drawer-title{
 font-size:11px;
 font-weight:700;
 color:#fff;
+text-shadow:0 1px 2px rgba(0,0,0,0.4);
 }
 
 .close-btn{
 background:transparent;
 border:0;
-color:rgba(255,255,255,0.8);
+color:rgba(255,255,255,0.9);
 font-size:16px;
 cursor:pointer;
 padding:0 2px;
@@ -507,12 +510,12 @@ padding-right:2px;
 width:2px;
 }
 .song-list::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.3);
 border-radius:3px;
 }
 
 
-/* MINI SONG ITEM BLUR CARD */
+/* GLASS EFFECT SONG CARD */
 
 .song-item{
 display:flex;
@@ -521,14 +524,17 @@ gap:6px;
 padding:5px 6px;
 border-radius:10px;
 
-background:rgba(0, 0, 0, 0.35);
-border:1px solid rgba(255,255,255,0.15);
+/* GLASS EFFECT BACKGROUND */
+background:rgba(255, 255, 255, 0.12);
+border:1px solid rgba(255, 255, 255, 0.22);
 
-backdrop-filter:blur(15px) saturate(120%);
--webkit-backdrop-filter:blur(15px) saturate(120%);
+backdrop-filter:blur(18px) saturate(140%);
+-webkit-backdrop-filter:blur(18px) saturate(140%);
+
+box-shadow:0 4px 12px rgba(0, 0, 0, 0.15);
 
 cursor:pointer;
-transition:background 0.2s, transform 0.1s;
+transition:background 0.2s, border-color 0.2s, transform 0.1s;
 }
 
 .song-item:active{
@@ -536,8 +542,9 @@ transform:scale(0.96);
 }
 
 .song-item:hover, .song-item.active{
-background:rgba(255,255,255,0.22);
-border-color:rgba(255,255,255,0.35);
+background:rgba(255, 255, 255, 0.25);
+border-color:rgba(255, 255, 255, 0.45);
+box-shadow:0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
 .song-item img{
@@ -546,6 +553,7 @@ height:28px;
 border-radius:6px;
 object-fit:cover;
 flex-shrink:0;
+box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
 .song-item-info{
@@ -560,11 +568,12 @@ color:#fff;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
+text-shadow:0 1px 2px rgba(0,0,0,0.5);
 }
 
 .song-item-artist{
 font-size:8.5px;
-color:rgba(255,255,255,0.6);
+color:rgba(255,255,255,0.75);
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -666,7 +675,7 @@ width:165px;
     <button class="close-btn" onclick="toggleDrawer()">&times;</button>
   </div>
   <div class="song-list" id="songList">
-    <div style="text-align:center; color:rgba(255,255,255,0.5); font-size:10px; margin-top:15px;">
+    <div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">
       Loading...
     </div>
   </div>
@@ -848,7 +857,7 @@ function loadPlaylistItems(){
   const listContainer = document.getElementById("songList");
   
   if(!playlistItems || playlistItems.length === 0){
-    listContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); font-size:10px; margin-top:15px;">No tracks found</div>';
+    listContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">No tracks found</div>';
     return;
   }
   
