@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>My Music Player</title>
 
-<!-- FAST NETWORK CONNECT -->
-<link rel="preconnect" href="https://pipedapi.kavin.rocks">
-<link rel="preload" as="image" href="background.jpg">
-
 <!-- iOS / iPhone Home Screen Icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
@@ -497,7 +493,16 @@ margin-top:0.5px;
 <script>
 /* CORE SETTINGS */
 const PLAYLIST_ID = "PLbvY05KVYwoo";
-const API_BASE = "https://pipedapi.kavin.rocks"; 
+
+/* MULTIPLE API SERVERS FOR GUARANTEED UPTIME */
+const API_SERVERS = [
+  "https://pipedapi.mha.fi",
+  "https://pipedapi.kavin.rocks",
+  "https://api.piped.privacydev.net",
+  "https://pipedapi.palvelu.org"
+];
+
+let workingApi = API_SERVERS[0];
 let playlist = [];
 let currentIndex = 0;
 let isPlaying = false;
@@ -513,20 +518,25 @@ function updateBDTime(){
 updateBDTime();
 setInterval(updateBDTime,1000);
 
-/* FETCH PLAYLIST VIA API */
+/* FETCH PLAYLIST WITH AUTO-FALLBACK API */
 async function fetchPlaylistData() {
-  try {
-    const res = await fetch(`${API_BASE}/playlists/${PLAYLIST_ID}`);
-    const data = await res.json();
-    playlist = data.relatedStreams;
-    renderPlaylist();
-    if(playlist.length > 0) {
-      prepareTrack(0);
+  for (let server of API_SERVERS) {
+    try {
+      const res = await fetch(`${server}/playlists/${PLAYLIST_ID}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.relatedStreams && data.relatedStreams.length > 0) {
+        workingApi = server;
+        playlist = data.relatedStreams;
+        renderPlaylist();
+        prepareTrack(0);
+        return;
+      }
+    } catch(e) {
+      console.warn("API Server Failed:", server);
     }
-  } catch(e) {
-    document.getElementById("title").textContent = "Connection Error";
-    console.error(e);
   }
+  document.getElementById("title").textContent = "Connection Error";
 }
 
 function renderPlaylist() {
@@ -565,30 +575,41 @@ async function prepareTrack(index) {
   document.getElementById("current").textContent = "0:00";
   highlightActiveTrack();
 
-  try {
-    // Fetch direct streaming URL (.m4a)
-    const res = await fetch(`${API_BASE}/streams/${videoId}`);
-    const data = await res.json();
-    
-    // Find best audio stream
-    const audioStreams = data.audioStreams;
-    const bestStream = audioStreams.find(s => s.codec.includes('mp4a')) || audioStreams[0];
-    
-    audio.src = bestStream.url;
-    audio.load();
-    isAudioReady = true;
+  // Try fetching stream from active and fallback APIs
+  let streamFetched = false;
+  for (let server of [workingApi, ...API_SERVERS.filter(s => s !== workingApi)]) {
+    try {
+      const res = await fetch(`${server}/streams/${videoId}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      
+      const audioStreams = data.audioStreams;
+      if (!audioStreams || audioStreams.length === 0) continue;
+      
+      const bestStream = audioStreams.find(s => s.codec && s.codec.includes('mp4a')) || audioStreams[0];
+      
+      audio.src = bestStream.url;
+      audio.load();
+      isAudioReady = true;
+      streamFetched = true;
+      workingApi = server; // Set current working server
 
-    // Set iOS Lock Screen Metadata
-    if('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title,
-        artist: track.uploaderName,
-        artwork: [{ src: track.thumbnail, sizes: '512x512', type: 'image/jpeg' }]
-      });
+      if('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title,
+          artist: track.uploaderName,
+          artwork: [{ src: track.thumbnail, sizes: '512x512', type: 'image/jpeg' }]
+        });
+      }
+      break;
+    } catch(e) {
+      console.warn("Stream Fetch Fail on:", server);
     }
-  } catch(e) {
-    console.error("Stream Error", e);
-    nextSong();
+  }
+
+  if (!streamFetched) {
+    console.error("All Stream APIs failed for video:", videoId);
+    nextSong(); // Skipping track on failure
   }
 }
 
