@@ -3,35 +3,52 @@ export default async function handler(req, res) {
   const playlistId = req.query.id || "PLbvY05KVYwoo";
 
   try {
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
-    const response = await fetch(rssUrl);
-    
-    if (response.ok) {
-      const xmlText = await response.text();
-      const entryRegex = /<entry>[\s\S]*?<\/entry>/g;
-      const entries = xmlText.match(entryRegex) || [];
+    const response = await fetch(`https://api.cobalt.tools/api/json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        url: `https://www.youtube.com/playlist?list=${playlistId}`
+      })
+    });
 
-      const videos = entries.map(entry => {
-        const videoIdMatch = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/);
-        const titleMatch = entry.match(/<title>(.*?)<\/title>/);
-        const nameMatch = entry.match(/<name>(.*?)<\/name>/);
+    // Fallback using direct HTML scrape if API limits hit
+    const ytRes = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
+    const html = await ytRes.text();
 
-        const videoId = videoIdMatch ? videoIdMatch[1] : "";
-        return {
-          videoId: videoId,
-          title: titleMatch ? titleMatch[1].replace("<![CDATA[", "").replace("]]>", "") : "Unknown Title",
-          artist: nameMatch ? nameMatch[1] : "YouTube Artist",
-          thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-        };
-      }).filter(v => v.videoId !== "");
-
-      if (videos.length > 0) {
-        return res.status(200).json({ success: true, videos });
+    const videoIds = [];
+    const regex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      if (!videoIds.includes(match[1])) {
+        videoIds.push(match[1]);
       }
     }
+
+    const titles = [];
+    const titleRegex = /"title":{"runs":\[{"text":"(.*?)"}\]/g;
+    let tMatch;
+    while ((tMatch = titleRegex.exec(html)) !== null) {
+      if (tMatch[1] && !tMatch[1].includes("Play all")) {
+        titles.push(tMatch[1]);
+      }
+    }
+
+    const videos = videoIds.map((id, index) => ({
+      videoId: id,
+      title: titles[index] || "YouTube Track",
+      artist: "Music",
+      thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+    }));
+
+    if (videos.length > 0) {
+      return res.status(200).json({ success: true, videos });
+    }
   } catch (e) {
-    console.error("RSS Fetch Error:", e);
+    console.error(e);
   }
 
-  return res.status(500).json({ success: false, error: "Unable to load playlist" });
+  return res.status(500).json({ success: false, error: "Failed to fetch full playlist" });
 }
