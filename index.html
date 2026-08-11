@@ -456,7 +456,7 @@ margin-top:0.5px;
   </div>
   <div class="song-list" id="songList">
     <div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">
-      Fetching Audio Streams...
+      Connecting to Playlist...
     </div>
   </div>
 </div>
@@ -494,15 +494,15 @@ margin-top:0.5px;
 /* CORE SETTINGS */
 const PLAYLIST_ID = "PLbvY05KVYwoo";
 
-/* MULTIPLE API SERVERS FOR GUARANTEED UPTIME */
-const API_SERVERS = [
-  "https://pipedapi.mha.fi",
-  "https://pipedapi.kavin.rocks",
-  "https://api.piped.privacydev.net",
-  "https://pipedapi.palvelu.org"
+/* INVIDIOUS & PIPED INSTANCE LIST */
+const INVIDIOUS_SERVERS = [
+  "https://inv.nadeko.net",
+  "https://invidious.nerdvpn.de",
+  "https://yt.chocolatemoo53.com",
+  "https://invidious.tiekoetter.com"
 ];
 
-let workingApi = API_SERVERS[0];
+let activeServer = INVIDIOUS_SERVERS[0];
 let playlist = [];
 let currentIndex = 0;
 let isPlaying = false;
@@ -510,7 +510,7 @@ let isAudioReady = false;
 
 const audio = document.getElementById("native-audio");
 
-/* TIME FORMATTING */
+/* BD TIME updates */
 function updateBDTime(){
   const options = { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
   document.getElementById("bdTimeVal").textContent = new Intl.DateTimeFormat('en-US', options).format(new Date());
@@ -518,25 +518,30 @@ function updateBDTime(){
 updateBDTime();
 setInterval(updateBDTime,1000);
 
-/* FETCH PLAYLIST WITH AUTO-FALLBACK API */
+/* FETCH PLAYLIST VIA INVIDIOUS */
 async function fetchPlaylistData() {
-  for (let server of API_SERVERS) {
+  for (let server of INVIDIOUS_SERVERS) {
     try {
-      const res = await fetch(`${server}/playlists/${PLAYLIST_ID}`);
+      const res = await fetch(`${server}/api/v1/playlists/${PLAYLIST_ID}`);
       if (!res.ok) continue;
       const data = await res.json();
-      if (data && data.relatedStreams && data.relatedStreams.length > 0) {
-        workingApi = server;
-        playlist = data.relatedStreams;
+      if (data && data.videos && data.videos.length > 0) {
+        activeServer = server;
+        playlist = data.videos.map(v => ({
+          videoId: v.videoId,
+          title: v.title,
+          artist: v.author,
+          thumbnail: v.videoThumbnails ? v.videoThumbnails.find(t => t.quality === "medium")?.url || v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`
+        }));
         renderPlaylist();
         prepareTrack(0);
         return;
       }
     } catch(e) {
-      console.warn("API Server Failed:", server);
+      console.warn("Server failed:", server);
     }
   }
-  document.getElementById("title").textContent = "Connection Error";
+  document.getElementById("title").textContent = "Network Error";
 }
 
 function renderPlaylist() {
@@ -551,71 +556,65 @@ function renderPlaylist() {
       <img src="${track.thumbnail}" alt="thumb">
       <div class="song-item-info">
         <div class="song-item-title">${track.title}</div>
-        <div class="song-item-artist">${track.uploaderName}</div>
+        <div class="song-item-artist">${track.artist}</div>
       </div>
     `;
     list.appendChild(div);
   });
 }
 
-/* AUDIO ENGINE LOGIC */
+/* PREPARE TRACK */
 async function prepareTrack(index) {
   currentIndex = index;
   isAudioReady = false;
   const track = playlist[index];
   
-  // Extract Video ID
-  const videoId = track.url.includes("v=") ? track.url.split("v=")[1] : track.url.split("/").pop();
-  
-  // Update UI immediately
   document.getElementById("title").textContent = track.title;
-  document.getElementById("artist").textContent = track.uploaderName;
+  document.getElementById("artist").textContent = track.artist;
   document.getElementById("cover").src = track.thumbnail;
   document.getElementById("fill").style.width = "0%";
   document.getElementById("current").textContent = "0:00";
   highlightActiveTrack();
 
-  // Try fetching stream from active and fallback APIs
-  let streamFetched = false;
-  for (let server of [workingApi, ...API_SERVERS.filter(s => s !== workingApi)]) {
+  let audioLoaded = false;
+  for (let server of [activeServer, ...INVIDIOUS_SERVERS.filter(s => s !== activeServer)]) {
     try {
-      const res = await fetch(`${server}/streams/${videoId}`);
+      const res = await fetch(`${server}/api/v1/videos/${track.videoId}`);
       if (!res.ok) continue;
       const data = await res.json();
       
-      const audioStreams = data.audioStreams;
-      if (!audioStreams || audioStreams.length === 0) continue;
-      
-      const bestStream = audioStreams.find(s => s.codec && s.codec.includes('mp4a')) || audioStreams[0];
-      
-      audio.src = bestStream.url;
+      // Filter audio format
+      const audioFormat = data.adaptiveFormats.find(f => f.type.includes("audio/mp4") || f.type.includes("audio/webm"));
+      if (!audioFormat || !audioFormat.url) continue;
+
+      audio.src = audioFormat.url;
       audio.load();
       isAudioReady = true;
-      streamFetched = true;
-      workingApi = server; // Set current working server
+      audioLoaded = true;
+      activeServer = server;
 
       if('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: track.title,
-          artist: track.uploaderName,
+          artist: track.artist,
           artwork: [{ src: track.thumbnail, sizes: '512x512', type: 'image/jpeg' }]
         });
       }
       break;
     } catch(e) {
-      console.warn("Stream Fetch Fail on:", server);
+      console.warn("Audio Fetch Error on:", server);
     }
   }
 
-  if (!streamFetched) {
-    console.error("All Stream APIs failed for video:", videoId);
-    nextSong(); // Skipping track on failure
+  if (!audioLoaded) {
+    console.error("All servers failed to load audio for video:", track.videoId);
+    nextSong();
   }
 }
 
 async function playSpecificTrack(index) {
   if (currentIndex !== index || !isAudioReady) {
-    document.getElementById("title").textContent = "Loading Audio...";
+    document.getElementById("title").textContent = "Loading...";
     await prepareTrack(index);
   }
   toggleDrawer();
