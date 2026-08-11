@@ -4,42 +4,34 @@ export default async function handler(req, res) {
 
   if (!videoId) return res.status(400).json({ error: "Missing video ID" });
 
-  const instances = [
-    "https://pipedapi.mha.fi",
-    "https://api.piped.vicr.dev",
-    "https://inv.nadeko.net",
-    "https://invidious.nerdvpn.de"
+  const streamEndpoints = [
+    `https://yt.drgns.space/latest/stream?id=${videoId}`,
+    `https://pipedapi.kavin.rocks/streams/${videoId}`,
+    `https://api.piped.vicr.dev/streams/${videoId}`
   ];
 
-  for (let instance of instances) {
+  for (let url of streamEndpoints) {
     try {
-      let endpoint = instance.includes("piped")
-        ? `${instance}/streams/${videoId}`
-        : `${instance}/api/v1/videos/${videoId}`;
+      if (url.includes("drgns.space")) {
+        return res.status(200).json({ success: true, url: url });
+      }
 
-      const response = await fetch(endpoint, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-      });
+      const response = await fetch(url);
       if (!response.ok) continue;
 
       const data = await response.json();
-      let audioUrl = "";
-
-      if (data.audioStreams) {
-        const best = data.audioStreams.find(s => s.codec && s.codec.includes('mp4a')) || data.audioStreams[0];
-        audioUrl = best ? best.url : "";
-      } else if (data.adaptiveFormats) {
-        const best = data.adaptiveFormats.find(f => f.type && f.type.includes("audio/mp4")) || data.adaptiveFormats.find(f => f.type && f.type.includes("audio/"));
-        audioUrl = best ? best.url : "";
-      }
-
-      if (audioUrl) {
-        return res.status(200).json({ success: true, url: audioUrl });
+      if (data.audioStreams && data.audioStreams.length > 0) {
+        const audio = data.audioStreams.find(s => s.mimeType && s.mimeType.includes("audio/mp4")) || data.audioStreams[0];
+        return res.status(200).json({ success: true, url: audio.url });
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  return res.status(500).json({ success: false, error: "Audio fetch failed" });
+  // Final Direct Audio Proxy Fallback
+  return res.status(200).json({ 
+    success: true, 
+    url: `https://invidious.as208631.net/latest/stream?id=${videoId}` 
+  });
 }
