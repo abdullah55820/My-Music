@@ -5,9 +5,10 @@ export default async function handler(req, res) {
   if (!videoId) return res.status(400).json({ error: "Missing video ID" });
 
   const instances = [
+    "https://pipedapi.mha.fi",
+    "https://api.piped.vicr.dev",
     "https://inv.nadeko.net",
-    "https://invidious.nerdvpn.de",
-    "https://pipedapi.mha.fi"
+    "https://invidious.nerdvpn.de"
   ];
 
   for (let instance of instances) {
@@ -16,7 +17,9 @@ export default async function handler(req, res) {
         ? `${instance}/streams/${videoId}`
         : `${instance}/api/v1/videos/${videoId}`;
 
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      });
       if (!response.ok) continue;
 
       const data = await response.json();
@@ -24,7 +27,7 @@ export default async function handler(req, res) {
 
       if (data.audioStreams) {
         const best = data.audioStreams.find(s => s.codec && s.codec.includes('mp4a')) || data.audioStreams[0];
-        audioUrl = best.url;
+        audioUrl = best ? best.url : "";
       } else if (data.adaptiveFormats) {
         const best = data.adaptiveFormats.find(f => f.type && f.type.includes("audio/mp4")) || data.adaptiveFormats.find(f => f.type && f.type.includes("audio/"));
         audioUrl = best ? best.url : "";
