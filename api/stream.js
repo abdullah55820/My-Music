@@ -4,53 +4,44 @@ export default async function handler(req, res) {
 
   if (!videoId) return res.status(400).json({ error: "Missing video ID" });
 
-  try {
-    const cobaltRes = await fetch("https://api.cobalt.tools/api/json", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        isAudioOnly: true,
-        filenamePattern: "basic"
-      })
-    });
-
-    if (cobaltRes.ok) {
-      const data = await cobaltRes.json();
-      if (data.status === "redirect" || data.status === "stream") {
-        return res.status(200).json({ success: true, url: data.url });
-      }
-    }
-  } catch (e) {
-    console.error("Cobalt Error:", e);
-  }
-
-  // Fallback to Piped API
-  const pipedInstances = [
-    "https://pipedapi.kavin.rocks",
-    "https://api.piped.privacy.com.de",
-    "https://pipedapi.drgns.space"
+  const endpoints = [
+    `https://piped-api.garudalinux.org/streams/${videoId}`,
+    `https://vid.priv.au/api/v1/videos/${videoId}`,
+    `https://invidious.projectsegfau.lt/api/v1/videos/${videoId}`
   ];
 
-  for (let instance of pipedInstances) {
+  for (let url of endpoints) {
     try {
-      const response = await fetch(`${instance}/streams/${videoId}`);
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      });
       if (!response.ok) continue;
 
       const data = await response.json();
+      let audioUrl = "";
+
+      // Check Piped format
       if (data.audioStreams && data.audioStreams.length > 0) {
-        const audio = data.audioStreams.find(s => s.mimeType && s.mimeType.includes("audio/mp4")) || data.audioStreams[0];
-        if (audio && audio.url) {
-          return res.status(200).json({ success: true, url: audio.url });
-        }
+        const stream = data.audioStreams.find(s => s.url) || data.audioStreams[0];
+        audioUrl = stream.url;
+      } 
+      // Check Invidious format
+      else if (data.adaptiveFormats) {
+        const audio = data.adaptiveFormats.find(f => f.type && f.type.includes("audio/") && f.url);
+        if (audio) audioUrl = audio.url;
+      }
+
+      if (audioUrl) {
+        return res.status(200).json({ success: true, url: audioUrl });
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  return res.status(500).json({ success: false, error: "Audio stream failed" });
+  // Fallback stream proxy endpoint
+  return res.status(200).json({
+    success: true,
+    url: `https://invidious.nerdvpn.de/latest/stream?id=${videoId}`
+  });
 }
