@@ -2,18 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <title>My Music Player</title>
 
-<!-- FAST NETWORK CONNECT TO YOUTUBE -->
-<link rel="preconnect" href="https://www.youtube.com">
-<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://api.jamendo.com">
+<link rel="preconnect" href="https://prod-1.storage.jamendo.com">
+
 <link rel="preload" as="image" href="background.jpg">
 
-<!-- iOS / iPhone Home Screen Icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-
-<!-- Favicon for Browser -->
 <link rel="icon" type="image/png" href="logo.png">
 
 <style>
@@ -26,16 +25,16 @@ height:100%;
 overflow:hidden;
 background:#050505;
 color:#fff;
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",
+"Segoe UI",sans-serif;
 }
 
 body{
 position:relative;
-overflow-x:hidden !important;
+overflow-x:hidden!important;
 }
 
-
-/* BACKGROUND - ALWAYS CLEAR */
+/* BACKGROUND */
 
 .bg{
 position:fixed;
@@ -54,8 +53,7 @@ inset:0;
 background:rgba(0,0,0,.15);
 }
 
-
-/* TOP HEADER WRAPPER (TIME + PLAYLIST BUTTON) */
+/* TOP */
 
 .top-widgets{
 position:fixed;
@@ -63,14 +61,14 @@ top:14px;
 left:50%;
 transform:translateX(-50%);
 z-index:10;
+
 display:flex;
 flex-direction:column;
 align-items:center;
 gap:8px;
 }
 
-
-/* BD LIVE TIME */
+/* BD TIME */
 
 .bd-time{
 padding:5px 11px;
@@ -92,25 +90,25 @@ align-items:center;
 gap:6px;
 }
 
-/* LIVE RED DOT ANIMATION */
 .live-dot{
 width:7px;
 height:7px;
-background-color:#ff3b30;
+background:#ff3b30;
 border-radius:50%;
 display:inline-block;
+
 box-shadow:0 0 8px #ff3b30;
+
 animation:pulse 1.5s infinite;
 }
 
 @keyframes pulse{
-0%{opacity:1;transform:scale(1);}
-50%{opacity:0.3;transform:scale(0.8);}
-100%{opacity:1;transform:scale(1);}
+0%{opacity:1;transform:scale(1)}
+50%{opacity:.3;transform:scale(.8)}
+100%{opacity:1;transform:scale(1)}
 }
 
-
-/* PLAYLIST BUTTON UNDER TIME */
+/* PLAYLIST BUTTON */
 
 .playlist-toggle-btn{
 padding:5px 12px;
@@ -129,12 +127,13 @@ backdrop-filter:blur(12px);
 display:flex;
 align-items:center;
 gap:6px;
+
 cursor:pointer;
-transition:transform 0.2s, background 0.2s;
+transition:transform .2s,background .2s;
 }
 
 .playlist-toggle-btn:active{
-transform:scale(0.95);
+transform:scale(.95);
 }
 
 .playlist-toggle-btn svg{
@@ -142,20 +141,6 @@ width:14px;
 height:14px;
 fill:#fff;
 }
-
-
-/* YOUTUBE */
-
-#yt{
-position:fixed;
-width:2px;
-height:2px;
-left:-10px;
-bottom:-10px;
-opacity:.01;
-pointer-events:none;
-}
-
 
 /* APP */
 
@@ -173,11 +158,10 @@ justify-content:center;
 padding:0 16px 65px;
 }
 
-
 /* PLAYER */
 
 .player{
-width:min(400px, 92%);
+width:min(400px,92%);
 height:120px;
 
 padding:16px 20px;
@@ -185,7 +169,7 @@ padding:16px 20px;
 border:1px solid rgba(255,255,255,.18);
 border-radius:60px;
 
-background:rgba(55, 30, 25, 0.75);
+background:rgba(55,30,25,.75);
 
 box-shadow:0 20px 50px rgba(0,0,0,.6);
 
@@ -197,8 +181,7 @@ align-items:center;
 gap:14px;
 }
 
-
-/* THUMBNAIL */
+/* COVER */
 
 .cover-wrapper{
 position:relative;
@@ -215,7 +198,7 @@ justify-content:center;
 border-radius:50%;
 overflow:hidden;
 
-border:1px solid rgba(255, 255, 255, 0.3);
+border:1px solid rgba(255,255,255,.3);
 }
 
 .cover{
@@ -235,7 +218,7 @@ animation:spin 8s linear infinite;
 animation-play-state:paused;
 }
 
-.cover-wrapper::after{
+.cover-wrapper:after{
 content:"";
 
 position:absolute;
@@ -262,12 +245,11 @@ animation-play-state:running;
 }
 
 @keyframes spin{
-from{transform:rotate(0deg);}
-to{transform:rotate(360deg);}
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
 }
 
-
-/* SONG INFO */
+/* INFO */
 
 .middle{
 flex:1;
@@ -286,7 +268,7 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-color:#ffffff;
+color:#fff;
 }
 
 .artist{
@@ -302,8 +284,7 @@ margin-top:2px;
 margin-bottom:8px;
 }
 
-
-/* SEEK BAR */
+/* SEEK */
 
 .seek{
 position:relative;
@@ -342,7 +323,6 @@ color:rgba(255,255,255,.65);
 font-variant-numeric:tabular-nums;
 }
 
-
 /* CONTROLS */
 
 .controls{
@@ -377,9 +357,6 @@ height:22px;
 fill:#fff;
 }
 
-
-/* PLAY BUTTON */
-
 .play{
 width:52px;
 height:52px;
@@ -387,7 +364,7 @@ height:52px;
 border-radius:50%;
 border:0;
 
-background:#ffffff;
+background:#fff;
 color:#000;
 
 display:flex;
@@ -403,7 +380,7 @@ cursor:pointer;
 width:22px;
 height:22px;
 
-fill:#000000;
+fill:#000;
 
 margin-left:2px;
 }
@@ -417,16 +394,16 @@ margin-left:0;
 transform:scale(.90);
 }
 
-
-/* TRANSPARENT OVERLAY - CLICK ANYWHERE TO CLOSE */
+/* OVERLAY */
 
 .drawer-overlay{
 position:fixed;
 inset:0;
+
 z-index:99;
-background:transparent !important;
-backdrop-filter:none !important;
--webkit-backdrop-filter:none !important;
+
+background:transparent!important;
+
 pointer-events:none;
 display:none;
 }
@@ -436,34 +413,42 @@ display:block;
 pointer-events:auto;
 }
 
-
-/* FULL PLAYLIST PANEL WITH GLASS EFFECT */
+/* PLAYLIST */
 
 .playlist-drawer{
 position:fixed;
+
 top:0;
 right:-100%;
+
 width:170px;
 height:100dvh;
 
-/* GLASS BACKGROUND ON ENTIRE PLAYLIST */
-background:rgba(20, 20, 20, 0.35) !important;
-backdrop-filter:blur(25px) saturate(150%) !important;
--webkit-backdrop-filter:blur(25px) saturate(150%) !important;
-border-left:1px solid rgba(255, 255, 255, 0.15) !important;
+background:rgba(20,20,20,.35)!important;
+
+backdrop-filter:blur(25px) saturate(150%)!important;
+-webkit-backdrop-filter:blur(25px) saturate(150%)!important;
+
+border-left:1px solid rgba(255,255,255,.15)!important;
 
 z-index:100;
-transition:right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+transition:right .35s cubic-bezier(.2,.8,.2,1);
+
 display:flex;
 flex-direction:column;
+
 padding:12px 6px;
-box-shadow:-10px 0 30px rgba(0,0,0,0.3) !important;
+
+box-shadow:-10px 0 30px rgba(0,0,0,.3)!important;
+
 visibility:hidden;
 pointer-events:none;
 }
 
 .playlist-drawer.open{
 right:0;
+
 visibility:visible;
 pointer-events:auto;
 }
@@ -472,10 +457,15 @@ pointer-events:auto;
 display:flex;
 align-items:center;
 justify-content:space-between;
+
 padding:6px 8px;
-border-bottom:1px solid rgba(255,255,255,0.15);
+
+border-bottom:1px solid rgba(255,255,255,.15);
+
 margin-bottom:8px;
-background:rgba(255, 255, 255, 0.1);
+
+background:rgba(255,255,255,.1);
+
 border-radius:8px;
 }
 
@@ -483,69 +473,91 @@ border-radius:8px;
 font-size:11px;
 font-weight:700;
 color:#fff;
-text-shadow:0 1px 2px rgba(0,0,0,0.4);
+
+text-shadow:0 1px 2px rgba(0,0,0,.4);
 }
 
 .close-btn{
 background:transparent;
 border:0;
-color:rgba(255,255,255,0.9);
+
+color:rgba(255,255,255,.9);
+
 font-size:16px;
+
 cursor:pointer;
 padding:0 2px;
+
 line-height:1;
 }
 
 .song-list{
 flex:1;
+
 overflow-y:auto;
+
 display:flex;
 flex-direction:column;
-gap:4px; /* OPTIMIZED CARD SPACING */
+
+gap:4px;
+
 padding-right:2px;
 }
 
 .song-list::-webkit-scrollbar{
 width:2px;
 }
+
 .song-list::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,0.3);
+background:rgba(255,255,255,.3);
 border-radius:3px;
 }
 
-
-/* SONG CARDS INSIDE PLAYLIST */
+/* SONG ITEM */
 
 .song-item{
 display:flex;
 align-items:center;
+
 gap:6px;
-padding:4px 5px; /* COMPACT PADDING FOR CLEANER LOOK */
+
+padding:4px 5px;
+
 border-radius:7px;
 
-background:rgba(255, 255, 255, 0.08);
-border:1px solid rgba(255, 255, 255, 0.1);
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.1);
 
 cursor:pointer;
-transition:background 0.2s, border-color 0.2s, transform 0.1s;
+
+transition:
+background .2s,
+border-color .2s,
+transform .1s;
 }
 
 .song-item:active{
-transform:scale(0.96);
+transform:scale(.96);
 }
 
-.song-item:hover, .song-item.active{
-background:rgba(255, 255, 255, 0.22);
-border-color:rgba(255, 255, 255, 0.35);
+.song-item:hover,
+.song-item.active{
+background:rgba(255,255,255,.22);
+border-color:rgba(255,255,255,.35);
 }
 
 .song-item img{
 width:26px;
 height:26px;
+
 border-radius:5px;
+
 object-fit:cover;
+
 flex-shrink:0;
-box-shadow:0 2px 5px rgba(0,0,0,0.3);
+
+box-shadow:0 2px 5px rgba(0,0,0,.3);
 }
 
 .song-item-info{
@@ -553,29 +565,33 @@ flex:1;
 min-width:0;
 }
 
-/* BOLDER TITLE & SOFT SECONDARY TEXT */
 .song-item-title{
 font-size:9.5px;
 font-weight:700;
-color:#ffffff;
+
+color:#fff;
+
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
+
 letter-spacing:.2px;
 }
 
 .song-item-artist{
 font-size:8px;
 font-weight:400;
-color:rgba(255,255,255,0.55);
+
+color:rgba(255,255,255,.55);
+
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
-margin-top:0.5px;
+
+margin-top:.5px;
 }
 
-
-/* MOBILE RESPONSIVENESS */
+/* MOBILE */
 
 @media(max-width:480px){
 
@@ -585,8 +601,11 @@ padding-bottom:60px;
 
 .player{
 height:116px;
+
 padding:14px 16px;
+
 border-radius:58px;
+
 gap:12px;
 }
 
@@ -630,333 +649,1074 @@ padding:4px 9px;
 .playlist-drawer{
 width:170px;
 }
-
 }
 </style>
 </head>
+
 <body>
 
-<!-- BACKGROUND IMAGE -->
 <div class="bg"></div>
 
-<!-- TOP HEADER WIDGETS -->
+<!-- TOP -->
+
 <div class="top-widgets">
-  <!-- BANGLADESH LIVE TIME -->
+
   <div class="bd-time">
     <span>BD</span>
     <span class="live-dot"></span>
     <span id="bdTimeVal">--:--:-- --</span>
   </div>
 
-  <!-- PLAYLIST TOGGLE BUTTON -->
-  <button class="playlist-toggle-btn" onclick="toggleDrawer()">
+  <button class="playlist-toggle-btn"
+          onclick="toggleDrawer()">
+
     <svg viewBox="0 0 24 24">
       <path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
     </svg>
+
     <span>Playlist</span>
+
   </button>
+
 </div>
 
-<!-- YOUTUBE PLAYER -->
-<div id="yt"></div>
 
-<!-- DRAWER OVERLAY & PANEL -->
-<div class="drawer-overlay" id="overlay" onclick="toggleDrawer()"></div>
+<!-- PLAYLIST -->
 
-<div class="playlist-drawer" id="drawer">
+<div class="drawer-overlay"
+     id="overlay"
+     onclick="toggleDrawer()">
+</div>
+
+
+<div class="playlist-drawer"
+     id="drawer">
+
   <div class="drawer-header">
-    <div class="drawer-title">Playlist Songs</div>
-    <button class="close-btn" onclick="toggleDrawer()">&times;</button>
+
+    <div class="drawer-title">
+      Jamendo Songs
+    </div>
+
+    <button class="close-btn"
+            onclick="toggleDrawer()">
+      &times;
+    </button>
+
   </div>
-  <div class="song-list" id="songList">
-    <div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">
+
+  <div class="song-list"
+       id="songList">
+
+    <div style="
+      text-align:center;
+      color:rgba(255,255,255,.7);
+      font-size:10px;
+      margin-top:15px;
+    ">
       Loading...
     </div>
+
   </div>
+
 </div>
 
+
+<!-- PLAYER -->
 
 <div class="app">
 
 <section class="player">
 
-<!-- THUMBNAIL -->
-<div class="cover-wrapper">
-  <img id="cover" class="cover" src="logo.png" alt="Album art">
-</div>
+  <div class="cover-wrapper">
 
-<!-- SONG INFORMATION -->
-<div class="middle">
-  <div id="title" class="title">My Playlist</div>
-  <div id="artist" class="artist">YouTube Music</div>
+    <img id="cover"
+         class="cover"
+         src="logo.png"
+         alt="Album art">
 
-  <!-- SEEK BAR -->
-  <div class="seek" id="seek" onclick="seek(event)">
-    <div class="fill" id="fill"></div>
   </div>
 
-  <!-- TIME -->
-  <div class="time-display">
-    <span id="current">0:00</span> / <span id="duration">0:00</span>
+
+  <div class="middle">
+
+    <div id="title"
+         class="title">
+      Jamendo Music
+    </div>
+
+    <div id="artist"
+         class="artist">
+      Loading...
+    </div>
+
+
+    <div class="seek"
+         id="seek">
+
+      <div class="fill"
+           id="fill">
+      </div>
+
+    </div>
+
+
+    <div class="time-display">
+
+      <span id="current">
+        0:00
+      </span>
+
+      /
+
+      <span id="duration">
+        0:00
+      </span>
+
+    </div>
+
   </div>
-</div>
 
-<!-- CONTROLS -->
-<div class="controls">
-  <button class="btn" onclick="previousSong()" aria-label="Previous">
-    <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-  </button>
 
-  <button class="play" id="play" onclick="togglePlay()" aria-label="Play">
-    <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </button>
+  <div class="controls">
 
-  <button class="btn" onclick="nextSong()" aria-label="Next">
-    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/></svg>
-  </button>
-</div>
+    <button class="btn"
+            onclick="previousSong()"
+            aria-label="Previous">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+      </svg>
+
+    </button>
+
+
+    <button class="play"
+            id="play"
+            onclick="togglePlay()"
+            aria-label="Play">
+
+      <svg id="play-icon"
+           viewBox="0 0 24 24">
+
+        <path d="M8 5v14l11-7z"/>
+
+      </svg>
+
+    </button>
+
+
+    <button class="btn"
+            onclick="nextSong()"
+            aria-label="Next">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/>
+      </svg>
+
+    </button>
+
+  </div>
 
 </section>
 
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+
+<!-- NATIVE AUDIO -->
+
+<audio id="audio"
+       preload="metadata"
+       playsinline>
+</audio>
+
 
 <script>
 
-/* PLAYLIST */
-const PLAYLIST_ID="PLbvY05KVYwoo";
+/* =========================================
+   JAMENDO
+========================================= */
 
-let player=null;
-let playing=false;
-let playlistItems = [];
+const JAMENDO_CLIENT_ID = "709fa152";
+
+/*
+  TEST SEARCH
+
+  Change this to:
+  rock
+  pop
+  chillout
+  electronic
+  instrumental
+  etc.
+*/
+
+const JAMENDO_TAG = "pop";
 
 
-/* BANGLADESH LIVE TIME */
+let playlist = [];
+let currentIndex = 0;
+
+const audio =
+  document.getElementById("audio");
+
+
+/* =========================================
+   BANGLADESH TIME
+========================================= */
+
 function updateBDTime(){
-  const options = { 
-    timeZone: 'Asia/Dhaka', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit', 
-    hour12: true 
+
+  const options = {
+    timeZone:"Asia/Dhaka",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit",
+    hour12:true
   };
-  const timeString = new Intl.DateTimeFormat('en-US', options).format(new Date());
-  document.getElementById("bdTimeVal").textContent = timeString;
+
+  const timeString =
+    new Intl.DateTimeFormat(
+      "en-US",
+      options
+    ).format(new Date());
+
+  document.getElementById(
+    "bdTimeVal"
+  ).textContent = timeString;
 }
 
 updateBDTime();
-setInterval(updateBDTime,1000);
+
+setInterval(
+  updateBDTime,
+  1000
+);
 
 
-/* YOUTUBE API */
-function onYouTubeIframeAPIReady(){
-  player=new YT.Player("yt",{
-    width:"2",
-    height:"2",
-    playerVars:{
-      autoplay:0,
-      controls:0,
-      disablekb:1,
-      fs:0,
-      modestbranding:1,
-      playsinline:1,
-      rel:0,
-      listType:"playlist",
-      list:PLAYLIST_ID
-    },
-    events:{
-      onReady:ready,
-      onStateChange:state
+/* =========================================
+   LOAD JAMENDO TRACKS
+========================================= */
+
+async function loadJamendo(){
+
+  const list =
+    document.getElementById("songList");
+
+  try{
+
+    const url =
+      "https://api.jamendo.com/v3.0/tracks/?" +
+      "client_id=" +
+      encodeURIComponent(JAMENDO_CLIENT_ID) +
+      "&format=json" +
+      "&limit=20" +
+      "&audioformat=mp32" +
+      "&fuzzytags=" +
+      encodeURIComponent(JAMENDO_TAG);
+
+    const response =
+      await fetch(url);
+
+    if(!response.ok){
+      throw new Error(
+        "Jamendo API error"
+      );
     }
-  });
-}
+
+    const data =
+      await response.json();
+
+    if(
+      !data.results ||
+      data.results.length === 0
+    ){
+      throw new Error(
+        "No tracks found"
+      );
+    }
 
 
-/* INSTANT READY */
-function ready(){
-  updateInfo();
-  loadPlaylistItems();
-  setInterval(updateProgress, 250);
-}
+    playlist =
+      data.results
+      .filter(track => track.audio)
+      .map(track => ({
+
+        id:track.id,
+
+        title:
+          track.name ||
+          "Unknown Track",
+
+        artist:
+          track.artist_name ||
+          "Unknown Artist",
+
+        audio:
+          track.audio,
+
+        cover:
+          track.album_image ||
+          track.image ||
+          "logo.png",
+
+        duration:
+          Number(track.duration || 0)
+
+      }));
 
 
-/* PLAYER STATE */
-function state(e){
-  const cover=document.getElementById("cover");
-  const playBtn=document.getElementById("play");
-  const playIcon=document.getElementById("play-icon");
+    renderPlaylist();
 
-  if(e.data===YT.PlayerState.PLAYING){
-    playing=true;
-    playBtn.classList.add("playing");
-    playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    cover.classList.add("spinning");
-    updateInfo();
-    highlightActiveTrack();
+    if(playlist.length > 0){
+
+      loadSong(0, false);
+
+    }
+
   }
-  else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
-    playing=false;
-    playBtn.classList.remove("playing");
-    playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
-    cover.classList.remove("spinning");
-  }
-  else if(e.data===YT.PlayerState.CUED || e.data===-1){
-    updateInfo();
-  }
-}
+  catch(error){
 
+    console.error(error);
 
-/* PLAY / PAUSE */
-function togglePlay(){
-  if(!player)return;
-  if(playing){
-    player.pauseVideo();
-  }else{
-    player.playVideo();
-  }
-}
-
-
-/* NEXT & PREVIOUS */
-function nextSong(){
-  if(!player)return;
-  player.nextVideo();
-}
-
-function previousSong(){
-  if(!player)return;
-  player.previousVideo();
-}
-
-
-/* DRAWER & PLAYLIST FUNCTIONS */
-function toggleDrawer(){
-  const drawer = document.getElementById("drawer");
-  const overlay = document.getElementById("overlay");
-  
-  if(drawer.classList.contains("open")){
-    drawer.classList.remove("open");
-    overlay.classList.remove("active");
-  } else {
-    drawer.classList.add("open");
-    overlay.classList.add("active");
-  }
-}
-
-function loadPlaylistItems(){
-  if(!player || typeof player.getPlaylist !== 'function') return;
-  
-  playlistItems = player.getPlaylist();
-  const listContainer = document.getElementById("songList");
-  
-  if(!playlistItems || playlistItems.length === 0){
-    listContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.7); font-size:10px; margin-top:15px;">No tracks found</div>';
-    return;
-  }
-  
-  listContainer.innerHTML = "";
-  
-  playlistItems.forEach((id, index) => {
-    const item = document.createElement("div");
-    item.className = "song-item";
-    item.id = `track-${index}`;
-    item.onclick = () => playSpecificTrack(index);
-    
-    item.innerHTML = `
-      <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="thumb">
-      <div class="song-item-info">
-        <div class="song-item-title" id="title-${index}">Track #${index + 1}</div>
-        <div class="song-item-artist" id="artist-${index}">YouTube Music</div>
+    list.innerHTML = `
+      <div style="
+        text-align:center;
+        color:rgba(255,255,255,.75);
+        font-size:10px;
+        margin-top:15px;
+        padding:10px;
+      ">
+        Could not load Jamendo songs.
       </div>
     `;
-    
-    listContainer.appendChild(item);
-    fetchSongDetails(id, index);
-  });
-  
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER PLAYLIST
+========================================= */
+
+function renderPlaylist(){
+
+  const list =
+    document.getElementById("songList");
+
+  list.innerHTML = "";
+
+
+  playlist.forEach(
+    (song,index) => {
+
+      const item =
+        document.createElement("div");
+
+      item.className =
+        "song-item";
+
+      item.id =
+        "track-" + index;
+
+
+      item.innerHTML = `
+
+        <img
+          src="${escapeHTML(song.cover)}"
+          alt="cover">
+
+        <div class="song-item-info">
+
+          <div class="song-item-title">
+            ${escapeHTML(song.title)}
+          </div>
+
+          <div class="song-item-artist">
+            ${escapeHTML(song.artist)}
+          </div>
+
+        </div>
+
+      `;
+
+
+      item.onclick =
+        () => {
+
+          loadSong(index,true);
+
+          toggleDrawer();
+
+        };
+
+
+      list.appendChild(item);
+
+    }
+  );
+
+
   highlightActiveTrack();
+
 }
 
-function fetchSongDetails(id, index){
-  fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
-    .then(res => res.json())
-    .then(data => {
-      if(data && data.title) {
-        const titleEl = document.getElementById(`title-${index}`);
-        const artistEl = document.getElementById(`artist-${index}`);
-        
-        if(titleEl) titleEl.textContent = data.title;
-        if(artistEl && data.author_name) artistEl.textContent = data.author_name;
-      }
-    })
-    .catch(() => {});
+
+/* =========================================
+   LOAD SONG
+========================================= */
+
+function loadSong(
+  index,
+  autoplay = true
+){
+
+  if(
+    !playlist[index]
+  ) return;
+
+
+  currentIndex =
+    index;
+
+
+  const song =
+    playlist[index];
+
+
+  audio.src =
+    song.audio;
+
+  audio.load();
+
+
+  document.getElementById(
+    "title"
+  ).textContent =
+    song.title;
+
+
+  document.getElementById(
+    "artist"
+  ).textContent =
+    song.artist;
+
+
+  document.getElementById(
+    "cover"
+  ).src =
+    song.cover;
+
+
+  document.getElementById(
+    "current"
+  ).textContent =
+    "0:00";
+
+
+  document.getElementById(
+    "duration"
+  ).textContent =
+    format(song.duration);
+
+
+  document.getElementById(
+    "fill"
+  ).style.width =
+    "0%";
+
+
+  highlightActiveTrack();
+
+
+  setupMediaSession(song);
+
+
+  if(autoplay){
+
+    /*
+      This happens after a user click,
+      so iPhone is much more likely
+      to allow playback.
+    */
+
+    audio.play()
+      .catch(error => {
+
+        console.log(
+          "Playback waiting for user:",
+          error
+        );
+
+      });
+
+  }
+
 }
 
-function playSpecificTrack(index){
-  if(!player) return;
-  player.playVideoAt(index);
-  toggleDrawer();
-}
 
-function highlightActiveTrack(){
-  if(!player || typeof player.getPlaylistIndex !== 'function') return;
-  
-  const currentIndex = player.getPlaylistIndex();
-  const items = document.querySelectorAll(".song-item");
-  
-  items.forEach((item, index) => {
-    if(index === currentIndex){
-      item.classList.add("active");
-    } else {
-      item.classList.remove("active");
+/* =========================================
+   PLAY / PAUSE
+========================================= */
+
+function togglePlay(){
+
+  if(!audio.src){
+
+    if(playlist.length){
+      loadSong(
+        currentIndex,
+        true
+      );
     }
-  });
+
+    return;
+  }
+
+
+  if(audio.paused){
+
+    audio.play()
+      .catch(console.error);
+
+  }
+  else{
+
+    audio.pause();
+
+  }
+
 }
 
 
-/* SONG INFORMATION & PROGRESS */
-function updateInfo(){
-  if(!player || typeof player.getVideoData !== 'function')return;
-  try{
-    const d=player.getVideoData();
-    if(!d || !d.video_id)return;
-    
-    document.getElementById("cover").src="https://i.ytimg.com/vi/"+d.video_id+"/hqdefault.jpg";
-    if(d.title && d.title !== "") {
-      document.getElementById("title").textContent=d.title;
-    }
-    if(d.author && d.author !== "") {
-      document.getElementById("artist").textContent=d.author;
-    }
-  }catch(e){}
+/* =========================================
+   NEXT
+========================================= */
+
+function nextSong(){
+
+  if(!playlist.length)
+    return;
+
+
+  let next =
+    currentIndex + 1;
+
+
+  if(
+    next >= playlist.length
+  ){
+
+    next = 0;
+
+  }
+
+
+  loadSong(
+    next,
+    true
+  );
+
 }
+
+
+/* =========================================
+   PREVIOUS
+========================================= */
+
+function previousSong(){
+
+  if(!playlist.length)
+    return;
+
+
+  let previous =
+    currentIndex - 1;
+
+
+  if(previous < 0){
+
+    previous =
+      playlist.length - 1;
+
+  }
+
+
+  loadSong(
+    previous,
+    true
+  );
+
+}
+
+
+/* =========================================
+   AUDIO EVENTS
+========================================= */
+
+audio.addEventListener(
+  "play",
+  () => {
+
+    setPlayingUI(true);
+
+  }
+);
+
+
+audio.addEventListener(
+  "pause",
+  () => {
+
+    setPlayingUI(false);
+
+  }
+);
+
+
+audio.addEventListener(
+  "ended",
+  () => {
+
+    nextSong();
+
+  }
+);
+
+
+audio.addEventListener(
+  "loadedmetadata",
+  () => {
+
+    document.getElementById(
+      "duration"
+    ).textContent =
+      format(audio.duration);
+
+  }
+);
+
+
+audio.addEventListener(
+  "timeupdate",
+  updateProgress
+);
+
+
+/* =========================================
+   PLAYER UI
+========================================= */
+
+function setPlayingUI(isPlaying){
+
+  const cover =
+    document.getElementById("cover");
+
+  const play =
+    document.getElementById("play");
+
+  const icon =
+    document.getElementById("play-icon");
+
+
+  if(isPlaying){
+
+    cover.classList.add(
+      "spinning"
+    );
+
+    play.classList.add(
+      "playing"
+    );
+
+
+    icon.innerHTML =
+      '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+  }
+  else{
+
+    cover.classList.remove(
+      "spinning"
+    );
+
+    play.classList.remove(
+      "playing"
+    );
+
+
+    icon.innerHTML =
+      '<path d="M8 5v14l11-7z"/>';
+
+  }
+
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
 
 function updateProgress(){
-  if(!player || typeof player.getCurrentTime !== 'function')return;
+
+  if(
+    !audio.duration ||
+    isNaN(audio.duration)
+  ) return;
+
+
+  const percent =
+    (
+      audio.currentTime /
+      audio.duration
+    ) * 100;
+
+
+  document.getElementById(
+    "fill"
+  ).style.width =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        percent
+      )
+    ) + "%";
+
+
+  document.getElementById(
+    "current"
+  ).textContent =
+    format(
+      audio.currentTime
+    );
+
+
+  document.getElementById(
+    "duration"
+  ).textContent =
+    format(
+      audio.duration
+    );
+
+
+  updateMediaPosition();
+
+}
+
+
+/* =========================================
+   SEEK
+========================================= */
+
+document.getElementById(
+  "seek"
+).addEventListener(
+  "click",
+  function(event){
+
+    if(!audio.duration)
+      return;
+
+
+    const rect =
+      this.getBoundingClientRect();
+
+
+    const position =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          (
+            event.clientX -
+            rect.left
+          ) /
+          rect.width
+        )
+      );
+
+
+    audio.currentTime =
+      position *
+      audio.duration;
+
+  }
+);
+
+
+/* =========================================
+   MEDIA SESSION
+========================================= */
+
+function setupMediaSession(song){
+
+  if(
+    !("mediaSession" in navigator)
+  ) return;
+
+
+  navigator.mediaSession.metadata =
+    new MediaMetadata({
+
+      title:
+        song.title,
+
+      artist:
+        song.artist,
+
+      album:
+        "My Music Player",
+
+      artwork:[
+        {
+          src:song.cover,
+          sizes:"300x300",
+          type:"image/jpeg"
+        }
+      ]
+
+    });
+
+
+  navigator.mediaSession.setActionHandler(
+    "play",
+    () => audio.play()
+  );
+
+
+  navigator.mediaSession.setActionHandler(
+    "pause",
+    () => audio.pause()
+  );
+
+
+  navigator.mediaSession.setActionHandler(
+    "nexttrack",
+    () => nextSong()
+  );
+
+
+  navigator.mediaSession.setActionHandler(
+    "previoustrack",
+    () => previousSong()
+  );
+
+
   try{
-    const c=player.getCurrentTime();
-    const d=player.getDuration();
-    if(!d)return;
-    document.getElementById("fill").style.width=Math.max(0,Math.min(100,(c/d)*100))+"%";
-    document.getElementById("current").textContent=format(c);
-    document.getElementById("duration").textContent=format(d);
-    if(playing) updateInfo();
-  }catch(e){}
+
+    navigator.mediaSession.setActionHandler(
+      "seekbackward",
+      () => {
+
+        audio.currentTime =
+          Math.max(
+            0,
+            audio.currentTime - 10
+          );
+
+      }
+    );
+
+
+    navigator.mediaSession.setActionHandler(
+      "seekforward",
+      () => {
+
+        audio.currentTime =
+          Math.min(
+            audio.duration,
+            audio.currentTime + 10
+          );
+
+      }
+    );
+
+  }
+  catch(e){}
+
 }
 
-function seek(e){
-  if(!player || typeof player.getDuration !== 'function')return;
-  const r=document.getElementById("seek").getBoundingClientRect();
-  const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-  player.seekTo(p*player.getDuration(),true);
+
+/* =========================================
+   MEDIA POSITION
+========================================= */
+
+function updateMediaPosition(){
+
+  if(
+    !("mediaSession" in navigator)
+  ) return;
+
+
+  if(
+    !audio.duration ||
+    isNaN(audio.duration)
+  ) return;
+
+
+  try{
+
+    navigator.mediaSession.setPositionState({
+
+      duration:
+        audio.duration,
+
+      playbackRate:
+        audio.playbackRate,
+
+      position:
+        Math.min(
+          audio.currentTime,
+          audio.duration
+        )
+
+    });
+
+  }
+  catch(e){}
+
 }
 
-function format(s){
-  if(!s || isNaN(s)) return "0:00";
-  s=Math.floor(s);
-  return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+
+/* =========================================
+   ACTIVE TRACK
+========================================= */
+
+function highlightActiveTrack(){
+
+  document
+    .querySelectorAll(".song-item")
+    .forEach(
+      (item,index) => {
+
+        if(
+          index === currentIndex
+        ){
+
+          item.classList.add(
+            "active"
+          );
+
+        }
+        else{
+
+          item.classList.remove(
+            "active"
+          );
+
+        }
+
+      }
+    );
+
 }
+
+
+/* =========================================
+   DRAWER
+========================================= */
+
+function toggleDrawer(){
+
+  const drawer =
+    document.getElementById(
+      "drawer"
+    );
+
+  const overlay =
+    document.getElementById(
+      "overlay"
+    );
+
+
+  if(
+    drawer.classList.contains(
+      "open"
+    )
+  ){
+
+    drawer.classList.remove(
+      "open"
+    );
+
+    overlay.classList.remove(
+      "active"
+    );
+
+  }
+  else{
+
+    drawer.classList.add(
+      "open"
+    );
+
+    overlay.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   FORMAT
+========================================= */
+
+function format(seconds){
+
+  if(
+    !seconds ||
+    isNaN(seconds)
+  ){
+
+    return "0:00";
+
+  }
+
+
+  seconds =
+    Math.floor(seconds);
+
+
+  return (
+    Math.floor(
+      seconds / 60
+    )
+    +
+    ":"
+    +
+    String(
+      seconds % 60
+    ).padStart(2,"0")
+  );
+
+}
+
+
+/* =========================================
+   BASIC HTML ESCAPE
+========================================= */
+
+function escapeHTML(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+loadJamendo();
 
 </script>
 
