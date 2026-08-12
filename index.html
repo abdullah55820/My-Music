@@ -14,884 +14,1161 @@
 <link rel="icon" type="image/png" href="logo.png">
 
 <style>
+
 *{
-  box-sizing:border-box;
+box-sizing:border-box;
 }
 
 html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#050505;
-  color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#050505;
+color:#fff;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
 }
 
 body{
-  position:relative;
-  overflow-x:hidden !important;
+position:relative;
+overflow-x:hidden!important;
 }
 
 
-/* =========================
-   BACKGROUND
-========================= */
+/* ================= BACKGROUND ================= */
 
 .bg{
-  position:fixed;
-  inset:0;
-  background-image:url("background.jpg");
-  background-position:center center;
-  background-size:cover;
-  background-repeat:no-repeat;
-  z-index:0;
+position:fixed;
+inset:0;
+
+background-image:url("background.jpg");
+background-position:center center;
+background-size:cover;
+background-repeat:no-repeat;
+
+z-index:0;
 }
 
 .bg:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.15);
+content:"";
+position:absolute;
+inset:0;
+
+background:rgba(0,0,0,.15);
 }
 
 
-/* =========================
-   TOP WIDGETS
-========================= */
+/* ================= TOP WIDGETS ================= */
 
 .top-widgets{
-  position:fixed;
-  top:14px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:10;
+position:fixed;
+top:14px;
+left:50%;
 
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
+transform:translateX(-50%);
+
+z-index:10;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+gap:8px;
 }
 
 
 /* BD TIME */
 
 .bd-time{
-  padding:5px 11px;
-  border-radius:20px;
+padding:5px 11px;
 
-  background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.18);
+border-radius:20px;
 
-  color:rgba(255,255,255,.9);
-  font-size:11px;
-  font-weight:600;
-  letter-spacing:.3px;
+background:rgba(0,0,0,.45);
 
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,.18);
 
-  display:flex;
-  align-items:center;
-  gap:6px;
+color:rgba(255,255,255,.9);
+
+font-size:11px;
+font-weight:600;
+
+letter-spacing:.3px;
+
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+
+gap:6px;
 }
 
+
+/* LIVE DOT */
+
 .live-dot{
-  width:7px;
-  height:7px;
+width:7px;
+height:7px;
 
-  background-color:#ff3b30;
-  border-radius:50%;
+background:#ff3b30;
 
-  display:inline-block;
+border-radius:50%;
 
-  box-shadow:0 0 8px #ff3b30;
+display:inline-block;
 
-  animation:pulse 1.5s infinite;
+box-shadow:0 0 8px #ff3b30;
+
+animation:pulse 1.5s infinite;
 }
 
 @keyframes pulse{
-  0%{
-    opacity:1;
-    transform:scale(1);
-  }
 
-  50%{
-    opacity:.3;
-    transform:scale(.8);
-  }
+0%{
+opacity:1;
+transform:scale(1);
+}
 
-  100%{
-    opacity:1;
-    transform:scale(1);
-  }
+50%{
+opacity:.3;
+transform:scale(.8);
+}
+
+100%{
+opacity:1;
+transform:scale(1);
+}
+
 }
 
 
 /* PLAYLIST BUTTON */
 
 .playlist-toggle-btn{
-  padding:5px 12px;
-  border-radius:20px;
 
-  background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.18);
+padding:5px 12px;
 
-  color:rgba(255,255,255,.9);
+border-radius:20px;
 
-  font-size:11px;
-  font-weight:600;
+background:rgba(0,0,0,.45);
 
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,.18);
 
-  display:flex;
-  align-items:center;
-  gap:6px;
+color:rgba(255,255,255,.9);
 
-  cursor:pointer;
+font-size:11px;
+font-weight:600;
 
-  transition:transform .2s,background .2s;
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+
+gap:6px;
+
+cursor:pointer;
+
+transition:.2s;
 }
 
 .playlist-toggle-btn:active{
-  transform:scale(.95);
+transform:scale(.95);
 }
 
 .playlist-toggle-btn svg{
-  width:14px;
-  height:14px;
-  fill:#fff;
+width:14px;
+height:14px;
+fill:#fff;
 }
 
 
-/* =========================
-   YOUTUBE
-========================= */
+/* ================= YOUTUBE ================= */
 
 #yt{
-  position:fixed;
 
-  width:2px;
-  height:2px;
+position:fixed;
 
-  left:-10px;
-  bottom:-10px;
+width:2px;
+height:2px;
 
-  opacity:.01;
+left:-10px;
+bottom:-10px;
 
-  pointer-events:none;
+opacity:.01;
+
+pointer-events:none;
+
 }
 
 
-/* =========================
-   APP
-========================= */
+/* ================= APP ================= */
 
 .app{
-  position:relative;
-  z-index:2;
 
-  height:100dvh;
-  width:100%;
+position:relative;
 
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
+z-index:2;
 
-  padding:0 16px 65px;
+height:100dvh;
+width:100%;
+
+display:flex;
+
+align-items:flex-end;
+
+justify-content:center;
+
+padding:0 16px 48px;
+
 }
 
 
-/* =========================
-   SPECTRUM
-   OUTSIDE PLAYER
-========================= */
+/* ================= PLAYER AREA ================= */
 
-.spectrum-wrapper{
-  position:fixed;
+.player-area{
 
-  left:50%;
-  bottom:185px;
+width:min(430px,96%);
 
-  transform:translateX(-50%);
+display:flex;
 
-  width:min(430px,94vw);
-  height:75px;
+flex-direction:column;
 
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
+align-items:center;
 
-  gap:3px;
+gap:13px;
 
-  z-index:1;
-
-  pointer-events:none;
-
-  opacity:.85;
-
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.45));
-
-  transition:opacity .35s ease;
 }
 
 
-/* SPECTRUM BARS */
-
-.spectrum-bar{
-  width:5px;
-
-  min-height:4px;
-
-  height:10px;
-
-  border-radius:8px 8px 2px 2px;
-
-  background:rgba(255,255,255,.78);
-
-  transform-origin:bottom center;
-
-  opacity:.8;
-
-  transition:
-    height .12s ease,
-    opacity .2s ease;
-}
-
-
-/* PLAYING ANIMATION */
-
-.spectrum-wrapper.playing .spectrum-bar{
-  animation:spectrumMove .55s ease-in-out infinite alternate;
-}
-
-.spectrum-wrapper.playing .spectrum-bar:nth-child(2n){
-  animation-duration:.42s;
-}
-
-.spectrum-wrapper.playing .spectrum-bar:nth-child(3n){
-  animation-duration:.68s;
-}
-
-.spectrum-wrapper.playing .spectrum-bar:nth-child(4n){
-  animation-duration:.5s;
-}
-
-.spectrum-wrapper.playing .spectrum-bar:nth-child(5n){
-  animation-duration:.76s;
-}
-
-@keyframes spectrumMove{
-  0%{
-    transform:scaleY(.35);
-  }
-
-  30%{
-    transform:scaleY(.7);
-  }
-
-  60%{
-    transform:scaleY(1.15);
-  }
-
-  100%{
-    transform:scaleY(.5);
-  }
-}
-
-
-/* CENTER BARS BIGGER */
-
-.spectrum-bar:nth-child(9),
-.spectrum-bar:nth-child(10),
-.spectrum-bar:nth-child(11),
-.spectrum-bar:nth-child(12),
-.spectrum-bar:nth-child(13),
-.spectrum-bar:nth-child(14),
-.spectrum-bar:nth-child(15){
-  height:42px;
-}
-
-
-/* =========================
-   PLAYER
-========================= */
+/* ================= PLAYER ================= */
 
 .player{
-  width:min(400px,92%);
-  height:120px;
 
-  padding:16px 20px;
+width:100%;
 
-  border:1px solid rgba(255,255,255,.18);
+height:120px;
 
-  border-radius:60px;
+padding:16px 20px;
 
-  background:rgba(55,30,25,.75);
+border:1px solid rgba(255,255,255,.18);
 
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
+border-radius:60px;
 
-  backdrop-filter:blur(30px) saturate(140%);
-  -webkit-backdrop-filter:blur(30px) saturate(140%);
+background:rgba(55,30,25,.75);
 
-  display:flex;
-  align-items:center;
+box-shadow:
+0 20px 50px rgba(0,0,0,.6);
 
-  gap:14px;
+backdrop-filter:
+blur(30px) saturate(140%);
 
-  position:relative;
-  z-index:3;
+-webkit-backdrop-filter:
+blur(30px) saturate(140%);
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
 }
 
 
-/* =========================
-   COVER
-========================= */
+/* ================= COVER ================= */
 
 .cover-wrapper{
-  position:relative;
 
-  width:88px;
-  height:88px;
+position:relative;
 
-  flex-shrink:0;
+width:88px;
+height:88px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+flex-shrink:0;
 
-  border-radius:50%;
+display:flex;
 
-  overflow:hidden;
+align-items:center;
+justify-content:center;
 
-  border:1px solid rgba(255,255,255,.3);
+border-radius:50%;
+
+overflow:hidden;
+
+border:1px solid rgba(255,255,255,.3);
+
+box-shadow:
+0 5px 20px rgba(0,0,0,.35);
+
 }
 
 .cover{
-  width:137%;
-  height:137%;
 
-  margin:-18.5%;
+width:137%;
+height:137%;
 
-  border-radius:50%;
+margin:-18.5%;
 
-  object-fit:cover;
-  object-position:center;
+border-radius:50%;
 
-  background:#222;
+object-fit:cover;
 
-  animation:spin 8s linear infinite;
+object-position:center;
 
-  animation-play-state:paused;
+background:#222;
+
+animation:spin 8s linear infinite;
+
+animation-play-state:paused;
+
 }
 
-.cover-wrapper::after{
-  content:"";
+.cover-wrapper:after{
 
-  position:absolute;
+content:"";
 
-  width:16px;
-  height:16px;
+position:absolute;
 
-  background:rgba(20,20,20,.85);
+width:16px;
+height:16px;
 
-  border:2px solid rgba(255,255,255,.3);
+background:rgba(20,20,20,.85);
 
-  border-radius:50%;
+border:2px solid rgba(255,255,255,.3);
 
-  left:50%;
-  top:50%;
+border-radius:50%;
 
-  transform:translate(-50%,-50%);
+left:50%;
+top:50%;
 
-  z-index:2;
+transform:translate(-50%,-50%);
+
+z-index:2;
+
 }
 
 .cover.spinning{
-  animation-play-state:running;
+
+animation-play-state:running;
+
 }
 
 @keyframes spin{
-  from{
-    transform:rotate(0deg);
-  }
 
-  to{
-    transform:rotate(360deg);
-  }
+from{
+transform:rotate(0deg);
+}
+
+to{
+transform:rotate(360deg);
+}
+
 }
 
 
-/* =========================
-   SONG INFO
-========================= */
+/* ================= SONG INFO ================= */
 
 .middle{
-  flex:1;
-  min-width:0;
 
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
+flex:1;
+
+min-width:0;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
 }
 
 .title{
-  font-size:16px;
-  font-weight:700;
 
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+font-size:16px;
 
-  color:#fff;
+font-weight:700;
+
+white-space:nowrap;
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+color:#fff;
+
 }
 
 .artist{
-  font-size:13.5px;
 
-  color:rgba(255,255,255,.65);
+font-size:13.5px;
 
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+color:rgba(255,255,255,.65);
 
-  margin-top:2px;
-  margin-bottom:8px;
+white-space:nowrap;
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+margin-top:2px;
+
+margin-bottom:8px;
+
 }
 
 
-/* SEEK */
+/* ================= SEEK ================= */
 
 .seek{
-  position:relative;
 
-  width:100%;
-  height:4px;
+position:relative;
 
-  border-radius:10px;
+width:100%;
 
-  background:rgba(255,255,255,.2);
+height:4px;
 
-  cursor:pointer;
+border-radius:10px;
 
-  margin-bottom:6px;
+background:rgba(255,255,255,.2);
+
+cursor:pointer;
+
+margin-bottom:6px;
+
 }
 
 .fill{
-  position:absolute;
 
-  left:0;
-  top:0;
+position:absolute;
 
-  height:100%;
-  width:0;
+left:0;
+top:0;
 
-  background:#fff;
+height:100%;
 
-  border-radius:10px;
+width:0;
+
+background:#fff;
+
+border-radius:10px;
+
 }
 
 .time-display{
-  font-size:12px;
 
-  color:rgba(255,255,255,.65);
+font-size:12px;
 
-  font-variant-numeric:tabular-nums;
+color:rgba(255,255,255,.65);
+
+font-variant-numeric:tabular-nums;
+
 }
 
 
-/* =========================
-   CONTROLS
-========================= */
+/* ================= CONTROLS ================= */
 
 .controls{
-  display:flex;
-  align-items:center;
 
-  gap:10px;
+display:flex;
 
-  flex-shrink:0;
+align-items:center;
+
+gap:10px;
+
+flex-shrink:0;
+
 }
 
 .btn{
-  width:28px;
-  height:28px;
 
-  border:0;
+width:28px;
+height:28px;
 
-  background:transparent;
+border:0;
 
-  color:rgba(255,255,255,.9);
+background:transparent;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+color:rgba(255,255,255,.9);
 
-  cursor:pointer;
+display:flex;
 
-  padding:0;
+align-items:center;
+justify-content:center;
 
-  transition:transform .1s;
+cursor:pointer;
+
+padding:0;
+
+transition:transform .1s;
+
 }
 
 .btn svg{
-  width:22px;
-  height:22px;
 
-  fill:#fff;
+width:22px;
+height:22px;
+
+fill:#fff;
+
 }
 
 
 /* PLAY */
 
 .play{
-  width:52px;
-  height:52px;
 
-  border-radius:50%;
+width:52px;
+height:52px;
 
-  border:0;
+border-radius:50%;
 
-  background:#fff;
+border:0;
 
-  color:#000;
+background:#fff;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+color:#000;
 
-  box-shadow:0 4px 15px rgba(0,0,0,.3);
+display:flex;
 
-  cursor:pointer;
+align-items:center;
+justify-content:center;
+
+box-shadow:
+0 4px 15px rgba(0,0,0,.3);
+
+cursor:pointer;
+
 }
 
 .play svg{
-  width:22px;
-  height:22px;
 
-  fill:#000;
+width:22px;
+height:22px;
 
-  margin-left:2px;
+fill:#000;
+
+margin-left:2px;
+
 }
 
 .play.playing svg{
-  margin-left:0;
+
+margin-left:0;
+
 }
 
 .btn:active,
 .play:active{
-  transform:scale(.90);
+
+transform:scale(.90);
+
 }
 
 
-/* =========================
-   OVERLAY
-========================= */
+/* ================================================= */
+/* PREMIUM AUDIO SPECTRUM */
+/* ================================================= */
+
+.spectrum-box{
+
+position:relative;
+
+width:92%;
+
+height:58px;
+
+padding:8px 12px;
+
+border-radius:25px;
+
+background:rgba(10,10,10,.28);
+
+border:1px solid rgba(255,255,255,.13);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.35),
+inset 0 1px 0 rgba(255,255,255,.08);
+
+backdrop-filter:
+blur(22px) saturate(130%);
+
+-webkit-backdrop-filter:
+blur(22px) saturate(130%);
+
+overflow:hidden;
+
+}
+
+
+/* soft glow behind spectrum */
+
+.spectrum-box:before{
+
+content:"";
+
+position:absolute;
+
+left:10%;
+right:10%;
+
+bottom:-20px;
+
+height:45px;
+
+background:rgba(255,255,255,.08);
+
+filter:blur(25px);
+
+border-radius:50%;
+
+opacity:.6;
+
+}
+
+
+/* SPECTRUM */
+
+.spectrum{
+
+position:relative;
+
+z-index:2;
+
+height:100%;
+
+width:100%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+gap:3px;
+
+}
+
+
+/* EACH BAR */
+
+.bar{
+
+width:4px;
+
+height:8px;
+
+border-radius:10px;
+
+background:rgba(255,255,255,.82);
+
+opacity:.65;
+
+transform-origin:center;
+
+transition:
+height .12s ease,
+opacity .2s ease;
+
+}
+
+
+/* CENTER BARS */
+
+.bar:nth-child(1){height:8px}
+.bar:nth-child(2){height:12px}
+.bar:nth-child(3){height:17px}
+.bar:nth-child(4){height:23px}
+.bar:nth-child(5){height:30px}
+.bar:nth-child(6){height:37px}
+.bar:nth-child(7){height:43px}
+.bar:nth-child(8){height:48px}
+.bar:nth-child(9){height:42px}
+.bar:nth-child(10){height:35px}
+.bar:nth-child(11){height:28px}
+.bar:nth-child(12){height:22px}
+.bar:nth-child(13){height:17px}
+.bar:nth-child(14){height:13px}
+.bar:nth-child(15){height:9px}
+
+
+/* ANIMATION */
+
+.spectrum.active .bar{
+
+animation:
+spectrumMove .65s ease-in-out infinite alternate;
+
+opacity:.9;
+
+}
+
+.spectrum.active .bar:nth-child(2){
+animation-delay:.08s;
+}
+
+.spectrum.active .bar:nth-child(3){
+animation-delay:.14s;
+}
+
+.spectrum.active .bar:nth-child(4){
+animation-delay:.21s;
+}
+
+.spectrum.active .bar:nth-child(5){
+animation-delay:.27s;
+}
+
+.spectrum.active .bar:nth-child(6){
+animation-delay:.34s;
+}
+
+.spectrum.active .bar:nth-child(7){
+animation-delay:.41s;
+}
+
+.spectrum.active .bar:nth-child(8){
+animation-delay:.48s;
+}
+
+.spectrum.active .bar:nth-child(9){
+animation-delay:.42s;
+}
+
+.spectrum.active .bar:nth-child(10){
+animation-delay:.35s;
+}
+
+.spectrum.active .bar:nth-child(11){
+animation-delay:.28s;
+}
+
+.spectrum.active .bar:nth-child(12){
+animation-delay:.21s;
+}
+
+.spectrum.active .bar:nth-child(13){
+animation-delay:.15s;
+}
+
+.spectrum.active .bar:nth-child(14){
+animation-delay:.09s;
+}
+
+@keyframes spectrumMove{
+
+0%{
+transform:scaleY(.35);
+}
+
+50%{
+transform:scaleY(1);
+}
+
+100%{
+transform:scaleY(.5);
+}
+
+}
+
+
+/* ================= DRAWER OVERLAY ================= */
 
 .drawer-overlay{
-  position:fixed;
 
-  inset:0;
+position:fixed;
 
-  z-index:99;
+inset:0;
 
-  background:transparent !important;
+z-index:99;
 
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
+background:transparent!important;
 
-  pointer-events:none;
+backdrop-filter:none!important;
 
-  display:none;
+-webkit-backdrop-filter:none!important;
+
+pointer-events:none;
+
+display:none;
+
 }
 
 .drawer-overlay.active{
-  display:block;
-  pointer-events:auto;
+
+display:block;
+
+pointer-events:auto;
+
 }
 
 
-/* =========================
-   PLAYLIST DRAWER
-========================= */
+/* ================= PLAYLIST DRAWER ================= */
 
 .playlist-drawer{
-  position:fixed;
 
-  top:0;
-  right:-100%;
+position:fixed;
 
-  width:170px;
-  height:100dvh;
+top:0;
 
-  background:rgba(20,20,20,.35) !important;
+right:-100%;
 
-  backdrop-filter:blur(25px) saturate(150%) !important;
-  -webkit-backdrop-filter:blur(25px) saturate(150%) !important;
+width:170px;
 
-  border-left:1px solid rgba(255,255,255,.15) !important;
+height:100dvh;
 
-  z-index:100;
+background:rgba(20,20,20,.35)!important;
 
-  transition:right .35s cubic-bezier(.2,.8,.2,1);
+backdrop-filter:blur(25px) saturate(150%)!important;
 
-  display:flex;
-  flex-direction:column;
+-webkit-backdrop-filter:blur(25px) saturate(150%)!important;
 
-  padding:12px 6px;
+border-left:1px solid rgba(255,255,255,.15)!important;
 
-  box-shadow:-10px 0 30px rgba(0,0,0,.3) !important;
+z-index:100;
 
-  visibility:hidden;
+transition:
+right .35s cubic-bezier(.2,.8,.2,1);
 
-  pointer-events:none;
+display:flex;
+
+flex-direction:column;
+
+padding:12px 6px;
+
+box-shadow:
+-10px 0 30px rgba(0,0,0,.3)!important;
+
+visibility:hidden;
+
+pointer-events:none;
+
 }
 
 .playlist-drawer.open{
-  right:0;
 
-  visibility:visible;
+right:0;
 
-  pointer-events:auto;
+visibility:visible;
+
+pointer-events:auto;
+
 }
 
 
-/* HEADER */
+/* DRAWER HEADER */
 
 .drawer-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
 
-  padding:6px 8px;
+display:flex;
 
-  border-bottom:1px solid rgba(255,255,255,.15);
+align-items:center;
 
-  margin-bottom:8px;
+justify-content:space-between;
 
-  background:rgba(255,255,255,.1);
+padding:6px 8px;
 
-  border-radius:8px;
+border-bottom:
+1px solid rgba(255,255,255,.15);
+
+margin-bottom:8px;
+
+background:rgba(255,255,255,.1);
+
+border-radius:8px;
+
 }
 
 .drawer-title{
-  font-size:11px;
 
-  font-weight:700;
+font-size:11px;
 
-  color:#fff;
+font-weight:700;
 
-  text-shadow:0 1px 2px rgba(0,0,0,.4);
+color:#fff;
+
+text-shadow:
+0 1px 2px rgba(0,0,0,.4);
+
 }
 
 .close-btn{
-  background:transparent;
 
-  border:0;
+background:transparent;
 
-  color:rgba(255,255,255,.9);
+border:0;
 
-  font-size:16px;
+color:rgba(255,255,255,.9);
 
-  cursor:pointer;
+font-size:16px;
 
-  padding:0 2px;
+cursor:pointer;
 
-  line-height:1;
+padding:0 2px;
+
+line-height:1;
+
 }
 
 
 /* SONG LIST */
 
 .song-list{
-  flex:1;
 
-  overflow-y:auto;
+flex:1;
 
-  display:flex;
+overflow-y:auto;
 
-  flex-direction:column;
+display:flex;
 
-  gap:4px;
+flex-direction:column;
 
-  padding-right:2px;
+gap:4px;
+
+padding-right:2px;
+
 }
 
 .song-list::-webkit-scrollbar{
-  width:2px;
+
+width:2px;
+
 }
 
 .song-list::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,.3);
 
-  border-radius:3px;
+background:rgba(255,255,255,.3);
+
+border-radius:3px;
+
 }
 
 
 /* SONG ITEM */
 
 .song-item{
-  display:flex;
-  align-items:center;
 
-  gap:6px;
+display:flex;
 
-  padding:4px 5px;
+align-items:center;
 
-  border-radius:7px;
+gap:6px;
 
-  background:rgba(255,255,255,.08);
+padding:4px 5px;
 
-  border:1px solid rgba(255,255,255,.1);
+border-radius:7px;
 
-  cursor:pointer;
+background:rgba(255,255,255,.08);
 
-  transition:
-    background .2s,
-    border-color .2s,
-    transform .1s;
+border:
+1px solid rgba(255,255,255,.1);
+
+cursor:pointer;
+
+transition:
+background .2s,
+border-color .2s,
+transform .1s;
+
 }
 
 .song-item:active{
-  transform:scale(.96);
+
+transform:scale(.96);
+
 }
 
 .song-item:hover,
 .song-item.active{
-  background:rgba(255,255,255,.22);
 
-  border-color:rgba(255,255,255,.35);
+background:rgba(255,255,255,.22);
+
+border-color:
+rgba(255,255,255,.35);
+
 }
 
 .song-item img{
-  width:26px;
-  height:26px;
 
-  border-radius:5px;
+width:26px;
+height:26px;
 
-  object-fit:cover;
+border-radius:5px;
 
-  flex-shrink:0;
+object-fit:cover;
 
-  box-shadow:0 2px 5px rgba(0,0,0,.3);
+flex-shrink:0;
+
+box-shadow:
+0 2px 5px rgba(0,0,0,.3);
+
 }
 
 .song-item-info{
-  flex:1;
 
-  min-width:0;
+flex:1;
+
+min-width:0;
+
 }
 
 .song-item-title{
-  font-size:9.5px;
 
-  font-weight:700;
+font-size:9.5px;
 
-  color:#fff;
+font-weight:700;
 
-  white-space:nowrap;
+color:#fff;
 
-  overflow:hidden;
+white-space:nowrap;
 
-  text-overflow:ellipsis;
+overflow:hidden;
 
-  letter-spacing:.2px;
+text-overflow:ellipsis;
+
+letter-spacing:.2px;
+
 }
 
 .song-item-artist{
-  font-size:8px;
 
-  font-weight:400;
+font-size:8px;
 
-  color:rgba(255,255,255,.55);
+font-weight:400;
 
-  white-space:nowrap;
+color:rgba(255,255,255,.55);
 
-  overflow:hidden;
+white-space:nowrap;
 
-  text-overflow:ellipsis;
+overflow:hidden;
 
-  margin-top:.5px;
+text-overflow:ellipsis;
+
+margin-top:.5px;
+
 }
 
 
-/* =========================
-   MOBILE
-========================= */
+/* ================= MOBILE ================= */
 
 @media(max-width:480px){
 
-  .app{
-    padding-bottom:60px;
-  }
+.app{
 
-  .player{
-    height:116px;
+padding-bottom:40px;
 
-    padding:14px 16px;
+}
 
-    border-radius:58px;
+.player-area{
 
-    gap:12px;
-  }
+width:96%;
 
-  .cover-wrapper{
-    width:82px;
-    height:82px;
-  }
+gap:11px;
 
-  .title{
-    font-size:15px;
-  }
+}
 
-  .artist{
-    font-size:12.5px;
-  }
+.player{
 
-  .play{
-    width:48px;
-    height:48px;
-  }
+height:116px;
 
-  .btn{
-    width:26px;
-    height:26px;
-  }
+padding:14px 16px;
 
-  .top-widgets{
-    top:10px;
-  }
+border-radius:58px;
 
-  .bd-time{
-    font-size:10px;
-    padding:4px 9px;
-  }
+gap:12px;
 
-  .playlist-toggle-btn{
-    font-size:10px;
-    padding:4px 9px;
-  }
+}
 
-  .playlist-drawer{
-    width:170px;
-  }
+.cover-wrapper{
 
-  /* MOBILE SPECTRUM */
+width:82px;
 
-  .spectrum-wrapper{
-    width:92vw;
+height:82px;
 
-    height:65px;
+}
 
-    bottom:178px;
+.title{
 
-    gap:2px;
-  }
+font-size:15px;
 
-  .spectrum-bar{
-    width:4px;
-  }
+}
+
+.artist{
+
+font-size:12.5px;
+
+}
+
+.play{
+
+width:48px;
+height:48px;
+
+}
+
+.btn{
+
+width:26px;
+height:26px;
+
+}
+
+.top-widgets{
+
+top:10px;
+
+}
+
+.bd-time{
+
+font-size:10px;
+
+padding:4px 9px;
+
+}
+
+.playlist-toggle-btn{
+
+font-size:10px;
+
+padding:4px 9px;
+
+}
+
+.playlist-drawer{
+
+width:170px;
+
+}
+
+
+/* MOBILE SPECTRUM */
+
+.spectrum-box{
+
+width:90%;
+
+height:52px;
+
+padding:7px 9px;
+
+border-radius:22px;
+
+}
+
+.bar{
+
+width:3px;
+
+gap:2px;
+
+}
+
+.spectrum{
+
+gap:2px;
+
+}
+
 }
 
 
@@ -899,1157 +1176,1079 @@ body{
 
 @media(max-width:360px){
 
-  .spectrum-wrapper{
-    bottom:175px;
+.player{
 
-    height:58px;
+padding-left:12px;
+padding-right:12px;
 
-    gap:2px;
-  }
+gap:9px;
 
-  .spectrum-bar{
-    width:3px;
-  }
-
-  .player{
-    width:95%;
-  }
 }
+
+.cover-wrapper{
+
+width:76px;
+height:76px;
+
+}
+
+.title{
+
+font-size:14px;
+
+}
+
+.artist{
+
+font-size:11.5px;
+
+}
+
+.controls{
+
+gap:5px;
+
+}
+
+.spectrum-box{
+
+height:48px;
+
+}
+
+}
+
 </style>
 </head>
+
 
 <body>
 
 
-<!-- =========================
-     BACKGROUND
-========================= -->
+<!-- ================= BACKGROUND ================= -->
 
 <div class="bg"></div>
 
 
-<!-- =========================
-     TOP WIDGETS
-========================= -->
+<!-- ================= TOP ================= -->
 
 <div class="top-widgets">
 
-  <div class="bd-time">
+<div class="bd-time">
 
-    <span>BD</span>
+<span>BD</span>
 
-    <span class="live-dot"></span>
+<span class="live-dot"></span>
 
-    <span id="bdTimeVal">
-      --:--:-- --
-    </span>
-
-  </div>
-
-
-  <button
-    class="playlist-toggle-btn"
-    onclick="toggleDrawer()"
-  >
-
-    <svg viewBox="0 0 24 24">
-
-      <path d="
-      M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
-      "/>
-
-    </svg>
-
-    <span>Playlist</span>
-
-  </button>
+<span id="bdTimeVal">
+--:--:-- --
+</span>
 
 </div>
 
 
-<!-- =========================
-     YOUTUBE PLAYER
-========================= -->
+<button
+class="playlist-toggle-btn"
+onclick="toggleDrawer()"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
+"/>
+
+</svg>
+
+<span>Playlist</span>
+
+</button>
+
+</div>
+
+
+<!-- ================= YOUTUBE ================= -->
 
 <div id="yt"></div>
 
 
-<!-- =========================
-     SPECTRUM
-========================= -->
+<!-- ================= DRAWER ================= -->
 
 <div
-  class="spectrum-wrapper"
-  id="spectrum"
->
-
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-  <div class="spectrum-bar"></div>
-
-</div>
-
-
-<!-- =========================
-     DRAWER OVERLAY
-========================= -->
-
-<div
-  class="drawer-overlay"
-  id="overlay"
-  onclick="toggleDrawer()"
+class="drawer-overlay"
+id="overlay"
+onclick="toggleDrawer()"
 ></div>
 
 
-<!-- =========================
-     PLAYLIST DRAWER
-========================= -->
-
 <div
-  class="playlist-drawer"
-  id="drawer"
+class="playlist-drawer"
+id="drawer"
 >
 
-  <div class="drawer-header">
+<div class="drawer-header">
 
-    <div class="drawer-title">
-      Playlist Songs
-    </div>
+<div class="drawer-title">
+Playlist Songs
+</div>
 
-    <button
-      class="close-btn"
-      onclick="toggleDrawer()"
-    >
-      &times;
-    </button>
-
-  </div>
-
-
-  <div
-    class="song-list"
-    id="songList"
-  >
-
-    <div
-      style="
-      text-align:center;
-      color:rgba(255,255,255,.7);
-      font-size:10px;
-      margin-top:15px;
-      "
-    >
-      Loading...
-    </div>
-
-  </div>
+<button
+class="close-btn"
+onclick="toggleDrawer()"
+>
+&times;
+</button>
 
 </div>
 
 
-<!-- =========================
-     APP / PLAYER
-========================= -->
+<div
+class="song-list"
+id="songList"
+>
+
+<div
+style="
+text-align:center;
+color:rgba(255,255,255,.7);
+font-size:10px;
+margin-top:15px;
+"
+>
+Loading...
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ================= MAIN APP ================= -->
 
 <div class="app">
 
-  <section class="player">
+
+<div class="player-area">
 
 
-    <!-- COVER -->
+<!-- ================= PLAYER ================= -->
 
-    <div class="cover-wrapper">
-
-      <img
-        id="cover"
-        class="cover"
-        src="logo.png"
-        alt="Album art"
-      >
-
-    </div>
+<section class="player">
 
 
-    <!-- SONG INFO -->
+<!-- COVER -->
 
-    <div class="middle">
+<div class="cover-wrapper">
 
-      <div
-        id="title"
-        class="title"
-      >
-        My Playlist
-      </div>
-
-
-      <div
-        id="artist"
-        class="artist"
-      >
-        YouTube Music
-      </div>
-
-
-      <!-- SEEK -->
-
-      <div
-        class="seek"
-        id="seek"
-        onclick="seek(event)"
-      >
-
-        <div
-          class="fill"
-          id="fill"
-        ></div>
-
-      </div>
-
-
-      <!-- TIME -->
-
-      <div class="time-display">
-
-        <span id="current">
-          0:00
-        </span>
-
-        /
-
-        <span id="duration">
-          0:00
-        </span>
-
-      </div>
-
-    </div>
-
-
-    <!-- CONTROLS -->
-
-    <div class="controls">
-
-
-      <!-- PREVIOUS -->
-
-      <button
-        class="btn"
-        onclick="previousSong()"
-        aria-label="Previous"
-      >
-
-        <svg viewBox="0 0 24 24">
-
-          <path d="
-          M6 6h2v12H6zm3.5 6l8.5 6V6z
-          "/>
-
-        </svg>
-
-      </button>
-
-
-      <!-- PLAY -->
-
-      <button
-        class="play"
-        id="play"
-        onclick="togglePlay()"
-        aria-label="Play"
-      >
-
-        <svg
-          id="play-icon"
-          viewBox="0 0 24 24"
-        >
-
-          <path d="
-          M8 5v14l11-7z
-          "/>
-
-        </svg>
-
-      </button>
-
-
-      <!-- NEXT -->
-
-      <button
-        class="btn"
-        onclick="nextSong()"
-        aria-label="Next"
-      >
-
-        <svg viewBox="0 0 24 24">
-
-          <path d="
-          M6 18l8.5-6L6 6v12z
-          M16 6v12h-2V6h2z
-          "/>
-
-        </svg>
-
-      </button>
-
-
-    </div>
-
-  </section>
+<img
+id="cover"
+class="cover"
+src="logo.png"
+alt="Album art"
+>
 
 </div>
 
 
-<!-- =========================
-     YOUTUBE API
-========================= -->
+<!-- SONG INFO -->
+
+<div class="middle">
+
+<div
+id="title"
+class="title"
+>
+My Playlist
+</div>
+
+
+<div
+id="artist"
+class="artist"
+>
+YouTube Music
+</div>
+
+
+<!-- SEEK -->
+
+<div
+class="seek"
+id="seek"
+onclick="seek(event)"
+>
+
+<div
+class="fill"
+id="fill"
+></div>
+
+</div>
+
+
+<!-- TIME -->
+
+<div class="time-display">
+
+<span id="current">
+0:00
+</span>
+
+/
+
+<span id="duration">
+0:00
+</span>
+
+</div>
+
+</div>
+
+
+<!-- CONTROLS -->
+
+<div class="controls">
+
+
+<button
+class="btn"
+onclick="previousSong()"
+aria-label="Previous"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M6 6h2v12H6zm3.5 6l8.5 6V6z
+"/>
+
+</svg>
+
+</button>
+
+
+<button
+class="play"
+id="play"
+onclick="togglePlay()"
+aria-label="Play"
+>
+
+<svg
+id="play-icon"
+viewBox="0 0 24 24"
+>
+
+<path d="
+M8 5v14l11-7z
+"/>
+
+</svg>
+
+</button>
+
+
+<button
+class="btn"
+onclick="nextSong()"
+aria-label="Next"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M6 18l8.5-6L6 6v12z
+M16 6v12h-2V6h2z
+"/>
+
+</svg>
+
+</button>
+
+
+</div>
+
+</section>
+
+
+<!-- ================= PREMIUM SPECTRUM ================= -->
+
+<div
+class="spectrum-box"
+>
+
+<div
+class="spectrum"
+id="spectrum"
+>
+
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<!-- ================= YOUTUBE API ================= -->
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
 
 <script>
 
-/* =========================
-   PLAYLIST
-========================= */
 
-const PLAYLIST_ID = "PLbvY05KVYwoo";
+/* ================= PLAYLIST ================= */
 
-let player = null;
+const PLAYLIST_ID="PLbvY05KVYwoo";
 
-let playing = false;
+let player=null;
 
-let playlistItems = [];
+let playing=false;
+
+let playlistItems=[];
 
 
-/* =========================
-   BD TIME
-========================= */
+/* ================= BD TIME ================= */
 
 function updateBDTime(){
 
-  const options = {
+const options={
 
-    timeZone:"Asia/Dhaka",
+timeZone:"Asia/Dhaka",
 
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit",
+hour:"2-digit",
 
-    hour12:true
+minute:"2-digit",
 
-  };
+second:"2-digit",
 
-  const timeString =
-    new Intl.DateTimeFormat(
-      "en-US",
-      options
-    ).format(new Date());
+hour12:true
 
+};
 
-  document.getElementById(
-    "bdTimeVal"
-  ).textContent = timeString;
+const timeString=
+new Intl.DateTimeFormat(
+"en-US",
+options
+).format(new Date());
+
+document.getElementById(
+"bdTimeVal"
+).textContent=timeString;
 
 }
-
 
 updateBDTime();
 
 setInterval(
-  updateBDTime,
-  1000
+updateBDTime,
+1000
 );
 
 
-/* =========================
-   YOUTUBE API READY
-========================= */
+/* ================= YOUTUBE API ================= */
 
 function onYouTubeIframeAPIReady(){
 
-  player = new YT.Player(
-    "yt",
-    {
+player=new YT.Player(
+"yt",
+{
 
-      width:"2",
-      height:"2",
+width:"2",
 
-      playerVars:{
+height:"2",
 
-        autoplay:0,
+playerVars:{
 
-        controls:0,
+autoplay:0,
 
-        disablekb:1,
+controls:0,
 
-        fs:0,
+disablekb:1,
 
-        modestbranding:1,
+fs:0,
 
-        playsinline:1,
+modestbranding:1,
 
-        rel:0,
+playsinline:1,
 
-        listType:"playlist",
+rel:0,
 
-        list:PLAYLIST_ID
+listType:"playlist",
 
-      },
+list:PLAYLIST_ID
 
-      events:{
+},
 
-        onReady:ready,
+events:{
 
-        onStateChange:state
+onReady:ready,
 
-      }
+onStateChange:state
 
-    }
-  );
+}
+
+});
 
 }
 
 
-/* =========================
-   READY
-========================= */
+/* ================= READY ================= */
 
 function ready(){
 
-  updateInfo();
+updateInfo();
 
-  loadPlaylistItems();
+loadPlaylistItems();
 
-  setInterval(
-    updateProgress,
-    250
-  );
+setInterval(
+updateProgress,
+250
+);
 
 }
 
 
-/* =========================
-   PLAYER STATE
-========================= */
+/* ================= PLAYER STATE ================= */
 
 function state(e){
 
-  const cover =
-    document.getElementById("cover");
+const cover=
+document.getElementById(
+"cover"
+);
 
-  const playBtn =
-    document.getElementById("play");
+const playBtn=
+document.getElementById(
+"play"
+);
 
-  const playIcon =
-    document.getElementById("play-icon");
+const playIcon=
+document.getElementById(
+"play-icon"
+);
 
-  const spectrum =
-    document.getElementById("spectrum");
-
-
-  /* PLAYING */
-
-  if(
-    e.data ===
-    YT.PlayerState.PLAYING
-  ){
-
-    playing = true;
+const spectrum=
+document.getElementById(
+"spectrum"
+);
 
 
-    playBtn.classList.add(
-      "playing"
-    );
+if(
+e.data===YT.PlayerState.PLAYING
+){
 
+playing=true;
 
-    playIcon.innerHTML =
-      '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' ;
+playBtn.classList.add(
+"playing"
+);
 
+playIcon.innerHTML=
+'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-    cover.classList.add(
-      "spinning"
-    );
+cover.classList.add(
+"spinning"
+);
 
+spectrum.classList.add(
+"active"
+);
 
-    spectrum.classList.add(
-      "playing"
-    );
+updateInfo();
 
-
-    updateInfo();
-
-    highlightActiveTrack();
-
-  }
-
-
-  /* PAUSED / ENDED */
-
-  else if(
-
-    e.data ===
-    YT.PlayerState.PAUSED
-
-    ||
-
-    e.data ===
-    YT.PlayerState.ENDED
-
-  ){
-
-    playing = false;
-
-
-    playBtn.classList.remove(
-      "playing"
-    );
-
-
-    playIcon.innerHTML =
-      '<path d="M8 5v14l11-7z"/>' ;
-
-
-    cover.classList.remove(
-      "spinning"
-    );
-
-
-    spectrum.classList.remove(
-      "playing"
-    );
-
-  }
-
-
-  /* CUED */
-
-  else if(
-
-    e.data ===
-    YT.PlayerState.CUED
-
-    ||
-
-    e.data === -1
-
-  ){
-
-    updateInfo();
-
-  }
+highlightActiveTrack();
 
 }
 
 
-/* =========================
-   PLAY / PAUSE
-========================= */
+else if(
+
+e.data===YT.PlayerState.PAUSED
+
+||
+
+e.data===YT.PlayerState.ENDED
+
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
+spectrum.classList.remove(
+"active"
+);
+
+}
+
+
+else if(
+
+e.data===YT.PlayerState.CUED
+
+||
+
+e.data===-1
+
+){
+
+updateInfo();
+
+}
+
+}
+
+
+/* ================= PLAY / PAUSE ================= */
 
 function togglePlay(){
 
-  if(!player)return;
+if(!player)return;
 
+if(playing){
 
-  if(playing){
+player.pauseVideo();
 
-    player.pauseVideo();
+}
 
-  }else{
+else{
 
-    player.playVideo();
+player.playVideo();
 
-  }
+}
 
 }
 
 
-/* =========================
-   NEXT
-========================= */
+/* ================= NEXT ================= */
 
 function nextSong(){
 
-  if(!player)return;
+if(!player)return;
 
-  player.nextVideo();
+player.nextVideo();
 
 }
 
 
-/* =========================
-   PREVIOUS
-========================= */
+/* ================= PREVIOUS ================= */
 
 function previousSong(){
 
-  if(!player)return;
+if(!player)return;
 
-  player.previousVideo();
+player.previousVideo();
 
 }
 
 
-/* =========================
-   DRAWER
-========================= */
+/* ================= DRAWER ================= */
 
 function toggleDrawer(){
 
-  const drawer =
-    document.getElementById(
-      "drawer"
-    );
+const drawer=
+document.getElementById(
+"drawer"
+);
 
-  const overlay =
-    document.getElementById(
-      "overlay"
-    );
+const overlay=
+document.getElementById(
+"overlay"
+);
 
 
-  if(
-    drawer.classList.contains(
-      "open"
-    )
-  ){
+if(
+drawer.classList.contains(
+"open"
+)
+){
 
-    drawer.classList.remove(
-      "open"
-    );
+drawer.classList.remove(
+"open"
+);
 
-    overlay.classList.remove(
-      "active"
-    );
+overlay.classList.remove(
+"active"
+);
 
-  }else{
+}
 
-    drawer.classList.add(
-      "open"
-    );
+else{
 
-    overlay.classList.add(
-      "active"
-    );
+drawer.classList.add(
+"open"
+);
 
-  }
+overlay.classList.add(
+"active"
+);
+
+}
 
 }
 
 
-/* =========================
-   LOAD PLAYLIST
-========================= */
+/* ================= LOAD PLAYLIST ================= */
 
 function loadPlaylistItems(){
 
-  if(
-    !player ||
-    typeof player.getPlaylist !==
-    "function"
-  ) return;
+if(
+
+!player ||
+
+typeof player.getPlaylist !==
+"function"
+
+)return;
 
 
-  playlistItems =
-    player.getPlaylist();
+playlistItems=
+player.getPlaylist();
+
+const listContainer=
+document.getElementById(
+"songList"
+);
 
 
-  const listContainer =
-    document.getElementById(
-      "songList"
-    );
+if(
+!playlistItems ||
+playlistItems.length===0
+){
 
+listContainer.innerHTML=
+`
+<div style="
+text-align:center;
+color:rgba(255,255,255,.7);
+font-size:10px;
+margin-top:15px;
+">
+No tracks found
+</div>
+`;
 
-  if(
-    !playlistItems ||
-    playlistItems.length === 0
-  ){
-
-    listContainer.innerHTML =
-      `
-      <div
-        style="
-        text-align:center;
-        color:rgba(255,255,255,.7);
-        font-size:10px;
-        margin-top:15px;
-        "
-      >
-        No tracks found
-      </div>
-      `;
-
-    return;
-
-  }
-
-
-  listContainer.innerHTML = "";
-
-
-  playlistItems.forEach(
-    (id,index)=>{
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-
-      item.className =
-        "song-item";
-
-
-      item.id =
-        `track-${index}`;
-
-
-      item.onclick = () =>
-        playSpecificTrack(index);
-
-
-      item.innerHTML = `
-
-        <img
-          src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
-          alt="thumb"
-        >
-
-        <div class="song-item-info">
-
-          <div
-            class="song-item-title"
-            id="title-${index}"
-          >
-            Track #${index + 1}
-          </div>
-
-          <div
-            class="song-item-artist"
-            id="artist-${index}"
-          >
-            YouTube Music
-          </div>
-
-        </div>
-
-      `;
-
-
-      listContainer.appendChild(
-        item
-      );
-
-
-      fetchSongDetails(
-        id,
-        index
-      );
-
-    }
-  );
-
-
-  highlightActiveTrack();
+return;
 
 }
 
 
-/* =========================
-   SONG DETAILS
-========================= */
+listContainer.innerHTML="";
+
+
+playlistItems.forEach(
+(id,index)=>{
+
+const item=
+document.createElement(
+"div"
+);
+
+item.className=
+"song-item";
+
+item.id=
+`track-${index}`;
+
+item.onclick=()=>{
+playSpecificTrack(index);
+};
+
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
+alt="thumb"
+>
+
+<div class="song-item-info">
+
+<div
+class="song-item-title"
+id="title-${index}"
+>
+Track #${index+1}
+</div>
+
+<div
+class="song-item-artist"
+id="artist-${index}"
+>
+YouTube Music
+</div>
+
+</div>
+
+`;
+
+
+listContainer.appendChild(
+item
+);
+
+fetchSongDetails(
+id,
+index
+);
+
+});
+
+
+highlightActiveTrack();
+
+}
+
+
+/* ================= SONG DETAILS ================= */
 
 function fetchSongDetails(
-  id,
-  index
+id,
+index
 ){
 
-  fetch(
-    `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
-  )
+fetch(
+`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
+)
 
-  .then(
-    res => res.json()
-  )
+.then(
+res=>res.json()
+)
 
-  .then(
-    data => {
+.then(
+data=>{
 
-      if(
-        data &&
-        data.title
-      ){
+if(
+data &&
+data.title
+){
 
-        const titleEl =
-          document.getElementById(
-            `title-${index}`
-          );
+const titleEl=
+document.getElementById(
+`title-${index}`
+);
 
-
-        const artistEl =
-          document.getElementById(
-            `artist-${index}`
-          );
-
-
-        if(titleEl){
-
-          titleEl.textContent =
-            data.title;
-
-        }
+const artistEl=
+document.getElementById(
+`artist-${index}`
+);
 
 
-        if(
-          artistEl &&
-          data.author_name
-        ){
+if(titleEl){
 
-          artistEl.textContent =
-            data.author_name;
-
-        }
-
-      }
-
-    }
-  )
-
-  .catch(
-    ()=>{}
-  );
+titleEl.textContent=
+data.title;
 
 }
 
 
-/* =========================
-   PLAY SPECIFIC
-========================= */
+if(
+artistEl &&
+data.author_name
+){
+
+artistEl.textContent=
+data.author_name;
+
+}
+
+}
+
+})
+
+.catch(
+()=>{}
+);
+
+}
+
+
+/* ================= PLAY SPECIFIC ================= */
 
 function playSpecificTrack(
-  index
+index
 ){
 
-  if(!player)return;
+if(!player)return;
 
+player.playVideoAt(
+index
+);
 
-  player.playVideoAt(
-    index
-  );
-
-
-  toggleDrawer();
+toggleDrawer();
 
 }
 
 
-/* =========================
-   ACTIVE TRACK
-========================= */
+/* ================= ACTIVE TRACK ================= */
 
 function highlightActiveTrack(){
 
-  if(
-    !player ||
-    typeof player.getPlaylistIndex !==
-    "function"
-  ) return;
+if(
+
+!player ||
+
+typeof player.getPlaylistIndex !==
+"function"
+
+)return;
 
 
-  const currentIndex =
-    player.getPlaylistIndex();
+const currentIndex=
+player.getPlaylistIndex();
+
+const items=
+document.querySelectorAll(
+".song-item"
+);
 
 
-  const items =
-    document.querySelectorAll(
-      ".song-item"
-    );
+items.forEach(
+(item,index)=>{
 
+if(
+index===currentIndex
+){
 
-  items.forEach(
-    (item,index)=>{
+item.classList.add(
+"active"
+);
 
-      if(
-        index === currentIndex
-      ){
+}
 
-        item.classList.add(
-          "active"
-        );
+else{
 
-      }else{
+item.classList.remove(
+"active"
+);
 
-        item.classList.remove(
-          "active"
-        );
+}
 
-      }
-
-    }
-  );
+});
 
 }
 
 
-/* =========================
-   SONG INFO
-========================= */
+/* ================= SONG INFO ================= */
 
 function updateInfo(){
 
-  if(
-    !player ||
-    typeof player.getVideoData !==
-    "function"
-  ) return;
+if(
+
+!player ||
+
+typeof player.getVideoData !==
+"function"
+
+)return;
 
 
-  try{
+try{
 
-    const d =
-      player.getVideoData();
-
-
-    if(
-      !d ||
-      !d.video_id
-    ) return;
+const d=
+player.getVideoData();
 
 
-    document.getElementById(
-      "cover"
-    ).src =
-      "https://i.ytimg.com/vi/"
-      +
-      d.video_id
-      +
-      "/hqdefault.jpg";
+if(
+!d ||
+!d.video_id
+)return;
 
 
-    if(
-      d.title &&
-      d.title !== ""
-    ){
-
-      document.getElementById(
-        "title"
-      ).textContent =
-        d.title;
-
-    }
+document.getElementById(
+"cover"
+).src=
+"https://i.ytimg.com/vi/"
++d.video_id+
+"/hqdefault.jpg";
 
 
-    if(
-      d.author &&
-      d.author !== ""
-    ){
+if(
+d.title &&
+d.title!==""
+){
 
-      document.getElementById(
-        "artist"
-      ).textContent =
-        d.author;
-
-    }
-
-  }
-
-  catch(e){}
+document.getElementById(
+"title"
+).textContent=
+d.title;
 
 }
 
 
-/* =========================
-   PROGRESS
-========================= */
+if(
+d.author &&
+d.author!==""
+){
+
+document.getElementById(
+"artist"
+).textContent=
+d.author;
+
+}
+
+}
+
+catch(e){}
+
+}
+
+
+/* ================= PROGRESS ================= */
 
 function updateProgress(){
 
-  if(
-    !player ||
-    typeof player.getCurrentTime !==
-    "function"
-  ) return;
+if(
+
+!player ||
+
+typeof player.getCurrentTime !==
+"function"
+
+)return;
 
 
-  try{
+try{
 
-    const c =
-      player.getCurrentTime();
+const c=
+player.getCurrentTime();
 
-
-    const d =
-      player.getDuration();
-
-
-    if(!d)return;
+const d=
+player.getDuration();
 
 
-    document.getElementById(
-      "fill"
-    ).style.width =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          (c/d)*100
-        )
-      )
-      +
-      "%";
+if(!d)return;
 
 
-    document.getElementById(
-      "current"
-    ).textContent =
-      format(c);
+document.getElementById(
+"fill"
+).style.width=
+
+Math.max(
+0,
+Math.min(
+100,
+(c/d)*100
+)
+)+"%";
 
 
-    document.getElementById(
-      "duration"
-    ).textContent =
-      format(d);
+document.getElementById(
+"current"
+).textContent=
+format(c);
 
 
-    if(playing){
+document.getElementById(
+"duration"
+).textContent=
+format(d);
 
-      updateInfo();
 
-    }
+if(playing){
 
-  }
+updateInfo();
 
-  catch(e){}
+}
+
+}
+
+catch(e){}
 
 }
 
 
-/* =========================
-   SEEK
-========================= */
+/* ================= SEEK ================= */
 
 function seek(e){
 
-  if(
-    !player ||
-    typeof player.getDuration !==
-    "function"
-  ) return;
+if(
+
+!player ||
+
+typeof player.getDuration !==
+"function"
+
+)return;
 
 
-  const r =
-    document
-      .getElementById("seek")
-      .getBoundingClientRect();
+const r=
+document.getElementById(
+"seek"
+).getBoundingClientRect();
 
 
-  const p =
-    Math.max(
-      0,
-      Math.min(
-        1,
-        (e.clientX-r.left)/r.width
-      )
-    );
+const p=
+Math.max(
+0,
+Math.min(
+1,
+(e.clientX-r.left)/r.width
+)
+);
 
 
-  player.seekTo(
-    p *
-    player.getDuration(),
-    true
-  );
+player.seekTo(
+p*player.getDuration(),
+true
+);
 
 }
 
 
-/* =========================
-   FORMAT TIME
-========================= */
+/* ================= FORMAT ================= */
 
 function format(s){
 
-  if(
-    !s ||
-    isNaN(s)
-  ){
-
-    return "0:00";
-
-  }
+if(
+!s ||
+isNaN(s)
+)return "0:00";
 
 
-  s =
-    Math.floor(s);
+s=Math.floor(s);
 
 
-  return (
-    Math.floor(s/60)
-    +
-    ":"
-    +
-    String(
-      s%60
-    ).padStart(
-      2,
-      "0"
-    )
-  );
+return
+Math.floor(s/60)
++
+":"+
+String(
+s%60
+).padStart(
+2,
+"0"
+);
 
 }
 
