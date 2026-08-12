@@ -195,6 +195,8 @@ backdrop-filter:blur(30px) saturate(140%);
 display:flex;
 align-items:center;
 gap:14px;
+
+touch-action: pan-y; /* Smooth vertical ignore, horizontal swipe optimization */
 }
 
 
@@ -678,7 +680,7 @@ width:170px;
 
 <div class="app">
 
-<section class="player">
+<section class="player" id="playerCard">
 
 <!-- THUMBNAIL -->
 <div class="cover-wrapper">
@@ -821,7 +823,6 @@ function nextSong(){
   let currentIdx = (typeof player.getPlaylistIndex === 'function') ? player.getPlaylistIndex() : 0;
   let nextIdx = (currentIdx + 1) % playlistItems.length;
   
-  // Instant UI Force Update
   forceUpdateUI(nextIdx);
   player.nextVideo();
 }
@@ -831,7 +832,6 @@ function previousSong(){
   let currentIdx = (typeof player.getPlaylistIndex === 'function') ? player.getPlaylistIndex() : 0;
   let prevIdx = (currentIdx - 1 + playlistItems.length) % playlistItems.length;
   
-  // Instant UI Force Update
   forceUpdateUI(prevIdx);
   player.previousVideo();
 }
@@ -840,10 +840,8 @@ function forceUpdateUI(index){
   if(!playlistItems[index]) return;
   const videoId = playlistItems[index];
   
-  // Instant Thumbnail
   document.getElementById("cover").src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   
-  // Instant Title & Artist from list elements if available
   const titleEl = document.getElementById(`title-${index}`);
   const artistEl = document.getElementById(`artist-${index}`);
   
@@ -852,6 +850,33 @@ function forceUpdateUI(index){
   }
   if(artistEl) {
     document.getElementById("artist").textContent = artistEl.textContent;
+  }
+}
+
+
+/* TOUCH / SWIPE GESTURE SUPPORT FOR PLAYER CARD */
+let touchStartX = 0;
+let touchEndX = 0;
+const playerCard = document.getElementById("playerCard");
+
+playerCard.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+playerCard.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, {passive: true});
+
+function handleSwipe() {
+  const swipeThreshold = 50; // Minimum distance for swipe
+  if (touchEndX < touchStartX - swipeThreshold) {
+    // Swiped Left -> Next Song
+    nextSong();
+  }
+  if (touchEndX > touchStartX + swipeThreshold) {
+    // Swiped Right -> Previous Song
+    previousSong();
   }
 }
 
@@ -916,7 +941,6 @@ function fetchSongDetails(id, index){
         if(titleEl) titleEl.textContent = data.title;
         if(artistEl && data.author_name) artistEl.textContent = data.author_name;
         
-        // If this is the currently playing track, update main player info too
         if(player && typeof player.getPlaylistIndex === 'function' && player.getPlaylistIndex() === index) {
           document.getElementById("title").textContent = data.title;
           if(data.author_name) document.getElementById("artist").textContent = data.author_name;
