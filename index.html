@@ -787,13 +787,14 @@ function state(e){
   const playBtn=document.getElementById("play");
   const playIcon=document.getElementById("play-icon");
 
+  updateInfo();
+  highlightActiveTrack();
+
   if(e.data===YT.PlayerState.PLAYING){
     playing=true;
     playBtn.classList.add("playing");
     playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
     cover.classList.add("spinning");
-    updateInfo();
-    highlightActiveTrack();
   }
   else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
     playing=false;
@@ -802,7 +803,7 @@ function state(e){
     cover.classList.remove("spinning");
   }
   else if(e.data===YT.PlayerState.CUED || e.data===-1){
-    updateInfo();
+    setTimeout(updateInfo, 300);
   }
 }
 
@@ -822,11 +823,13 @@ function togglePlay(){
 function nextSong(){
   if(!player)return;
   player.nextVideo();
+  setTimeout(updateInfo, 400);
 }
 
 function previousSong(){
   if(!player)return;
   player.previousVideo();
+  setTimeout(updateInfo, 400);
 }
 
 
@@ -897,6 +900,7 @@ function playSpecificTrack(index){
   if(!player) return;
   player.playVideoAt(index);
   toggleDrawer();
+  setTimeout(updateInfo, 400);
 }
 
 function highlightActiveTrack(){
@@ -919,15 +923,25 @@ function highlightActiveTrack(){
 function updateInfo(){
   if(!player || typeof player.getVideoData !== 'function')return;
   try{
-    const d=player.getVideoData();
+    const d = player.getVideoData();
     if(!d || !d.video_id)return;
     
-    document.getElementById("cover").src="https://i.ytimg.com/vi/"+d.video_id+"/hqdefault.jpg";
+    document.getElementById("cover").src = "https://i.ytimg.com/vi/" + d.video_id + "/hqdefault.jpg";
+    
     if(d.title && d.title !== "") {
-      document.getElementById("title").textContent=d.title;
+      document.getElementById("title").textContent = d.title;
+    } else {
+      const currentIdx = player.getPlaylistIndex();
+      const fallbackTitleEl = document.getElementById(`title-${currentIdx}`);
+      if(fallbackTitleEl) {
+        document.getElementById("title").textContent = fallbackTitleEl.textContent;
+      }
     }
+
     if(d.author && d.author !== "") {
-      document.getElementById("artist").textContent=d.author;
+      document.getElementById("artist").textContent = d.author;
+    } else {
+      document.getElementById("artist").textContent = "YouTube Music";
     }
   }catch(e){}
 }
@@ -941,7 +955,6 @@ function updateProgress(){
     document.getElementById("fill").style.width=Math.max(0,Math.min(100,(c/d)*100))+"%";
     document.getElementById("current").textContent=format(c);
     document.getElementById("duration").textContent=format(d);
-    if(playing) updateInfo();
   }catch(e){}
 }
 
