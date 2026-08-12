@@ -196,7 +196,7 @@ display:flex;
 align-items:center;
 gap:14px;
 
-touch-action: pan-y; /* Smooth vertical ignore, horizontal swipe optimization */
+touch-action: pan-y;
 }
 
 
@@ -311,15 +311,23 @@ margin-bottom:8px;
 position:relative;
 
 width:100%;
-height:4px;
+height:16px; /* Increased touch area for smooth scrubbing */
 
-border-radius:10px;
-
-background:rgba(255,255,255,.2);
+display:flex;
+align-items:center;
 
 cursor:pointer;
 
-margin-bottom:6px;
+margin-bottom:2px;
+}
+
+.seek-track{
+position:relative;
+width:100%;
+height:4px;
+background:rgba(255,255,255,.2);
+border-radius:10px;
+overflow:visible;
 }
 
 .fill{
@@ -334,6 +342,20 @@ width:0;
 background:#fff;
 
 border-radius:10px;
+}
+
+/* Seek knob/handle for youtube feel */
+.fill::after {
+content:'';
+position:absolute;
+right:-5px;
+top:50%;
+transform:translateY(-50%);
+width:10px;
+height:10px;
+background:#fff;
+border-radius:50%;
+box-shadow:0 0 4px rgba(0,0,0,0.5);
 }
 
 .time-display{
@@ -503,7 +525,7 @@ flex:1;
 overflow-y:auto;
 display:flex;
 flex-direction:column;
-gap:4px; /* OPTIMIZED CARD SPACING */
+gap:4px;
 padding-right:2px;
 }
 
@@ -522,7 +544,7 @@ border-radius:3px;
 display:flex;
 align-items:center;
 gap:6px;
-padding:4px 5px; /* COMPACT PADDING FOR CLEANER LOOK */
+padding:4px 5px;
 border-radius:7px;
 
 background:rgba(255, 255, 255, 0.08);
@@ -555,7 +577,6 @@ flex:1;
 min-width:0;
 }
 
-/* BOLDER TITLE & SOFT SECONDARY TEXT */
 .song-item-title{
 font-size:9.5px;
 font-weight:700;
@@ -692,9 +713,11 @@ width:170px;
   <div id="title" class="title">My Playlist</div>
   <div id="artist" class="artist">YouTube Music</div>
 
-  <!-- SEEK BAR -->
-  <div class="seek" id="seek" onclick="seek(event)">
-    <div class="fill" id="fill"></div>
+  <!-- SEEK BAR WITH DRAG & TAP SUPPORT -->
+  <div class="seek" id="seek">
+    <div class="seek-track" id="seekTrack">
+      <div class="fill" id="fill"></div>
+    </div>
   </div>
 
   <!-- TIME -->
@@ -732,6 +755,7 @@ const PLAYLIST_ID="PLbvY05KVYwoo";
 let player=null;
 let playing=false;
 let playlistItems = [];
+let isSeeking = false;
 
 
 /* BANGLADESH LIVE TIME */
@@ -817,7 +841,7 @@ function togglePlay(){
 }
 
 
-/* NEXT & PREVIOUS - INSTANT UI UPDATE */
+/* NEXT & PREVIOUS */
 function nextSong(){
   if(!player || playlistItems.length === 0)return;
   let currentIdx = (typeof player.getPlaylistIndex === 'function') ? player.getPlaylistIndex() : 0;
@@ -854,31 +878,51 @@ function forceUpdateUI(index){
 }
 
 
-/* TOUCH / SWIPE GESTURE SUPPORT FOR PLAYER CARD */
-let touchStartX = 0;
-let touchEndX = 0;
-const playerCard = document.getElementById("playerCard");
+/* SMOOTH SEEK BAR SCRUBBING (TOUCH & MOUSE DRAG) */
+const seekContainer = document.getElementById("seek");
 
-playerCard.addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-}, {passive: true});
-
-playerCard.addEventListener('touchend', e => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-}, {passive: true});
-
-function handleSwipe() {
-  const swipeThreshold = 50; // Minimum distance for swipe
-  if (touchEndX < touchStartX - swipeThreshold) {
-    // Swiped Left -> Next Song
-    nextSong();
-  }
-  if (touchEndX > touchStartX + swipeThreshold) {
-    // Swiped Right -> Previous Song
-    previousSong();
-  }
+function getSeekPosition(e) {
+  const rect = seekContainer.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const position = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  return position;
 }
+
+function handleSeekStart(e) {
+  isSeeking = true;
+  updateSeekVisual(e);
+}
+
+function handleSeekMove(e) {
+  if (!isSeeking) return;
+  updateSeekVisual(e);
+}
+
+function handleSeekEnd(e) {
+  if (!isSeeking) return;
+  isSeeking = false;
+  if (!player || typeof player.getDuration !== 'function') return;
+  const pos = getSeekPosition(e.changedTouches ? e.changedTouches[0] : e);
+  player.seekTo(pos * player.getDuration(), true);
+}
+
+function updateSeekVisual(e) {
+  if (!player || typeof player.getDuration !== 'function') return;
+  const rect = seekContainer.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  
+  document.getElementById("fill").style.width = (pos * 100) + "%";
+  document.getElementById("current").textContent = format(pos * player.getDuration());
+}
+
+seekContainer.addEventListener('mousedown', handleSeekStart);
+window.addEventListener('mousemove', handleSeekMove);
+window.addEventListener('mouseup', handleSeekEnd);
+
+seekContainer.addEventListener('touchstart', handleSeekStart, {passive: true});
+window.addEventListener('touchmove', handleSeekMove, {passive: true});
+window.addEventListener('touchend', handleSeekEnd, {passive: true});
 
 
 /* DRAWER & PLAYLIST FUNCTIONS */
@@ -991,6 +1035,7 @@ function updateInfo(){
 }
 
 function updateProgress(){
+  if(isSeeking) return; // Don't overwrite while user is dragging
   if(!player || typeof player.getCurrentTime !== 'function')return;
   try{
     const c=player.getCurrentTime();
@@ -1000,13 +1045,6 @@ function updateProgress(){
     document.getElementById("current").textContent=format(c);
     document.getElementById("duration").textContent=format(d);
   }catch(e){}
-}
-
-function seek(e){
-  if(!player || typeof player.getDuration !== 'function')return;
-  const r=document.getElementById("seek").getBoundingClientRect();
-  const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-  player.seekTo(p*player.getDuration(),true);
 }
 
 function format(s){
