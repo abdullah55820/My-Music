@@ -25,23 +25,24 @@
 <style>
 *{box-sizing:border-box}
 
-html, body {
+html {
+  background: #000 !important; /* স্ক্রিনের চারপাশের সাদা গ্যাপ বন্ধ রাখবে */
+}
+
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  background: #000 !important; /* নিচে সাদা গ্যাপ পুরোপুরি বন্ধ করবে */
+  background: transparent !important; /* ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট রাখা হয়েছে যেন ভিডিও ঢেকে না যায় */
   overflow: hidden;
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-}
-
-body {
   position: relative;
   overflow-x: hidden !important;
 }
 
-/* BACKGROUND VIDEO / IMAGE COVER ALL THE WAY TO TOP & BOTTOM */
+/* BACKGROUND VIDEO COVER */
 .bg {
   position: fixed;
   top: 0;
@@ -50,7 +51,7 @@ body {
   height: 100dvh;
   min-height: 100%;
   object-fit: cover;
-  z-index: -1;
+  z-index: 1; /* z-index বাড়িয়ে দেওয়া হয়েছে যেন ভিডিও ঢাকা না পড়ে */
   pointer-events: none;
   filter: brightness(0.85);
 }
@@ -554,8 +555,8 @@ body {
 </head>
 <body>
 
-<!-- BACKGROUND VIDEO / IMAGE -->
-<video autoplay loop muted playsinline class="bg">
+<!-- BACKGROUND VIDEO WITH IOS AUTOPLAY ATTRIBUTES -->
+<video autoplay loop muted playsinline webkit-playsinline preload="auto" class="bg" id="bgVideo">
   <source src="bg-video.mp4" type="video/mp4">
 </video>
 
@@ -645,6 +646,32 @@ function updateBDTime(){
 
 updateBDTime();
 setInterval(updateBDTime, 1000);
+
+/* IOS BACKGROUND VIDEO FIX & RECOVERY */
+document.addEventListener('DOMContentLoaded', () => {
+  const bgVid = document.getElementById('bgVideo');
+  if (bgVid) {
+    bgVid.play().catch(() => {
+      document.addEventListener('touchstart', () => bgVid.play(), { once: true });
+    });
+
+    bgVid.addEventListener('ended', () => {
+      bgVid.currentTime = 0;
+      bgVid.play().catch(() => {});
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && bgVid.paused) {
+        bgVid.play().catch(() => {});
+      }
+    });
+
+    bgVid.addEventListener('stalled', () => {
+      bgVid.load();
+      bgVid.play().catch(() => {});
+    });
+  }
+});
 
 /* YOUTUBE API */
 function onYouTubeIframeAPIReady(){
