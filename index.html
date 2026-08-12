@@ -5,7 +5,7 @@
 
 <!-- iOS Web App & Fullscreen Meta Tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Music Player">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
@@ -50,7 +50,7 @@ height:100%;
 object-fit:cover;
 z-index:0;
 pointer-events:none;
-filter: brightness(0.7);
+filter: brightness(0.75);
 }
 
 
@@ -58,7 +58,7 @@ filter: brightness(0.7);
 
 .top-widgets{
 position:fixed;
-top: calc(14px + env(safe-area-inset-top)); /* নচ ও নচ-লেস আইফোনের সেফ এরিয়া */
+top: calc(14px + env(safe-area-inset-top));
 left:50%;
 transform:translateX(-50%);
 z-index:10;
@@ -75,16 +75,16 @@ gap:8px;
 padding:5px 11px;
 border-radius:20px;
 
-background:rgba(0,0,0,.45);
-border:1px solid rgba(255,255,255,.18);
+background:rgba(0,0,0,.6);
+border:1px solid rgba(255,255,255,.2);
 
-color:rgba(255,255,255,.9);
+color:rgba(255,255,255,.95);
 font-size:11px;
 font-weight:600;
 letter-spacing:.3px;
 
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+backdrop-filter:none !important;
+-webkit-backdrop-filter:none !important;
 
 display:flex;
 align-items:center;
@@ -115,15 +115,15 @@ animation:pulse 1.5s infinite;
 padding:5px 12px;
 border-radius:20px;
 
-background:rgba(0,0,0,.45);
-border:1px solid rgba(255,255,255,.18);
+background:rgba(0,0,0,.6);
+border:1px solid rgba(255,255,255,.2);
 
-color:rgba(255,255,255,.9);
+color:rgba(255,255,255,.95);
 font-size:11px;
 font-weight:600;
 
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+backdrop-filter:none !important;
+-webkit-backdrop-filter:none !important;
 
 display:flex;
 align-items:center;
@@ -156,7 +156,7 @@ pointer-events:none;
 }
 
 
-/* APP */
+/* APP CONTAINER */
 
 .app{
 position:relative;
@@ -169,7 +169,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 16px calc(65px + env(safe-area-inset-bottom));
+padding:0 16px calc(25px + env(safe-area-inset-bottom));
 }
 
 
@@ -184,7 +184,7 @@ padding:14px 18px;
 border:1px solid rgba(255,255,255,.18);
 border-radius:60px;
 
-background:rgba(55, 30, 25, 0.8);
+background:rgba(55, 30, 25, 0.85);
 
 box-shadow:0 20px 50px rgba(0,0,0,.6);
 
@@ -656,7 +656,7 @@ margin-top:0.5px;
 @media(max-width:480px){
 
 .app{
-padding-bottom:calc(60px + env(safe-area-inset-bottom));
+padding-bottom:calc(25px + env(safe-area-inset-bottom));
 }
 
 .player{
@@ -894,7 +894,7 @@ function resetVolTimer() {
   if (volTimer) clearTimeout(volTimer);
   volTimer = setTimeout(() => {
     document.getElementById("volWrapper").classList.remove("active");
-  }, 3000); // 3 Seconds
+  }, 3000);
 }
 
 function toggleVolume(){
@@ -916,7 +916,6 @@ function changeVolume(val){
   resetVolTimer();
 }
 
-// Close volume slider when touching outside
 document.addEventListener('click', (e) => {
   const container = document.querySelector('.vol-container');
   if(container && !container.contains(e.target)){
@@ -1119,7 +1118,6 @@ function handleSeek(e) {
   }
 }
 
-// Mouse Events
 seekElement.addEventListener('mousedown', (e) => {
   isDragging = true;
   handleSeek(e);
@@ -1140,7 +1138,6 @@ window.addEventListener('mouseup', (e) => {
   }
 });
 
-// Touch Events
 seekElement.addEventListener('touchstart', (e) => {
   isDragging = true;
   handleSeek(e);
