@@ -1,3 +1,13 @@
+// FORCE PLAY BACKGROUND VIDEO FOR IOS SAFARI
+document.addEventListener('DOMContentLoaded', () => {
+  const bgVid = document.getElementById('bgVideo');
+  if (bgVid) {
+    bgVid.play().catch(() => {
+      // iOS Autoplay ব্লক করলে প্রথম টাচেই প্লে হয়ে যাবে
+      document.addEventListener('touchstart', () => bgVid.play(), { once: true });
+    });
+  }
+});
 <!DOCTYPE html>
 <html lang="en">
 <head>
