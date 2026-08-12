@@ -174,10 +174,10 @@ padding:0 16px 65px;
 }
 
 
-/* PLAYER */
+/* PLAYER MAIN CARD */
 
 .player{
-width:min(400px, 92%);
+width:min(420px, 94%);
 height:120px;
 
 padding:16px 20px;
@@ -197,6 +197,7 @@ align-items:center;
 gap:14px;
 
 touch-action: pan-y;
+position:relative;
 }
 
 
@@ -269,7 +270,7 @@ to{transform:rotate(360deg);}
 }
 
 
-/* SONG INFO */
+/* SONG INFO (EXPANDED AREA) */
 
 .middle{
 flex:1;
@@ -281,7 +282,7 @@ justify-content:center;
 }
 
 .title{
-font-size:16px;
+font-size:18px; /* LARGER SONG TITLE */
 font-weight:700;
 
 white-space:nowrap;
@@ -289,6 +290,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 color:#ffffff;
+letter-spacing:0.2px;
 }
 
 .artist{
@@ -305,13 +307,13 @@ margin-bottom:8px;
 }
 
 
-/* SEEK BAR WITH ENHANCED TOUCH AREA */
+/* SEEK BAR (LARGER & SMOOTHER) */
 
 .seek{
 position:relative;
 
 width:100%;
-height:4px;
+height:5px; /* LARGER BAR THICKNESS */
 
 border-radius:10px;
 
@@ -358,12 +360,12 @@ font-variant-numeric:tabular-nums;
 }
 
 
-/* CONTROLS & VOLUME TOGGLE */
+/* CONTROLS & COMPACT VOLUME TOGGLE */
 
 .controls{
 display:flex;
 align-items:center;
-gap:8px;
+gap:10px;
 flex-shrink:0;
 }
 
@@ -393,7 +395,8 @@ fill:#fff;
 }
 
 
-/* VOLUME CONTROL POPUP BAR */
+/* VOLUME CONTROL INSIDE PLAYER BOX */
+
 .vol-container{
 position:relative;
 display:flex;
@@ -403,37 +406,37 @@ align-items:center;
 .vol-slider-wrapper{
 position:absolute;
 bottom:42px;
-left:50%;
-transform:translateX(-50%) scale(0.9);
+right:-4px; /* PERFECTLY ADJUSTED INSIDE BOX */
+transform:translateY(5px) scale(0.95);
 opacity:0;
 visibility:hidden;
 
-background:rgba(20, 20, 20, 0.85);
-border:1px solid rgba(255, 255, 255, 0.2);
-backdrop-filter:blur(15px);
--webkit-backdrop-filter:blur(15px);
+background:rgba(20, 20, 20, 0.9);
+border:1px solid rgba(255, 255, 255, 0.25);
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
 
-padding:10px 8px;
-border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,0.5);
+padding:8px 10px;
+border-radius:14px;
+box-shadow:0 8px 20px rgba(0,0,0,0.5);
 
-transition:all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+transition:all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 display:flex;
 align-items:center;
 justify-content:center;
-z-index:20;
+z-index:30;
 }
 
 .vol-slider-wrapper.active{
 opacity:1;
 visibility:visible;
-transform:translateX(-50%) scale(1);
+transform:translateY(0) scale(1);
 }
 
 .vol-slider{
 -webkit-appearance:none;
 appearance:none;
-width:90px;
+width:80px;
 height:4px;
 background:rgba(255, 255, 255, 0.3);
 border-radius:10px;
@@ -456,8 +459,8 @@ box-shadow:0 0 6px rgba(0,0,0,0.4);
 /* PLAY BUTTON */
 
 .play{
-width:48px;
-height:48px;
+width:50px;
+height:50px;
 
 border-radius:50%;
 border:0;
@@ -475,8 +478,8 @@ cursor:pointer;
 }
 
 .play svg{
-width:20px;
-height:20px;
+width:22px;
+height:22px;
 
 fill:#000000;
 
@@ -660,7 +663,7 @@ padding-bottom:60px;
 height:116px;
 padding:14px 16px;
 border-radius:58px;
-gap:10px;
+gap:12px;
 }
 
 .cover-wrapper{
@@ -669,7 +672,7 @@ height:82px;
 }
 
 .title{
-font-size:15px;
+font-size:16.5px;
 }
 
 .artist{
@@ -677,13 +680,13 @@ font-size:12.5px;
 }
 
 .play{
-width:44px;
-height:44px;
+width:46px;
+height:46px;
 }
 
 .btn{
-width:24px;
-height:24px;
+width:26px;
+height:26px;
 }
 
 .top-widgets{
@@ -758,7 +761,7 @@ width:170px;
   <img id="cover" class="cover" src="logo.png" alt="Album art">
 </div>
 
-<!-- SONG INFORMATION -->
+<!-- SONG INFORMATION (LARGER TITLE & SEEK BAR) -->
 <div class="middle">
   <div id="title" class="title">My Playlist</div>
   <div id="artist" class="artist">YouTube Music</div>
@@ -774,21 +777,13 @@ width:170px;
   </div>
 </div>
 
-<!-- CONTROLS -->
+<!-- CONTROLS (ONLY PLAY & VOLUME) -->
 <div class="controls">
-  <button class="btn" onclick="previousSong()" aria-label="Previous">
-    <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-  </button>
-
   <button class="play" id="play" onclick="togglePlay()" aria-label="Play">
     <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
   </button>
 
-  <button class="btn" onclick="nextSong()" aria-label="Next">
-    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/></svg>
-  </button>
-
-  <!-- VOLUME TOGGLE BUTTON & SLIDER -->
+  <!-- VOLUME TOGGLE BUTTON & SLIDER INSIDE BOX -->
   <div class="vol-container">
     <button class="btn" onclick="toggleVolume()" aria-label="Volume">
       <svg viewBox="0 0 24 24">
@@ -920,7 +915,7 @@ document.addEventListener('click', (e) => {
 });
 
 
-/* NEXT & PREVIOUS - INSTANT UI UPDATE */
+/* NEXT & PREVIOUS (CARRIED OVER FOR SWIPE & PLAYLIST SELECTION) */
 function nextSong(){
   if(!player || playlistItems.length === 0)return;
   let currentIdx = (typeof player.getPlaylistIndex === 'function') ? player.getPlaylistIndex() : 0;
@@ -957,7 +952,7 @@ function forceUpdateUI(index){
 }
 
 
-/* TOUCH / SWIPE GESTURE SUPPORT FOR PLAYER CARD */
+/* TOUCH / SWIPE GESTURE SUPPORT (LEFT/RIGHT SWIPE STILL WORKS) */
 let touchStartX = 0;
 let touchEndX = 0;
 const playerCard = document.getElementById("playerCard");
