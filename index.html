@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<!-- iOS Web App & Fullscreen Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Music Player">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
 <title>My Music Player</title>
 
 <!-- FAST NETWORK CONNECT TO YOUTUBE -->
@@ -44,7 +50,7 @@ height:100%;
 object-fit:cover;
 z-index:0;
 pointer-events:none;
-filter: brightness(0.7); /* ডার্কনেস যা টেক্সট ফুটিয়ে তুলবে */
+filter: brightness(0.7);
 }
 
 
@@ -52,7 +58,7 @@ filter: brightness(0.7); /* ডার্কনেস যা টেক্সট �
 
 .top-widgets{
 position:fixed;
-top:14px;
+top: calc(14px + env(safe-area-inset-top)); /* নচ ও নচ-লেস আইফোনের সেফ এরিয়া */
 left:50%;
 transform:translateX(-50%);
 z-index:10;
@@ -163,7 +169,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 16px 65px;
+padding:0 16px calc(65px + env(safe-area-inset-bottom));
 }
 
 
@@ -389,7 +395,7 @@ fill:#fff;
 }
 
 
-/* INLINE VOLUME BAR (INSIDE PLAYER BOX) */
+/* INLINE VOLUME BAR */
 
 .vol-container{
 display:flex;
@@ -527,7 +533,7 @@ z-index:100;
 transition:right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 display:flex;
 flex-direction:column;
-padding:12px 6px;
+padding:calc(12px + env(safe-area-inset-top)) 6px calc(12px + env(safe-area-inset-bottom));
 box-shadow:-10px 0 30px rgba(0,0,0,0.3) !important;
 visibility:hidden;
 pointer-events:none;
@@ -650,7 +656,7 @@ margin-top:0.5px;
 @media(max-width:480px){
 
 .app{
-padding-bottom:60px;
+padding-bottom:calc(60px + env(safe-area-inset-bottom));
 }
 
 .player{
@@ -676,10 +682,6 @@ font-size:11px;
 .play{
 width:42px;
 height:42px;
-}
-
-.top-widgets{
-top:10px;
 }
 
 .bd-time{
