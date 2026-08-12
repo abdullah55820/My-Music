@@ -305,7 +305,7 @@ margin-bottom:8px;
 }
 
 
-/* SEEK BAR */
+/* SEEK BAR WITH ENHANCED TOUCH AREA */
 
 .seek{
 position:relative;
@@ -320,6 +320,19 @@ background:rgba(255,255,255,.2);
 cursor:pointer;
 
 margin-bottom:6px;
+
+touch-action:none; /* Prevents window scrolling while sliding */
+}
+
+/* Invisible Touch Target Expansion */
+.seek::before{
+content:"";
+position:absolute;
+top:-12px;
+bottom:-12px;
+left:-10px;
+right:-10px;
+z-index:10;
 }
 
 .fill{
@@ -334,6 +347,7 @@ width:0;
 background:#fff;
 
 border-radius:10px;
+pointer-events:none;
 }
 
 .time-display{
@@ -990,16 +1004,18 @@ function updateInfo(){
   }catch(e){}
 }
 
-/* SEEK BAR - DRAG & SLIDE FUNCTIONALITY */
+/* SEEK BAR - ULTRA SMOOTH & EXPANDED TOUCH AREA */
 let isDragging = false;
 const seekElement = document.getElementById("seek");
 
 function handleSeek(e) {
   if (!player || typeof player.getDuration !== 'function') return;
+  
   const rect = seekElement.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   
+  // Update progress bar UI smoothly
   document.getElementById("fill").style.width = (pos * 100) + "%";
   
   const duration = player.getDuration();
@@ -1036,11 +1052,14 @@ window.addEventListener('mouseup', (e) => {
 seekElement.addEventListener('touchstart', (e) => {
   isDragging = true;
   handleSeek(e);
-}, { passive: true });
+}, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
-  if (isDragging) handleSeek(e);
-}, { passive: true });
+  if (isDragging) {
+    if (e.cancelable) e.preventDefault(); // Prevents touch stuttering/scrolling
+    handleSeek(e);
+  }
+}, { passive: false });
 
 window.addEventListener('touchend', (e) => {
   if (isDragging) {
