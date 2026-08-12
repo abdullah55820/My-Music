@@ -693,7 +693,7 @@ width:170px;
   <div id="artist" class="artist">YouTube Music</div>
 
   <!-- SEEK BAR -->
-  <div class="seek" id="seek" onclick="seek(event)">
+  <div class="seek" id="seek">
     <div class="fill" id="fill"></div>
   </div>
 
@@ -990,8 +990,75 @@ function updateInfo(){
   }catch(e){}
 }
 
+/* SEEK BAR - DRAG & SLIDE FUNCTIONALITY */
+let isDragging = false;
+const seekElement = document.getElementById("seek");
+
+function handleSeek(e) {
+  if (!player || typeof player.getDuration !== 'function') return;
+  const rect = seekElement.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  
+  document.getElementById("fill").style.width = (pos * 100) + "%";
+  
+  const duration = player.getDuration();
+  if (duration) {
+    document.getElementById("current").textContent = format(pos * duration);
+    if (!isDragging) {
+      player.seekTo(pos * duration, true);
+    }
+  }
+}
+
+// Mouse Events
+seekElement.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  handleSeek(e);
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (isDragging) handleSeek(e);
+});
+
+window.addEventListener('mouseup', (e) => {
+  if (isDragging) {
+    isDragging = false;
+    const rect = seekElement.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    if (player && typeof player.getDuration === 'function') {
+      player.seekTo(pos * player.getDuration(), true);
+    }
+  }
+});
+
+// Touch Events (Mobile/Tablet)
+seekElement.addEventListener('touchstart', (e) => {
+  isDragging = true;
+  handleSeek(e);
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+  if (isDragging) handleSeek(e);
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+  if (isDragging) {
+    isDragging = false;
+    const rect = seekElement.getBoundingClientRect();
+    const touch = e.changedTouches[0];
+    if (touch) {
+      const pos = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+      if (player && typeof player.getDuration === 'function') {
+        player.seekTo(pos * player.getDuration(), true);
+      }
+    }
+  }
+});
+
 function updateProgress(){
-  if(!player || typeof player.getCurrentTime !== 'function')return;
+  if (isDragging) return;
+  if (!player || typeof player.getCurrentTime !== 'function') return;
   try{
     const c=player.getCurrentTime();
     const d=player.getDuration();
@@ -1000,13 +1067,6 @@ function updateProgress(){
     document.getElementById("current").textContent=format(c);
     document.getElementById("duration").textContent=format(d);
   }catch(e){}
-}
-
-function seek(e){
-  if(!player || typeof player.getDuration !== 'function')return;
-  const r=document.getElementById("seek").getBoundingClientRect();
-  const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-  player.seekTo(p*player.getDuration(),true);
 }
 
 function format(s){
