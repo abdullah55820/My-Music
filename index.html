@@ -196,7 +196,7 @@ display:flex;
 align-items:center;
 gap:14px;
 
-touch-action: pan-y; /* Smooth vertical ignore, horizontal swipe optimization */
+touch-action: pan-y;
 }
 
 
@@ -321,10 +321,9 @@ cursor:pointer;
 
 margin-bottom:6px;
 
-touch-action:none; /* Prevents window scrolling while sliding */
+touch-action:none;
 }
 
-/* Invisible Touch Target Expansion */
 .seek::before{
 content:"";
 position:absolute;
@@ -359,12 +358,12 @@ font-variant-numeric:tabular-nums;
 }
 
 
-/* CONTROLS */
+/* CONTROLS & VOLUME TOGGLE */
 
 .controls{
 display:flex;
 align-items:center;
-gap:10px;
+gap:8px;
 flex-shrink:0;
 }
 
@@ -394,11 +393,71 @@ fill:#fff;
 }
 
 
+/* VOLUME CONTROL POPUP BAR */
+.vol-container{
+position:relative;
+display:flex;
+align-items:center;
+}
+
+.vol-slider-wrapper{
+position:absolute;
+bottom:42px;
+left:50%;
+transform:translateX(-50%) scale(0.9);
+opacity:0;
+visibility:hidden;
+
+background:rgba(20, 20, 20, 0.85);
+border:1px solid rgba(255, 255, 255, 0.2);
+backdrop-filter:blur(15px);
+-webkit-backdrop-filter:blur(15px);
+
+padding:10px 8px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+
+transition:all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:20;
+}
+
+.vol-slider-wrapper.active{
+opacity:1;
+visibility:visible;
+transform:translateX(-50%) scale(1);
+}
+
+.vol-slider{
+-webkit-appearance:none;
+appearance:none;
+width:90px;
+height:4px;
+background:rgba(255, 255, 255, 0.3);
+border-radius:10px;
+outline:none;
+cursor:pointer;
+}
+
+.vol-slider::-webkit-slider-thumb{
+-webkit-appearance:none;
+appearance:none;
+width:12px;
+height:12px;
+border-radius:50%;
+background:#ffffff;
+cursor:pointer;
+box-shadow:0 0 6px rgba(0,0,0,0.4);
+}
+
+
 /* PLAY BUTTON */
 
 .play{
-width:52px;
-height:52px;
+width:48px;
+height:48px;
 
 border-radius:50%;
 border:0;
@@ -416,8 +475,8 @@ cursor:pointer;
 }
 
 .play svg{
-width:22px;
-height:22px;
+width:20px;
+height:20px;
 
 fill:#000000;
 
@@ -462,7 +521,6 @@ right:-100%;
 width:170px;
 height:100dvh;
 
-/* GLASS BACKGROUND ON ENTIRE PLAYLIST */
 background:rgba(20, 20, 20, 0.35) !important;
 backdrop-filter:blur(25px) saturate(150%) !important;
 -webkit-backdrop-filter:blur(25px) saturate(150%) !important;
@@ -517,7 +575,7 @@ flex:1;
 overflow-y:auto;
 display:flex;
 flex-direction:column;
-gap:4px; /* OPTIMIZED CARD SPACING */
+gap:4px;
 padding-right:2px;
 }
 
@@ -536,7 +594,7 @@ border-radius:3px;
 display:flex;
 align-items:center;
 gap:6px;
-padding:4px 5px; /* COMPACT PADDING FOR CLEANER LOOK */
+padding:4px 5px;
 border-radius:7px;
 
 background:rgba(255, 255, 255, 0.08);
@@ -569,7 +627,6 @@ flex:1;
 min-width:0;
 }
 
-/* BOLDER TITLE & SOFT SECONDARY TEXT */
 .song-item-title{
 font-size:9.5px;
 font-weight:700;
@@ -603,7 +660,7 @@ padding-bottom:60px;
 height:116px;
 padding:14px 16px;
 border-radius:58px;
-gap:12px;
+gap:10px;
 }
 
 .cover-wrapper{
@@ -620,13 +677,13 @@ font-size:12.5px;
 }
 
 .play{
-width:48px;
-height:48px;
+width:44px;
+height:44px;
 }
 
 .btn{
-width:26px;
-height:26px;
+width:24px;
+height:24px;
 }
 
 .top-widgets{
@@ -730,12 +787,23 @@ width:170px;
   <button class="btn" onclick="nextSong()" aria-label="Next">
     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h-2V6h2z"/></svg>
   </button>
+
+  <!-- VOLUME TOGGLE BUTTON & SLIDER -->
+  <div class="vol-container">
+    <button class="btn" onclick="toggleVolume()" aria-label="Volume">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+      </svg>
+    </button>
+    <div class="vol-slider-wrapper" id="volWrapper">
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
+    </div>
+  </div>
 </div>
 
 </section>
 
 </div>
-
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -831,6 +899,27 @@ function togglePlay(){
 }
 
 
+/* VOLUME CONTROL TOGGLE */
+function toggleVolume(){
+  const wrapper = document.getElementById("volWrapper");
+  wrapper.classList.toggle("active");
+}
+
+function changeVolume(val){
+  if(player && typeof player.setVolume === 'function'){
+    player.setVolume(val);
+  }
+}
+
+// Close volume slider when touching outside
+document.addEventListener('click', (e) => {
+  const container = document.querySelector('.vol-container');
+  if(container && !container.contains(e.target)){
+    document.getElementById("volWrapper").classList.remove("active");
+  }
+});
+
+
 /* NEXT & PREVIOUS - INSTANT UI UPDATE */
 function nextSong(){
   if(!player || playlistItems.length === 0)return;
@@ -883,13 +972,11 @@ playerCard.addEventListener('touchend', e => {
 }, {passive: true});
 
 function handleSwipe() {
-  const swipeThreshold = 50; // Minimum distance for swipe
+  const swipeThreshold = 50;
   if (touchEndX < touchStartX - swipeThreshold) {
-    // Swiped Left -> Next Song
     nextSong();
   }
   if (touchEndX > touchStartX + swipeThreshold) {
-    // Swiped Right -> Previous Song
     previousSong();
   }
 }
@@ -1015,7 +1102,6 @@ function handleSeek(e) {
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   
-  // Update progress bar UI smoothly
   document.getElementById("fill").style.width = (pos * 100) + "%";
   
   const duration = player.getDuration();
@@ -1056,7 +1142,7 @@ seekElement.addEventListener('touchstart', (e) => {
 
 window.addEventListener('touchmove', (e) => {
   if (isDragging) {
-    if (e.cancelable) e.preventDefault(); // Prevents touch stuttering/scrolling
+    if (e.cancelable) e.preventDefault();
     handleSeek(e);
   }
 }, { passive: false });
