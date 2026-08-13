@@ -1,29 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <title>My Music Player</title>
 
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preload" as="image" href="background.jpg">
 
-<link rel="preload"
-as="image"
-href="background.jpg">
-
-<link rel="apple-touch-icon"
-sizes="180x180"
-href="logo.png">
-
-<link rel="icon"
-type="image/png"
-href="logo.png">
-
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 
 <style>
 
@@ -32,30 +20,17 @@ box-sizing:border-box;
 }
 
 html,body{
-
 margin:0;
-
 width:100%;
 height:100%;
-
 overflow:hidden;
-
 background:#050505;
-
 color:#fff;
-
-font-family:
--apple-system,
-BlinkMacSystemFont,
-"SF Pro Display",
-"Segoe UI",
-sans-serif;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
 }
 
 body{
-
 position:relative;
-
 overflow-x:hidden!important;
 }
 
@@ -65,45 +40,32 @@ overflow-x:hidden!important;
    ========================= */
 
 .bg{
-
 position:fixed;
-
 inset:0;
 
 background-image:url("background.jpg");
-
 background-position:center center;
-
 background-size:cover;
-
 background-repeat:no-repeat;
 
 z-index:0;
 
-transition:
-filter .35s ease;
+transition:filter .3s ease;
 }
 
-
 .bg:after{
-
 content:"";
-
 position:absolute;
-
 inset:0;
-
 background:rgba(0,0,0,.15);
 }
 
 
-/* =========================
-   VIDEO OPEN
-   ========================= */
+/* ONLY BACKGROUND BLUR WHEN VIDEO OPEN */
 
-body.video-open .bg{
-
-filter:blur(14px);
+.bg.video-blur{
+filter:blur(16px);
+transform:scale(1.04);
 }
 
 
@@ -112,11 +74,8 @@ filter:blur(14px);
    ========================= */
 
 .top-widgets{
-
 position:fixed;
-
 top:14px;
-
 left:50%;
 
 transform:translateX(-50%);
@@ -124,11 +83,8 @@ transform:translateX(-50%);
 z-index:10;
 
 display:flex;
-
 flex-direction:column;
-
 align-items:center;
-
 gap:8px;
 }
 
@@ -136,7 +92,6 @@ gap:8px;
 /* BD TIME */
 
 .bd-time{
-
 padding:5px 11px;
 
 border-radius:20px;
@@ -148,27 +103,21 @@ border:1px solid rgba(255,255,255,.18);
 color:rgba(255,255,255,.9);
 
 font-size:11px;
-
 font-weight:600;
 
 letter-spacing:.3px;
 
 backdrop-filter:blur(12px);
-
 -webkit-backdrop-filter:blur(12px);
 
 display:flex;
-
 align-items:center;
-
 gap:6px;
 }
 
 
 .live-dot{
-
 width:7px;
-
 height:7px;
 
 background:#ff3b30;
@@ -177,8 +126,7 @@ border-radius:50%;
 
 display:inline-block;
 
-box-shadow:
-0 0 8px #ff3b30;
+box-shadow:0 0 8px #ff3b30;
 
 animation:pulse 1.5s infinite;
 }
@@ -204,9 +152,21 @@ transform:scale(1);
 }
 
 
+/* =========================
+   TOP BUTTONS
+   ========================= */
+
+.top-buttons{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+
 /* PLAYLIST BUTTON */
 
-.playlist-toggle-btn{
+.playlist-toggle-btn,
+.video-toggle-btn{
 
 padding:5px 12px;
 
@@ -219,62 +179,195 @@ border:1px solid rgba(255,255,255,.18);
 color:rgba(255,255,255,.9);
 
 font-size:11px;
-
 font-weight:600;
 
 backdrop-filter:blur(12px);
-
 -webkit-backdrop-filter:blur(12px);
 
 display:flex;
-
 align-items:center;
+justify-content:center;
 
 gap:6px;
 
 cursor:pointer;
 
-transition:
-transform .2s,
-background .2s;
+transition:transform .2s,background .2s;
 }
 
-
-.playlist-toggle-btn:active{
-
+.playlist-toggle-btn:active,
+.video-toggle-btn:active{
 transform:scale(.95);
 }
 
-
-.playlist-toggle-btn svg{
-
+.playlist-toggle-btn svg,
+.video-toggle-btn svg{
 width:14px;
-
 height:14px;
-
 fill:#fff;
 }
 
 
 /* =========================
-   YOUTUBE AUDIO PLAYER
+   YOUTUBE
    ========================= */
 
 #yt{
-
 position:fixed;
 
 width:2px;
-
 height:2px;
 
 left:-10px;
-
 bottom:-10px;
 
 opacity:.01;
 
 pointer-events:none;
+
+z-index:-1;
+}
+
+
+/* =========================
+   VIDEO POPUP
+   ========================= */
+
+.video-popup{
+
+position:fixed;
+
+inset:0;
+
+z-index:50;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+padding:20px;
+
+opacity:0;
+
+visibility:hidden;
+
+pointer-events:none;
+
+transition:
+opacity .25s ease,
+visibility .25s ease;
+}
+
+
+.video-popup.open{
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+}
+
+
+/* GLASS VIDEO BOX */
+
+.video-box{
+
+position:relative;
+
+width:min(720px,92vw);
+
+aspect-ratio:16 / 9;
+
+border-radius:24px;
+
+padding:8px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.25);
+
+backdrop-filter:blur(22px) saturate(130%);
+-webkit-backdrop-filter:blur(22px) saturate(130%);
+
+box-shadow:
+0 25px 80px rgba(0,0,0,.6),
+0 0 0 1px rgba(255,255,255,.05);
+
+overflow:hidden;
+
+transform:scale(.94);
+
+transition:transform .3s cubic-bezier(.2,.8,.2,1);
+}
+
+
+.video-popup.open .video-box{
+transform:scale(1);
+}
+
+
+/* VIDEO AREA */
+
+#videoScreen{
+
+position:absolute;
+
+left:8px;
+right:8px;
+top:8px;
+bottom:8px;
+
+border-radius:18px;
+
+overflow:hidden;
+
+background:#000;
+}
+
+
+/* CLOSE BUTTON */
+
+.video-close{
+
+position:absolute;
+
+top:-5px;
+right:-5px;
+
+width:32px;
+height:32px;
+
+border-radius:50%;
+
+border:1px solid rgba(255,255,255,.3);
+
+background:rgba(20,20,20,.65);
+
+color:#fff;
+
+font-size:22px;
+
+line-height:28px;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+cursor:pointer;
+
+z-index:20;
+
+backdrop-filter:blur(15px);
+-webkit-backdrop-filter:blur(15px);
+
+box-shadow:0 5px 20px rgba(0,0,0,.4);
+}
+
+.video-close:active{
+transform:scale(.9);
 }
 
 
@@ -283,19 +376,16 @@ pointer-events:none;
    ========================= */
 
 .app{
-
 position:relative;
 
 z-index:2;
 
 height:100dvh;
-
 width:100%;
 
 display:flex;
 
 align-items:flex-end;
-
 justify-content:center;
 
 padding:0 16px 65px;
@@ -320,13 +410,8 @@ border-radius:60px;
 
 background:rgba(255,255,255,.06);
 
-backdrop-filter:
-blur(25px)
-saturate(115%);
-
--webkit-backdrop-filter:
-blur(25px)
-saturate(115%);
+backdrop-filter:blur(25px) saturate(115%);
+-webkit-backdrop-filter:blur(25px) saturate(115%);
 
 box-shadow:
 0 20px 50px rgba(0,0,0,.45);
@@ -342,6 +427,7 @@ position:relative;
 overflow:hidden;
 
 touch-action:pan-y;
+
 }
 
 
@@ -354,7 +440,6 @@ touch-action:pan-y;
 position:relative;
 
 width:84px;
-
 height:84px;
 
 flex-shrink:0;
@@ -362,7 +447,6 @@ flex-shrink:0;
 display:flex;
 
 align-items:center;
-
 justify-content:center;
 
 border-radius:50%;
@@ -376,7 +460,6 @@ border:1px solid rgba(255,255,255,.3);
 .cover{
 
 width:137%;
-
 height:137%;
 
 margin:-18.5%;
@@ -402,7 +485,6 @@ content:"";
 position:absolute;
 
 width:16px;
-
 height:16px;
 
 background:rgba(20,20,20,.85);
@@ -412,7 +494,6 @@ border:2px solid rgba(255,255,255,.3);
 border-radius:50%;
 
 left:50%;
-
 top:50%;
 
 transform:translate(-50%,-50%);
@@ -422,7 +503,6 @@ z-index:2;
 
 
 .cover.spinning{
-
 animation-play-state:running;
 }
 
@@ -495,7 +575,7 @@ margin-bottom:8px;
 
 
 /* =========================
-   SEEK
+   SEEK BAR
    ========================= */
 
 .seek{
@@ -529,11 +609,9 @@ content:"";
 position:absolute;
 
 top:-12px;
-
 bottom:-12px;
 
 left:-10px;
-
 right:-10px;
 
 z-index:1;
@@ -545,7 +623,6 @@ z-index:1;
 position:absolute;
 
 left:0;
-
 top:0;
 
 height:100%;
@@ -591,7 +668,6 @@ flex-shrink:0;
 .btn{
 
 width:28px;
-
 height:28px;
 
 border:0;
@@ -603,7 +679,6 @@ color:rgba(255,255,255,.9);
 display:flex;
 
 align-items:center;
-
 justify-content:center;
 
 cursor:pointer;
@@ -615,16 +690,13 @@ padding:0;
 .btn svg{
 
 width:20px;
-
 height:20px;
 
 fill:#fff;
 }
 
 
-/* =========================
-   VOLUME
-   ========================= */
+/* VOLUME */
 
 .vol-container{
 
@@ -661,9 +733,7 @@ display:flex;
 align-items:center;
 
 transition:
-
 width .28s cubic-bezier(.2,.8,.2,1),
-
 opacity .2s ease;
 }
 
@@ -705,7 +775,6 @@ cursor:pointer;
 appearance:none;
 
 width:10px;
-
 height:10px;
 
 border-radius:50%;
@@ -714,29 +783,26 @@ background:#fff;
 
 cursor:pointer;
 
-box-shadow:
-0 0 5px rgba(0,0,0,.5);
+box-shadow:0 0 5px rgba(0,0,0,.5);
 }
 
+
+/* HIDE VOLUME ON IOS */
 
 @supports (-webkit-touch-callout:none){
 
 .vol-container{
-
 display:none!important;
 }
 
 }
 
 
-/* =========================
-   PLAY BUTTON
-   ========================= */
+/* PLAY BUTTON */
 
 .play{
 
 width:44px;
-
 height:44px;
 
 border-radius:50%;
@@ -750,11 +816,9 @@ color:#000;
 display:flex;
 
 align-items:center;
-
 justify-content:center;
 
-box-shadow:
-0 4px 15px rgba(0,0,0,.3);
+box-shadow:0 4px 15px rgba(0,0,0,.3);
 
 cursor:pointer;
 
@@ -765,7 +829,6 @@ flex-shrink:0;
 .play svg{
 
 width:20px;
-
 height:20px;
 
 fill:#000;
@@ -775,7 +838,6 @@ margin-left:2px;
 
 
 .play.playing svg{
-
 margin-left:0;
 }
 
@@ -787,210 +849,9 @@ transform:scale(.90);
 }
 
 
-/* =================================================
-   VIDEO BUTTON
-   ================================================= */
-
-.video-btn{
-
-width:34px;
-
-height:34px;
-
-border:0;
-
-border-radius:50%;
-
-background:rgba(255,255,255,.12);
-
-border:1px solid rgba(255,255,255,.2);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-padding:0;
-
-cursor:pointer;
-
-color:#fff;
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-}
-
-
-.video-btn svg{
-
-width:18px;
-
-height:18px;
-
-fill:#fff;
-}
-
-
-.video-btn:active{
-
-transform:scale(.9);
-}
-
-
-/* =================================================
-   VIDEO POPUP
-   ================================================= */
-
-.video-overlay{
-
-position:fixed;
-
-inset:0;
-
-z-index:80;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-pointer-events:none;
-
-opacity:0;
-
-visibility:hidden;
-
-transition:
-opacity .25s ease,
-visibility .25s ease;
-}
-
-
-.video-overlay.open{
-
-opacity:1;
-
-visibility:visible;
-
-pointer-events:none;
-}
-
-
-/*
-   শুধু video থাকবে।
-   Background আলাদা blur হবে।
-*/
-
-.video-box{
-
-position:relative;
-
-width:min(92vw,720px);
-
-aspect-ratio:16/9;
-
-border-radius:22px;
-
-overflow:hidden;
-
-background:#000;
-
-border:1px solid rgba(255,255,255,.18);
-
-box-shadow:
-0 25px 80px rgba(0,0,0,.65);
-
-transform:scale(.94);
-
-transition:
-transform .28s cubic-bezier(.2,.8,.2,1);
-
-pointer-events:auto;
-}
-
-
-.video-overlay.open .video-box{
-
-transform:scale(1);
-}
-
-
-/* VIDEO IFRAME */
-
-#videoPlayer{
-
-position:absolute;
-
-inset:0;
-
-width:100%;
-
-height:100%;
-
-border:0;
-
-display:block;
-
-background:#000;
-}
-
-
 /* =========================
-   VIDEO CLOSE
-   ========================= */
-
-.video-close{
-
-position:absolute;
-
-right:10px;
-
-top:10px;
-
-z-index:10;
-
-width:34px;
-
-height:34px;
-
-border-radius:50%;
-
-border:1px solid rgba(255,255,255,.35);
-
-background:rgba(0,0,0,.55);
-
-color:#fff;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:23px;
-
-line-height:1;
-
-cursor:pointer;
-
-backdrop-filter:blur(12px);
-
--webkit-backdrop-filter:blur(12px);
-}
-
-
-.video-close:active{
-
-transform:scale(.9);
-}
-
-
-/* =================================================
    DRAWER
-   ================================================= */
+   ========================= */
 
 .drawer-overlay{
 
@@ -1034,16 +895,11 @@ height:100dvh;
 
 background:rgba(20,20,20,.35)!important;
 
-backdrop-filter:
-blur(25px)
-saturate(150%)!important;
+backdrop-filter:blur(25px) saturate(150%)!important;
 
--webkit-backdrop-filter:
-blur(25px)
-saturate(150%)!important;
+-webkit-backdrop-filter:blur(25px) saturate(150%)!important;
 
-border-left:
-1px solid rgba(255,255,255,.15)!important;
+border-left:1px solid rgba(255,255,255,.15)!important;
 
 z-index:100;
 
@@ -1141,7 +997,6 @@ padding-right:2px;
 
 
 .song-list::-webkit-scrollbar{
-
 width:2px;
 }
 
@@ -1177,7 +1032,6 @@ cursor:pointer;
 
 
 .song-item:active{
-
 transform:scale(.96);
 }
 
@@ -1194,7 +1048,6 @@ border-color:rgba(255,255,255,.35);
 .song-item img{
 
 width:26px;
-
 height:26px;
 
 border-radius:5px;
@@ -1259,7 +1112,6 @@ margin-top:.5px;
 @media(max-width:480px){
 
 .app{
-
 padding-bottom:60px;
 }
 
@@ -1277,29 +1129,24 @@ gap:10px;
 .cover-wrapper{
 
 width:78px;
-
 height:78px;
 }
 
 .title{
-
 font-size:15px;
 }
 
 .artist{
-
 font-size:11px;
 }
 
 .play{
 
 width:42px;
-
 height:42px;
 }
 
 .top-widgets{
-
 top:10px;
 }
 
@@ -1310,7 +1157,8 @@ font-size:10px;
 padding:4px 9px;
 }
 
-.playlist-toggle-btn{
+.playlist-toggle-btn,
+.video-toggle-btn{
 
 font-size:10px;
 
@@ -1318,43 +1166,43 @@ padding:4px 9px;
 }
 
 .playlist-drawer{
-
 width:170px;
 }
 
-
-/* VIDEO MOBILE */
+.video-popup{
+padding:14px;
+}
 
 .video-box{
+width:94vw;
+border-radius:20px;
+padding:6px;
+}
 
-width:92vw;
-
-border-radius:18px;
+#videoScreen{
+left:6px;
+right:6px;
+top:6px;
+bottom:6px;
+border-radius:15px;
 }
 
 .video-close{
-
-width:32px;
-
-height:32px;
-
-right:8px;
-
-top:8px;
+width:30px;
+height:30px;
+font-size:20px;
 }
 
 }
 
 </style>
-
 </head>
 
 <body>
 
-
 <!-- BACKGROUND -->
 
-<div class="bg"></div>
+<div class="bg" id="background"></div>
 
 
 <!-- TOP -->
@@ -1374,6 +1222,8 @@ top:8px;
 </div>
 
 
+<div class="top-buttons">
+
 <button
 class="playlist-toggle-btn"
 onclick="toggleDrawer()"
@@ -1391,21 +1241,43 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </button>
 
+
+<!-- VIDEO BUTTON -->
+
+<button
+class="video-toggle-btn"
+onclick="openVideo()"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M4 5h11a2 2 0 0 1 2 2v2.2l3-1.7v9l-3-1.7V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v10h11V7H4zm13 3.7v2.6l1-.55v-1.5l-1-.55z
+"/>
+
+</svg>
+
+<span>Video</span>
+
+</button>
+
+</div>
+
 </div>
 
 
-<!-- HIDDEN YOUTUBE AUDIO PLAYER -->
+<!-- YOUTUBE PLAYER -->
 
 <div id="yt"></div>
 
 
-<!-- =================================================
+<!-- =========================
      VIDEO POPUP
-     ================================================= -->
+     ========================= -->
 
 <div
-class="video-overlay"
-id="videoOverlay"
+class="video-popup"
+id="videoPopup"
 >
 
 <div class="video-box">
@@ -1413,22 +1285,18 @@ id="videoOverlay"
 <button
 class="video-close"
 onclick="closeVideo()"
-aria-label="Close"
 >
 &times;
 </button>
 
-
-<div id="videoPlayer"></div>
-
-</div>
+<div id="videoScreen"></div>
 
 </div>
 
+</div>
 
-<!-- =================================================
-     DRAWER
-     ================================================= -->
+
+<!-- DRAWER -->
 
 <div
 class="drawer-overlay"
@@ -1479,12 +1347,9 @@ Loading...
 </div>
 
 
-<!-- =================================================
-     APP
-     ================================================= -->
+<!-- APP -->
 
 <div class="app">
-
 
 <section
 class="player"
@@ -1564,28 +1429,6 @@ id="fill"
 
 <div class="controls">
 
-
-<!-- VIDEO BUTTON -->
-
-<button
-class="video-btn"
-onclick="openVideo()"
-title="Video"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M4 5h11a2 2 0 0 1 2 2v2.2l3.2-1.8A1.2 1.2 0 0 1 22 8.45v7.1a1.2 1.2 0 0 1-1.8 1.05L17 14.8V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v10h11V7H4z
-"/>
-
-</svg>
-
-</button>
-
-
-<!-- PLAY -->
-
 <button
 class="play"
 id="play"
@@ -1603,8 +1446,6 @@ viewBox="0 0 24 24"
 
 </button>
 
-
-<!-- VOLUME -->
 
 <div class="vol-container">
 
@@ -1655,8 +1496,6 @@ oninput="changeVolume(this.value)"
 
 
 <script src="https://www.youtube.com/iframe_api"></script>
-
-
 <script>
 
 /* =========================
@@ -1665,14 +1504,9 @@ oninput="changeVolume(this.value)"
 
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
-
 let player=null;
 
-let videoPlayer=null;
-
 let playing=false;
-
-let videoOpen=false;
 
 let playlistItems=[];
 
@@ -1697,7 +1531,6 @@ hour12:true
 
 };
 
-
 document.getElementById("bdTimeVal").textContent=
 
 new Intl.DateTimeFormat(
@@ -1706,7 +1539,6 @@ options
 ).format(new Date());
 
 }
-
 
 updateBDTime();
 
@@ -1718,8 +1550,6 @@ setInterval(updateBDTime,1000);
    ========================= */
 
 function onYouTubeIframeAPIReady(){
-
-/* AUDIO PLAYER */
 
 player=new YT.Player(
 "yt",
@@ -1746,6 +1576,8 @@ playsinline:1,
 rel:0,
 
 iv_load_policy:3,
+
+cc_load_policy:0,
 
 listType:"playlist",
 
@@ -1842,46 +1674,22 @@ cover.classList.remove("spinning");
 
 
 /* =========================
-   ACTIVE MEDIA
-   ========================= */
-
-function getActivePlayer(){
-
-if(
-videoOpen &&
-videoPlayer &&
-typeof videoPlayer.getCurrentTime==="function"
-){
-
-return videoPlayer;
-
-}
-
-return player;
-
-}
-
-
-/* =========================
    PLAY / PAUSE
    ========================= */
 
 function togglePlay(){
 
-const p=getActivePlayer();
-
-if(!p)return;
-
+if(!player)return;
 
 if(playing){
 
-p.pauseVideo();
+player.pauseVideo();
 
 }
 
 else{
 
-p.playVideo();
+player.playVideo();
 
 }
 
@@ -1942,21 +1750,6 @@ resetVolTimer();
 
 function changeVolume(val){
 
-if(videoOpen){
-
-if(
-videoPlayer &&
-typeof videoPlayer.setVolume==="function"
-){
-
-videoPlayer.setVolume(val);
-
-}
-
-}
-
-else{
-
 if(
 player &&
 typeof player.setVolume==="function"
@@ -1966,15 +1759,13 @@ player.setVolume(val);
 
 }
 
-}
-
 resetVolTimer();
 
 }
 
 
 /* =========================
-   NEXT
+   NEXT / PREVIOUS
    ========================= */
 
 function nextSong(){
@@ -1995,26 +1786,12 @@ const next=
 playlistItems.length;
 
 
-if(videoOpen){
-
-openVideoAtIndex(next);
-
-}
-
-else{
-
 forceUpdateUI(next);
 
 player.nextVideo();
 
 }
 
-}
-
-
-/* =========================
-   PREVIOUS
-   ========================= */
 
 function previousSong(){
 
@@ -2035,26 +1812,12 @@ playlistItems.length)%
 playlistItems.length;
 
 
-if(videoOpen){
-
-openVideoAtIndex(previous);
-
-}
-
-else{
-
 forceUpdateUI(previous);
 
 player.previousVideo();
 
 }
 
-}
-
-
-/* =========================
-   FORCE UI
-   ========================= */
 
 function forceUpdateUI(index){
 
@@ -2106,387 +1869,6 @@ artist.textContent;
 
 
 /* =================================================
-   VIDEO POPUP
-   ================================================= */
-
-function openVideo(){
-
-if(
-!player ||
-typeof player.getVideoData!=="function"
-)
-return;
-
-
-const data=
-player.getVideoData();
-
-
-if(
-!data ||
-!data.video_id
-)
-return;
-
-
-const currentTime=
-player.getCurrentTime();
-
-
-const currentVolume=
-player.getVolume();
-
-
-const videoOverlay=
-document.getElementById("videoOverlay");
-
-
-/* AUDIO PAUSE */
-
-player.pauseVideo();
-
-
-videoOpen=true;
-
-document.body.classList.add("video-open");
-
-videoOverlay.classList.add("open");
-
-
-/* CREATE VIDEO PLAYER */
-
-if(!videoPlayer){
-
-videoPlayer=new YT.Player(
-"videoPlayer",
-{
-
-width:"100%",
-
-height:"100%",
-
-videoId:data.video_id,
-
-playerVars:{
-
-autoplay:1,
-
-controls:0,
-
-disablekb:1,
-
-fs:0,
-
-modestbranding:1,
-
-rel:0,
-
-iv_load_policy:3,
-
-playsinline:1,
-
-showinfo:0,
-
-enablejsapi:1
-
-},
-
-events:{
-
-onReady:function(){
-
-videoPlayer.seekTo(
-currentTime,
-true
-);
-
-videoPlayer.setVolume(
-currentVolume
-);
-
-videoPlayer.playVideo();
-
-},
-
-onStateChange:function(e){
-
-if(
-e.data===YT.PlayerState.PLAYING
-){
-
-playing=true;
-
-document
-.getElementById("play")
-.classList.add("playing");
-
-document
-.getElementById("play-icon")
-.innerHTML=
-'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-
-}
-
-else if(
-
-e.data===YT.PlayerState.PAUSED ||
-
-e.data===YT.PlayerState.ENDED
-
-){
-
-playing=false;
-
-document
-.getElementById("play")
-.classList.remove("playing");
-
-document
-.getElementById("play-icon")
-.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
-}
-
-}
-
-}
-
-);
-
-}
-
-else{
-
-videoPlayer.loadVideoById({
-
-videoId:data.video_id,
-
-startSeconds:currentTime
-
-});
-
-videoPlayer.setVolume(
-currentVolume
-);
-
-videoPlayer.playVideo();
-
-}
-
-}
-
-
-/* =================================================
-   OPEN VIDEO AT SPECIFIC TRACK
-   ================================================= */
-
-function openVideoAtIndex(index){
-
-if(
-!playlistItems[index]
-)
-return;
-
-
-const id=
-playlistItems[index];
-
-
-const oldTime=
-getCurrentPosition();
-
-
-forceUpdateUI(index);
-
-
-if(videoOpen){
-
-if(
-videoPlayer &&
-typeof videoPlayer.loadVideoById==="function"
-){
-
-videoPlayer.loadVideoById({
-
-videoId:id,
-
-startSeconds:0
-
-});
-
-}
-
-}
-
-else{
-
-if(player){
-
-player.playVideoAt(index);
-
-}
-
-}
-
-}
-
-
-/* =========================
-   CURRENT POSITION
-   ========================= */
-
-function getCurrentPosition(){
-
-try{
-
-if(videoOpen &&
-videoPlayer &&
-typeof videoPlayer.getCurrentTime==="function"
-){
-
-return videoPlayer.getCurrentTime();
-
-}
-
-if(
-player &&
-typeof player.getCurrentTime==="function"
-){
-
-return player.getCurrentTime();
-
-}
-
-}catch(e){}
-
-return 0;
-
-}
-
-
-/* =================================================
-   CLOSE VIDEO
-   ================================================= */
-
-function closeVideo(){
-
-if(!videoOpen)
-return;
-
-
-let currentTime=0;
-
-let videoId=null;
-
-let volume=100;
-
-
-try{
-
-if(videoPlayer){
-
-currentTime=
-videoPlayer.getCurrentTime();
-
-const data=
-videoPlayer.getVideoData();
-
-if(data){
-
-videoId=
-data.video_id;
-
-}
-
-volume=
-videoPlayer.getVolume();
-
-}
-
-}catch(e){}
-
-
-/* STOP VIDEO */
-
-try{
-
-if(videoPlayer){
-
-videoPlayer.pauseVideo();
-
-}
-
-}catch(e){}
-
-
-/* HIDE */
-
-document
-.getElementById("videoOverlay")
-.classList.remove("open");
-
-document.body.classList.remove("video-open");
-
-videoOpen=false;
-
-
-/* CONTINUE AUDIO */
-
-if(
-player &&
-videoId
-){
-
-try{
-
-const index=
-playlistItems.indexOf(videoId);
-
-
-if(index>=0){
-
-player.playVideoAt(index);
-
-setTimeout(()=>{
-
-try{
-
-player.seekTo(
-currentTime,
-true
-);
-
-player.setVolume(volume);
-
-}catch(e){}
-
-},300);
-
-}
-
-else{
-
-player.loadVideoById({
-
-videoId:videoId,
-
-startSeconds:currentTime
-
-});
-
-player.setVolume(volume);
-
-}
-
-}catch(e){}
-
-}
-
-}
-
-
-/* =================================================
    UNIVERSAL SWIPE
    ================================================= */
 
@@ -2515,10 +1897,13 @@ swipeStartX=e.clientX;
 
 swipeStartY=e.clientY;
 
+
 swipeFromSeek=
 !!e.target.closest("#seek");
 
+
 swipeActive=true;
+
 
 if(swipeFromSeek){
 
@@ -2561,6 +1946,7 @@ const endY=e.clientY;
 
 const dx=
 endX-swipeStartX;
+
 
 const dy=
 endY-swipeStartY;
@@ -2627,7 +2013,7 @@ swipeActive=false;
 
 
 /* =================================================
-   SEEK
+   SEEK BAR
    ================================================= */
 
 let isDragging=false;
@@ -2664,17 +2050,13 @@ document.getElementById("fill")
 (pos*100)+"%";
 
 
-const p=
-getActivePlayer();
-
-
 if(
-p &&
-typeof p.getDuration==="function"
+player &&
+typeof player.getDuration==="function"
 ){
 
 const duration=
-p.getDuration();
+player.getDuration();
 
 
 if(duration){
@@ -2682,6 +2064,7 @@ if(duration){
 document.getElementById("current")
 .textContent=
 format(pos*duration);
+
 
 document.getElementById("duration")
 .textContent=
@@ -2704,6 +2087,7 @@ e.preventDefault();
 
 e.stopPropagation();
 
+
 isDragging=true;
 
 seekPointerId=e.pointerId;
@@ -2720,6 +2104,7 @@ e.pointerId
 
 const pos=
 getSeekPosition(e.clientX);
+
 
 updateSeekVisual(pos);
 
@@ -2748,6 +2133,7 @@ e.stopPropagation();
 const pos=
 getSeekPosition(e.clientX);
 
+
 updateSeekVisual(pos);
 
 },
@@ -2775,25 +2161,22 @@ e.stopPropagation();
 const pos=
 getSeekPosition(e.clientX);
 
+
 updateSeekVisual(pos);
 
 
-const p=
-getActivePlayer();
-
-
 if(
-p &&
-typeof p.getDuration==="function"
+player &&
+typeof player.getDuration==="function"
 ){
 
 const duration=
-p.getDuration();
+player.getDuration();
 
 
 if(duration){
 
-p.seekTo(
+player.seekTo(
 pos*duration,
 true
 );
@@ -2823,6 +2206,20 @@ passive:false
 );
 
 
+/* SEEK CANCEL */
+
+seekElement.addEventListener(
+"pointercancel",
+e=>{
+
+isDragging=false;
+
+seekPointerId=null;
+
+}
+);
+
+
 /* SEEK CLICK */
 
 seekElement.addEventListener(
@@ -2837,19 +2234,15 @@ const pos=
 getSeekPosition(e.clientX);
 
 
-const p=
-getActivePlayer();
-
-
-if(p){
+if(player){
 
 const duration=
-p.getDuration();
+player.getDuration();
 
 
 if(duration){
 
-p.seekTo(
+player.seekTo(
 pos*duration,
 true
 );
@@ -2871,13 +2264,9 @@ if(isDragging)
 return;
 
 
-const p=
-getActivePlayer();
-
-
 if(
-!p ||
-typeof p.getCurrentTime!=="function"
+!player ||
+typeof player.getCurrentTime!=="function"
 )
 return;
 
@@ -2885,10 +2274,11 @@ return;
 try{
 
 const current=
-p.getCurrentTime();
+player.getCurrentTime();
+
 
 const duration=
-p.getDuration();
+player.getDuration();
 
 
 if(!duration)
@@ -2925,7 +2315,9 @@ format(duration);
 }
 
 
-/* FORMAT */
+/* =========================
+   FORMAT
+   ========================= */
 
 function format(s){
 
@@ -2948,7 +2340,7 @@ s%60
 ).padStart(2,"0");
 
 }
-<script>
+
 
 /* =================================================
    PLAYLIST
@@ -3065,9 +2457,9 @@ updateInfo();
 }
 
 
-/* =================================================
-   SONG DETAILS
-   ================================================= */
+/* =========================
+   DETAILS
+   ========================= */
 
 function fetchSongDetails(
 id,
@@ -3131,9 +2523,9 @@ data.author_name;
 }
 
 
-/* =================================================
+/* =========================
    PLAY SPECIFIC
-   ================================================= */
+   ========================= */
 
 function playSpecificTrack(index){
 
@@ -3141,24 +2533,10 @@ if(!player)
 return;
 
 
-if(videoOpen){
-
-/*
-   Video open থাকলে
-   নতুন গান video-তেই চলবে
-*/
-
-openVideoAtIndex(index);
-
-}
-
-else{
-
 forceUpdateUI(index);
 
-player.playVideoAt(index);
 
-}
+player.playVideoAt(index);
 
 
 toggleDrawer();
@@ -3166,9 +2544,9 @@ toggleDrawer();
 }
 
 
-/* =================================================
+/* =========================
    ACTIVE TRACK
-   ================================================= */
+   ========================= */
 
 function highlightActiveTrack(){
 
@@ -3198,9 +2576,9 @@ index===current
 }
 
 
-/* =================================================
+/* =========================
    SONG INFO
-   ================================================= */
+   ========================= */
 
 function updateInfo(){
 
@@ -3225,7 +2603,6 @@ return;
 
 
 document.getElementById("cover").src=
-
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 
@@ -3250,28 +2627,265 @@ document.getElementById("artist")
 
 
 /* =================================================
-   DRAWER
+   VIDEO POPUP
    ================================================= */
 
-function toggleDrawer(){
+/*
+   IMPORTANT:
+   একই YouTube player-কে popup-এর মধ্যে
+   resize করা হচ্ছে।
 
-const drawer=
-document.getElementById("drawer");
+   তাই audio/video আলাদা player নয়।
+   ফলে audio 30 sec হলে video-ও 30 sec থেকেই থাকবে।
+*/
 
 
-const overlay=
-document.getElementById("overlay");
+let videoOpen=false;
 
 
-drawer.classList.toggle("open");
+/* OPEN VIDEO */
 
-overlay.classList.toggle("active");
+function openVideo(){
+
+if(
+!player ||
+typeof player.getCurrentTime!=="function"
+)
+return;
+
+
+/* Current audio position save */
+
+const currentTime=
+player.getCurrentTime();
+
+
+const popup=
+document.getElementById("videoPopup");
+
+const background=
+document.getElementById("background");
+
+const videoScreen=
+document.getElementById("videoScreen");
+
+
+/*
+   Existing YouTube iframe-কে
+   video popup-এর ভিতরে নিয়ে যাই
+*/
+
+const iframe=
+document.querySelector("#yt iframe");
+
+
+if(!iframe)
+return;
+
+
+/* Move iframe */
+
+videoScreen.appendChild(iframe);
+
+
+/* Reset iframe positioning */
+
+iframe.style.position="absolute";
+
+iframe.style.left="0";
+
+iframe.style.top="0";
+
+iframe.style.width="100%";
+
+iframe.style.height="100%";
+
+iframe.style.border="0";
+
+iframe.style.display="block";
+
+iframe.style.opacity="1";
+
+iframe.style.pointerEvents="none";
+
+
+/*
+   Same player size
+*/
+
+try{
+
+player.setSize(
+videoScreen.clientWidth,
+videoScreen.clientHeight
+);
+
+}catch(e){}
+
+
+/*
+   Exact current time
+*/
+
+try{
+
+player.seekTo(
+currentTime,
+true
+);
+
+}catch(e){}
+
+
+/* Open */
+
+popup.classList.add("open");
+
+background.classList.add("video-blur");
+
+videoOpen=true;
+
+
+/*
+   If audio was already playing,
+   video automatically keeps playing.
+
+   If paused, it stays paused.
+*/
+
+}
+
+
+/* CLOSE VIDEO */
+
+function closeVideo(){
+
+const popup=
+document.getElementById("videoPopup");
+
+const background=
+document.getElementById("background");
+
+const yt=
+document.getElementById("yt");
+
+
+if(!player)
+return;
+
+
+/* Save exact current position */
+
+const currentTime=
+player.getCurrentTime();
+
+
+/* Remove popup */
+
+popup.classList.remove("open");
+
+background.classList.remove("video-blur");
+
+
+/*
+   Move iframe back to hidden player
+*/
+
+const iframe=
+document.querySelector("#videoScreen iframe");
+
+
+if(iframe){
+
+yt.appendChild(iframe);
+
+iframe.style.position="";
+
+iframe.style.left="";
+
+iframe.style.top="";
+
+iframe.style.width="";
+
+iframe.style.height="";
+
+iframe.style.border="";
+
+iframe.style.display="";
+
+iframe.style.opacity="";
+
+iframe.style.pointerEvents="";
+}
+
+
+/*
+   Restore tiny player
+*/
+
+setTimeout(()=>{
+
+try{
+
+player.setSize(2,2);
+
+}catch(e){}
+
+
+/*
+   Exact same time after closing
+*/
+
+try{
+
+player.seekTo(
+currentTime,
+true
+);
+
+}catch(e){}
+
+},20);
+
+
+videoOpen=false;
 
 }
 
 
 /* =================================================
-   ESC KEY
+   VIDEO POPUP RESIZE
+   ================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+if(
+!videoOpen ||
+!player
+)
+return;
+
+
+const screen=
+document.getElementById("videoScreen");
+
+
+try{
+
+player.setSize(
+screen.clientWidth,
+screen.clientHeight
+);
+
+}catch(e){}
+
+});
+
+
+/* =================================================
+   ESC CLOSE
    ================================================= */
 
 document.addEventListener(
@@ -3290,37 +2904,25 @@ closeVideo();
 });
 
 
-/* =================================================
-   VIDEO CLOSE WHEN PAGE HIDDEN
-   ================================================= */
+/* =========================
+   DRAWER
+   ========================= */
 
-document.addEventListener(
-"visibilitychange",
-()=>{
+function toggleDrawer(){
 
-if(
-document.hidden &&
-videoOpen
-){
+const drawer=
+document.getElementById("drawer");
 
-/*
-   Browser background এ গেলে
-   video আলাদা করে চালিয়ে রাখবে না
-*/
 
-try{
+const overlay=
+document.getElementById("overlay");
 
-if(videoPlayer){
 
-videoPlayer.pauseVideo();
+drawer.classList.toggle("open");
+
+overlay.classList.toggle("active");
 
 }
-
-}catch(e){}
-
-}
-
-});
 
 </script>
 
