@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -24,14 +25,12 @@ href="logo.png">
 type="image/png"
 href="logo.png">
 
-<style>
 
-/* =================================================
-   BASIC
-   ================================================= */
+<style>
 
 *{
 box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
 html,
@@ -76,6 +75,8 @@ position:fixed;
 
 inset:0;
 
+z-index:0;
+
 background-image:url("background.jpg");
 
 background-position:center center;
@@ -84,15 +85,13 @@ background-size:cover;
 
 background-repeat:no-repeat;
 
-z-index:0;
-
 transition:
-filter .25s ease,
-transform .25s ease;
+filter .35s ease,
+transform .35s ease;
 
 }
 
-.bg:after{
+.bg::after{
 
 content:"";
 
@@ -105,14 +104,11 @@ background:rgba(0,0,0,.15);
 }
 
 
-/* =================================================
-   VIDEO OPEN
-   ONLY BACKGROUND BLURS
-   ================================================= */
+/* ONLY BACKGROUND BLURS WHEN VIDEO OPENS */
 
-body.video-open .bg{
+.bg.video-blur{
 
-filter:blur(18px);
+filter:blur(16px);
 
 transform:scale(1.04);
 
@@ -133,7 +129,7 @@ left:50%;
 
 transform:translateX(-50%);
 
-z-index:10;
+z-index:300;
 
 display:flex;
 
@@ -191,8 +187,7 @@ border-radius:50%;
 
 display:inline-block;
 
-box-shadow:
-0 0 8px #ff3b30;
+box-shadow:0 0 8px #ff3b30;
 
 animation:pulse 1.5s infinite;
 
@@ -251,9 +246,7 @@ gap:6px;
 
 cursor:pointer;
 
-transition:
-transform .2s,
-background .2s;
+transition:transform .2s;
 
 }
 
@@ -275,7 +268,7 @@ fill:#fff;
 
 
 /* =================================================
-   HIDDEN YOUTUBE PLAYER
+   HIDDEN AUDIO YOUTUBE
    ================================================= */
 
 #yt{
@@ -286,15 +279,13 @@ width:2px;
 
 height:2px;
 
-left:-10px;
+left:-20px;
 
-bottom:-10px;
+bottom:-20px;
 
-opacity:1;
+opacity:.01;
 
 pointer-events:none;
-
-z-index:1;
 
 }
 
@@ -307,7 +298,7 @@ z-index:1;
 
 position:relative;
 
-z-index:2;
+z-index:20;
 
 height:100dvh;
 
@@ -336,19 +327,19 @@ height:120px;
 
 padding:14px 18px;
 
-border:
-1px solid rgba(255,255,255,.18);
+border:1px solid rgba(255,255,255,.18);
 
 border-radius:60px;
 
-background:
-rgba(255,255,255,.06);
+background:rgba(255,255,255,.06);
 
 backdrop-filter:
-blur(25px) saturate(115%);
+blur(25px)
+saturate(115%);
 
 -webkit-backdrop-filter:
-blur(25px) saturate(115%);
+blur(25px)
+saturate(115%);
 
 box-shadow:
 0 20px 50px rgba(0,0,0,.45);
@@ -392,11 +383,9 @@ border-radius:50%;
 
 overflow:hidden;
 
-border:
-1px solid rgba(255,255,255,.3);
+border:1px solid rgba(255,255,255,.3);
 
 }
-
 
 .cover{
 
@@ -414,13 +403,11 @@ object-position:center;
 
 background:#222;
 
-animation:
-spin 8s linear infinite;
+animation:spin 8s linear infinite;
 
 animation-play-state:paused;
 
 }
-
 
 .cover-wrapper::after{
 
@@ -432,11 +419,9 @@ width:16px;
 
 height:16px;
 
-background:
-rgba(20,20,20,.85);
+background:rgba(20,20,20,.85);
 
-border:
-2px solid rgba(255,255,255,.3);
+border:2px solid rgba(255,255,255,.3);
 
 border-radius:50%;
 
@@ -444,20 +429,17 @@ left:50%;
 
 top:50%;
 
-transform:
-translate(-50%,-50%);
+transform:translate(-50%,-50%);
 
 z-index:2;
 
 }
-
 
 .cover.spinning{
 
 animation-play-state:running;
 
 }
-
 
 @keyframes spin{
 
@@ -490,7 +472,6 @@ justify-content:center;
 
 }
 
-
 .title{
 
 font-size:16px;
@@ -509,13 +490,11 @@ letter-spacing:.2px;
 
 }
 
-
 .artist{
 
 font-size:12px;
 
-color:
-rgba(255,255,255,.65);
+color:rgba(255,255,255,.65);
 
 white-space:nowrap;
 
@@ -544,8 +523,7 @@ height:5px;
 
 border-radius:10px;
 
-background:
-rgba(255,255,255,.2);
+background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
@@ -558,7 +536,6 @@ user-select:none;
 -webkit-user-select:none;
 
 }
-
 
 .seek::before{
 
@@ -577,7 +554,6 @@ right:-10px;
 z-index:1;
 
 }
-
 
 .fill{
 
@@ -601,16 +577,13 @@ z-index:2;
 
 }
 
-
 .time-display{
 
 font-size:11px;
 
-color:
-rgba(255,255,255,.65);
+color:rgba(255,255,255,.65);
 
-font-variant-numeric:
-tabular-nums;
+font-variant-numeric:tabular-nums;
 
 }
 
@@ -636,58 +609,13 @@ flex-shrink:0;
 
 .btn{
 
-width:28px;
+width:30px;
 
-height:28px;
+height:30px;
 
 border:0;
 
 background:transparent;
-
-color:
-rgba(255,255,255,.9);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-cursor:pointer;
-
-padding:0;
-
-}
-
-
-.btn svg{
-
-width:20px;
-
-height:20px;
-
-fill:#fff;
-
-}
-
-
-/* =================================================
-   VIDEO BUTTON
-   ================================================= */
-
-.video-btn{
-
-width:34px;
-
-height:34px;
-
-border-radius:50%;
-
-border:
-1px solid rgba(255,255,255,.25);
-
-background:
-rgba(255,255,255,.10);
 
 color:#fff;
 
@@ -697,161 +625,9 @@ align-items:center;
 
 justify-content:center;
 
+cursor:pointer;
+
 padding:0;
-
-cursor:pointer;
-
-flex-shrink:0;
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-
-transition:
-transform .15s,
-background .2s;
-
-}
-
-
-.video-btn svg{
-
-width:18px;
-
-height:18px;
-
-fill:#fff;
-
-}
-
-
-.video-btn:active{
-
-transform:scale(.88);
-
-}
-
-
-.video-btn.active{
-
-background:
-rgba(255,255,255,.22);
-
-}
-
-
-/* =================================================
-   VOLUME
-   ================================================= */
-
-.vol-container{
-
-display:flex;
-
-align-items:center;
-
-gap:4px;
-
-background:
-rgba(0,0,0,.25);
-
-border:
-1px solid rgba(255,255,255,.15);
-
-padding:4px 6px;
-
-border-radius:20px;
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-
-}
-
-
-.vol-slider-wrapper{
-
-width:0;
-
-overflow:hidden;
-
-opacity:0;
-
-display:flex;
-
-align-items:center;
-
-transition:
-width .28s cubic-bezier(.2,.8,.2,1),
-opacity .2s ease;
-
-}
-
-
-.vol-slider-wrapper.active{
-
-width:55px;
-
-opacity:1;
-
-margin-left:2px;
-
-}
-
-
-.vol-slider{
-
--webkit-appearance:none;
-
-appearance:none;
-
-width:55px;
-
-height:3.5px;
-
-background:
-rgba(255,255,255,.3);
-
-border-radius:10px;
-
-outline:none;
-
-cursor:pointer;
-
-}
-
-
-.vol-slider::-webkit-slider-thumb{
-
--webkit-appearance:none;
-
-appearance:none;
-
-width:10px;
-
-height:10px;
-
-border-radius:50%;
-
-background:#fff;
-
-cursor:pointer;
-
-box-shadow:
-0 0 5px rgba(0,0,0,.5);
-
-}
-
-
-/* IOS VOLUME HIDE */
-
-@supports (-webkit-touch-callout:none){
-
-.vol-container{
-
-display:none!important;
-
-}
 
 }
 
@@ -889,7 +665,6 @@ flex-shrink:0;
 
 }
 
-
 .play svg{
 
 width:20px;
@@ -902,7 +677,6 @@ margin-left:2px;
 
 }
 
-
 .play.playing svg{
 
 margin-left:0;
@@ -910,8 +684,69 @@ margin-left:0;
 }
 
 
-.btn:active,
-.play:active{
+/* =================================================
+   VIDEO BUTTON
+   ================================================= */
+
+.video-btn{
+
+width:42px;
+
+height:42px;
+
+border-radius:14px;
+
+border:1px solid rgba(255,255,255,.28);
+
+background:
+rgba(255,255,255,.12);
+
+color:#fff;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+cursor:pointer;
+
+backdrop-filter:blur(12px);
+
+-webkit-backdrop-filter:blur(12px);
+
+box-shadow:
+0 5px 18px rgba(0,0,0,.25);
+
+transition:
+transform .2s,
+background .2s;
+
+flex-shrink:0;
+
+}
+
+.video-btn svg{
+
+width:21px;
+
+height:21px;
+
+fill:#fff;
+
+}
+
+.video-btn.active{
+
+background:
+rgba(255,255,255,.24);
+
+border-color:
+rgba(255,255,255,.45);
+
+}
+
+.video-btn:active{
 
 transform:scale(.90);
 
@@ -919,7 +754,192 @@ transform:scale(.90);
 
 
 /* =================================================
-   DRAWER OVERLAY
+   VOLUME
+   ================================================= */
+
+.vol-container{
+
+display:flex;
+
+align-items:center;
+
+gap:4px;
+
+background:rgba(0,0,0,.25);
+
+border:1px solid rgba(255,255,255,.15);
+
+padding:4px 6px;
+
+border-radius:20px;
+
+backdrop-filter:blur(10px);
+
+-webkit-backdrop-filter:blur(10px);
+
+}
+
+.vol-slider-wrapper{
+
+width:0;
+
+overflow:hidden;
+
+opacity:0;
+
+display:flex;
+
+align-items:center;
+
+transition:
+width .28s ease,
+opacity .2s ease;
+
+}
+
+.vol-slider-wrapper.active{
+
+width:55px;
+
+opacity:1;
+
+margin-left:2px;
+
+}
+
+.vol-slider{
+
+-webkit-appearance:none;
+
+appearance:none;
+
+width:55px;
+
+height:3.5px;
+
+background:rgba(255,255,255,.3);
+
+border-radius:10px;
+
+outline:none;
+
+}
+
+.vol-slider::-webkit-slider-thumb{
+
+-webkit-appearance:none;
+
+appearance:none;
+
+width:10px;
+
+height:10px;
+
+border-radius:50%;
+
+background:#fff;
+
+}
+
+@supports (-webkit-touch-callout:none){
+
+.vol-container{
+
+display:none!important;
+
+}
+
+}
+
+
+/* =================================================
+   VIDEO POPUP
+   ================================================= */
+
+.video-popup{
+
+position:fixed;
+
+left:50%;
+
+top:50%;
+
+transform:
+translate(-50%,-50%)
+scale(.96);
+
+width:min(665px,92vw);
+
+aspect-ratio:16/9;
+
+z-index:150;
+
+display:none;
+
+opacity:0;
+
+pointer-events:none;
+
+border-radius:24px;
+
+overflow:hidden;
+
+background:#000;
+
+border:1px solid
+rgba(255,255,255,.35);
+
+box-shadow:
+0 0 0 1px rgba(255,255,255,.08),
+0 25px 70px rgba(0,0,0,.65);
+
+transition:
+opacity .25s ease,
+transform .25s ease;
+
+}
+
+.video-popup.open{
+
+display:block;
+
+opacity:1;
+
+transform:
+translate(-50%,-50%)
+scale(1);
+
+pointer-events:none;
+
+}
+
+
+/*
+   VERY IMPORTANT:
+   video itself cannot be touched.
+   Controller is used to close it.
+*/
+
+.video-popup iframe{
+
+position:absolute;
+
+inset:0;
+
+width:100%;
+
+height:100%;
+
+border:0;
+
+pointer-events:none;
+
+}
+
+
+/* =================================================
+   PLAYLIST
+   MUST STAY ABOVE VIDEO
    ================================================= */
 
 .drawer-overlay{
@@ -928,20 +948,15 @@ position:fixed;
 
 inset:0;
 
-z-index:99;
+z-index:400;
 
-background:transparent!important;
-
-backdrop-filter:none!important;
-
--webkit-backdrop-filter:none!important;
+background:transparent;
 
 pointer-events:none;
 
 display:none;
 
 }
-
 
 .drawer-overlay.active{
 
@@ -952,9 +967,7 @@ pointer-events:auto;
 }
 
 
-/* =================================================
-   PLAYLIST DRAWER
-   ================================================= */
+/* DRAWER */
 
 .playlist-drawer{
 
@@ -969,18 +982,20 @@ width:170px;
 height:100dvh;
 
 background:
-rgba(20,20,20,.35)!important;
+rgba(20,20,20,.38);
 
 backdrop-filter:
-blur(25px) saturate(150%)!important;
+blur(25px)
+saturate(150%);
 
 -webkit-backdrop-filter:
-blur(25px) saturate(150%)!important;
+blur(25px)
+saturate(150%);
 
 border-left:
-1px solid rgba(255,255,255,.15)!important;
+1px solid rgba(255,255,255,.15);
 
-z-index:100;
+z-index:500;
 
 transition:
 right .35s cubic-bezier(.2,.8,.2,1);
@@ -992,14 +1007,13 @@ flex-direction:column;
 padding:12px 6px;
 
 box-shadow:
--10px 0 30px rgba(0,0,0,.3)!important;
+-10px 0 30px rgba(0,0,0,.3);
 
 visibility:hidden;
 
 pointer-events:none;
 
 }
-
 
 .playlist-drawer.open{
 
@@ -1011,6 +1025,8 @@ pointer-events:auto;
 
 }
 
+
+/* DRAWER HEADER */
 
 .drawer-header{
 
@@ -1034,7 +1050,6 @@ border-radius:8px;
 
 }
 
-
 .drawer-title{
 
 font-size:11px;
@@ -1045,15 +1060,13 @@ color:#fff;
 
 }
 
-
 .close-btn{
 
 background:transparent;
 
 border:0;
 
-color:
-rgba(255,255,255,.9);
+color:rgba(255,255,255,.9);
 
 font-size:16px;
 
@@ -1065,6 +1078,8 @@ line-height:1;
 
 }
 
+
+/* SONG LIST */
 
 .song-list{
 
@@ -1082,27 +1097,22 @@ padding-right:2px;
 
 }
 
-
 .song-list::-webkit-scrollbar{
 
 width:2px;
 
 }
 
-
 .song-list::-webkit-scrollbar-thumb{
 
-background:
-rgba(255,255,255,.3);
+background:rgba(255,255,255,.3);
 
 border-radius:3px;
 
 }
 
 
-/* =================================================
-   SONG ITEM
-   ================================================= */
+/* SONG ITEM */
 
 .song-item{
 
@@ -1126,13 +1136,11 @@ cursor:pointer;
 
 }
 
-
 .song-item:active{
 
 transform:scale(.96);
 
 }
-
 
 .song-item:hover,
 .song-item.active{
@@ -1144,7 +1152,6 @@ border-color:
 rgba(255,255,255,.35);
 
 }
-
 
 .song-item img{
 
@@ -1158,11 +1165,7 @@ object-fit:cover;
 
 flex-shrink:0;
 
-box-shadow:
-0 2px 5px rgba(0,0,0,.3);
-
 }
-
 
 .song-item-info{
 
@@ -1171,7 +1174,6 @@ flex:1;
 min-width:0;
 
 }
-
 
 .song-item-title{
 
@@ -1187,19 +1189,13 @@ overflow:hidden;
 
 text-overflow:ellipsis;
 
-letter-spacing:.2px;
-
 }
-
 
 .song-item-artist{
 
 font-size:8px;
 
-font-weight:400;
-
-color:
-rgba(255,255,255,.55);
+color:rgba(255,255,255,.55);
 
 white-space:nowrap;
 
@@ -1208,156 +1204,6 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:.5px;
-
-}
-
-
-/* =================================================
-   VIDEO POPUP
-   ================================================= */
-
-.video-popup{
-
-position:fixed;
-
-left:50%;
-
-top:50%;
-
-transform:
-translate(-50%,-50%);
-
-width:min(92vw,665px);
-
-aspect-ratio:16 / 9;
-
-border-radius:22px;
-
-overflow:hidden;
-
-background:#000;
-
-border:
-1px solid rgba(255,255,255,.48);
-
-box-shadow:
-
-0 0 0 1px
-rgba(255,255,255,.08),
-
-0 0 22px
-rgba(255,255,255,.16),
-
-0 25px 70px
-rgba(0,0,0,.65);
-
-z-index:500;
-
-display:none;
-
-}
-
-
-/* ACTIVE */
-
-.video-popup.active{
-
-display:block;
-
-}
-
-
-/* VIDEO ITSELF */
-
-#yt{
-
-position:absolute!important;
-
-left:0!important;
-
-top:0!important;
-
-width:100%!important;
-
-height:100%!important;
-
-opacity:1!important;
-
-pointer-events:none!important;
-
-z-index:1!important;
-
-}
-
-
-/* YOUTUBE IFRAME */
-
-#yt iframe{
-
-position:absolute!important;
-
-left:0!important;
-
-top:0!important;
-
-width:100%!important;
-
-height:100%!important;
-
-border:0!important;
-
-display:block!important;
-
-pointer-events:none!important;
-
-}
-
-
-/* =================================================
-   VIDEO CLOSE
-   ================================================= */
-
-.video-close{
-
-position:absolute;
-
-top:8px;
-
-right:8px;
-
-width:36px;
-
-height:36px;
-
-border-radius:50%;
-
-border:
-1px solid rgba(255,255,255,.40);
-
-background:
-rgba(0,0,0,.38);
-
-color:#fff;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:24px;
-
-line-height:1;
-
-padding:0;
-
-z-index:20;
-
-cursor:pointer;
-
-backdrop-filter:blur(12px);
-
--webkit-backdrop-filter:blur(12px);
 
 }
 
@@ -1374,19 +1220,17 @@ padding-bottom:60px;
 
 }
 
-
 .player{
 
 height:116px;
 
-padding:12px 14px;
+padding:12px 13px;
 
 border-radius:58px;
 
 gap:8px;
 
 }
-
 
 .cover-wrapper{
 
@@ -1396,20 +1240,17 @@ height:78px;
 
 }
 
-
 .title{
 
 font-size:15px;
 
 }
 
-
 .artist{
 
 font-size:11px;
 
 }
-
 
 .play{
 
@@ -1419,22 +1260,21 @@ height:42px;
 
 }
 
-
 .video-btn{
 
-width:34px;
+width:40px;
 
-height:34px;
+height:40px;
+
+border-radius:13px;
 
 }
-
 
 .top-widgets{
 
 top:10px;
 
 }
-
 
 .bd-time{
 
@@ -1444,7 +1284,6 @@ padding:4px 9px;
 
 }
 
-
 .playlist-toggle-btn{
 
 font-size:10px;
@@ -1453,7 +1292,6 @@ padding:4px 9px;
 
 }
 
-
 .playlist-drawer{
 
 width:170px;
@@ -1461,9 +1299,11 @@ width:170px;
 }
 
 
+/* VIDEO ON MOBILE */
+
 .video-popup{
 
-width:94vw;
+width:92vw;
 
 border-radius:20px;
 
@@ -1472,20 +1312,11 @@ border-radius:20px;
 }
 
 
-/* SMALL PHONE */
+/* =================================================
+   EXTRA SMALL
+   ================================================= */
 
-@media(max-width:370px){
-
-.player{
-
-gap:5px;
-
-padding-left:10px;
-
-padding-right:10px;
-
-}
-
+@media(max-width:380px){
 
 .cover-wrapper{
 
@@ -1495,22 +1326,13 @@ height:70px;
 
 }
 
-
-.controls{
-
-gap:4px;
-
-}
-
-
 .video-btn{
 
-width:31px;
+width:37px;
 
-height:31px;
+height:37px;
 
 }
-
 
 .play{
 
@@ -1520,23 +1342,36 @@ height:40px;
 
 }
 
+.player{
+
+gap:6px;
+
+padding-left:10px;
+
+padding-right:10px;
+
+}
+
 }
 
 </style>
+
 </head>
+
 
 <body>
 
 
+<!-- BACKGROUND -->
+
+<div
+class="bg"
+id="background"
+></div>
+
+
 <!-- =================================================
-     BACKGROUND
-     ================================================= -->
-
-<div class="bg"></div>
-
-
-<!-- =================================================
-     TOP WIDGETS
+     TOP
      ================================================= -->
 
 <div class="top-widgets">
@@ -1575,7 +1410,29 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 
 <!-- =================================================
-     DRAWER
+     HIDDEN AUDIO YOUTUBE PLAYER
+     ================================================= -->
+
+<div id="yt"></div>
+
+
+<!-- =================================================
+     VIDEO POPUP
+     NO CROSS HERE
+     ================================================= -->
+
+<div
+class="video-popup"
+id="videoPopup"
+>
+
+<div id="videoPlayer"></div>
+
+</div>
+
+
+<!-- =================================================
+     PLAYLIST OVERLAY
      ================================================= -->
 
 <div
@@ -1584,6 +1441,10 @@ id="overlay"
 onclick="toggleDrawer()"
 ></div>
 
+
+<!-- =================================================
+     PLAYLIST DRAWER
+     ================================================= -->
 
 <div
 class="playlist-drawer"
@@ -1653,7 +1514,7 @@ alt="Album art"
 </div>
 
 
-<!-- SONG INFO -->
+<!-- INFO -->
 
 <div class="middle">
 
@@ -1664,7 +1525,6 @@ class="title"
 My Playlist
 </div>
 
-
 <div
 id="artist"
 class="artist"
@@ -1672,8 +1532,6 @@ class="artist"
 YouTube Music
 </div>
 
-
-<!-- SEEK -->
 
 <div
 class="seek"
@@ -1687,8 +1545,6 @@ id="fill"
 
 </div>
 
-
-<!-- TIME -->
 
 <div class="time-display">
 
@@ -1707,9 +1563,7 @@ id="fill"
 </div>
 
 
-<!-- =================================================
-     CONTROLS
-     ================================================= -->
+<!-- CONTROLS -->
 
 <div class="controls">
 
@@ -1734,10 +1588,7 @@ viewBox="0 0 24 24"
 </button>
 
 
-<!-- =================================================
-     VIDEO BUTTON
-     PLAY BUTTON-এর পাশেই
-     ================================================= -->
+<!-- VIDEO -->
 
 <button
 class="video-btn"
@@ -1746,20 +1597,21 @@ onclick="toggleVideo()"
 aria-label="Video"
 >
 
-<svg viewBox="0 0 24 24">
+<svg
+id="videoIcon"
+viewBox="0 0 24 24"
+>
+
+<!-- VIDEO CAMERA ICON -->
 
 <path d="
-M8 5.5
-A2.5 2.5 0 0 1 10.5 3
-h7
-A2.5 2.5 0 0 1 20 5.5
-v13
-a2.5 2.5 0 0 1-2.5 2.5
-h-7
-A2.5 2.5 0 0 1 8 18.5z
-M10.5 7
-v10
-l7-5z
+M4 6
+C2.9 6 2 6.9 2 8v8
+c0 1.1.9 2 2 2h10
+c1.1 0 2-.9 2-2v-1.2l3.3 2.4
+c.7.5 1.7 0 1.7-.9V7.7
+c0-.9-1-1.4-1.7-.9L16 9.2V8
+c0-1.1-.9-2-2-2H4z
 "/>
 
 </svg>
@@ -1810,6 +1662,7 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
 </div>
 
 </section>
@@ -1817,52 +1670,26 @@ oninput="changeVolume(this.value)"
 </div>
 
 
-<!-- =================================================
-     VIDEO POPUP
-     ================================================= -->
-
-<div
-class="video-popup"
-id="videoPopup"
->
-
-<button
-class="video-close"
-id="videoClose"
-onclick="closeVideo()"
-aria-label="Close video"
->
-×
-</button>
-
-<!-- SAME YOUTUBE PLAYER -->
-<div id="yt"></div>
-
-</div>
-
-
-<script
-src="https://www.youtube.com/iframe_api">
-</script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 
 /* =================================================
-   PLAYLIST
+   SETTINGS
    ================================================= */
 
-const PLAYLIST_ID =
-"PLbvY05KVYwoo";
+const PLAYLIST_ID="PLbvY05KVYwoo";
 
+let player=null;
 
-let player = null;
+let videoPlayer=null;
 
-let playing = false;
+let playing=false;
 
-let playlistItems = [];
+let playlistItems=[];
 
-let videoOpen = false;
+let videoOpen=false;
 
-let videoWasPlaying = false;
+let videoReady=false;
 
 
 /* =================================================
@@ -1871,7 +1698,7 @@ let videoWasPlaying = false;
 
 function updateBDTime(){
 
-const options = {
+const options={
 
 timeZone:"Asia/Dhaka",
 
@@ -1885,10 +1712,7 @@ hour12:true
 
 };
 
-
-document.getElementById(
-"bdTimeVal"
-).textContent =
+document.getElementById("bdTimeVal").textContent=
 
 new Intl.DateTimeFormat(
 "en-US",
@@ -1897,13 +1721,9 @@ options
 
 }
 
-
 updateBDTime();
 
-setInterval(
-updateBDTime,
-1000
-);
+setInterval(updateBDTime,1000);
 
 
 /* =================================================
@@ -1912,7 +1732,9 @@ updateBDTime,
 
 function onYouTubeIframeAPIReady(){
 
-player = new YT.Player(
+/* AUDIO PLAYER */
+
+player=new YT.Player(
 "yt",
 {
 
@@ -1936,8 +1758,6 @@ playsinline:1,
 
 rel:0,
 
-iv_load_policy:3,
-
 listType:"playlist",
 
 list:PLAYLIST_ID
@@ -1946,9 +1766,50 @@ list:PLAYLIST_ID
 
 events:{
 
-onReady:ready,
+onReady:audioReady,
 
-onStateChange:state
+onStateChange:audioState
+
+}
+
+});
+
+
+/* VIDEO PLAYER */
+
+videoPlayer=new YT.Player(
+"videoPlayer",
+{
+
+width:"100%",
+
+height:"100%",
+
+playerVars:{
+
+autoplay:0,
+
+controls:0,
+
+disablekb:1,
+
+fs:0,
+
+modestbranding:1,
+
+playsinline:1,
+
+rel:0,
+
+iv_load_policy:3,
+
+enablejsapi:1
+
+},
+
+events:{
+
+onReady:videoReadyEvent
 
 }
 
@@ -1958,113 +1819,105 @@ onStateChange:state
 
 
 /* =================================================
-   READY
+   AUDIO READY
    ================================================= */
 
-function ready(){
-
-try{
-
-player.setVolume(100);
-
-}catch(e){}
-
+function audioReady(){
 
 loadPlaylistItems();
 
-
 setInterval(
 updateProgress,
-250
+200
 );
 
 }
 
 
 /* =================================================
-   STATE
+   VIDEO READY
    ================================================= */
 
-function state(e){
+function videoReadyEvent(){
 
-const cover =
-document.getElementById(
-"cover"
-);
+videoReady=true;
 
-const playBtn =
-document.getElementById(
-"play"
-);
+}
 
-const playIcon =
-document.getElementById(
-"play-icon"
-);
+
+/* =================================================
+   AUDIO STATE
+   ================================================= */
+
+function audioState(e){
+
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
 
 
 highlightActiveTrack();
 
 
-if(
-e.data ===
-YT.PlayerState.PLAYING
-){
+if(e.data===YT.PlayerState.PLAYING){
 
-playing = true;
+playing=true;
 
-playBtn.classList.add(
-"playing"
-);
+playBtn.classList.add("playing");
 
-playIcon.innerHTML =
-`
-<path d="
-M6 19h4V5H6v14zm8-14v14h4V5h-4z
-"/>
-`;
+playIcon.innerHTML=
+'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add(
-"spinning"
-);
-
-
-/*
-   Video popup open থাকলে
-   audio/video same player
-*/
+cover.classList.add("spinning");
 
 updateInfo();
+
+
+/* IF VIDEO IS OPEN */
+
+if(videoOpen){
+
+startVideoAtAudioTime();
+
+}
 
 }
 
 
 else if(
 
-e.data ===
-YT.PlayerState.PAUSED ||
+e.data===YT.PlayerState.PAUSED ||
 
-e.data ===
-YT.PlayerState.ENDED
+e.data===YT.PlayerState.ENDED
 
 ){
 
-playing = false;
+playing=false;
 
-playBtn.classList.remove(
-"playing"
-);
+playBtn.classList.remove("playing");
 
-playIcon.innerHTML =
-`
-<path d="
-M8 5v14l11-7z
-"/>
-`;
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
+
+
+/* PAUSE VIDEO TOO */
+
+if(videoOpen && videoPlayer){
+
+try{
+
+videoPlayer.pauseVideo();
+
+}catch(err){}
+
+}
 
 }
 
@@ -2085,7 +1938,9 @@ if(playing){
 
 player.pauseVideo();
 
-}else{
+}
+
+else{
 
 player.playVideo();
 
@@ -2095,10 +1950,300 @@ player.playVideo();
 
 
 /* =================================================
+   VIDEO TOGGLE
+   ================================================= */
+
+function toggleVideo(){
+
+if(!player)
+return;
+
+
+if(videoOpen){
+
+closeVideo();
+
+}
+
+else{
+
+openVideo();
+
+}
+
+}
+
+
+/* =================================================
+   OPEN VIDEO
+   ================================================= */
+
+function openVideo(){
+
+if(!player)
+return;
+
+
+const popup=
+document.getElementById("videoPopup");
+
+const bg=
+document.getElementById("background");
+
+const btn=
+document.getElementById("videoBtn");
+
+const icon=
+document.getElementById("videoIcon");
+
+
+videoOpen=true;
+
+
+/* SHOW POPUP */
+
+popup.classList.add("open");
+
+
+/* ONLY BACKGROUND BLUR */
+
+bg.classList.add("video-blur");
+
+
+/* BUTTON ACTIVE */
+
+btn.classList.add("active");
+
+
+/* CHANGE ICON TO X */
+
+icon.innerHTML=`
+
+<path d="
+M6.4 5L5 6.4
+12.6 12
+5 17.6
+6.4 19
+14 13.4
+21.6 19
+23 17.6
+15.4 12
+23 6.4
+21.6 5
+14 10.6
+6.4 5z
+"/>
+
+`;
+
+
+/*
+   Wait for popup to render,
+   then sync exact audio time.
+*/
+
+setTimeout(()=>{
+
+startVideoAtAudioTime();
+
+},250);
+
+}
+
+
+/* =================================================
+   CLOSE VIDEO
+   ================================================= */
+
+function closeVideo(){
+
+const popup=
+document.getElementById("videoPopup");
+
+const bg=
+document.getElementById("background");
+
+const btn=
+document.getElementById("videoBtn");
+
+const icon=
+document.getElementById("videoIcon");
+
+
+videoOpen=false;
+
+
+/* STOP VIDEO */
+
+if(videoPlayer){
+
+try{
+
+videoPlayer.stopVideo();
+
+}catch(err){}
+
+}
+
+
+/* HIDE */
+
+popup.classList.remove("open");
+
+
+/* REMOVE ONLY BG BLUR */
+
+bg.classList.remove("video-blur");
+
+
+/* BUTTON */
+
+btn.classList.remove("active");
+
+
+/* VIDEO ICON AGAIN */
+
+icon.innerHTML=`
+
+<path d="
+M4 6
+C2.9 6 2 6.9 2 8v8
+c0 1.1.9 2 2 2h10
+c1.1 0 2-.9 2-2v-1.2l3.3 2.4
+c.7.5 1.7 0 1.7-.9V7.7
+c0-.9-1-1.4-1.7-.9L16 9.2V8
+c0-1.1-.9-2-2-2H4z
+"/>
+
+`;
+
+}
+
+
+/* =================================================
+   START VIDEO AT EXACT AUDIO TIME
+   ================================================= */
+
+function startVideoAtAudioTime(){
+
+if(!videoPlayer)
+return;
+
+if(!videoReady)
+return;
+
+if(!player)
+return;
+
+
+try{
+
+const videoId=
+player.getVideoData().video_id;
+
+const current=
+player.getCurrentTime();
+
+
+if(!videoId)
+return;
+
+
+/*
+   Load SAME video.
+   Then jump to SAME second.
+*/
+
+videoPlayer.loadVideoById({
+
+videoId:videoId,
+
+startSeconds:current
+
+});
+
+
+/*
+   MUTE VIDEO
+   Audio continues from hidden player.
+*/
+
+videoPlayer.mute();
+
+
+/*
+   Ensure video starts automatically.
+*/
+
+setTimeout(()=>{
+
+if(!videoOpen)
+return;
+
+try{
+
+videoPlayer.mute();
+
+videoPlayer.playVideo();
+
+}catch(err){}
+
+},180);
+
+}catch(err){}
+
+}
+
+
+/* =================================================
+   KEEP VIDEO SYNCED
+   ================================================= */
+
+setInterval(()=>{
+
+if(!videoOpen)
+return;
+
+if(!player || !videoPlayer)
+return;
+
+if(!playing)
+return;
+
+try{
+
+const audioTime=
+player.getCurrentTime();
+
+const videoTime=
+videoPlayer.getCurrentTime();
+
+
+/*
+   Correct only if drift is noticeable.
+*/
+
+if(
+Math.abs(audioTime-videoTime)>0.45
+){
+
+videoPlayer.seekTo(
+audioTime,
+true
+);
+
+}
+
+}catch(err){}
+
+},700);
+
+
+/* =================================================
    VOLUME
    ================================================= */
 
-let volTimer = null;
+let volTimer=null;
 
 
 function resetVolTimer(){
@@ -2107,16 +2252,11 @@ if(volTimer)
 clearTimeout(volTimer);
 
 
-volTimer =
-setTimeout(()=>{
+volTimer=setTimeout(()=>{
 
 document
-.getElementById(
-"volWrapper"
-)
-.classList.remove(
-"active"
-);
+.getElementById("volWrapper")
+.classList.remove("active");
 
 },3000);
 
@@ -2125,30 +2265,22 @@ document
 
 function toggleVolume(){
 
-const wrapper =
-document.getElementById(
-"volWrapper"
-);
+const wrapper=
+document.getElementById("volWrapper");
 
 
-if(
-wrapper.classList.contains(
-"active"
-)
-){
+if(wrapper.classList.contains("active")){
 
-wrapper.classList.remove(
-"active"
-);
+wrapper.classList.remove("active");
 
 if(volTimer)
 clearTimeout(volTimer);
 
-}else{
+}
 
-wrapper.classList.add(
-"active"
-);
+else{
+
+wrapper.classList.add("active");
 
 resetVolTimer();
 
@@ -2161,8 +2293,7 @@ function changeVolume(val){
 
 if(
 player &&
-typeof player.setVolume ===
-"function"
+typeof player.setVolume==="function"
 ){
 
 player.setVolume(val);
@@ -2175,32 +2306,28 @@ resetVolTimer();
 
 
 /* =================================================
-   NEXT SONG
+   NEXT
    ================================================= */
 
 function nextSong(){
 
 if(
 !player ||
-playlistItems.length === 0
+playlistItems.length===0
 )
 return;
 
 
-const current =
+const current=
 player.getPlaylistIndex();
 
 
-const next =
-(
-current + 1
-)
-%
+const next=
+(current+1)%
 playlistItems.length;
 
 
 forceUpdateUI(next);
-
 
 player.nextVideo();
 
@@ -2208,33 +2335,29 @@ player.nextVideo();
 
 
 /* =================================================
-   PREVIOUS SONG
+   PREVIOUS
    ================================================= */
 
 function previousSong(){
 
 if(
 !player ||
-playlistItems.length === 0
+playlistItems.length===0
 )
 return;
 
 
-const current =
+const current=
 player.getPlaylistIndex();
 
 
-const previous =
-(
-current - 1 +
-playlistItems.length
-)
-%
+const previous=
+(current-1+
+playlistItems.length)%
 playlistItems.length;
 
 
 forceUpdateUI(previous);
-
 
 player.previousVideo();
 
@@ -2247,50 +2370,54 @@ player.previousVideo();
 
 function forceUpdateUI(index){
 
-if(
-!playlistItems[index]
-)
+if(!playlistItems[index])
 return;
 
 
-const id =
+const id=
 playlistItems[index];
 
 
-document.getElementById(
-"cover"
-).src =
+document.getElementById("cover").src=
+
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 
-const title =
-document.getElementById(
-`title-${index}`
-);
+const title=
+document.getElementById(`title-${index}`);
 
-
-const artist =
-document.getElementById(
-`artist-${index}`
-);
+const artist=
+document.getElementById(`artist-${index}`);
 
 
 if(title){
 
-document.getElementById(
-"title"
-).textContent =
-title.textContent;
+document.getElementById("title")
+.textContent=title.textContent;
 
 }
 
 
 if(artist){
 
-document.getElementById(
-"artist"
-).textContent =
-artist.textContent;
+document.getElementById("artist")
+.textContent=artist.textContent;
+
+}
+
+
+/*
+   If video is open,
+   load the new song too.
+*/
+
+if(videoOpen){
+
+setTimeout(()=>{
+
+startVideoAtAudioTime();
+
+},400);
 
 }
 
@@ -2301,46 +2428,35 @@ artist.textContent;
    SWIPE
    ================================================= */
 
-let swipeStartX = 0;
+let swipeStartX=0;
 
-let swipeStartY = 0;
+let swipeStartY=0;
 
-let swipeActive = false;
+let swipeActive=false;
 
-let swipeFromSeek = false;
-
-
-const playerCard =
-document.getElementById(
-"playerCard"
-);
+let swipeFromSeek=false;
 
 
-const seekElement =
-document.getElementById(
-"seek"
-);
+const playerCard=
+document.getElementById("playerCard");
 
 
-/* POINTER DOWN */
+const seekElement=
+document.getElementById("seek");
+
 
 playerCard.addEventListener(
 "pointerdown",
 e=>{
 
-swipeStartX =
-e.clientX;
+swipeStartX=e.clientX;
 
-swipeStartY =
-e.clientY;
+swipeStartY=e.clientY;
 
-swipeFromSeek =
-!!e.target.closest(
-"#seek"
-);
+swipeFromSeek=
+!!e.target.closest("#seek");
 
-swipeActive = true;
-
+swipeActive=true;
 
 if(swipeFromSeek){
 
@@ -2350,8 +2466,6 @@ e.stopPropagation();
 
 });
 
-
-/* POINTER MOVE */
 
 playerCard.addEventListener(
 "pointermove",
@@ -2360,7 +2474,6 @@ e=>{
 if(!swipeActive)
 return;
 
-
 if(swipeFromSeek){
 
 e.stopPropagation();
@@ -2369,8 +2482,6 @@ e.stopPropagation();
 
 });
 
-
-/* POINTER UP */
 
 playerCard.addEventListener(
 "pointerup",
@@ -2380,99 +2491,78 @@ if(!swipeActive)
 return;
 
 
-const endX =
-e.clientX;
+const dx=
+e.clientX-swipeStartX;
 
-const endY =
-e.clientY;
-
-
-const dx =
-endX - swipeStartX;
-
-const dy =
-endY - swipeStartY;
+const dy=
+e.clientY-swipeStartY;
 
 
 if(swipeFromSeek){
 
-swipeActive = false;
+swipeActive=false;
 
 return;
 
 }
 
 
-if(
-Math.abs(dx) < 50
-){
+if(Math.abs(dx)<50){
 
-swipeActive = false;
+swipeActive=false;
 
 return;
 
 }
 
 
-if(
-Math.abs(dy) >
-Math.abs(dx)
-){
+if(Math.abs(dy)>Math.abs(dx)){
 
-swipeActive = false;
+swipeActive=false;
 
 return;
 
 }
 
 
-if(dx < -50){
+if(dx<-50){
 
 nextSong();
 
 }
-else if(dx > 50){
+
+else if(dx>50){
 
 previousSong();
 
 }
 
 
-swipeActive = false;
+swipeActive=false;
 
 });
 
-
-/* CANCEL */
 
 playerCard.addEventListener(
 "pointercancel",
 ()=>{
 
-swipeActive = false;
+swipeActive=false;
 
-}
-);
+});
 
 
 /* =================================================
    SEEK
    ================================================= */
 
-let isDragging = false;
-
-let seekPointerId = null;
+let isDragging=false;
 
 
-/* POSITION */
+function getSeekPosition(clientX){
 
-function getSeekPosition(
-clientX
-){
-
-const rect =
-seekElement
-.getBoundingClientRect();
+const rect=
+seekElement.getBoundingClientRect();
 
 
 if(!rect.width)
@@ -2483,51 +2573,37 @@ return Math.max(
 0,
 Math.min(
 1,
-(
-clientX -
-rect.left
-) /
-rect.width
+(clientX-rect.left)/rect.width
 )
 );
 
 }
 
 
-/* VISUAL */
+function updateSeekVisual(pos){
 
-function updateSeekVisual(
-pos
-){
-
-document.getElementById(
-"fill"
-).style.width =
-(pos * 100) + "%";
+document.getElementById("fill")
+.style.width=
+(pos*100)+"%";
 
 
 if(
 player &&
-typeof player.getDuration ===
-"function"
+typeof player.getDuration==="function"
 ){
 
-const duration =
+const duration=
 player.getDuration();
 
 
 if(duration){
 
-document.getElementById(
-"current"
-).textContent =
-format(
-pos * duration
-);
+document.getElementById("current")
+.textContent=
+format(pos*duration);
 
-document.getElementById(
-"duration"
-).textContent =
+document.getElementById("duration")
+.textContent=
 format(duration);
 
 }
@@ -2537,7 +2613,7 @@ format(duration);
 }
 
 
-/* SEEK START */
+/* SEEK DOWN */
 
 seekElement.addEventListener(
 "pointerdown",
@@ -2547,11 +2623,7 @@ e.preventDefault();
 
 e.stopPropagation();
 
-isDragging = true;
-
-seekPointerId =
-e.pointerId;
-
+isDragging=true;
 
 try{
 
@@ -2562,11 +2634,8 @@ e.pointerId
 }catch(err){}
 
 
-const pos =
-getSeekPosition(
-e.clientX
-);
-
+const pos=
+getSeekPosition(e.clientX);
 
 updateSeekVisual(pos);
 
@@ -2586,17 +2655,12 @@ e=>{
 if(!isDragging)
 return;
 
-
 e.preventDefault();
 
 e.stopPropagation();
 
-
-const pos =
-getSeekPosition(
-e.clientX
-);
-
+const pos=
+getSeekPosition(e.clientX);
 
 updateSeekVisual(pos);
 
@@ -2607,7 +2671,7 @@ passive:false
 );
 
 
-/* SEEK END */
+/* SEEK UP */
 
 seekElement.addEventListener(
 "pointerup",
@@ -2616,47 +2680,55 @@ e=>{
 if(!isDragging)
 return;
 
-
 e.preventDefault();
 
 e.stopPropagation();
 
 
-const pos =
-getSeekPosition(
-e.clientX
-);
+const pos=
+getSeekPosition(e.clientX);
 
 
 updateSeekVisual(pos);
 
 
-if(
-player &&
-typeof player.getDuration ===
-"function"
-){
+if(player){
 
-const duration =
+const duration=
 player.getDuration();
 
 
 if(duration){
 
 player.seekTo(
-pos * duration,
+pos*duration,
 true
 );
 
+
+/*
+   Keep video at same position.
+*/
+
+if(videoOpen && videoPlayer){
+
+try{
+
+videoPlayer.seekTo(
+pos*duration,
+true
+);
+
+}catch(err){}
+
+}
+
 }
 
 }
 
 
-isDragging = false;
-
-seekPointerId = null;
-
+isDragging=false;
 
 try{
 
@@ -2673,20 +2745,6 @@ passive:false
 );
 
 
-/* SEEK CANCEL */
-
-seekElement.addEventListener(
-"pointercancel",
-()=>{
-
-isDragging = false;
-
-seekPointerId = null;
-
-}
-);
-
-
 /* =================================================
    PROGRESS
    ================================================= */
@@ -2699,18 +2757,17 @@ return;
 
 if(
 !player ||
-typeof player.getCurrentTime !==
-"function"
+typeof player.getCurrentTime!=="function"
 )
 return;
 
 
 try{
 
-const current =
+const current=
 player.getCurrentTime();
 
-const duration =
+const duration=
 player.getDuration();
 
 
@@ -2718,33 +2775,29 @@ if(!duration)
 return;
 
 
-const pos =
+const pos=
 Math.max(
 0,
 Math.min(
 1,
-current / duration
+current/duration
 )
 );
 
 
-document.getElementById(
-"fill"
-).style.width =
-(pos * 100) + "%";
+document.getElementById("fill")
+.style.width=
+(pos*100)+"%";
 
 
-document.getElementById(
-"current"
-).textContent =
+document.getElementById("current")
+.textContent=
 format(current);
 
 
-document.getElementById(
-"duration"
-).textContent =
+document.getElementById("duration")
+.textContent=
 format(duration);
-
 
 }catch(e){}
 
@@ -2757,70 +2810,63 @@ format(duration);
 
 function format(s){
 
-if(
-!s ||
-isNaN(s)
-)
+if(!s || isNaN(s))
 return "0:00";
 
 
-s =
-Math.floor(s);
+s=Math.floor(s);
 
 
-return Math.floor(s / 60)
+return Math.floor(s/60)
 +
 ":"
 +
 String(
-s % 60
-).padStart(
-2,
-"0"
-);
+s%60
+).padStart(2,"0");
 
 }
 
 
 /* =================================================
-   PLAYLIST LOAD
+   PLAYLIST
    ================================================= */
 
 function loadPlaylistItems(){
 
 if(
 !player ||
-typeof player.getPlaylist !==
-"function"
+typeof player.getPlaylist!=="function"
 )
 return;
 
 
-playlistItems =
+playlistItems=
 player.getPlaylist();
 
 
-const list =
-document.getElementById(
-"songList"
-);
+const list=
+document.getElementById("songList");
 
 
 if(
 !playlistItems ||
-playlistItems.length === 0
+playlistItems.length===0
 ){
 
-list.innerHTML =
-`
+list.innerHTML=`
+
 <div style="
 text-align:center;
 color:rgba(255,255,255,.7);
 font-size:10px;
 margin-top:15px;
 ">
+
 No tracks found
+
 </div>
+
 `;
 
 return;
@@ -2828,33 +2874,32 @@ return;
 }
 
 
-list.innerHTML = "";
+list.innerHTML="";
 
 
 playlistItems.forEach(
 (id,index)=>{
 
-const item =
-document.createElement(
-"div"
-);
+const item=
+document.createElement("div");
 
 
-item.className =
+item.className=
 "song-item";
 
 
-item.id =
+item.id=
 `track-${index}`;
 
 
-item.onclick = ()=>{
+item.onclick=()=>{
+
 playSpecificTrack(index);
+
 };
 
 
-item.innerHTML =
-`
+item.innerHTML=`
 
 <img
 src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
@@ -2867,14 +2912,18 @@ alt="thumb"
 class="song-item-title"
 id="title-${index}"
 >
+
 Track #${index+1}
+
 </div>
 
 <div
 class="song-item-artist"
 id="artist-${index}"
 >
+
 YouTube Music
+
 </div>
 
 </div>
@@ -2901,7 +2950,7 @@ updateInfo();
 
 
 /* =================================================
-   DETAILS
+   SONG DETAILS
    ================================================= */
 
 function fetchSongDetails(
@@ -2913,66 +2962,52 @@ fetch(
 `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
 )
 
-.then(
-r=>r.json()
-)
+.then(r=>r.json())
 
-.then(
-data=>{
+.then(data=>{
 
 if(!data)
 return;
 
 
-const title =
+const title=
 document.getElementById(
 `title-${index}`
 );
 
-
-const artist =
+const artist=
 document.getElementById(
 `artist-${index}`
 );
 
 
-if(
-title &&
-data.title
-){
+if(title && data.title){
 
-title.textContent =
+title.textContent=
 data.title;
 
 }
 
 
-if(
-artist &&
-data.author_name
-){
+if(artist && data.author_name){
 
-artist.textContent =
+artist.textContent=
 data.author_name;
 
 }
 
 })
 
-.catch(
-()=>{}
-);
+.catch(()=>{});
 
 }
 
 
 /* =================================================
-   PLAY SPECIFIC TRACK
+   PLAY SPECIFIC
    ================================================= */
 
-function playSpecificTrack(
-index
-){
+function playSpecificTrack(index){
 
 if(!player)
 return;
@@ -2986,6 +3021,22 @@ player.playVideoAt(index);
 
 toggleDrawer();
 
+
+/*
+   If video was already open,
+   sync it with selected song.
+*/
+
+if(videoOpen){
+
+setTimeout(()=>{
+
+startVideoAtAudioTime();
+
+},600);
+
+}
+
 }
 
 
@@ -2997,26 +3048,23 @@ function highlightActiveTrack(){
 
 if(
 !player ||
-typeof player.getPlaylistIndex !==
-"function"
+typeof player.getPlaylistIndex!=="function"
 )
 return;
 
 
-const current =
+const current=
 player.getPlaylistIndex();
 
 
 document
-.querySelectorAll(
-".song-item"
-)
+.querySelectorAll(".song-item")
 .forEach(
 (item,index)=>{
 
 item.classList.toggle(
 "active",
-index === current
+index===current
 );
 
 });
@@ -3032,47 +3080,38 @@ function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData !==
-"function"
+typeof player.getVideoData!=="function"
 )
 return;
 
 
 try{
 
-const d =
+const d=
 player.getVideoData();
 
 
-if(
-!d ||
-!d.video_id
-)
+if(!d || !d.video_id)
 return;
 
 
-document.getElementById(
-"cover"
-).src =
+document.getElementById("cover").src=
+
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 
 if(d.title){
 
-document.getElementById(
-"title"
-).textContent =
-d.title;
+document.getElementById("title")
+.textContent=d.title;
 
 }
 
 
 if(d.author){
 
-document.getElementById(
-"artist"
-).textContent =
-d.author;
+document.getElementById("artist")
+.textContent=d.author;
 
 }
 
@@ -3087,428 +3126,21 @@ d.author;
 
 function toggleDrawer(){
 
-const drawer =
-document.getElementById(
-"drawer"
-);
+const drawer=
+document.getElementById("drawer");
 
-const overlay =
-document.getElementById(
-"overlay"
-);
+const overlay=
+document.getElementById("overlay");
 
 
-drawer.classList.toggle(
-"open"
-);
+drawer.classList.toggle("open");
 
-overlay.classList.toggle(
-"active"
-);
+overlay.classList.toggle("active");
 
 }
-
-
-/* =================================================
-   VIDEO POPUP
-   ================================================= */
-
-/*
-   IMPORTANT:
-
-   নতুন YT.Player() তৈরি করা হচ্ছে না।
-
-   একই player resize করে popup-এ
-   দেখানো হচ্ছে।
-*/
-
-
-function toggleVideo(){
-
-if(videoOpen){
-
-closeVideo();
-
-}else{
-
-openVideo();
-
-}
-
-}
-
-
-/* =================================================
-   OPEN VIDEO
-   ================================================= */
-
-function openVideo(){
-
-if(
-!player ||
-typeof player.getCurrentTime !==
-"function"
-)
-return;
-
-
-/*
-   Audio যেখানে আছে
-   সেই exact position
-*/
-
-let currentTime = 0;
-
-try{
-
-currentTime =
-player.getCurrentTime() || 0;
-
-}catch(e){}
-
-
-/*
-   এই সময়ের playing state
-*/
-
-videoWasPlaying =
-playing;
-
-
-/*
-   Popup open
-*/
-
-const popup =
-document.getElementById(
-"videoPopup"
-);
-
-popup.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"video-open"
-);
-
-
-/*
-   Button -> X
-*/
-
-const btn =
-document.getElementById(
-"videoBtn"
-);
-
-btn.classList.add(
-"active"
-);
-
-btn.innerHTML =
-`
-<svg viewBox="0 0 24 24">
-
-<path d="
-M18.3 5.71
-L12 12
-l6.3 6.29
--1.41 1.42
-L10.59 13.41
-4.29 19.71
-2.88 18.3
-9.17 12
-2.88 5.7
-4.29 4.29
-10.59 10.59
-16.89 4.29
-z
-"/>
-
-</svg>
-`;
-
-
-videoOpen = true;
-
-
-/*
-   Popup-এর real size পাওয়ার জন্য
-   সামান্য delay
-*/
-
-setTimeout(()=>{
-
-if(!player)
-return;
-
-
-try{
-
-const width =
-popup.clientWidth;
-
-const height =
-popup.clientHeight;
-
-
-/*
-   SAME PLAYER RESIZE
-*/
-
-player.setSize(
-width,
-height
-);
-
-}catch(e){}
-
-
-/*
-   Audio position -> Video position
-*/
-
-setTimeout(()=>{
-
-if(!player)
-return;
-
-
-try{
-
-player.seekTo(
-currentTime,
-true
-);
-
-/*
-   Button click user gesture হওয়ায়
-   video play করার চেষ্টা
-*/
-
-player.playVideo();
-
-}catch(e){}
-
-},80);
-
-},40);
-
-}
-
-
-/* =================================================
-   CLOSE VIDEO
-   ================================================= */
-
-function closeVideo(){
-
-if(!player)
-return;
-
-
-/*
-   Video এখন যেখানে আছে
-*/
-
-let currentTime = 0;
-
-try{
-
-currentTime =
-player.getCurrentTime() || 0;
-
-}catch(e){}
-
-
-/*
-   Popup বন্ধ
-*/
-
-const popup =
-document.getElementById(
-"videoPopup"
-);
-
-popup.classList.remove(
-"active"
-);
-
-document.body.classList.remove(
-"video-open"
-);
-
-
-/*
-   Button -> Video icon
-*/
-
-const btn =
-document.getElementById(
-"videoBtn"
-);
-
-btn.classList.remove(
-"active"
-);
-
-btn.innerHTML =
-`
-<svg viewBox="0 0 24 24">
-
-<path d="
-M8 5.5
-A2.5 2.5 0 0 1 10.5 3
-h7
-A2.5 2.5 0 0 1 20 5.5
-v13
-a2.5 2.5 0 0 1-2.5 2.5
-h-7
-A2.5 2.5 0 0 1 8 18.5z
-M10.5 7
-v10
-l7-5z
-"/>
-
-</svg>
-`;
-
-
-videoOpen = false;
-
-
-/*
-   Player আবার ছোট hidden size
-*/
-
-setTimeout(()=>{
-
-if(!player)
-return;
-
-
-try{
-
-/*
-   Current video position
-*/
-
-player.setSize(
-2,
-2
-);
-
-}catch(e){}
-
-
-/*
-   একই position-এ audio ফিরিয়ে দিই
-*/
-
-setTimeout(()=>{
-
-if(!player)
-return;
-
-
-try{
-
-player.seekTo(
-currentTime,
-true
-);
-
-
-/*
-   Video খোলার আগে audio
-   চললে আবার চলবে।
-
-   আগে pause থাকলে pause-ই থাকবে।
-*/
-
-if(videoWasPlaying){
-
-player.playVideo();
-
-}else{
-
-player.pauseVideo();
-
-}
-
-}catch(e){}
-
-},50);
-
-},50);
-
-}
-
-
-/* =================================================
-   PREVENT VIDEO POPUP TOUCH
-   ================================================= */
-
-/*
-   Video iframe-এ pointer-events:none
-   রাখা হয়েছে।
-
-   তাই YouTube-এর:
-   Share
-   Like
-   Next
-   Previous
-   YouTube button
-   ইত্যাদিতে touch করা যাবে না।
-
-   শুধু আমাদের X button কাজ করবে।
-*/
-
-
-document
-.getElementById("videoPopup")
-.addEventListener(
-"touchstart",
-e=>{
-
-if(
-e.target.closest(
-".video-close"
-)
-)
-return;
-
-e.preventDefault();
-
-},
-{
-passive:false
-}
-);
-
-
-/* =================================================
-   ESC CLOSE
-   ================================================= */
-
-document.addEventListener(
-"keydown",
-e=>{
-
-if(
-e.key === "Escape" &&
-videoOpen
-){
-
-closeVideo();
-
-}
-
-});
-
 
 </script>
 
 </body>
+
 </html>
