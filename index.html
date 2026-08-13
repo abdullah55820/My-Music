@@ -1,37 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+>
 
 <title>My Music Player</title>
 
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
-<link rel="preload" as="image" href="background.jpg">
 
-<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-<link rel="icon" type="image/png" href="logo.png">
+<link
+rel="preload"
+as="image"
+href="background.jpg"
+>
+
+<link
+rel="apple-touch-icon"
+sizes="180x180"
+href="logo.png"
+>
+
+<link
+rel="icon"
+type="image/png"
+href="logo.png"
+>
+
 
 <style>
+
+/* =========================
+   RESET
+   ========================= */
 
 *{
 box-sizing:border-box;
 }
 
-html,body{
+
+html,
+body{
+
 margin:0;
+
 width:100%;
 height:100%;
+
 overflow:hidden;
+
 background:#050505;
+
 color:#fff;
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Segoe UI",
+sans-serif;
+
 }
 
+
 body{
+
 position:relative;
+
 overflow-x:hidden!important;
+
 }
 
 
@@ -40,22 +82,39 @@ overflow-x:hidden!important;
    ========================= */
 
 .bg{
+
 position:fixed;
+
 inset:0;
 
-background-image:url("background.jpg");
-background-position:center center;
-background-size:cover;
-background-repeat:no-repeat;
+background-image:
+url("background.jpg");
+
+background-position:
+center center;
+
+background-size:
+cover;
+
+background-repeat:
+no-repeat;
 
 z-index:0;
+
 }
 
+
 .bg:after{
+
 content:"";
+
 position:absolute;
+
 inset:0;
-background:rgba(0,0,0,.15);
+
+background:
+rgba(0,0,0,.15);
+
 }
 
 
@@ -64,48 +123,73 @@ background:rgba(0,0,0,.15);
    ========================= */
 
 .top-widgets{
+
 position:fixed;
+
 top:14px;
+
 left:50%;
-transform:translateX(-50%);
+
+transform:
+translateX(-50%);
 
 z-index:10;
 
 display:flex;
+
 flex-direction:column;
+
 align-items:center;
+
 gap:8px;
+
 }
 
 
-/* BD TIME */
+/* =========================
+   BD TIME
+   ========================= */
 
 .bd-time{
-padding:5px 11px;
+
+padding:
+5px 11px;
 
 border-radius:20px;
 
-background:rgba(0,0,0,.45);
+background:
+rgba(0,0,0,.45);
 
-border:1px solid rgba(255,255,255,.18);
+border:
+1px solid
+rgba(255,255,255,.18);
 
-color:rgba(255,255,255,.9);
+color:
+rgba(255,255,255,.9);
 
 font-size:11px;
+
 font-weight:600;
 
 letter-spacing:.3px;
 
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+backdrop-filter:
+blur(12px);
+
+-webkit-backdrop-filter:
+blur(12px);
 
 display:flex;
+
 align-items:center;
+
 gap:6px;
+
 }
 
 
 .live-dot{
+
 width:7px;
 height:7px;
 
@@ -115,9 +199,12 @@ border-radius:50%;
 
 display:inline-block;
 
-box-shadow:0 0 8px #ff3b30;
+box-shadow:
+0 0 8px #ff3b30;
 
-animation:pulse 1.5s infinite;
+animation:
+pulse 1.5s infinite;
+
 }
 
 
@@ -142,57 +229,83 @@ transform:scale(1);
 
 
 /* =========================
-   BUTTONS
+   PLAYLIST BUTTON
    ========================= */
 
-.playlist-toggle-btn,
-.video-toggle-btn{
+.playlist-toggle-btn{
 
-padding:5px 12px;
+padding:
+5px 12px;
 
 border-radius:20px;
 
-background:rgba(0,0,0,.45);
+background:
+rgba(0,0,0,.45);
 
-border:1px solid rgba(255,255,255,.18);
+border:
+1px solid
+rgba(255,255,255,.18);
 
-color:rgba(255,255,255,.9);
+color:
+rgba(255,255,255,.9);
 
 font-size:11px;
+
 font-weight:600;
 
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+backdrop-filter:
+blur(12px);
+
+-webkit-backdrop-filter:
+blur(12px);
 
 display:flex;
+
 align-items:center;
+
 gap:6px;
 
 cursor:pointer;
 
-transition:transform .2s,background .2s;
+transition:
+transform .2s,
+background .2s;
+
 }
 
-.playlist-toggle-btn:active,
-.video-toggle-btn:active{
+
+.playlist-toggle-btn:active{
+
 transform:scale(.95);
+
 }
 
-.playlist-toggle-btn svg,
-.video-toggle-btn svg{
+
+.playlist-toggle-btn svg{
 
 width:14px;
 height:14px;
 
 fill:#fff;
+
 }
 
 
 /* =========================
-   YOUTUBE
+   YOUTUBE PLAYER
    ========================= */
 
+/*
+   Initially hidden.
+   This is the SAME YouTube player
+   used for audio.
+
+   When Video button is clicked,
+   this exact player becomes visible.
+*/
+
 #yt{
+
 position:fixed;
 
 width:2px;
@@ -204,6 +317,161 @@ bottom:-10px;
 opacity:.01;
 
 pointer-events:none;
+
+z-index:-1;
+
+}
+
+
+/* =========================
+   VIDEO WINDOW
+   ========================= */
+
+.videoBox{
+
+position:fixed;
+
+left:50%;
+top:50%;
+
+transform:
+translate(-50%,-50%)
+scale(.94);
+
+width:
+min(700px,92vw);
+
+aspect-ratio:16/9;
+
+border-radius:22px;
+
+overflow:hidden;
+
+background:
+rgba(20,20,20,.45);
+
+border:
+1px solid
+rgba(255,255,255,.25);
+
+backdrop-filter:
+blur(25px)
+saturate(140%);
+
+-webkit-backdrop-filter:
+blur(25px)
+saturate(140%);
+
+box-shadow:
+0 25px 80px
+rgba(0,0,0,.65);
+
+z-index:200;
+
+opacity:0;
+
+visibility:hidden;
+
+pointer-events:none;
+
+transition:
+opacity .25s ease,
+transform .3s cubic-bezier(.2,.8,.2,1);
+
+}
+
+
+/* VIDEO OPEN */
+
+.videoBox.active{
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+transform:
+translate(-50%,-50%)
+scale(1);
+
+}
+
+
+/*
+   IMPORTANT:
+   Same #yt player becomes
+   full-size video.
+*/
+
+.videoBox #yt{
+
+position:absolute;
+
+left:0;
+top:0;
+
+width:100%;
+height:100%;
+
+opacity:1;
+
+z-index:1;
+
+pointer-events:auto;
+
+}
+
+
+/* VIDEO CLOSE */
+
+.video-close{
+
+position:absolute;
+
+right:9px;
+top:9px;
+
+width:34px;
+height:34px;
+
+border-radius:50%;
+
+border:
+1px solid
+rgba(255,255,255,.25);
+
+background:
+rgba(0,0,0,.55);
+
+color:#fff;
+
+font-size:23px;
+
+line-height:1;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+z-index:5;
+
+cursor:pointer;
+
+backdrop-filter:
+blur(10px);
+
+-webkit-backdrop-filter:
+blur(10px);
+
+}
+
+
+.video-close:active{
+
+transform:scale(.9);
+
 }
 
 
@@ -212,19 +480,24 @@ pointer-events:none;
    ========================= */
 
 .app{
+
 position:relative;
 
 z-index:2;
 
 height:100dvh;
+
 width:100%;
 
 display:flex;
 
 align-items:flex-end;
+
 justify-content:center;
 
-padding:0 16px 65px;
+padding:
+0 16px 65px;
+
 }
 
 
@@ -234,23 +507,34 @@ padding:0 16px 65px;
 
 .player{
 
-width:min(440px,94%);
+width:
+min(440px,94%);
 
 height:120px;
 
-padding:14px 18px;
+padding:
+14px 18px;
 
-border:1px solid rgba(255,255,255,.18);
+border:
+1px solid
+rgba(255,255,255,.18);
 
 border-radius:60px;
 
-background:rgba(255,255,255,.06);
+background:
+rgba(255,255,255,.06);
 
-backdrop-filter:blur(25px) saturate(115%);
--webkit-backdrop-filter:blur(25px) saturate(115%);
+backdrop-filter:
+blur(25px)
+saturate(115%);
+
+-webkit-backdrop-filter:
+blur(25px)
+saturate(115%);
 
 box-shadow:
-0 20px 50px rgba(0,0,0,.45);
+0 20px 50px
+rgba(0,0,0,.45);
 
 display:flex;
 
@@ -263,6 +547,7 @@ position:relative;
 overflow:hidden;
 
 touch-action:pan-y;
+
 }
 
 
@@ -288,7 +573,10 @@ border-radius:50%;
 
 overflow:hidden;
 
-border:1px solid rgba(255,255,255,.3);
+border:
+1px solid
+rgba(255,255,255,.3);
+
 }
 
 
@@ -307,9 +595,11 @@ object-position:center;
 
 background:#222;
 
-animation:spin 8s linear infinite;
+animation:
+spin 8s linear infinite;
 
 animation-play-state:paused;
+
 }
 
 
@@ -322,23 +612,30 @@ position:absolute;
 width:16px;
 height:16px;
 
-background:rgba(20,20,20,.85);
+background:
+rgba(20,20,20,.85);
 
-border:2px solid rgba(255,255,255,.3);
+border:
+2px solid
+rgba(255,255,255,.3);
 
 border-radius:50%;
 
 left:50%;
 top:50%;
 
-transform:translate(-50%,-50%);
+transform:
+translate(-50%,-50%);
 
 z-index:2;
+
 }
 
 
 .cover.spinning{
+
 animation-play-state:running;
+
 }
 
 
@@ -370,6 +667,7 @@ display:flex;
 flex-direction:column;
 
 justify-content:center;
+
 }
 
 
@@ -388,6 +686,7 @@ text-overflow:ellipsis;
 color:#fff;
 
 letter-spacing:.2px;
+
 }
 
 
@@ -395,7 +694,8 @@ letter-spacing:.2px;
 
 font-size:12px;
 
-color:rgba(255,255,255,.65);
+color:
+rgba(255,255,255,.65);
 
 white-space:nowrap;
 
@@ -406,6 +706,7 @@ text-overflow:ellipsis;
 margin-top:2px;
 
 margin-bottom:8px;
+
 }
 
 
@@ -423,7 +724,8 @@ height:5px;
 
 border-radius:10px;
 
-background:rgba(255,255,255,.2);
+background:
+rgba(255,255,255,.2);
 
 cursor:pointer;
 
@@ -434,6 +736,7 @@ touch-action:none;
 user-select:none;
 
 -webkit-user-select:none;
+
 }
 
 
@@ -450,6 +753,7 @@ left:-10px;
 right:-10px;
 
 z-index:1;
+
 }
 
 
@@ -471,6 +775,7 @@ border-radius:10px;
 pointer-events:none;
 
 z-index:2;
+
 }
 
 
@@ -478,9 +783,12 @@ z-index:2;
 
 font-size:11px;
 
-color:rgba(255,255,255,.65);
+color:
+rgba(255,255,255,.65);
 
-font-variant-numeric:tabular-nums;
+font-variant-numeric:
+tabular-nums;
+
 }
 
 
@@ -494,11 +802,14 @@ display:flex;
 
 align-items:center;
 
-gap:8px;
+gap:7px;
 
 flex-shrink:0;
+
 }
 
+
+/* NORMAL BUTTON */
 
 .btn{
 
@@ -509,7 +820,8 @@ border:0;
 
 background:transparent;
 
-color:rgba(255,255,255,.9);
+color:
+rgba(255,255,255,.9);
 
 display:flex;
 
@@ -519,6 +831,7 @@ justify-content:center;
 cursor:pointer;
 
 padding:0;
+
 }
 
 
@@ -528,6 +841,80 @@ width:20px;
 height:20px;
 
 fill:#fff;
+
+}
+
+
+/* =========================
+   VIDEO BUTTON
+   ========================= */
+
+.video-btn{
+
+width:38px;
+height:38px;
+
+border-radius:50%;
+
+border:
+1px solid
+rgba(255,255,255,.25);
+
+background:
+rgba(255,255,255,.10);
+
+color:#fff;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+cursor:pointer;
+
+padding:0;
+
+backdrop-filter:
+blur(10px);
+
+-webkit-backdrop-filter:
+blur(10px);
+
+box-shadow:
+0 4px 12px
+rgba(0,0,0,.25);
+
+transition:
+transform .2s,
+background .2s;
+
+}
+
+
+.video-btn svg{
+
+width:19px;
+height:19px;
+
+fill:#fff;
+
+margin-left:2px;
+
+}
+
+
+.video-btn:active{
+
+transform:scale(.88);
+
+}
+
+
+.video-btn:hover{
+
+background:
+rgba(255,255,255,.18);
+
 }
 
 
@@ -543,17 +930,24 @@ align-items:center;
 
 gap:4px;
 
-background:rgba(0,0,0,.25);
+background:
+rgba(0,0,0,.25);
 
-border:1px solid rgba(255,255,255,.15);
+border:
+1px solid
+rgba(255,255,255,.15);
 
-padding:4px 6px;
+padding:
+4px 6px;
 
 border-radius:20px;
 
-backdrop-filter:blur(10px);
+backdrop-filter:
+blur(10px);
 
--webkit-backdrop-filter:blur(10px);
+-webkit-backdrop-filter:
+blur(10px);
+
 }
 
 
@@ -572,6 +966,7 @@ align-items:center;
 transition:
 width .28s cubic-bezier(.2,.8,.2,1),
 opacity .2s ease;
+
 }
 
 
@@ -582,6 +977,7 @@ width:55px;
 opacity:1;
 
 margin-left:2px;
+
 }
 
 
@@ -595,13 +991,15 @@ width:55px;
 
 height:3.5px;
 
-background:rgba(255,255,255,.3);
+background:
+rgba(255,255,255,.3);
 
 border-radius:10px;
 
 outline:none;
 
 cursor:pointer;
+
 }
 
 
@@ -620,7 +1018,10 @@ background:#fff;
 
 cursor:pointer;
 
-box-shadow:0 0 5px rgba(0,0,0,.5);
+box-shadow:
+0 0 5px
+rgba(0,0,0,.5);
+
 }
 
 
@@ -629,7 +1030,9 @@ box-shadow:0 0 5px rgba(0,0,0,.5);
 @supports (-webkit-touch-callout:none){
 
 .vol-container{
+
 display:none!important;
+
 }
 
 }
@@ -657,11 +1060,14 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-box-shadow:0 4px 15px rgba(0,0,0,.3);
+box-shadow:
+0 4px 15px
+rgba(0,0,0,.3);
 
 cursor:pointer;
 
 flex-shrink:0;
+
 }
 
 
@@ -673,11 +1079,14 @@ height:20px;
 fill:#000;
 
 margin-left:2px;
+
 }
 
 
 .play.playing svg{
+
 margin-left:0;
+
 }
 
 
@@ -685,6 +1094,7 @@ margin-left:0;
 .play:active{
 
 transform:scale(.90);
+
 }
 
 
@@ -709,6 +1119,7 @@ backdrop-filter:none!important;
 pointer-events:none;
 
 display:none;
+
 }
 
 
@@ -717,6 +1128,7 @@ display:none;
 display:block;
 
 pointer-events:auto;
+
 }
 
 
@@ -732,13 +1144,20 @@ width:170px;
 
 height:100dvh;
 
-background:rgba(20,20,20,.35)!important;
+background:
+rgba(20,20,20,.35)!important;
 
-backdrop-filter:blur(25px) saturate(150%)!important;
+backdrop-filter:
+blur(25px)
+saturate(150%)!important;
 
--webkit-backdrop-filter:blur(25px) saturate(150%)!important;
+-webkit-backdrop-filter:
+blur(25px)
+saturate(150%)!important;
 
-border-left:1px solid rgba(255,255,255,.15)!important;
+border-left:
+1px solid
+rgba(255,255,255,.15)!important;
 
 z-index:100;
 
@@ -749,14 +1168,17 @@ display:flex;
 
 flex-direction:column;
 
-padding:12px 6px;
+padding:
+12px 6px;
 
 box-shadow:
--10px 0 30px rgba(0,0,0,.3)!important;
+-10px 0 30px
+rgba(0,0,0,.3)!important;
 
 visibility:hidden;
 
 pointer-events:none;
+
 }
 
 
@@ -767,6 +1189,7 @@ right:0;
 visibility:visible;
 
 pointer-events:auto;
+
 }
 
 
@@ -778,16 +1201,20 @@ align-items:center;
 
 justify-content:space-between;
 
-padding:6px 8px;
+padding:
+6px 8px;
 
 border-bottom:
-1px solid rgba(255,255,255,.15);
+1px solid
+rgba(255,255,255,.15);
 
 margin-bottom:8px;
 
-background:rgba(255,255,255,.1);
+background:
+rgba(255,255,255,.1);
 
 border-radius:8px;
+
 }
 
 
@@ -798,6 +1225,7 @@ font-size:11px;
 font-weight:700;
 
 color:#fff;
+
 }
 
 
@@ -807,15 +1235,18 @@ background:transparent;
 
 border:0;
 
-color:rgba(255,255,255,.9);
+color:
+rgba(255,255,255,.9);
 
 font-size:16px;
 
 cursor:pointer;
 
-padding:0 2px;
+padding:
+0 2px;
 
 line-height:1;
+
 }
 
 
@@ -832,23 +1263,30 @@ flex-direction:column;
 gap:4px;
 
 padding-right:2px;
+
 }
 
 
 .song-list::-webkit-scrollbar{
+
 width:2px;
+
 }
 
 
 .song-list::-webkit-scrollbar-thumb{
 
-background:rgba(255,255,255,.3);
+background:
+rgba(255,255,255,.3);
 
 border-radius:3px;
+
 }
 
 
-/* SONG ITEM */
+/* =========================
+   SONG ITEM
+   ========================= */
 
 .song-item{
 
@@ -858,29 +1296,39 @@ align-items:center;
 
 gap:6px;
 
-padding:4px 5px;
+padding:
+4px 5px;
 
 border-radius:7px;
 
-background:rgba(255,255,255,.08);
+background:
+rgba(255,255,255,.08);
 
-border:1px solid rgba(255,255,255,.1);
+border:
+1px solid
+rgba(255,255,255,.1);
 
 cursor:pointer;
+
 }
 
 
 .song-item:active{
+
 transform:scale(.96);
+
 }
 
 
 .song-item:hover,
 .song-item.active{
 
-background:rgba(255,255,255,.22);
+background:
+rgba(255,255,255,.22);
 
-border-color:rgba(255,255,255,.35);
+border-color:
+rgba(255,255,255,.35);
+
 }
 
 
@@ -896,7 +1344,9 @@ object-fit:cover;
 flex-shrink:0;
 
 box-shadow:
-0 2px 5px rgba(0,0,0,.3);
+0 2px 5px
+rgba(0,0,0,.3);
+
 }
 
 
@@ -905,6 +1355,7 @@ box-shadow:
 flex:1;
 
 min-width:0;
+
 }
 
 
@@ -923,6 +1374,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 letter-spacing:.2px;
+
 }
 
 
@@ -932,7 +1384,8 @@ font-size:8px;
 
 font-weight:400;
 
-color:rgba(255,255,255,.55);
+color:
+rgba(255,255,255,.55);
 
 white-space:nowrap;
 
@@ -941,153 +1394,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:.5px;
-}
 
-
-/* =========================
-   VIDEO POPUP
-   ========================= */
-
-.video-overlay{
-
-position:fixed;
-
-inset:0;
-
-z-index:200;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-padding:20px;
-
-background:rgba(0,0,0,.48);
-
-backdrop-filter:blur(12px);
-
--webkit-backdrop-filter:blur(12px);
-
-opacity:0;
-
-visibility:hidden;
-
-pointer-events:none;
-
-transition:
-opacity .28s ease,
-visibility .28s ease;
-}
-
-
-.video-overlay.active{
-
-opacity:1;
-
-visibility:visible;
-
-pointer-events:auto;
-}
-
-
-.video-popup{
-
-position:relative;
-
-width:min(720px,94vw);
-
-aspect-ratio:16/9;
-
-border-radius:22px;
-
-overflow:hidden;
-
-background:rgba(20,20,20,.55);
-
-border:1px solid rgba(255,255,255,.22);
-
-box-shadow:
-0 25px 80px rgba(0,0,0,.65),
-0 0 0 1px rgba(255,255,255,.05);
-
-backdrop-filter:blur(25px) saturate(140%);
-
--webkit-backdrop-filter:blur(25px) saturate(140%);
-
-transform:scale(.92);
-
-transition:
-transform .3s cubic-bezier(.2,.8,.2,1);
-}
-
-
-.video-overlay.active .video-popup{
-
-transform:scale(1);
-}
-
-
-.video-frame{
-
-width:100%;
-
-height:100%;
-
-border:0;
-
-display:block;
-
-background:#000;
-}
-
-
-.video-close{
-
-position:absolute;
-
-right:10px;
-
-top:10px;
-
-width:34px;
-height:34px;
-
-border-radius:50%;
-
-border:1px solid rgba(255,255,255,.25);
-
-background:rgba(0,0,0,.55);
-
-color:#fff;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:21px;
-
-line-height:1;
-
-cursor:pointer;
-
-z-index:5;
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-
-box-shadow:
-0 4px 15px rgba(0,0,0,.35);
-}
-
-
-.video-close:active{
-
-transform:scale(.9);
 }
 
 
@@ -1098,96 +1405,142 @@ transform:scale(.9);
 @media(max-width:480px){
 
 .app{
+
 padding-bottom:60px;
+
 }
+
 
 .player{
 
 height:116px;
 
-padding:12px 14px;
+padding:
+12px 14px;
 
 border-radius:58px;
 
-gap:10px;
+gap:8px;
+
 }
+
 
 .cover-wrapper{
 
 width:78px;
 height:78px;
+
 }
+
 
 .title{
+
 font-size:15px;
+
 }
 
+
 .artist{
+
 font-size:11px;
+
 }
+
 
 .play{
 
 width:42px;
 height:42px;
+
 }
 
-.top-widgets{
-top:10px;
+
+.video-btn{
+
+width:36px;
+height:36px;
+
 }
+
+
+.top-widgets{
+
+top:10px;
+
+}
+
 
 .bd-time{
 
 font-size:10px;
 
-padding:4px 9px;
+padding:
+4px 9px;
+
 }
 
-.playlist-toggle-btn,
-.video-toggle-btn{
+
+.playlist-toggle-btn{
 
 font-size:10px;
 
-padding:4px 9px;
+padding:
+4px 9px;
+
 }
+
 
 .playlist-drawer{
+
 width:170px;
+
 }
 
-.video-overlay{
 
-padding:14px;
-}
+/* Mobile video */
 
-.video-popup{
+.videoBox{
 
-width:100%;
+width:92vw;
 
 border-radius:18px;
+
 }
+
 
 .video-close{
 
 width:32px;
 height:32px;
 
-right:8px;
-top:8px;
+right:7px;
+top:7px;
 
-font-size:20px;
 }
 
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- =========================
+     BACKGROUND
+     ========================= -->
+
 <div class="bg"></div>
 
+
+<!-- =========================
+     TOP
+     ========================= -->
+
 <div class="top-widgets">
+
 
 <div class="bd-time">
 
@@ -1201,18 +1554,6 @@ font-size:20px;
 
 </div>
 
-<button
-class="video-toggle-btn"
-onclick="toggleVideoPopup()"
->
-
-<svg viewBox="0 0 24 24">
-<path d="M8 5v14l11-7z"/>
-</svg>
-
-<span>Video</span>
-
-</button>
 
 <button
 class="playlist-toggle-btn"
@@ -1231,54 +1572,34 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </button>
 
+
 </div>
 
-<div id="yt"></div>
 
+<!-- =========================
+     SAME YOUTUBE PLAYER
+     ========================= -->
 
-<!-- VIDEO POPUP -->
+<div class="videoBox" id="videoBox">
 
-<div
-class="video-overlay"
-id="videoOverlay"
-onclick="closeVideoOutside(event)"
->
-
-<div
-class="video-popup"
-onclick="event.stopPropagation()"
->
 
 <button
 class="video-close"
-onclick="closeVideoPopup()"
+onclick="closeVideo()"
 >
 &times;
 </button>
 
-<iframe
-id="videoFrame"
-class="video-frame"
-src=""
-title="YouTube video player"
-allow="
-accelerometer;
-autoplay;
-clipboard-write;
-encrypted-media;
-gyroscope;
-picture-in-picture;
-web-share
-"
-allowfullscreen>
-</iframe>
 
-</div>
+<div id="yt"></div>
+
 
 </div>
 
 
-<!-- DRAWER -->
+<!-- =========================
+     DRAWER OVERLAY
+     ========================= -->
 
 <div
 class="drawer-overlay"
@@ -1286,16 +1607,24 @@ id="overlay"
 onclick="toggleDrawer()"
 ></div>
 
+
+<!-- =========================
+     PLAYLIST DRAWER
+     ========================= -->
+
 <div
 class="playlist-drawer"
 id="drawer"
 >
 
+
 <div class="drawer-header">
+
 
 <div class="drawer-title">
 Playlist Songs
 </div>
+
 
 <button
 class="close-btn"
@@ -1304,12 +1633,15 @@ onclick="toggleDrawer()"
 &times;
 </button>
 
+
 </div>
+
 
 <div
 class="song-list"
 id="songList"
 >
+
 
 <div
 style="
@@ -1322,21 +1654,30 @@ margin-top:15px;
 Loading...
 </div>
 
-</div>
 
 </div>
 
 
-<!-- APP -->
+</div>
+
+
+<!-- =========================
+     APP
+     ========================= -->
 
 <div class="app">
+
 
 <section
 class="player"
 id="playerCard"
 >
 
+
+<!-- COVER -->
+
 <div class="cover-wrapper">
+
 
 <img
 id="cover"
@@ -1345,9 +1686,14 @@ src="logo.png"
 alt="Album art"
 >
 
+
 </div>
 
+
+<!-- INFO -->
+
 <div class="middle">
+
 
 <div
 id="title"
@@ -1356,12 +1702,16 @@ class="title"
 My Playlist
 </div>
 
+
 <div
 id="artist"
 class="artist"
 >
 YouTube Music
 </div>
+
+
+<!-- SEEK -->
 
 <div
 class="seek"
@@ -1374,6 +1724,9 @@ id="fill"
 ></div>
 
 </div>
+
+
+<!-- TIME -->
 
 <div class="time-display">
 
@@ -1389,9 +1742,18 @@ id="fill"
 
 </div>
 
+
 </div>
 
+
+<!-- =========================
+     CONTROLS
+     ========================= -->
+
 <div class="controls">
+
+
+<!-- PLAY -->
 
 <button
 class="play"
@@ -1410,7 +1772,30 @@ viewBox="0 0 24 24"
 
 </button>
 
+
+<!-- VIDEO -->
+
+<button
+class="video-btn"
+onclick="openVideo()"
+title="Video"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M8 5v14l11-7z
+"/>
+
+</svg>
+
+</button>
+
+
+<!-- VOLUME -->
+
 <div class="vol-container">
+
 
 <button
 class="btn"
@@ -1431,10 +1816,12 @@ v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z
 
 </button>
 
+
 <div
 class="vol-slider-wrapper"
 id="volWrapper"
 >
+
 
 <input
 type="range"
@@ -1446,17 +1833,25 @@ value="100"
 oninput="changeVolume(this.value)"
 >
 
-</div>
 
 </div>
 
+
 </div>
+
+
+</div>
+
 
 </section>
 
+
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+
+<script
+src="https://www.youtube.com/iframe_api"
+></script>
 <script>
 
 /* =========================
@@ -1466,7 +1861,9 @@ oninput="changeVolume(this.value)"
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
 let player=null;
+
 let playing=false;
+
 let playlistItems=[];
 
 
@@ -1481,12 +1878,15 @@ const options={
 timeZone:"Asia/Dhaka",
 
 hour:"2-digit",
+
 minute:"2-digit",
+
 second:"2-digit",
 
 hour12:true
 
 };
+
 
 document.getElementById("bdTimeVal").textContent=
 
@@ -1497,9 +1897,13 @@ options
 
 }
 
+
 updateBDTime();
 
-setInterval(updateBDTime,1000);
+setInterval(
+updateBDTime,
+1000
+);
 
 
 /* =========================
@@ -1513,19 +1917,27 @@ player=new YT.Player(
 {
 
 width:"2",
+
 height:"2",
 
 playerVars:{
 
 autoplay:0,
-controls:0,
-disablekb:1,
-fs:0,
+
+controls:1,
+
+disablekb:0,
+
+fs:1,
+
 modestbranding:1,
+
 playsinline:1,
+
 rel:0,
 
 listType:"playlist",
+
 list:PLAYLIST_ID
 
 },
@@ -1533,6 +1945,7 @@ list:PLAYLIST_ID
 events:{
 
 onReady:ready,
+
 onStateChange:state
 
 }
@@ -1585,14 +1998,18 @@ playing=true;
 
 playBtn.classList.add("playing");
 
+
 playIcon.innerHTML=
-'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+`
+<path d="
+M6 19h4V5H6v14zm8-14v14h4V5h-4z
+"/>
+`;
+
 
 cover.classList.add("spinning");
 
 updateInfo();
-
-updateVideoPopup();
 
 }
 
@@ -1609,8 +2026,14 @@ playing=false;
 
 playBtn.classList.remove("playing");
 
+
 playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
+`
+<path d="
+M8 5v14l11-7z
+"/>
+`;
+
 
 cover.classList.remove("spinning");
 
@@ -1628,6 +2051,7 @@ function togglePlay(){
 if(!player)
 return;
 
+
 if(playing){
 
 player.pauseVideo();
@@ -1644,6 +2068,100 @@ player.playVideo();
 
 
 /* =========================
+   VIDEO
+   IMPORTANT:
+   SAME PLAYER
+   ========================= */
+
+function openVideo(){
+
+if(!player)
+return;
+
+
+/*
+   Save exact current position.
+*/
+
+let currentTime=0;
+
+
+try{
+
+currentTime=
+player.getCurrentTime();
+
+}catch(e){
+
+currentTime=0;
+
+}
+
+
+/*
+   Show SAME YouTube player.
+   No new iframe.
+   No new video URL.
+*/
+
+const box=
+document.getElementById("videoBox");
+
+
+box.classList.add("active");
+
+
+/*
+   Keep exact current position.
+
+   Example:
+   Audio = 30 seconds
+   Video = 30 seconds
+*/
+
+setTimeout(()=>{
+
+try{
+
+player.seekTo(
+currentTime,
+true
+);
+
+player.playVideo();
+
+}catch(e){}
+
+},80);
+
+}
+
+
+/* =========================
+   CLOSE VIDEO
+   ========================= */
+
+function closeVideo(){
+
+const box=
+document.getElementById("videoBox");
+
+
+/*
+   Hide only.
+
+   DO NOT pause.
+
+   Audio will continue from
+   the same position.
+*/
+
+box.classList.remove("active");
+
+}
+
+
+/* =========================
    VOLUME
    ========================= */
 
@@ -1654,6 +2172,7 @@ function resetVolTimer(){
 
 if(volTimer)
 clearTimeout(volTimer);
+
 
 volTimer=setTimeout(()=>{
 
@@ -1677,6 +2196,7 @@ wrapper.classList.contains("active")
 ){
 
 wrapper.classList.remove("active");
+
 
 if(volTimer)
 clearTimeout(volTimer);
@@ -1705,13 +2225,14 @@ player.setVolume(val);
 
 }
 
+
 resetVolTimer();
 
 }
 
 
 /* =========================
-   NEXT / PREVIOUS
+   NEXT
    ========================= */
 
 function nextSong(){
@@ -1734,10 +2255,15 @@ playlistItems.length;
 
 forceUpdateUI(next);
 
+
 player.nextVideo();
 
 }
 
+
+/* =========================
+   PREVIOUS
+   ========================= */
 
 function previousSong(){
 
@@ -1753,12 +2279,15 @@ player.getPlaylistIndex();
 
 
 const previous=
-(current-1+
-playlistItems.length)%
+(
+current-1+
+playlistItems.length
+)%
 playlistItems.length;
 
 
 forceUpdateUI(previous);
+
 
 player.previousVideo();
 
@@ -1815,28 +2344,32 @@ artist.textContent;
 
 }
 
-
-updateVideoPopup();
-
 }
 
 
 /* =================================================
-   UNIVERSAL SWIPE
+   SWIPE
    ================================================= */
 
 let swipeStartX=0;
+
 let swipeStartY=0;
 
 let swipeActive=false;
+
 let swipeFromSeek=false;
 
 
 const playerCard=
-document.getElementById("playerCard");
+document.getElementById(
+"playerCard"
+);
+
 
 const seekElement=
-document.getElementById("seek");
+document.getElementById(
+"seek"
+);
 
 
 /* POINTER DOWN */
@@ -1846,10 +2379,13 @@ playerCard.addEventListener(
 e=>{
 
 swipeStartX=e.clientX;
+
 swipeStartY=e.clientY;
+
 
 swipeFromSeek=
 !!e.target.closest("#seek");
+
 
 swipeActive=true;
 
@@ -1893,10 +2429,13 @@ return;
 
 
 const endX=e.clientX;
+
 const endY=e.clientY;
+
 
 const dx=
 endX-swipeStartX;
+
 
 const dy=
 endY-swipeStartY;
@@ -1970,10 +2509,11 @@ swipeActive=false;
 
 
 /* =================================================
-   SEEK BAR
+   SEEK
    ================================================= */
 
 let isDragging=false;
+
 let seekPointerId=null;
 
 
@@ -2025,6 +2565,7 @@ document.getElementById("current")
 .textContent=
 format(pos*duration);
 
+
 document.getElementById("duration")
 .textContent=
 format(duration);
@@ -2043,7 +2584,9 @@ seekElement.addEventListener(
 e=>{
 
 e.preventDefault();
+
 e.stopPropagation();
+
 
 isDragging=true;
 
@@ -2060,7 +2603,9 @@ e.pointerId
 
 
 const pos=
-getSeekPosition(e.clientX);
+getSeekPosition(
+e.clientX
+);
 
 
 updateSeekVisual(pos);
@@ -2083,11 +2628,14 @@ return;
 
 
 e.preventDefault();
+
 e.stopPropagation();
 
 
 const pos=
-getSeekPosition(e.clientX);
+getSeekPosition(
+e.clientX
+);
 
 
 updateSeekVisual(pos);
@@ -2110,11 +2658,14 @@ return;
 
 
 e.preventDefault();
+
 e.stopPropagation();
 
 
 const pos=
-getSeekPosition(e.clientX);
+getSeekPosition(
+e.clientX
+);
 
 
 updateSeekVisual(pos);
@@ -2142,6 +2693,7 @@ true
 
 
 isDragging=false;
+
 seekPointerId=null;
 
 
@@ -2167,6 +2719,7 @@ seekElement.addEventListener(
 ()=>{
 
 isDragging=false;
+
 seekPointerId=null;
 
 }
@@ -2184,7 +2737,9 @@ return;
 
 
 const pos=
-getSeekPosition(e.clientX);
+getSeekPosition(
+e.clientX
+);
 
 
 if(player){
@@ -2229,6 +2784,7 @@ try{
 const current=
 player.getCurrentTime();
 
+
 const duration=
 player.getDuration();
 
@@ -2260,7 +2816,6 @@ format(current);
 document.getElementById("duration")
 .textContent=
 format(duration);
-
 
 }catch(e){}
 
@@ -2312,7 +2867,9 @@ player.getPlaylist();
 
 
 const list=
-document.getElementById("songList");
+document.getElementById(
+"songList"
+);
 
 
 if(
@@ -2410,7 +2967,7 @@ updateInfo();
 
 
 /* =========================
-   SONG DETAILS
+   DETAILS
    ========================= */
 
 function fetchSongDetails(
@@ -2487,7 +3044,9 @@ return;
 
 forceUpdateUI(index);
 
+
 player.playVideoAt(index);
+
 
 toggleDrawer();
 
@@ -2560,7 +3119,8 @@ document.getElementById("cover").src=
 if(d.title){
 
 document.getElementById("title")
-.textContent=d.title;
+.textContent=
+d.title;
 
 }
 
@@ -2568,194 +3128,42 @@ document.getElementById("title")
 if(d.author){
 
 document.getElementById("artist")
-.textContent=d.author;
-
-}
-
-
-updateVideoPopup();
-
-}catch(e){}
-
-}
-
-
-/* =================================================
-   VIDEO POPUP
-   ================================================= */
-
-function getCurrentVideoId(){
-
-if(
-!player ||
-typeof player.getVideoData!=="function"
-)
-return null;
-
-
-try{
-
-const data=
-player.getVideoData();
-
-
-if(
-data &&
-data.video_id
-){
-
-return data.video_id;
+.textContent=
+d.author;
 
 }
 
 }catch(e){}
 
-return null;
-
 }
 
 
-/* UPDATE OPEN VIDEO */
-
-function updateVideoPopup(){
-
-const videoId=
-getCurrentVideoId();
-
-
-if(!videoId)
-return;
-
-
-const overlay=
-document.getElementById("videoOverlay");
-
-
-const frame=
-document.getElementById("videoFrame");
-
-
-if(
-overlay.classList.contains("active")
-){
-
-frame.src=
-`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-
-}
-
-}
-
-
-/* OPEN VIDEO */
-
-function toggleVideoPopup(){
-
-const overlay=
-document.getElementById("videoOverlay");
-
-
-if(
-overlay.classList.contains("active")
-){
-
-closeVideoPopup();
-
-return;
-
-}
-
-
-const videoId=
-getCurrentVideoId();
-
-
-if(!videoId)
-return;
-
-
-const frame=
-document.getElementById("videoFrame");
-
-
-frame.src=
-`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-
-
-overlay.classList.add("active");
-
-}
-
-
-/* CLOSE VIDEO */
-
-function closeVideoPopup(){
-
-const overlay=
-document.getElementById("videoOverlay");
-
-const frame=
-document.getElementById("videoFrame");
-
-
-overlay.classList.remove("active");
-
-
-setTimeout(()=>{
-
-frame.src="";
-
-},250);
-
-}
-
-
-/* CLICK OUTSIDE */
-
-function closeVideoOutside(event){
-
-if(
-event.target.id==="videoOverlay"
-){
-
-closeVideoPopup();
-
-}
-
-}
-
-
-/* ESC */
-
-document.addEventListener(
-"keydown",
-e=>{
-
-if(e.key==="Escape"){
-
-closeVideoPopup();
-
-}
-
-});
-
-
-/* =================================================
+/* =========================
    DRAWER
-   ================================================= */
+   ========================= */
 
 function toggleDrawer(){
 
 const drawer=
-document.getElementById("drawer");
+document.getElementById(
+"drawer"
+);
+
 
 const overlay=
-document.getElementById("overlay");
+document.getElementById(
+"overlay"
+);
 
 
-drawer.classList.toggle("open");
+drawer.classList.toggle(
+"open"
+);
 
-overlay.classList.toggle("active");
+
+overlay.classList.toggle(
+"active"
+);
 
 }
 
