@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -90,14 +91,11 @@ inset:0;
 background-image:
 url("background.jpg");
 
-background-position:
-center center;
+background-position:center center;
 
-background-size:
-cover;
+background-size:cover;
 
-background-repeat:
-no-repeat;
+background-repeat:no-repeat;
 
 z-index:0;
 
@@ -191,6 +189,7 @@ gap:6px;
 .live-dot{
 
 width:7px;
+
 height:7px;
 
 background:#ff3b30;
@@ -284,6 +283,7 @@ transform:scale(.95);
 .playlist-toggle-btn svg{
 
 width:14px;
+
 height:14px;
 
 fill:#fff;
@@ -291,47 +291,16 @@ fill:#fff;
 }
 
 
-/* =========================
-   YOUTUBE PLAYER
-   ========================= */
-
-/*
-   Initially hidden.
-   This is the SAME YouTube player
-   used for audio.
-
-   When Video button is clicked,
-   this exact player becomes visible.
-*/
-
-#yt{
-
-position:fixed;
-
-width:2px;
-height:2px;
-
-left:-10px;
-bottom:-10px;
-
-opacity:.01;
-
-pointer-events:none;
-
-z-index:-1;
-
-}
-
-
-/* =========================
-   VIDEO WINDOW
-   ========================= */
+/* =================================================
+   VIDEO AREA
+   ================================================= */
 
 .videoBox{
 
 position:fixed;
 
 left:50%;
+
 top:50%;
 
 transform:
@@ -347,20 +316,11 @@ border-radius:22px;
 
 overflow:hidden;
 
-background:
-rgba(20,20,20,.45);
+background:#000;
 
 border:
 1px solid
-rgba(255,255,255,.25);
-
-backdrop-filter:
-blur(25px)
-saturate(140%);
-
--webkit-backdrop-filter:
-blur(25px)
-saturate(140%);
+rgba(255,255,255,.18);
 
 box-shadow:
 0 25px 80px
@@ -376,12 +336,12 @@ pointer-events:none;
 
 transition:
 opacity .25s ease,
-transform .3s cubic-bezier(.2,.8,.2,1);
+transform .30s cubic-bezier(.2,.8,.2,1);
 
 }
 
 
-/* VIDEO OPEN */
+/* OPEN */
 
 .videoBox.active{
 
@@ -389,7 +349,7 @@ opacity:1;
 
 visibility:visible;
 
-pointer-events:auto;
+pointer-events:none;
 
 transform:
 translate(-50%,-50%)
@@ -399,78 +359,68 @@ scale(1);
 
 
 /*
-   IMPORTANT:
-   Same #yt player becomes
-   full-size video.
+   SAME YOUTUBE PLAYER
+
+   Hidden when audio mode.
+   Full video when video mode.
 */
+
+#yt{
+
+position:fixed;
+
+width:2px;
+
+height:2px;
+
+left:-10px;
+
+bottom:-10px;
+
+opacity:.01;
+
+pointer-events:none;
+
+z-index:-1;
+
+}
+
 
 .videoBox #yt{
 
 position:absolute;
 
 left:0;
+
 top:0;
 
 width:100%;
+
 height:100%;
 
 opacity:1;
 
+pointer-events:none;
+
 z-index:1;
 
-pointer-events:auto;
-
 }
 
 
-/* VIDEO CLOSE */
+/*
+   IMPORTANT
 
-.video-close{
+   YouTube iframe itself gets
+   no custom controls from us.
+*/
 
-position:absolute;
+.videoBox iframe{
 
-right:9px;
-top:9px;
+width:100%!important;
 
-width:34px;
-height:34px;
+height:100%!important;
 
-border-radius:50%;
-
-border:
-1px solid
-rgba(255,255,255,.25);
-
-background:
-rgba(0,0,0,.55);
-
-color:#fff;
-
-font-size:23px;
-
-line-height:1;
-
-display:flex;
-
-align-items:center;
-justify-content:center;
-
-z-index:5;
-
-cursor:pointer;
-
-backdrop-filter:
-blur(10px);
-
--webkit-backdrop-filter:
-blur(10px);
-
-}
-
-
-.video-close:active{
-
-transform:scale(.9);
+border:0!important;
 
 }
 
@@ -501,9 +451,9 @@ padding:
 }
 
 
-/* =========================
+/* =================================================
    MUSIC PLAYER
-   ========================= */
+   ================================================= */
 
 .player{
 
@@ -560,6 +510,7 @@ touch-action:pan-y;
 position:relative;
 
 width:84px;
+
 height:84px;
 
 flex-shrink:0;
@@ -567,6 +518,7 @@ flex-shrink:0;
 display:flex;
 
 align-items:center;
+
 justify-content:center;
 
 border-radius:50%;
@@ -583,6 +535,7 @@ rgba(255,255,255,.3);
 .cover{
 
 width:137%;
+
 height:137%;
 
 margin:-18.5%;
@@ -610,6 +563,7 @@ content:"";
 position:absolute;
 
 width:16px;
+
 height:16px;
 
 background:
@@ -622,6 +576,7 @@ rgba(255,255,255,.3);
 border-radius:50%;
 
 left:50%;
+
 top:50%;
 
 transform:
@@ -711,7 +666,7 @@ margin-bottom:8px;
 
 
 /* =========================
-   SEEK BAR
+   SEEK
    ========================= */
 
 .seek{
@@ -747,9 +702,11 @@ content:"";
 position:absolute;
 
 top:-12px;
+
 bottom:-12px;
 
 left:-10px;
+
 right:-10px;
 
 z-index:1;
@@ -762,6 +719,7 @@ z-index:1;
 position:absolute;
 
 left:0;
+
 top:0;
 
 height:100%;
@@ -809,11 +767,10 @@ flex-shrink:0;
 }
 
 
-/* NORMAL BUTTON */
-
 .btn{
 
 width:28px;
+
 height:28px;
 
 border:0;
@@ -826,6 +783,7 @@ rgba(255,255,255,.9);
 display:flex;
 
 align-items:center;
+
 justify-content:center;
 
 cursor:pointer;
@@ -838,6 +796,7 @@ padding:0;
 .btn svg{
 
 width:20px;
+
 height:20px;
 
 fill:#fff;
@@ -852,6 +811,7 @@ fill:#fff;
 .video-btn{
 
 width:38px;
+
 height:38px;
 
 border-radius:50%;
@@ -868,6 +828,7 @@ color:#fff;
 display:flex;
 
 align-items:center;
+
 justify-content:center;
 
 cursor:pointer;
@@ -894,6 +855,7 @@ background .2s;
 .video-btn svg{
 
 width:19px;
+
 height:19px;
 
 fill:#fff;
@@ -910,10 +872,10 @@ transform:scale(.88);
 }
 
 
-.video-btn:hover{
+.video-btn.active{
 
 background:
-rgba(255,255,255,.18);
+rgba(255,255,255,.22);
 
 }
 
@@ -1010,6 +972,7 @@ cursor:pointer;
 appearance:none;
 
 width:10px;
+
 height:10px;
 
 border-radius:50%;
@@ -1025,7 +988,7 @@ rgba(0,0,0,.5);
 }
 
 
-/* HIDE VOLUME ON IOS */
+/* IOS */
 
 @supports (-webkit-touch-callout:none){
 
@@ -1045,6 +1008,7 @@ display:none!important;
 .play{
 
 width:44px;
+
 height:44px;
 
 border-radius:50%;
@@ -1058,6 +1022,7 @@ color:#000;
 display:flex;
 
 align-items:center;
+
 justify-content:center;
 
 box-shadow:
@@ -1074,6 +1039,7 @@ flex-shrink:0;
 .play svg{
 
 width:20px;
+
 height:20px;
 
 fill:#000;
@@ -1335,6 +1301,7 @@ rgba(255,255,255,.35);
 .song-item img{
 
 width:26px;
+
 height:26px;
 
 border-radius:5px;
@@ -1428,6 +1395,7 @@ gap:8px;
 .cover-wrapper{
 
 width:78px;
+
 height:78px;
 
 }
@@ -1450,6 +1418,7 @@ font-size:11px;
 .play{
 
 width:42px;
+
 height:42px;
 
 }
@@ -1458,6 +1427,7 @@ height:42px;
 .video-btn{
 
 width:36px;
+
 height:36px;
 
 }
@@ -1497,24 +1467,11 @@ width:170px;
 }
 
 
-/* Mobile video */
-
 .videoBox{
 
 width:92vw;
 
 border-radius:18px;
-
-}
-
-
-.video-close{
-
-width:32px;
-height:32px;
-
-right:7px;
-top:7px;
 
 }
 
@@ -1577,22 +1534,17 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 
 <!-- =========================
+     VIDEO BOX
+
      SAME YOUTUBE PLAYER
      ========================= -->
 
-<div class="videoBox" id="videoBox">
-
-
-<button
-class="video-close"
-onclick="closeVideo()"
+<div
+class="videoBox"
+id="videoBox"
 >
-&times;
-</button>
-
 
 <div id="yt"></div>
-
 
 </div>
 
@@ -1620,7 +1572,6 @@ id="drawer"
 
 <div class="drawer-header">
 
-
 <div class="drawer-title">
 Playlist Songs
 </div>
@@ -1642,7 +1593,6 @@ class="song-list"
 id="songList"
 >
 
-
 <div
 style="
 text-align:center;
@@ -1653,7 +1603,6 @@ margin-top:15px;
 >
 Loading...
 </div>
-
 
 </div>
 
@@ -1766,7 +1715,9 @@ id="play-icon"
 viewBox="0 0 24 24"
 >
 
-<path d="M8 5v14l11-7z"/>
+<path d="
+M8 5v14l11-7z
+"/>
 
 </svg>
 
@@ -1777,7 +1728,8 @@ viewBox="0 0 24 24"
 
 <button
 class="video-btn"
-onclick="openVideo()"
+id="videoBtn"
+onclick="toggleVideo()"
 title="Video"
 >
 
@@ -1822,7 +1774,6 @@ class="vol-slider-wrapper"
 id="volWrapper"
 >
 
-
 <input
 type="range"
 class="vol-slider"
@@ -1832,7 +1783,6 @@ max="100"
 value="100"
 oninput="changeVolume(this.value)"
 >
-
 
 </div>
 
@@ -1865,6 +1815,13 @@ let player=null;
 let playing=false;
 
 let playlistItems=[];
+
+
+/* =========================
+   VIDEO STATE
+   ========================= */
+
+let videoOpen=false;
 
 
 /* =========================
@@ -1924,17 +1881,25 @@ playerVars:{
 
 autoplay:0,
 
-controls:1,
+/*
+   IMPORTANT
 
-disablekb:0,
+   No YouTube controls
+*/
 
-fs:1,
+controls:0,
+
+disablekb:1,
+
+fs:0,
 
 modestbranding:1,
 
 playsinline:1,
 
 rel:0,
+
+iv_load_policy:3,
 
 listType:"playlist",
 
@@ -2067,10 +2032,36 @@ player.playVideo();
 }
 
 
-/* =========================
-   VIDEO
-   IMPORTANT:
+/* =================================================
+   VIDEO TOGGLE
+
    SAME PLAYER
+   SAME POSITION
+   ================================================= */
+
+function toggleVideo(){
+
+if(!player)
+return;
+
+
+if(videoOpen){
+
+closeVideo();
+
+}
+
+else{
+
+openVideo();
+
+}
+
+}
+
+
+/* =========================
+   OPEN VIDEO
    ========================= */
 
 function openVideo(){
@@ -2080,7 +2071,7 @@ return;
 
 
 /*
-   Save exact current position.
+   EXACT CURRENT AUDIO POSITION
 */
 
 let currentTime=0;
@@ -2099,40 +2090,97 @@ currentTime=0;
 
 
 /*
-   Show SAME YouTube player.
-   No new iframe.
-   No new video URL.
+   Get current video ID
+*/
+
+let currentVideo=null;
+
+
+try{
+
+const data=
+player.getVideoData();
+
+if(data){
+
+currentVideo=
+data.video_id;
+
+}
+
+}catch(e){}
+
+
+/*
+   Show video box
 */
 
 const box=
-document.getElementById("videoBox");
+document.getElementById(
+"videoBox"
+);
 
 
 box.classList.add("active");
 
 
-/*
-   Keep exact current position.
+videoOpen=true;
 
-   Example:
-   Audio = 30 seconds
-   Video = 30 seconds
+
+/*
+   Change button appearance
+*/
+
+document
+.getElementById("videoBtn")
+.classList.add("active");
+
+
+/*
+   Give browser time to
+   resize the SAME iframe.
 */
 
 setTimeout(()=>{
 
 try{
 
+/*
+   IMPORTANT:
+
+   Do NOT load a new YouTube video.
+
+   Same video.
+   Same player.
+*/
+
+if(currentVideo){
+
+/*
+   First restore exact
+   audio position.
+*/
+
 player.seekTo(
 currentTime,
 true
 );
 
+}
+
+/*
+   Continue playing.
+*/
+
+if(playing){
+
 player.playVideo();
+
+}
 
 }catch(e){}
 
-},80);
+},120);
 
 }
 
@@ -2144,19 +2192,73 @@ player.playVideo();
 function closeVideo(){
 
 const box=
-document.getElementById("videoBox");
+document.getElementById(
+"videoBox"
+);
 
 
 /*
-   Hide only.
+   Save exact current position
+   before hiding.
+*/
 
-   DO NOT pause.
+let currentTime=0;
 
-   Audio will continue from
-   the same position.
+
+try{
+
+currentTime=
+player.getCurrentTime();
+
+}catch(e){}
+
+
+/*
+   Hide video.
 */
 
 box.classList.remove("active");
+
+videoOpen=false;
+
+
+document
+.getElementById("videoBtn")
+.classList.remove("active");
+
+
+/*
+   IMPORTANT:
+
+   Do NOT pause.
+
+   Audio keeps playing.
+*/
+
+setTimeout(()=>{
+
+try{
+
+/*
+   Restore the same position
+   after switching back to
+   hidden audio mode.
+*/
+
+player.seekTo(
+currentTime,
+true
+);
+
+if(playing){
+
+player.playVideo();
+
+}
+
+}catch(e){}
+
+},100);
 
 }
 
@@ -2188,7 +2290,9 @@ document
 function toggleVolume(){
 
 const wrapper=
-document.getElementById("volWrapper");
+document.getElementById(
+"volWrapper"
+);
 
 
 if(
@@ -2224,7 +2328,6 @@ typeof player.setVolume==="function"
 player.setVolume(val);
 
 }
-
 
 resetVolTimer();
 
@@ -2295,7 +2398,7 @@ player.previousVideo();
 
 
 /* =========================
-   FORCE UPDATE UI
+   FORCE UI
    ========================= */
 
 function forceUpdateUI(index){
@@ -2341,6 +2444,20 @@ if(artist){
 document.getElementById("artist")
 .textContent=
 artist.textContent;
+
+}
+
+
+/*
+   If video is currently open,
+   close it when changing song.
+
+   New song starts normally.
+*/
+
+if(videoOpen){
+
+closeVideo();
 
 }
 
@@ -2541,7 +2658,9 @@ rect.width
 }
 
 
-/* VISUAL */
+/* =========================
+   VISUAL
+   ========================= */
 
 function updateSeekVisual(pos){
 
@@ -2577,7 +2696,9 @@ format(duration);
 }
 
 
-/* SEEK START */
+/* =========================
+   SEEK START
+   ========================= */
 
 seekElement.addEventListener(
 "pointerdown",
@@ -2617,7 +2738,9 @@ passive:false
 );
 
 
-/* SEEK MOVE */
+/* =========================
+   SEEK MOVE
+   ========================= */
 
 seekElement.addEventListener(
 "pointermove",
@@ -2647,7 +2770,9 @@ passive:false
 );
 
 
-/* SEEK END */
+/* =========================
+   SEEK END
+   ========================= */
 
 seekElement.addEventListener(
 "pointerup",
@@ -2712,7 +2837,9 @@ passive:false
 );
 
 
-/* SEEK CANCEL */
+/* =========================
+   SEEK CANCEL
+   ========================= */
 
 seekElement.addEventListener(
 "pointercancel",
@@ -2726,7 +2853,9 @@ seekPointerId=null;
 );
 
 
-/* SEEK CLICK */
+/* =========================
+   SEEK CLICK
+   ========================= */
 
 seekElement.addEventListener(
 "click",
@@ -2762,9 +2891,9 @@ true
 });
 
 
-/* =========================
+/* =================================================
    PROGRESS
-   ========================= */
+   ================================================= */
 
 function updateProgress(){
 
@@ -3042,6 +3171,18 @@ if(!player)
 return;
 
 
+/*
+   If video is open,
+   close it first.
+*/
+
+if(videoOpen){
+
+closeVideo();
+
+}
+
+
 forceUpdateUI(index);
 
 
@@ -3170,4 +3311,5 @@ overlay.classList.toggle(
 </script>
 
 </body>
+
 </html>
