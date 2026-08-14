@@ -36,7 +36,7 @@ overflow-x:hidden!important;
 
 
 /* =========================
-   BACKGROUND (DEFAULT CLEAR, BLUR ON POPUP ACTIVE)
+   BACKGROUND
    ========================= */
 
 .bg{
@@ -166,7 +166,7 @@ inset:0;
 z-index:1499;
 background:rgba(0,0,0,0.4);
 display:none;
-pointer-events:none; /* যাতে ওভারলে কন্ট্রোলারের ক্লিক আটকে না দেয় */
+pointer-events:none;
 }
 
 .video-overlay.active{
@@ -213,30 +213,6 @@ background:transparent;
 pointer-events:auto;
 }
 
-.popup-close-btn{
-position:absolute;
-top:8px;
-right:8px;
-width:28px;
-height:28px;
-background:rgba(0,0,0,0.6);
-border:1px solid rgba(255,255,255,0.3);
-border-radius:50%;
-color:#fff;
-font-size:18px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-z-index:25;
-line-height:1;
-transition:transform .2s;
-}
-
-.popup-close-btn:active{
-transform:scale(0.9);
-}
-
 
 /* =========================
    APP
@@ -244,7 +220,7 @@ transform:scale(0.9);
 
 .app{
 position:relative;
-z-index:1600; /* কন্ট্রোলের ওপর যেন কোনো ওভারলে বাধা না দেয় */
+z-index:1600;
 height:100dvh;
 width:100%;
 display:flex;
@@ -255,7 +231,7 @@ padding:0 16px 65px;
 
 
 /* =================================================
-   MUSIC PLAYER (CONTROLLER - NO BLUR)
+   MUSIC PLAYER (CONTROLLER - WITH BLUR EFFECT)
    ================================================= */
 
 .player{
@@ -265,6 +241,8 @@ padding:14px 18px;
 border:1px solid rgba(255,255,255,.18);
 border-radius:60px;
 background:rgba(20,20,20,.35);
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
 box-shadow:0 20px 50px rgba(0,0,0,.45);
 display:flex;
 align-items:center;
@@ -529,13 +507,13 @@ transform:scale(.90);
 
 
 /* =========================
-   DRAWER
+   DRAWER (STAY ON TOP - HIGHEST Z-INDEX)
    ========================= */
 
 .drawer-overlay{
 position:fixed;
 inset:0;
-z-index:1999;
+z-index:9999;
 background:transparent!important;
 backdrop-filter:none!important;
 -webkit-backdrop-filter:none!important;
@@ -558,7 +536,7 @@ background:rgba(20,20,20,.45)!important;
 backdrop-filter:blur(30px) saturate(150%)!important;
 -webkit-backdrop-filter:blur(30px) saturate(150%)!important;
 border-left:1px solid rgba(255,255,255,.18)!important;
-z-index:2000;
+z-index:10000;
 transition:right .35s cubic-bezier(.2,.8,.2,1);
 display:flex;
 flex-direction:column;
@@ -724,7 +702,6 @@ gap:10px;
 <div id="videoPopup" class="video-popup">
   <div id="yt"></div>
   <div class="popup-blocker"></div>
-  <button class="popup-close-btn" onclick="toggleVideoPopup()">&times;</button>
 </div>
 
 <!-- DRAWER -->
@@ -875,7 +852,7 @@ const iconSvg = document.getElementById("videoToggleIcon");
 
 popup.classList.toggle("active");
 overlay.classList.toggle("active");
-document.body.classList.toggle("popup-active"); // ব্যাকগ্রাউন্ড ব্লার টগল করার জন্য
+document.body.classList.toggle("popup-active");
 
 if(popup.classList.contains("active")){
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
