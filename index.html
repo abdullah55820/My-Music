@@ -167,8 +167,6 @@ height:14px;
 fill:#fff;
 }
 
-/* VIDEO OPEN হলে button hide */
-
 body.video-open .playlist-toggle-btn{
 display:none;
 }
@@ -177,12 +175,6 @@ display:none;
 /* =========================
    VIDEO OVERLAY
    ========================= */
-
-/*
-   IMPORTANT:
-   পুরো screen-এর touch এখানে block করা হচ্ছে না।
-   Overlay শুধু visual darkening-এর জন্য।
-*/
 
 .video-overlay{
 position:fixed;
@@ -252,11 +244,6 @@ box-shadow:0 25px 50px rgba(0,0,0,.7);
 opacity:0;
 visibility:hidden;
 
-/*
-   Video area নিজে touch নেবে না।
-   তাই YouTube-এর ভিতরের control-ও user touch করতে পারবে না।
-*/
-
 pointer-events:none;
 
 transform:scale(.9);
@@ -277,9 +264,7 @@ transform:scale(1);
 }
 
 
-/*
-   iframe পুরোপুরি touch disabled
-*/
+/* VIDEO TOUCH DISABLED */
 
 #yt{
 width:100%;
@@ -300,17 +285,14 @@ pointer-events:none!important;
 width:100%;
 
 /*
-   Main controller-এর আগে শেষ হবে।
-   তাই controller-এর নিচে যাবে না।
+   Controller-এর উপরে শেষ হবে
 */
-
-height:clamp(
-120px,
-calc(100dvh - 7% - 250px - 155px),
-300px
+height:calc(
+100dvh - 7% - 250px - 155px - 18px
 );
 
-min-height:100px;
+min-height:90px;
+max-height:260px;
 
 margin-top:10px;
 
@@ -338,6 +320,9 @@ transition:
 opacity .3s ease,
 transform .3s ease,
 visibility .3s ease;
+
+/* playlist নিজে touch নেবে */
+touch-action:pan-y;
 }
 
 .video-playlist.active{
@@ -345,11 +330,7 @@ visibility .3s ease;
 opacity:1;
 visibility:visible;
 
-/*
-   Playlist অবশ্যই touchable
-*/
-
-pointer-events:auto;
+pointer-events:auto!important;
 
 transform:translateY(0);
 }
@@ -386,7 +367,7 @@ width:100%;
 
 height:calc(100% - 31px);
 
-overflow-y:auto;
+overflow-y:scroll;
 overflow-x:hidden;
 
 display:flex;
@@ -394,17 +375,19 @@ flex-direction:column;
 
 gap:5px;
 
-padding-right:2px;
+padding-right:3px;
 
-/*
-   Touch scrolling explicitly enabled
-*/
+touch-action:pan-y!important;
 
-touch-action:pan-y;
-
--webkit-overflow-scrolling:touch;
+-webkit-overflow-scrolling:touch!important;
 
 overscroll-behavior:contain;
+
+position:relative;
+
+z-index:20;
+
+pointer-events:auto!important;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -442,7 +425,9 @@ border:1px solid rgba(255,255,255,.08);
 
 cursor:pointer;
 
-touch-action:manipulation;
+touch-action:pan-y!important;
+
+pointer-events:auto!important;
 
 flex-shrink:0;
 
@@ -461,17 +446,9 @@ background:rgba(255,255,255,.20);
 border-color:rgba(255,255,255,.30);
 }
 
-
-/*
-   Number পুরোপুরি বাদ
-*/
-
 .video-song-number{
 display:none!important;
 }
-
-
-/* THUMB */
 
 .video-song-item img{
 
@@ -483,10 +460,9 @@ border-radius:8px;
 object-fit:cover;
 
 flex-shrink:0;
+
+pointer-events:none;
 }
-
-
-/* INFO */
 
 .video-song-info{
 
@@ -494,6 +470,8 @@ flex:1;
 min-width:0;
 
 overflow:hidden;
+
+pointer-events:none;
 }
 
 .video-song-title{
@@ -667,10 +645,6 @@ gap:12px;
 position:relative;
 
 overflow:hidden;
-
-/*
-   Main control touchable
-*/
 
 pointer-events:auto;
 
@@ -1349,26 +1323,39 @@ border-radius:18px;
 
 
 /*
-   Mobile playlist:
-   controller-এর আগেই শেষ হবে
+   Playlist controller-এর উপরে শেষ হবে
 */
 
 .video-playlist{
 
-height:clamp(
-120px,
-calc(100dvh - 6% - 230px - 145px),
-260px
-);
+height:calc(
+100dvh - 6% - 230px - 145px - 18px
+)!important;
+
+min-height:90px!important;
+max-height:260px!important;
 
 margin-top:9px;
 
 padding:7px;
+
+overflow:hidden!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-list{
 
-height:calc(100% - 31px);
+height:calc(100% - 31px)!important;
+
+overflow-y:scroll!important;
+overflow-x:hidden!important;
+
+touch-action:pan-y!important;
+
+-webkit-overflow-scrolling:touch!important;
+
+pointer-events:auto!important;
 }
 
 .video-song-item{
@@ -1376,6 +1363,10 @@ height:calc(100% - 31px);
 padding:7px;
 
 min-height:52px;
+
+touch-action:pan-y!important;
+
+pointer-events:auto!important;
 }
 
 .video-song-item img{
@@ -1411,11 +1402,27 @@ height:210px;
 
 .video-playlist{
 
-height:clamp(
-100px,
-calc(100dvh - 3% - 210px - 140px),
-220px
-);
+height:calc(
+100dvh - 3% - 210px - 140px - 18px
+)!important;
+
+min-height:80px!important;
+max-height:220px!important;
+
+overflow:hidden!important;
+}
+
+.video-song-list{
+
+height:calc(100% - 31px)!important;
+
+overflow-y:scroll!important;
+
+touch-action:pan-y!important;
+
+-webkit-overflow-scrolling:touch!important;
+
+pointer-events:auto!important;
 }
 
 }
@@ -1441,11 +1448,27 @@ margin-top:7px;
 
 padding:6px;
 
-height:clamp(
-100px,
-calc(100dvh - 3% - 210px - 135px),
-210px
-);
+height:calc(
+100dvh - 3% - 210px - 135px - 18px
+)!important;
+
+min-height:80px!important;
+max-height:210px!important;
+
+overflow:hidden!important;
+}
+
+.video-song-list{
+
+height:calc(100% - 31px)!important;
+
+overflow-y:scroll!important;
+
+touch-action:pan-y!important;
+
+-webkit-overflow-scrolling:touch!important;
+
+pointer-events:auto!important;
 }
 
 .video-song-item img{
@@ -1469,12 +1492,6 @@ font-size:8.5px;
    VIDEO OPEN — MAIN CONTROL
    ========================= */
 
-/*
-   Main control সবসময় visible.
-   Video popup-এর নিচে playlist থাকলেও
-   player-এর জায়গায় ঢুকবে না।
-*/
-
 body.video-open .app{
 z-index:3000;
 }
@@ -1488,11 +1505,6 @@ z-index:3001;
    VIDEO ONLY TOUCH BLOCK
    ========================= */
 
-/*
-   এই layer শুধু video-এর জায়গা cover করে।
-   Playlist-এর জায়গায় নয়।
-*/
-
 .video-touch-block{
 
 position:absolute;
@@ -1505,6 +1517,88 @@ pointer-events:auto;
 
 background:transparent;
 }
+
+
+/* =========================
+   FINAL TOUCH FIX
+   ========================= */
+
+/*
+   শুধুমাত্র video area touch block
+*/
+.video-popup,
+.video-popup #yt,
+.video-touch-block{
+touch-action:none!important;
+}
+
+
+/*
+   Playlist সম্পূর্ণ touchable
+*/
+.video-playlist,
+.video-song-list,
+.video-song-item{
+pointer-events:auto!important;
+touch-action:pan-y!important;
+-webkit-overflow-scrolling:touch!important;
+}
+
+
+/*
+   Main controller সবসময় touchable
+*/
+.player{
+pointer-events:auto!important;
+}
+
+
+/*
+   Playlist-এর ভেতরের image/text
+   parent item-এর touch নষ্ট করবে না
+*/
+.video-song-item img,
+.video-song-info,
+.video-song-title,
+.video-song-artist{
+pointer-events:none!important;
+}
+
+
+/*
+   Playlist যেন controller-এর নিচে না যায়
+*/
+@media(max-width:480px){
+
+.video-playlist{
+height:calc(
+100dvh - 6% - 230px - 145px - 18px
+)!important;
+
+max-height:260px!important;
+
+overflow:hidden!important;
+}
+
+.video-song-list{
+height:calc(100% - 31px)!important;
+
+overflow-y:scroll!important;
+overflow-x:hidden!important;
+
+touch-action:pan-y!important;
+
+pointer-events:auto!important;
+
+-webkit-overflow-scrolling:touch!important;
+}
+
+}
+
+
+/* =========================
+   SCRIPT
+   ========================= */
 
 </style>
 </head>
@@ -1574,9 +1668,7 @@ class="video-popup"
 
 <div id="yt"></div>
 
-<!--
-     শুধু video area touch block
--->
+<!-- শুধু video area touch block -->
 
 <div class="video-touch-block"></div>
 
@@ -1929,6 +2021,10 @@ playerVars:{
 
 autoplay:0,
 
+/*
+   YouTube-এর নিজস্ব control visual থাকবে,
+   কিন্তু video-touch-block এর কারণে touch কাজ করবে না।
+*/
 controls:1,
 
 disablekb:0,
@@ -2119,8 +2215,6 @@ const opening=
 
 if(opening){
 
-/* OPEN */
-
 popup.classList.add(
 "active"
 );
@@ -2150,8 +2244,6 @@ loadVideoPlaylist();
 
 }
 else{
-
-/* CLOSE */
 
 popup.classList.remove(
 "active"
@@ -3167,11 +3259,6 @@ item.onclick=(
 e
 )=>{
 
-/*
-   Playlist click completely independent
-   from video touch block
-*/
-
 e.stopPropagation();
 
 playSpecificTrack(index);
@@ -3371,8 +3458,6 @@ forceUpdateUI(index);
 player.playVideoAt(index);
 
 
-/* CLOSE OLD DRAWER */
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -3392,11 +3477,6 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-
-/*
-   Video playlist open থাকলে
-   সেটি open-ই থাকবে
-*/
 
 const popup=
 document.getElementById(
