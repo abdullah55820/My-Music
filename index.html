@@ -36,7 +36,7 @@ overflow-x:hidden!important;
 
 
 /* =========================
-   BACKGROUND (BLURRED)
+   BACKGROUND (DEFAULT CLEAR, BLUR ON POPUP ACTIVE)
    ========================= */
 
 .bg{
@@ -48,13 +48,20 @@ background-position:center center;
 background-size:cover;
 background-repeat:no-repeat;
 
-filter:blur(20px);
--webkit-filter:blur(20px);
-transform:scale(1.1);
+filter:blur(0px);
+-webkit-filter:blur(0px);
+transform:scale(1);
 
 z-index:0;
 -webkit-backface-visibility:hidden;
 backface-visibility:hidden;
+transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+body.popup-active .bg{
+filter:blur(20px);
+-webkit-filter:blur(20px);
+transform:scale(1.1);
 }
 
 .bg:after{
@@ -159,6 +166,7 @@ inset:0;
 z-index:1499;
 background:rgba(0,0,0,0.4);
 display:none;
+pointer-events:none; /* যাতে ওভারলে কন্ট্রোলারের ক্লিক আটকে না দেয় */
 }
 
 .video-overlay.active{
@@ -236,7 +244,7 @@ transform:scale(0.9);
 
 .app{
 position:relative;
-z-index:100;
+z-index:1600; /* কন্ট্রোলের ওপর যেন কোনো ওভারলে বাধা না দেয় */
 height:100dvh;
 width:100%;
 display:flex;
@@ -867,6 +875,7 @@ const iconSvg = document.getElementById("videoToggleIcon");
 
 popup.classList.toggle("active");
 overlay.classList.toggle("active");
+document.body.classList.toggle("popup-active"); // ব্যাকগ্রাউন্ড ব্লার টগল করার জন্য
 
 if(popup.classList.contains("active")){
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
