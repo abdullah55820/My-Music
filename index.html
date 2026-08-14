@@ -207,7 +207,7 @@ pointer-events:auto;
 }
 
 
-/* LANDSCAPE MODE */
+/* iOS LANDSCAPE MODE */
 @media(orientation:landscape){
 .video-popup.active{
 width:100vw !important;
@@ -219,15 +219,28 @@ border-radius:0 !important;
 border:none !important;
 box-shadow:none !important;
 }
-.video-popup.active iframe {
-pointer-events: auto !important;
-}
 .app{
 display: none !important;
 }
 .top-widgets{
 display: none !important;
 }
+}
+
+/* ANDROID SPECIFIC LANDSCAPE STYLES */
+body.android-device.landscape-mode .video-popup.active {
+width: 100vw !important;
+height: 100vh !important;
+top: 0 !important;
+left: 0 !important;
+transform: none !important;
+border-radius: 0 !important;
+border: none !important;
+box-shadow: none !important;
+}
+body.android-device.landscape-mode .app,
+body.android-device.landscape-mode .top-widgets {
+display: none !important;
 }
 
 
@@ -795,6 +808,12 @@ let player=null;
 let playing=false;
 let playlistItems=[];
 
+// Device Detection for Separate Handling
+const isAndroidDevice = /Android/i.test(navigator.userAgent);
+if (isAndroidDevice) {
+document.body.classList.add("android-device");
+}
+
 function updateBDTime(){
 const options={timeZone:"Asia/Dhaka",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true};
 document.getElementById("bdTimeVal").textContent=new Intl.DateTimeFormat("en-US",options).format(new Date());
@@ -878,26 +897,39 @@ iconSvg.innerHTML = '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0
 }
 }
 
-window.addEventListener("resize", handleOrientationChange);
-window.addEventListener("orientationchange", handleOrientationChange);
+// Separate Orientation Handling for Android vs iOS
+window.addEventListener("resize", handleDeviceOrientation);
+window.addEventListener("orientationchange", handleDeviceOrientation);
 
-function handleOrientationChange() {
+function handleDeviceOrientation() {
 const isLandscape = window.innerWidth > window.innerHeight;
 const popup = document.getElementById("videoPopup");
 const overlay = document.getElementById("videoOverlay");
 const iconSvg = document.getElementById("videoToggleIcon");
 
+if (isAndroidDevice) {
+// Android Specific Logic
+if (isLandscape) {
+document.body.classList.add("landscape-mode");
+if (popup && !popup.classList.contains("active")) {
+popup.classList.add("active");
+overlay.classList.add("active");
+document.body.classList.add("popup-active");
+}
+if(iconSvg) {
+iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
+}
+} else {
+document.body.classList.remove("landscape-mode");
+}
+} else {
+// iOS / Default Logic (Ager moto thik thak)
 if (isLandscape) {
 if (popup && !popup.classList.contains("active")) {
 popup.classList.add("active");
 overlay.classList.add("active");
 document.body.classList.add("popup-active");
 }
-iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-} else {
-if (popup && popup.classList.contains("active")) {
-overlay.classList.add("active");
-document.body.classList.add("popup-active");
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 }
 }
