@@ -211,7 +211,6 @@ border-radius: 0;
 border: none;
 background: #000;
 }
-/* ল্যান্ডস্কেপে উপরের ইউআই উইজেট ও মেইন প্লেয়ার হাইড থাকবে */
 .top-widgets, .app {
 display: none !important;
 }
@@ -228,7 +227,83 @@ position:absolute;
 inset:0;
 z-index:20;
 background:transparent;
-pointer-events:none; /* টাচ যেন সরাসরি ইউটিউব ভিডিওতে কাজ করে */
+pointer-events:auto;
+}
+
+/* ইউটিউব স্টাইল ল্যান্ডস্কেপ অটো-হাইডিং কন্ট্রোলস */
+.yt-controls {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+background: linear-gradient(transparent, rgba(0,0,0,0.85));
+padding: 20px 16px 14px;
+opacity: 0;
+transition: opacity 0.3s ease;
+pointer-events: none;
+z-index: 25;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.yt-controls.show {
+opacity: 1;
+pointer-events: auto;
+}
+
+.yt-progress-bar {
+position: relative;
+width: 100%;
+height: 4px;
+background: rgba(255,255,255,0.3);
+border-radius: 4px;
+cursor: pointer;
+}
+
+.yt-progress-fill {
+position: absolute;
+left: 0;
+top: 0;
+height: 100%;
+background: #ff0000;
+border-radius: 4px;
+width: 0%;
+}
+
+.yt-control-btns {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.yt-left-btns {
+display: flex;
+align-items: center;
+gap: 15px;
+}
+
+.yt-btn {
+background: none;
+border: none;
+color: #fff;
+cursor: pointer;
+padding: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.yt-btn svg {
+width: 22px;
+height: 22px;
+fill: #fff;
+}
+
+.yt-time-text {
+font-size: 12px;
+color: rgba(255,255,255,0.8);
+font-variant-numeric: tabular-nums;
 }
 
 
@@ -719,7 +794,25 @@ gap:10px;
 <div id="videoOverlay" class="video-overlay"></div>
 <div id="videoPopup" class="video-popup">
   <div id="yt"></div>
-  <div class="popup-blocker"></div>
+  <div class="popup-blocker" id="popupBlocker"></div>
+  
+  <!-- ইউটিউব স্টাইল অটো-হাইডিং কন্ট্রোলস -->
+  <div class="yt-controls" id="ytControls">
+    <div class="yt-progress-bar" id="ytSeek">
+      <div class="yt-progress-fill" id="ytFill"></div>
+    </div>
+    <div class="yt-control-btns">
+      <div class="yt-left-btns">
+        <button class="yt-btn" onclick="togglePlay()">
+          <svg id="ytPlayIcon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="yt-btn" onclick="nextSong()">
+          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <span class="yt-time-text"><span id="ytCurrent">0:00</span> / <span id="ytDuration">0:00</span></span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- DRAWER -->
@@ -796,6 +889,7 @@ const PLAYLIST_ID="PLbvY05KVYwoo";
 let player=null;
 let playing=false;
 let playlistItems=[];
+let controlTimeout=null;
 
 function updateBDTime(){
 const options={timeZone:"Asia/Dhaka",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true};
@@ -835,6 +929,7 @@ function state(e){
 const cover=document.getElementById("cover");
 const playBtn=document.getElementById("play");
 const playIcon=document.getElementById("play-icon");
+const ytPlayIcon=document.getElementById("ytPlayIcon");
 
 highlightActiveTrack();
 
@@ -842,6 +937,7 @@ if(e.data===YT.PlayerState.PLAYING){
 playing=true;
 playBtn.classList.add("playing");
 playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+ytPlayIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 cover.classList.add("spinning");
 updateInfo();
 if(playlistItems.length === 0) loadPlaylistItems();
@@ -850,6 +946,7 @@ else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
 playing=false;
 playBtn.classList.remove("playing");
 playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+ytPlayIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
 cover.classList.remove("spinning");
 }
 }
@@ -861,6 +958,26 @@ player.pauseVideo();
 }else{
 player.playVideo();
 }
+}
+
+// ইউটিউব কন্ট্রোল অটো-হাইড লজিক
+const popupBlocker = document.getElementById("popupBlocker");
+const ytControls = document.getElementById("ytControls");
+
+popupBlocker.addEventListener("click", () => {
+ytControls.classList.toggle("show");
+if(ytControls.classList.contains("show")){
+resetControlTimeout();
+} else {
+clearTimeout(controlTimeout);
+}
+});
+
+function resetControlTimeout(){
+clearTimeout(controlTimeout);
+controlTimeout = setTimeout(() => {
+ytControls.classList.remove("show");
+}, 3000);
 }
 
 function toggleVideoPopup() {
@@ -876,6 +993,7 @@ if(popup.classList.contains("active")){
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 } else {
 iconSvg.innerHTML = '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
+ytControls.classList.remove("show");
 }
 }
 
@@ -902,6 +1020,7 @@ popup.classList.remove("active");
 overlay.classList.remove("active");
 document.body.classList.remove("popup-active");
 iconSvg.innerHTML = '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
+ytControls.classList.remove("show");
 }
 }
 }
@@ -999,68 +1118,67 @@ playerCard.addEventListener("pointercancel",()=>{swipeActive=false;});
 let isDragging=false;
 let seekPointerId=null;
 
-function getSeekPosition(clientX){
-const rect=seekElement.getBoundingClientRect();
+function getSeekPosition(clientX, el){
+const rect=el.getBoundingClientRect();
 if(!rect.width)return 0;
 return Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
 }
 
 function updateSeekVisual(pos){
 document.getElementById("fill").style.width=(pos*100)+"%";
+document.getElementById("ytFill").style.width=(pos*100)+"%";
 if(player && typeof player.getDuration==="function"){
 const duration=player.getDuration();
 if(duration){
-document.getElementById("current").textContent=format(pos*duration);
-document.getElementById("duration").textContent=format(duration);
+const formatted = format(pos*duration);
+document.getElementById("current").textContent = formatted;
+document.getElementById("ytCurrent").textContent = formatted;
+document.getElementById("duration").textContent = format(duration);
+document.getElementById("ytDuration").textContent = format(duration);
 }
 }
 }
 
+// Main Player Seek Bar
 seekElement.addEventListener("pointerdown",e=>{
 e.preventDefault();
 e.stopPropagation();
 isDragging=true;
-seekPointerId=e.pointerId;
 try{seekElement.setPointerCapture(e.pointerId);}catch(err){}
-const pos=getSeekPosition(e.clientX);
-updateSeekVisual(pos);
+updateSeekVisual(getSeekPosition(e.clientX, seekElement));
 },{passive:false});
 
 seekElement.addEventListener("pointermove",e=>{
 e.preventDefault();
 e.stopPropagation();
 if(!isDragging)return;
-const pos=getSeekPosition(e.clientX);
-updateSeekVisual(pos);
+updateSeekVisual(getSeekPosition(e.clientX, seekElement));
 },{passive:false});
 
 seekElement.addEventListener("pointerup",e=>{
 e.preventDefault();
 e.stopPropagation();
 if(!isDragging)return;
-const pos=getSeekPosition(e.clientX);
+const pos=getSeekPosition(e.clientX, seekElement);
 updateSeekVisual(pos);
 if(player && typeof player.getDuration==="function"){
 const duration=player.getDuration();
 if(duration){player.seekTo(pos*duration,true);}
 }
 isDragging=false;
-seekPointerId=null;
 try{seekElement.releasePointerCapture(e.pointerId);}catch(err){}
 },{passive:false});
 
-seekElement.addEventListener("pointercancel",e=>{
-isDragging=false;
-seekPointerId=null;
-});
-
-seekElement.addEventListener("click",e=>{
-if(isDragging)return;
-const pos=getSeekPosition(e.clientX);
-if(player){
-const duration=player.getDuration();
-if(duration){player.seekTo(pos*duration,true);}
+// YouTube Landscape Seek Bar
+const ytSeek = document.getElementById("ytSeek");
+ytSeek.addEventListener("click", e => {
+const pos = getSeekPosition(e.clientX, ytSeek);
+updateSeekVisual(pos);
+if(player && typeof player.getDuration === "function"){
+const duration = player.getDuration();
+if(duration) { player.seekTo(pos * duration, true); }
 }
+resetControlTimeout();
 });
 
 function updateProgress(){
@@ -1072,8 +1190,13 @@ const duration=player.getDuration();
 if(!duration)return;
 const pos=Math.max(0,Math.min(1,current/duration));
 document.getElementById("fill").style.width=(pos*100)+"%";
-document.getElementById("current").textContent=format(current);
-document.getElementById("duration").textContent=format(duration);
+document.getElementById("ytFill").style.width=(pos*100)+"%";
+const formattedCurrent = format(current);
+const formattedDuration = format(duration);
+document.getElementById("current").textContent=formattedCurrent;
+document.getElementById("ytCurrent").textContent=formattedCurrent;
+document.getElementById("duration").textContent=formattedDuration;
+document.getElementById("ytDuration").textContent=formattedDuration;
 }catch(e){}
 }
 
