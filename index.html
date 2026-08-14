@@ -34,28 +34,23 @@ position:relative;
 overflow-x:hidden!important;
 }
 
-
 /* =========================
-   BACKGROUND
-   ========================= */
+BACKGROUND
+========================= */
 
 .bg{
 position:fixed;
 inset:-20px;
-
 background-image:url("background.jpg");
 background-position:center center;
 background-size:cover;
 background-repeat:no-repeat;
-
-filter:blur(0px);
--webkit-filter:blur(0px);
+filter:blur(0);
+-webkit-filter:blur(0);
 transform:scale(1);
-
 z-index:0;
 -webkit-backface-visibility:hidden;
 backface-visibility:hidden;
-
 transition:filter .3s ease,transform .3s ease;
 }
 
@@ -72,10 +67,9 @@ inset:0;
 background:rgba(0,0,0,.35);
 }
 
-
 /* =========================
-   TOP WIDGETS
-   ========================= */
+TOP WIDGETS
+========================= */
 
 .top-widgets{
 position:fixed;
@@ -83,33 +77,23 @@ top:14px;
 left:50%;
 transform:translateX(-50%);
 z-index:2500;
-
 display:flex;
 flex-direction:column;
 align-items:center;
 gap:8px;
 }
 
-
-/* BD TIME */
-
 .bd-time{
 padding:5px 11px;
-
 border-radius:20px;
-
 background:rgba(0,0,0,.45);
 border:1px solid rgba(255,255,255,.18);
-
 color:rgba(255,255,255,.9);
-
 font-size:11px;
 font-weight:600;
 letter-spacing:.3px;
-
 backdrop-filter:blur(12px);
 -webkit-backdrop-filter:blur(12px);
-
 display:flex;
 align-items:center;
 gap:6px;
@@ -118,15 +102,10 @@ gap:6px;
 .live-dot{
 width:7px;
 height:7px;
-
 background:#ff3b30;
-
 border-radius:50%;
-
 display:inline-block;
-
 box-shadow:0 0 8px #ff3b30;
-
 animation:pulse 1.5s infinite;
 }
 
@@ -136,31 +115,20 @@ animation:pulse 1.5s infinite;
 100%{opacity:1;transform:scale(1);}
 }
 
-
-/* PLAYLIST BUTTON */
-
 .playlist-toggle-btn{
 padding:5px 12px;
-
 border-radius:20px;
-
 background:rgba(0,0,0,.45);
 border:1px solid rgba(255,255,255,.18);
-
 color:rgba(255,255,255,.9);
-
 font-size:11px;
 font-weight:600;
-
 backdrop-filter:blur(12px);
 -webkit-backdrop-filter:blur(12px);
-
 display:flex;
 align-items:center;
 gap:6px;
-
 cursor:pointer;
-
 transition:transform .2s,background .2s;
 }
 
@@ -174,166 +142,125 @@ height:14px;
 fill:#fff;
 }
 
-
 /* =========================
-   VIDEO OVERLAY
-   ========================= */
+VIDEO OVERLAY
+========================= */
 
 .video-overlay{
 position:fixed;
 inset:0;
-
 z-index:1499;
-
 background:rgba(0,0,0,.4);
-
 display:none;
-
 pointer-events:none;
 }
 
 .video-overlay.active{
 display:block;
+pointer-events:auto;
 }
 
-
 /* =========================
-   VIDEO AREA
-   ========================= */
-
-.video-area{
-position:fixed;
-
-top:7%;
-left:50%;
-
-transform:translateX(-50%);
-
-width:min(420px,95%);
-
-z-index:1501;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-
-pointer-events:none;
-}
-
-
-/* =========================
-   VIDEO POPUP
-   ========================= */
+VIDEO POPUP
+========================= */
 
 .video-popup{
-position:relative;
+position:fixed;
+top:39%;
+left:50%;
+transform:translate(-50%,-50%) scale(.9);
 
-width:100%;
-height:250px;
+width:min(430px,94vw);
 
-background:#000;
-
+background:rgba(5,5,5,.96);
 border-radius:20px;
-
 overflow:hidden;
 
 z-index:1500;
 
 border:1px solid rgba(255,255,255,.25);
-
 box-shadow:0 25px 50px rgba(0,0,0,.7);
 
 opacity:0;
 visibility:hidden;
-
 pointer-events:none;
 
-transform:scale(.9);
-
 transition:all .3s cubic-bezier(.2,.8,.2,1);
+
+display:flex;
+flex-direction:column;
 }
 
 .video-popup.active{
 opacity:1;
-
 visibility:visible;
-
 pointer-events:auto;
+transform:translate(-50%,-50%) scale(1);
+}
 
-transform:scale(1);
+/* VIDEO AREA */
+
+.video-container{
+width:100%;
+aspect-ratio:16/9;
+background:#000;
+position:relative;
+flex-shrink:0;
+overflow:hidden;
 }
 
 #yt{
+position:absolute;
+inset:0;
 width:100%;
 height:100%;
-
-border:none;
-
-pointer-events:auto;
+border:0;
 }
 
-
 /* =========================
-   VIDEO PLAYLIST
-   ========================= */
+VIDEO PLAYLIST
+========================= */
 
 .video-playlist{
 width:100%;
-
-margin-top:10px;
-
-padding:8px;
-
-border-radius:16px;
-
-background:rgba(20,20,20,.48);
-
-border:1px solid rgba(255,255,255,.18);
-
-backdrop-filter:blur(28px) saturate(150%);
--webkit-backdrop-filter:blur(28px) saturate(150%);
-
-box-shadow:0 20px 45px rgba(0,0,0,.55);
-
-opacity:0;
-
-visibility:hidden;
-
-pointer-events:none;
-
-transform:translateY(-8px);
-
-transition:
-opacity .25s ease,
-transform .25s ease,
-visibility .25s ease;
+height:210px;
+background:rgba(15,15,15,.96);
+display:flex;
+flex-direction:column;
+overflow:hidden;
 }
 
-.video-playlist.active{
-opacity:1;
+.video-playlist-header{
+height:34px;
+min-height:34px;
+display:flex;
+align-items:center;
+padding:0 12px;
 
-visibility:visible;
+font-size:11px;
+font-weight:700;
 
-pointer-events:auto;
+color:#fff;
 
-transform:translateY(0);
+border-bottom:1px solid rgba(255,255,255,.12);
+background:rgba(255,255,255,.05);
 }
-
-
-/* SONG LIST */
 
 .video-song-list{
-width:100%;
-
-max-height:270px;
-
+flex:1;
+min-height:0;
 overflow-y:auto;
+overflow-x:hidden;
 
 display:flex;
-
 flex-direction:column;
+gap:5px;
 
-gap:6px;
+padding:7px;
+
+-webkit-overflow-scrolling:touch;
+overscroll-behavior:contain;
+touch-action:pan-y;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -341,226 +268,180 @@ width:3px;
 }
 
 .video-song-list::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,.3);
-border-radius:5px;
+background:rgba(255,255,255,.35);
+border-radius:10px;
 }
-
 
 /* VIDEO SONG */
 
 .video-song-item{
 width:100%;
+min-height:52px;
 
 display:flex;
 align-items:center;
-
 gap:9px;
 
-padding:7px;
+padding:6px 7px;
 
-border-radius:10px;
+border-radius:9px;
 
-background:rgba(255,255,255,.08);
-
-border:1px solid rgba(255,255,255,.10);
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.09);
 
 cursor:pointer;
 
-transition:
-background .2s ease,
-transform .15s ease,
-border-color .2s ease;
+touch-action:manipulation;
+user-select:none;
+-webkit-user-select:none;
+
+transition:background .15s,transform .15s;
 }
 
 .video-song-item:active{
-transform:scale(.97);
+transform:scale(.98);
+background:rgba(255,255,255,.18);
 }
 
 .video-song-item.active{
-background:rgba(255,255,255,.22);
-
-border-color:rgba(255,255,255,.35);
+background:rgba(255,255,255,.20);
+border-color:rgba(255,255,255,.30);
 }
-
-
-/* THUMB */
 
 .video-song-item img{
-width:48px;
-height:48px;
-
-border-radius:8px;
-
+width:68px;
+height:42px;
+border-radius:6px;
 object-fit:cover;
-
 flex-shrink:0;
-
-box-shadow:0 3px 8px rgba(0,0,0,.35);
+background:#222;
 }
-
-
-/* INFO */
 
 .video-song-info{
 flex:1;
-
 min-width:0;
 }
 
 .video-song-title{
 font-size:12px;
-
 font-weight:700;
+line-height:15px;
 
 color:#fff;
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
 }
 
 .video-song-artist{
-font-size:10px;
-
-color:rgba(255,255,255,.58);
+font-size:9.5px;
+color:rgba(255,255,255,.55);
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
 
 margin-top:3px;
 }
 
-
 /* =========================
-   LANDSCAPE
-   ========================= */
+LANDSCAPE
+========================= */
 
 @media(orientation:landscape){
 
-.video-area{
-top:0 !important;
-left:0 !important;
-
-transform:none !important;
-
-width:100vw !important;
-height:100vh !important;
-
-display:block !important;
-}
-
 .video-popup.active{
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
 
-top:0 !important;
-left:0 !important;
+top:0!important;
+left:0!important;
 
-transform:none !important;
+transform:none!important;
 
-border-radius:0 !important;
-border:none !important;
+border-radius:0!important;
+border:none!important;
 
-box-shadow:none !important;
+box-shadow:none!important;
+
 }
 
-/* Landscape-এ playlist hide */
+.video-container{
+aspect-ratio:auto;
+height:100vh;
+}
 
 .video-playlist{
-display:none !important;
+display:none;
 }
 
 .app{
-display:none !important;
+display:none!important;
 }
 
 .top-widgets{
-display:none !important;
+display:none!important;
 }
 
 }
 
-
-/* =========================
-   ANDROID LANDSCAPE
-   ========================= */
-
-body.android-device.landscape-mode .video-area{
-top:0 !important;
-left:0 !important;
-
-transform:none !important;
-
-width:100vw !important;
-height:100vh !important;
-}
+/* ANDROID LANDSCAPE */
 
 body.android-device.landscape-mode .video-popup.active{
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
+top:0!important;
+left:0!important;
+transform:none!important;
+border-radius:0!important;
+border:none!important;
+box-shadow:none!important;
+}
 
-top:0 !important;
-left:0 !important;
-
-transform:none !important;
-
-border-radius:0 !important;
-border:none !important;
-
-box-shadow:none !important;
+body.android-device.landscape-mode .video-container{
+aspect-ratio:auto;
+height:100vh;
 }
 
 body.android-device.landscape-mode .video-playlist{
-display:none !important;
+display:none;
 }
 
 body.android-device.landscape-mode .app,
 body.android-device.landscape-mode .top-widgets{
-display:none !important;
+display:none!important;
 }
 
-
 /* =========================
-   APP
-   ========================= */
+APP
+========================= */
 
 .app{
 position:relative;
-
 z-index:1600;
 
 height:100dvh;
-
 width:100%;
 
 display:flex;
-
 align-items:flex-end;
-
 justify-content:center;
 
 padding:0 16px 65px;
 }
 
-
 /* =========================
-   PLAYER
-   ========================= */
+PLAYER
+========================= */
 
 .player{
 width:min(440px,94%);
-
 height:120px;
 
 padding:14px 18px;
 
 border:1px solid rgba(255,255,255,.18);
-
 border-radius:60px;
 
 background:rgba(20,20,20,.35);
@@ -571,22 +452,18 @@ backdrop-filter:blur(20px);
 box-shadow:0 20px 50px rgba(0,0,0,.45);
 
 display:flex;
-
 align-items:center;
-
 gap:12px;
 
 position:relative;
-
 overflow:hidden;
 
 touch-action:pan-y;
 }
 
-
 /* =========================
-   COVER
-   ========================= */
+COVER
+========================= */
 
 .cover-wrapper{
 position:relative;
@@ -597,12 +474,10 @@ height:84px;
 flex-shrink:0;
 
 display:flex;
-
 align-items:center;
 justify-content:center;
 
 border-radius:50%;
-
 overflow:hidden;
 
 border:1px solid rgba(255,255,255,.3);
@@ -617,13 +492,11 @@ margin:-18.5%;
 border-radius:50%;
 
 object-fit:cover;
-
 object-position:center;
 
 background:#222;
 
 animation:spin 8s linear infinite;
-
 animation-play-state:paused;
 }
 
@@ -658,32 +531,25 @@ from{transform:rotate(0deg);}
 to{transform:rotate(360deg);}
 }
 
-
 /* =========================
-   SONG INFO
-   ========================= */
+SONG INFO
+========================= */
 
 .middle{
 flex:1;
-
 min-width:0;
 
 display:flex;
-
 flex-direction:column;
-
 justify-content:center;
 }
 
 .title{
 font-size:16px;
-
 font-weight:700;
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
 
 color:#fff;
@@ -697,26 +563,21 @@ font-size:12px;
 color:rgba(255,255,255,.65);
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
 
 margin-top:2px;
-
 margin-bottom:8px;
 }
 
-
 /* =========================
-   SEEK
-   ========================= */
+SEEK
+========================= */
 
 .seek{
 position:relative;
 
 width:100%;
-
 height:5px;
 
 border-radius:10px;
@@ -730,7 +591,6 @@ margin-bottom:6px;
 touch-action:none;
 
 user-select:none;
-
 -webkit-user-select:none;
 }
 
@@ -741,7 +601,6 @@ position:absolute;
 
 top:-12px;
 bottom:-12px;
-
 left:-10px;
 right:-10px;
 
@@ -755,7 +614,6 @@ left:0;
 top:0;
 
 height:100%;
-
 width:0;
 
 background:#fff;
@@ -775,18 +633,14 @@ color:rgba(255,255,255,.65);
 font-variant-numeric:tabular-nums;
 }
 
-
 /* =========================
-   CONTROLS
-   ========================= */
+CONTROLS
+========================= */
 
 .controls{
 display:flex;
-
 align-items:center;
-
 gap:8px;
-
 flex-shrink:0;
 }
 
@@ -801,9 +655,7 @@ background:transparent;
 color:rgba(255,255,255,.9);
 
 display:flex;
-
 align-items:center;
-
 justify-content:center;
 
 cursor:pointer;
@@ -814,20 +666,16 @@ padding:0;
 .btn svg{
 width:20px;
 height:20px;
-
 fill:#fff;
 }
 
-
 /* =========================
-   VOLUME
-   ========================= */
+VOLUME
+========================= */
 
 .vol-container{
 display:flex;
-
 align-items:center;
-
 gap:4px;
 
 background:rgba(0,0,0,.25);
@@ -850,7 +698,6 @@ overflow:hidden;
 opacity:0;
 
 display:flex;
-
 align-items:center;
 
 transition:
@@ -860,19 +707,15 @@ opacity .2s ease;
 
 .vol-slider-wrapper.active{
 width:55px;
-
 opacity:1;
-
 margin-left:2px;
 }
 
 .vol-slider{
 -webkit-appearance:none;
-
 appearance:none;
 
 width:55px;
-
 height:3.5px;
 
 background:rgba(255,255,255,.3);
@@ -886,7 +729,6 @@ cursor:pointer;
 
 .vol-slider::-webkit-slider-thumb{
 -webkit-appearance:none;
-
 appearance:none;
 
 width:10px;
@@ -907,10 +749,9 @@ display:none!important;
 }
 }
 
-
 /* =========================
-   PLAY
-   ========================= */
+PLAY
+========================= */
 
 .play{
 width:44px;
@@ -925,9 +766,7 @@ background:#fff;
 color:#000;
 
 display:flex;
-
 align-items:center;
-
 justify-content:center;
 
 box-shadow:0 4px 15px rgba(0,0,0,.3);
@@ -955,23 +794,17 @@ margin-left:0;
 transform:scale(.90);
 }
 
-
 /* =========================
-   OLD DRAWER
-   ========================= */
+OLD DRAWER
+========================= */
 
 .drawer-overlay{
 position:fixed;
-
 inset:0;
 
 z-index:9999;
 
 background:transparent!important;
-
-backdrop-filter:none!important;
-
--webkit-backdrop-filter:none!important;
 
 pointer-events:none;
 
@@ -980,7 +813,6 @@ display:none;
 
 .drawer-overlay.active{
 display:block;
-
 pointer-events:auto;
 }
 
@@ -988,17 +820,14 @@ pointer-events:auto;
 position:fixed;
 
 top:0;
-
 right:-100%;
 
 width:180px;
-
 height:100dvh;
 
 background:rgba(20,20,20,.45)!important;
 
 backdrop-filter:blur(30px) saturate(150%)!important;
-
 -webkit-backdrop-filter:blur(30px) saturate(150%)!important;
 
 border-left:1px solid rgba(255,255,255,.18)!important;
@@ -1008,7 +837,6 @@ z-index:10000;
 transition:right .35s cubic-bezier(.2,.8,.2,1);
 
 display:flex;
-
 flex-direction:column;
 
 padding:12px 6px;
@@ -1016,23 +844,18 @@ padding:12px 6px;
 box-shadow:-15px 0 40px rgba(0,0,0,.5)!important;
 
 visibility:hidden;
-
 pointer-events:none;
 }
 
 .playlist-drawer.open{
 right:0;
-
 visibility:visible;
-
 pointer-events:auto;
 }
 
 .drawer-header{
 display:flex;
-
 align-items:center;
-
 justify-content:space-between;
 
 padding:6px 8px;
@@ -1048,15 +871,12 @@ border-radius:8px;
 
 .drawer-title{
 font-size:11px;
-
 font-weight:700;
-
 color:#fff;
 }
 
 .close-btn{
 background:transparent;
-
 border:0;
 
 color:rgba(255,255,255,.9);
@@ -1076,7 +896,6 @@ flex:1;
 overflow-y:auto;
 
 display:flex;
-
 flex-direction:column;
 
 gap:4px;
@@ -1090,18 +909,12 @@ width:2px;
 
 .song-list::-webkit-scrollbar-thumb{
 background:rgba(255,255,255,.3);
-
 border-radius:3px;
 }
 
-
-/* OLD SONG ITEM */
-
 .song-item{
 display:flex;
-
 align-items:center;
-
 gap:6px;
 
 padding:4px 5px;
@@ -1122,7 +935,6 @@ transform:scale(.96);
 .song-item:hover,
 .song-item.active{
 background:rgba(255,255,255,.22);
-
 border-color:rgba(255,255,255,.35);
 }
 
@@ -1135,52 +947,39 @@ border-radius:5px;
 object-fit:cover;
 
 flex-shrink:0;
-
-box-shadow:0 2px 5px rgba(0,0,0,.3);
 }
 
 .song-item-info{
 flex:1;
-
 min-width:0;
 }
 
 .song-item-title{
 font-size:9.5px;
-
 font-weight:700;
 
 color:#fff;
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
-
-letter-spacing:.2px;
 }
 
 .song-item-artist{
 font-size:8px;
 
-font-weight:400;
-
 color:rgba(255,255,255,.55);
 
 white-space:nowrap;
-
 overflow:hidden;
-
 text-overflow:ellipsis;
 
 margin-top:.5px;
 }
 
-
 /* =========================
-   MOBILE
-   ========================= */
+MOBILE
+========================= */
 
 @media(max-width:480px){
 
@@ -1190,11 +989,8 @@ padding-bottom:60px;
 
 .player{
 height:116px;
-
 padding:12px 14px;
-
 border-radius:58px;
-
 gap:10px;
 }
 
@@ -1222,63 +1018,35 @@ top:10px;
 
 .bd-time{
 font-size:10px;
-
 padding:4px 9px;
 }
 
 .playlist-toggle-btn{
 font-size:10px;
-
 padding:4px 9px;
 }
 
-.playlist-drawer{
-width:180px;
-}
-
-
-/* VIDEO */
-
-.video-area{
-top:5%;
-
-width:94%;
-}
+/* VIDEO POPUP */
 
 .video-popup{
-height:225px;
-
-border-radius:18px;
+width:96vw;
+max-height:82vh;
+top:38%;
+border-radius:17px;
 }
-
-
-/* BIGGER SONGS */
 
 .video-playlist{
-margin-top:8px;
-
-padding:7px;
-}
-
-.video-song-list{
-max-height:250px;
-
-gap:6px;
+height:230px;
 }
 
 .video-song-item{
-padding:8px;
-
-gap:9px;
-
-border-radius:10px;
+min-height:56px;
+padding:7px;
 }
 
 .video-song-item img{
-width:50px;
-height:50px;
-
-border-radius:8px;
+width:76px;
+height:46px;
 }
 
 .video-song-title{
@@ -1286,54 +1054,7 @@ font-size:12px;
 }
 
 .video-song-artist{
-font-size:10px;
-}
-
-}
-
-
-/* SMALL HEIGHT */
-
-@media(max-height:700px) and (orientation:portrait){
-
-.video-area{
-top:3%;
-}
-
-.video-popup{
-height:205px;
-}
-
-.video-song-list{
-max-height:200px;
-}
-
-}
-
-
-/* VERY SMALL */
-
-@media(max-width:360px){
-
-.video-area{
-width:96%;
-}
-
-.video-popup{
-height:205px;
-}
-
-.video-song-item img{
-width:46px;
-height:46px;
-}
-
-.video-song-title{
-font-size:11px;
-}
-
-.video-song-artist{
-font-size:9px;
+font-size:9.5px;
 }
 
 }
@@ -1343,39 +1064,23 @@ font-size:9px;
 
 <body>
 
-
-<!-- BACKGROUND -->
-
 <div class="bg"></div>
-
 
 <!-- TOP WIDGETS -->
 
-<div class="top-widgets">
+<div class="top-widgets" id="topWidgets">
 
 <div class="bd-time">
-
 <span>BD</span>
-
 <span class="live-dot"></span>
-
-<span id="bdTimeVal">
---:--:-- --
-</span>
-
+<span id="bdTimeVal">--:--:-- --</span>
 </div>
 
-
-<button
-class="playlist-toggle-btn"
-id="playlistTopButton"
-onclick="toggleDrawer()"
->
+<button class="playlist-toggle-btn"
+onclick="toggleDrawer()">
 
 <svg viewBox="0 0 24 24">
-
 <path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
-
 </svg>
 
 <span>Playlist</span>
@@ -1384,67 +1089,51 @@ onclick="toggleDrawer()"
 
 </div>
 
-
 <!-- VIDEO OVERLAY -->
 
-<div
-id="videoOverlay"
-class="video-overlay">
-</div>
+<div id="videoOverlay" class="video-overlay"></div>
 
+<!-- VIDEO POPUP -->
 
-<!-- VIDEO AREA -->
+<div id="videoPopup" class="video-popup">
 
-<div
-id="videoArea"
-class="video-area"
->
-
-
-<!-- VIDEO -->
-
-<div
-id="videoPopup"
-class="video-popup"
->
-
+<div class="video-container">
 <div id="yt"></div>
+</div>
+
+<!-- PLAYLIST UNDER VIDEO -->
+
+<div class="video-playlist">
+
+<div class="video-playlist-header">
+Playlist
+</div>
+
+<div class="video-song-list" id="videoSongList">
+
+<div style="
+text-align:center;
+color:rgba(255,255,255,.6);
+font-size:11px;
+padding:15px;
+">
+Loading...
+</div>
 
 </div>
 
-
-<!-- VIDEO PLAYLIST -->
-
-<div
-id="videoPlaylist"
-class="video-playlist"
->
-
-<div
-class="video-song-list"
-id="videoSongList"
->
-
 </div>
 
 </div>
-
-</div>
-
 
 <!-- OLD DRAWER -->
 
-<div
-class="drawer-overlay"
+<div class="drawer-overlay"
 id="overlay"
 onclick="toggleDrawer()">
 </div>
 
-
-<div
-class="playlist-drawer"
-id="drawer"
->
+<div class="playlist-drawer" id="drawer">
 
 <div class="drawer-header">
 
@@ -1452,20 +1141,14 @@ id="drawer"
 Playlist Songs
 </div>
 
-<button
-class="close-btn"
-onclick="toggleDrawer()"
->
+<button class="close-btn"
+onclick="toggleDrawer()">
 &times;
 </button>
 
 </div>
 
-
-<div
-class="song-list"
-id="songList"
->
+<div class="song-list" id="songList">
 
 <div style="
 text-align:center;
@@ -1480,102 +1163,57 @@ Loading...
 
 </div>
 
-
 <!-- APP -->
 
 <div class="app">
 
-<section
-class="player"
-id="playerCard"
->
-
-
-<!-- COVER -->
+<section class="player" id="playerCard">
 
 <div class="cover-wrapper">
 
-<img
-id="cover"
+<img id="cover"
 class="cover"
 src="logo.png"
-alt="Album art"
->
+alt="Album art">
 
 </div>
-
-
-<!-- INFO -->
 
 <div class="middle">
 
-<div
-id="title"
-class="title"
->
+<div id="title"
+class="title">
 My Playlist
 </div>
 
-<div
-id="artist"
-class="artist"
->
+<div id="artist"
+class="artist">
 YouTube Music
 </div>
 
-
-<!-- SEEK -->
-
-<div
-class="seek"
-id="seek"
->
-
-<div
-class="fill"
-id="fill">
+<div class="seek" id="seek">
+<div class="fill" id="fill"></div>
 </div>
-
-</div>
-
-
-<!-- TIME -->
 
 <div class="time-display">
 
-<span id="current">
-0:00
-</span>
-
+<span id="current">0:00</span>
 /
-
-<span id="duration">
-0:00
-</span>
+<span id="duration">0:00</span>
 
 </div>
 
 </div>
-
-
-<!-- CONTROLS -->
 
 <div class="controls">
-
-
-<!-- VIDEO BUTTON -->
 
 <button
 class="btn"
 id="videoToggleBtn"
 onclick="toggleVideoPopup()"
-title="Toggle Video Popup"
->
+title="Toggle Video Popup">
 
-<svg
-id="videoToggleIcon"
-viewBox="0 0 24 24"
->
+<svg id="videoToggleIcon"
+viewBox="0 0 24 24">
 
 <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
 
@@ -1583,19 +1221,13 @@ viewBox="0 0 24 24"
 
 </button>
 
-
-<!-- PLAY -->
-
 <button
 class="play"
 id="play"
-onclick="togglePlay()"
->
+onclick="togglePlay()">
 
-<svg
-id="play-icon"
-viewBox="0 0 24 24"
->
+<svg id="play-icon"
+viewBox="0 0 24 24">
 
 <path d="M8 5v14l11-7z"/>
 
@@ -1603,29 +1235,23 @@ viewBox="0 0 24 24"
 
 </button>
 
-
-<!-- VOLUME -->
-
 <div class="vol-container">
 
 <button
 class="btn"
-onclick="toggleVolume()"
->
+onclick="toggleVolume()">
 
 <svg viewBox="0 0 24 24">
 
-<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77-2.99-7.86-7-8.77z"/>
+<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
 
 </svg>
 
 </button>
 
-
 <div
 class="vol-slider-wrapper"
-id="volWrapper"
->
+id="volWrapper">
 
 <input
 type="range"
@@ -1634,8 +1260,7 @@ id="volSlider"
 min="0"
 max="100"
 value="100"
-oninput="changeVolume(this.value)"
->
+oninput="changeVolume(this.value)">
 
 </div>
 
@@ -1647,9 +1272,7 @@ oninput="changeVolume(this.value)"
 
 </div>
 
-
 <script src="https://www.youtube.com/iframe_api"></script>
-
 
 <script>
 
@@ -1659,18 +1282,15 @@ let player=null;
 let playing=false;
 let playlistItems=[];
 
-
-/* DEVICE */
-
-const isAndroidDevice=
-/Android/i.test(navigator.userAgent);
+const isAndroidDevice=/Android/i.test(navigator.userAgent);
 
 if(isAndroidDevice){
 document.body.classList.add("android-device");
 }
 
-
-/* BD TIME */
+/* =========================
+BD TIME
+========================= */
 
 function updateBDTime(){
 
@@ -1682,32 +1302,23 @@ second:"2-digit",
 hour12:true
 };
 
-document.getElementById("bdTimeVal")
-.textContent=
-new Intl.DateTimeFormat(
-"en-US",
-options
-).format(new Date());
+document.getElementById("bdTimeVal").textContent=
+new Intl.DateTimeFormat("en-US",options)
+.format(new Date());
 
 }
 
 updateBDTime();
 
-setInterval(
-updateBDTime,
-1000
-);
-
+setInterval(updateBDTime,1000);
 
 /* =========================
-   YOUTUBE
-   ========================= */
+YOUTUBE
+========================= */
 
 function onYouTubeIframeAPIReady(){
 
-player=new YT.Player(
-"yt",
-{
+player=new YT.Player("yt",{
 
 width:"100%",
 height:"100%",
@@ -1734,62 +1345,51 @@ onStateChange:state
 
 }
 
-
-/* READY */
+/* =========================
+READY
+========================= */
 
 function ready(){
 
 loadPlaylistItems();
 
-setInterval(
-updateProgress,
-250
-);
+setInterval(updateProgress,250);
 
 }
 
-
 /* =========================
-   PLAYER STATE
-   ========================= */
+STATE
+========================= */
 
 function state(e){
 
-const cover=
-document.getElementById("cover");
+const cover=document.getElementById("cover");
 
-const playBtn=
-document.getElementById("play");
+const playBtn=document.getElementById("play");
 
-const playIcon=
-document.getElementById("play-icon");
-
+const playIcon=document.getElementById("play-icon");
 
 highlightActiveTrack();
 
-highlightVideoActiveTrack();
-
-
-if(
-e.data===YT.PlayerState.PLAYING
-){
+if(e.data===YT.PlayerState.PLAYING){
 
 playing=true;
 
-playBtn.classList.add(
-"playing"
-);
+playBtn.classList.add("playing");
 
 playIcon.innerHTML=
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add(
-"spinning"
-);
+cover.classList.add("spinning");
 
 updateInfo();
 
+if(playlistItems.length===0){
+loadPlaylistItems();
 }
+
+}
+
 else if(
 e.data===YT.PlayerState.PAUSED ||
 e.data===YT.PlayerState.ENDED
@@ -1797,115 +1397,53 @@ e.data===YT.PlayerState.ENDED
 
 playing=false;
 
-playBtn.classList.remove(
-"playing"
-);
+playBtn.classList.remove("playing");
 
 playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
 
 }
 
 }
-
 
 /* =========================
-   PLAY / PAUSE
-   ========================= */
-
-function togglePlay(){
-
-if(!player)return;
-
-if(playing){
-
-player.pauseVideo();
-
-}
-else{
-
-player.playVideo();
-
-}
-
-}
-
-
-/* =========================
-   VIDEO POPUP
-   ========================= */
+VIDEO POPUP
+========================= */
 
 function toggleVideoPopup(){
 
-const popup=
-document.getElementById(
-"videoPopup"
-);
+const popup=document.getElementById("videoPopup");
 
-const overlay=
-document.getElementById(
-"videoOverlay"
-);
+const overlay=document.getElementById("videoOverlay");
 
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
+const topWidgets=document.getElementById("topWidgets");
 
-const topPlaylist=
-document.getElementById(
-"playlistTopButton"
-);
+const iconSvg=document.getElementById("videoToggleIcon");
 
-const iconSvg=
-document.getElementById(
-"videoToggleIcon"
-);
+const opening=!popup.classList.contains("active");
 
+popup.classList.toggle("active",opening);
 
-const opening=
-!popup.classList.contains(
-"active"
-);
+overlay.classList.toggle("active",opening);
 
+document.body.classList.toggle("popup-active",opening);
 
-popup.classList.toggle(
-"active"
-);
+/* Playlist button hide */
 
-overlay.classList.toggle(
-"active"
-);
+topWidgets.style.display=opening ? "none" : "";
 
-videoPlaylist.classList.toggle(
-"active"
-);
-
-document.body.classList.toggle(
-"popup-active"
-);
-
-
-/* HIDE / SHOW TOP PLAYLIST BUTTON */
+/* Icon */
 
 if(opening){
-
-topPlaylist.style.display="none";
-
-loadVideoPlaylist();
-
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
-}
-else{
+loadVideoPlaylist();
 
-topPlaylist.style.display="flex";
+}else{
 
 iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
@@ -1914,10 +1452,9 @@ iconSvg.innerHTML=
 
 }
 
-
 /* =========================
-   ORIENTATION
-   ========================= */
+ORIENTATION
+========================= */
 
 window.addEventListener(
 "resize",
@@ -1929,241 +1466,91 @@ window.addEventListener(
 handleDeviceOrientation
 );
 
-
 function handleDeviceOrientation(){
 
 const isLandscape=
-window.innerWidth>
-window.innerHeight;
+window.innerWidth>window.innerHeight;
 
 const popup=
-document.getElementById(
-"videoPopup"
-);
+document.getElementById("videoPopup");
 
 const overlay=
-document.getElementById(
-"videoOverlay"
-);
-
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const topPlaylist=
-document.getElementById(
-"playlistTopButton"
-);
+document.getElementById("videoOverlay");
 
 const iconSvg=
-document.getElementById(
-"videoToggleIcon"
-);
+document.getElementById("videoToggleIcon");
 
-
-if(isAndroidDevice){
+const topWidgets=
+document.getElementById("topWidgets");
 
 if(isLandscape){
 
-document.body.classList.add(
-"landscape-mode"
-);
+if(!popup.classList.contains("active")){
 
+popup.classList.add("active");
 
-/* landscape-এ popup open */
+overlay.classList.add("active");
 
-if(
-popup &&
-!popup.classList.contains(
-"active"
-)
-){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
+document.body.classList.add("popup-active");
 
 }
 
-
-/* landscape-এ playlist hide */
-
-videoPlaylist.classList.remove(
-"active"
-);
-
-topPlaylist.style.display="none";
-
-
-if(iconSvg){
+topWidgets.style.display="none";
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
-}
+}else{
 
-}
-else{
+/*
+Do not close popup automatically.
+Only restore button when popup is closed.
+*/
 
-document.body.classList.remove(
-"landscape-mode"
-);
-
-
-/* portrait-এ video open থাকলে playlist আবার দেখাবে */
-
-if(
-popup.classList.contains(
-"active"
-)
-){
-
-videoPlaylist.classList.add(
-"active"
-);
-
-topPlaylist.style.display="none";
-
-}
-else{
-
-topPlaylist.style.display="flex";
-
+if(!popup.classList.contains("active")){
+topWidgets.style.display="";
 }
 
 }
 
 }
-else{
-
-/* iOS / default */
-
-if(isLandscape){
-
-if(
-popup &&
-!popup.classList.contains(
-"active"
-)
-){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-}
-
-videoPlaylist.classList.remove(
-"active"
-);
-
-topPlaylist.style.display="none";
-
-iconSvg.innerHTML=
-'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
-}
-else{
-
-if(
-popup.classList.contains(
-"active"
-)
-){
-
-videoPlaylist.classList.add(
-"active"
-);
-
-topPlaylist.style.display="none";
-
-}
-else{
-
-topPlaylist.style.display="flex";
-
-}
-
-}
-
-}
-
-}
-
 
 /* =========================
-   VOLUME
-   ========================= */
+VOLUME
+========================= */
 
 let volTimer=null;
 
 function resetVolTimer(){
 
-if(volTimer){
+if(volTimer)
 clearTimeout(volTimer);
-}
 
-volTimer=setTimeout(
-()=>{
+volTimer=setTimeout(()=>{
 
 document
 .getElementById("volWrapper")
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
-},
-3000
-);
+},3000);
 
 }
-
 
 function toggleVolume(){
 
 const wrapper=
-document.getElementById(
-"volWrapper"
-);
+document.getElementById("volWrapper");
 
+if(wrapper.classList.contains("active")){
 
-if(
-wrapper.classList.contains(
-"active"
-)
-){
+wrapper.classList.remove("active");
 
-wrapper.classList.remove(
-"active"
-);
-
-if(volTimer){
+if(volTimer)
 clearTimeout(volTimer);
-}
 
-}
-else{
+}else{
 
-wrapper.classList.add(
-"active"
-);
+wrapper.classList.add("active");
 
 resetVolTimer();
 
@@ -2171,13 +1558,11 @@ resetVolTimer();
 
 }
 
-
 function changeVolume(val){
 
 if(
 player &&
-typeof player.setVolume===
-"function"
+typeof player.setVolume==="function"
 ){
 
 player.setVolume(val);
@@ -2188,137 +1573,87 @@ resetVolTimer();
 
 }
 
-
 /* =========================
-   NEXT
-   ========================= */
+NEXT PREVIOUS
+========================= */
 
 function nextSong(){
 
-if(
-!player ||
-playlistItems.length===0
-)return;
+if(!player || playlistItems.length===0)
+return;
 
-
-const current=
-player.getPlaylistIndex();
+const current=player.getPlaylistIndex();
 
 const next=
-(current+1)%
-playlistItems.length;
-
+(current+1)%playlistItems.length;
 
 forceUpdateUI(next);
 
-player.nextVideo();
+player.playVideoAt(next);
 
 }
-
-
-/* =========================
-   PREVIOUS
-   ========================= */
 
 function previousSong(){
 
-if(
-!player ||
-playlistItems.length===0
-)return;
+if(!player || playlistItems.length===0)
+return;
 
-
-const current=
-player.getPlaylistIndex();
+const current=player.getPlaylistIndex();
 
 const previous=
-(current-1+
-playlistItems.length)%
+(current-1+playlistItems.length)%
 playlistItems.length;
-
 
 forceUpdateUI(previous);
 
-player.previousVideo();
+player.playVideoAt(previous);
 
 }
 
-
 /* =========================
-   FORCE UPDATE
-   ========================= */
+FORCE UI
+========================= */
 
 function forceUpdateUI(index){
 
 if(!playlistItems[index])
 return;
 
+const id=playlistItems[index];
 
-const id=
-playlistItems[index];
-
-
-document.getElementById(
-"cover"
-).src=
+document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
-
 const title=
-document.getElementById(
-`title-${index}`
-);
+document.getElementById(`title-${index}`);
 
 const artist=
-document.getElementById(
-`artist-${index}`
-);
+document.getElementById(`artist-${index}`);
 
-
-if(title){
-
-document.getElementById(
-"title"
-).textContent=
+if(title)
+document.getElementById("title").textContent=
 title.textContent;
 
-}
-
-if(artist){
-
-document.getElementById(
-"artist"
-).textContent=
+if(artist)
+document.getElementById("artist").textContent=
 artist.textContent;
 
 }
 
-
-highlightVideoActiveTrack();
-
-}
-
-
 /* =========================
-   SWIPE
-   ========================= */
+SWIPE
+========================= */
 
 let swipeStartX=0;
 let swipeStartY=0;
-
 let swipeActive=false;
 let swipeFromSeek=false;
 
 const playerCard=
-document.getElementById(
-"playerCard"
-);
+document.getElementById("playerCard");
 
 const seekElement=
-document.getElementById(
-"seek"
-);
-
+document.getElementById("seek");
 
 playerCard.addEventListener(
 "pointerdown",
@@ -2329,97 +1664,73 @@ swipeStartX=e.clientX;
 swipeStartY=e.clientY;
 
 swipeFromSeek=
-!!e.target.closest(
-"#seek"
-);
+!!e.target.closest("#seek");
 
 swipeActive=true;
 
-if(swipeFromSeek){
+if(swipeFromSeek)
 e.stopPropagation();
-}
 
 }
 );
-
 
 playerCard.addEventListener(
 "pointermove",
 e=>{
 
-if(!swipeActive)return;
+if(!swipeActive)
+return;
 
-if(swipeFromSeek){
+if(swipeFromSeek)
 e.stopPropagation();
-}
 
 }
 );
-
 
 playerCard.addEventListener(
 "pointerup",
 e=>{
 
-if(!swipeActive)return;
-
-
-const endX=e.clientX;
-const endY=e.clientY;
+if(!swipeActive)
+return;
 
 const dx=
-endX-swipeStartX;
+e.clientX-swipeStartX;
 
 const dy=
-endY-swipeStartY;
-
+e.clientY-swipeStartY;
 
 if(swipeFromSeek){
 
 swipeActive=false;
-
 return;
 
 }
-
 
 if(Math.abs(dx)<50){
 
 swipeActive=false;
-
 return;
 
 }
 
-
-if(Math.abs(dy)>
-Math.abs(dx)
-){
+if(Math.abs(dy)>Math.abs(dx)){
 
 swipeActive=false;
-
 return;
 
 }
 
-
-if(dx<-50){
-
+if(dx<-50)
 nextSong();
 
-}
-else if(dx>50){
-
+else if(dx>50)
 previousSong();
-
-}
-
 
 swipeActive=false;
 
 }
 );
-
 
 playerCard.addEventListener(
 "pointercancel",
@@ -2428,49 +1739,39 @@ swipeActive=false;
 }
 );
 
-
 /* =========================
-   SEEK
-   ========================= */
+SEEK
+========================= */
 
 let isDragging=false;
 
-
-function getSeekPosition(
-clientX,
-el
-){
+function getSeekPosition(clientX,el){
 
 const rect=
 el.getBoundingClientRect();
 
-if(!rect.width)return 0;
-
+if(!rect.width)
+return 0;
 
 return Math.max(
 0,
 Math.min(
 1,
-(clientX-rect.left)/
-rect.width
+(clientX-rect.left)/rect.width
 )
 );
 
 }
 
-
 function updateSeekVisual(pos){
 
-document.getElementById(
-"fill"
-).style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
-
 
 if(
 player &&
-typeof player.getDuration===
-"function"
+typeof player.getDuration==="function"
 ){
 
 const duration=
@@ -2478,46 +1779,32 @@ player.getDuration();
 
 if(duration){
 
-document.getElementById(
-"current"
-).textContent=
-format(
-pos*duration
-);
+document.getElementById("current")
+.textContent=
+format(pos*duration);
 
-document.getElementById(
-"duration"
-).textContent=
-format(
-duration
-);
+document.getElementById("duration")
+.textContent=
+format(duration);
 
 }
 
 }
 
 }
-
 
 seekElement.addEventListener(
 "pointerdown",
 e=>{
 
 e.preventDefault();
-
 e.stopPropagation();
 
 isDragging=true;
 
 try{
-
-seekElement.setPointerCapture(
-e.pointerId
-);
-
-}
-catch(err){}
-
+seekElement.setPointerCapture(e.pointerId);
+}catch(err){}
 
 updateSeekVisual(
 getSeekPosition(
@@ -2529,18 +1816,16 @@ seekElement
 },
 {passive:false}
 );
-
 
 seekElement.addEventListener(
 "pointermove",
 e=>{
 
 e.preventDefault();
-
 e.stopPropagation();
 
-if(!isDragging)return;
-
+if(!isDragging)
+return;
 
 updateSeekVisual(
 getSeekPosition(
@@ -2553,17 +1838,15 @@ seekElement
 {passive:false}
 );
 
-
 seekElement.addEventListener(
 "pointerup",
 e=>{
 
 e.preventDefault();
-
 e.stopPropagation();
 
-if(!isDragging)return;
-
+if(!isDragging)
+return;
 
 const pos=
 getSeekPosition(
@@ -2571,14 +1854,11 @@ e.clientX,
 seekElement
 );
 
-
 updateSeekVisual(pos);
-
 
 if(
 player &&
-typeof player.getDuration===
-"function"
+typeof player.getDuration==="function"
 ){
 
 const duration=
@@ -2595,39 +1875,30 @@ true
 
 }
 
-
 isDragging=false;
 
-
 try{
-
-seekElement.releasePointerCapture(
-e.pointerId
-);
-
-}
-catch(err){}
+seekElement.releasePointerCapture(e.pointerId);
+}catch(err){}
 
 },
 {passive:false}
 );
 
-
 /* =========================
-   PROGRESS
-   ========================= */
+PROGRESS
+========================= */
 
 function updateProgress(){
 
-if(isDragging)return;
-
+if(isDragging)
+return;
 
 if(
 !player ||
-typeof player.getCurrentTime!==
-"function"
-)return;
-
+typeof player.getCurrentTime!=="function"
+)
+return;
 
 try{
 
@@ -2637,9 +1908,8 @@ player.getCurrentTime();
 const duration=
 player.getDuration();
 
-
-if(!duration)return;
-
+if(!duration)
+return;
 
 const pos=
 Math.max(
@@ -2650,67 +1920,52 @@ current/duration
 )
 );
 
-
-document.getElementById(
-"fill"
-).style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
 
-
-document.getElementById(
-"current"
-).textContent=
+document.getElementById("current")
+.textContent=
 format(current);
 
-
-document.getElementById(
-"duration"
-).textContent=
+document.getElementById("duration")
+.textContent=
 format(duration);
 
-}
-catch(e){}
+}catch(e){}
 
 }
 
+/* =========================
+FORMAT
+========================= */
 
 function format(s){
 
 if(!s || isNaN(s))
 return "0:00";
 
-
 s=Math.floor(s);
-
 
 return Math.floor(s/60)+":"+
 String(s%60).padStart(2,"0");
 
 }
 
-
 /* =========================
-   LOAD PLAYLIST
-   ========================= */
+LOAD PLAYLIST
+========================= */
 
 function loadPlaylistItems(){
 
 if(
 !player ||
-typeof player.getPlaylist!==
-"function"
-)return;
-
+typeof player.getPlaylist!=="function"
+)
+return;
 
 playlistItems=
 player.getPlaylist();
-
-
-const list=
-document.getElementById(
-"songList"
-);
-
 
 if(
 !playlistItems ||
@@ -2726,90 +1981,143 @@ return;
 
 }
 
+/* OLD DRAWER */
+
+const list=
+document.getElementById("songList");
 
 list.innerHTML="";
 
+/* VIDEO LIST */
+
+const videoList=
+document.getElementById("videoSongList");
+
+videoList.innerHTML="";
 
 playlistItems.forEach(
 (id,index)=>{
 
+/* OLD DRAWER ITEM */
+
 const item=
-document.createElement(
-"div"
-);
+document.createElement("div");
 
+item.className="song-item";
 
-item.className=
-"song-item";
+item.id=`track-${index}`;
 
-item.id=
-`track-${index}`;
-
-
-item.onclick=
-()=>{
+item.onclick=()=>{
 playSpecificTrack(index);
 };
-
 
 item.innerHTML=`
 
 <img
 src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
-alt="thumb"
->
+alt="thumb">
 
 <div class="song-item-info">
 
 <div
 class="song-item-title"
-id="title-${index}"
->
-Track #${index+1}
+id="title-${index}">
+Loading...
 </div>
 
 <div
 class="song-item-artist"
-id="artist-${index}"
->
+id="artist-${index}">
 YouTube Music
 </div>
 
 </div>
 `;
 
-
 list.appendChild(item);
 
+/* VIDEO ITEM */
+
+const videoItem=
+document.createElement("div");
+
+videoItem.className=
+"video-song-item";
+
+videoItem.id=
+`video-track-${index}`;
+
+videoItem.onclick=()=>{
+playVideoTrack(index);
+};
+
+videoItem.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
+alt="thumbnail">
+
+<div class="video-song-info">
+
+<div
+class="video-song-title"
+id="video-title-${index}">
+Loading...
+</div>
+
+<div
+class="video-song-artist"
+id="video-artist-${index}">
+YouTube Music
+</div>
+
+</div>
+`;
+
+videoList.appendChild(videoItem);
+
+/* FETCH */
 
 fetchSongDetails(
 id,
 index
 );
 
-});
-
+}
+);
 
 highlightActiveTrack();
 
 updateInfo();
 
+}
 
-/* NEW VIDEO PLAYLIST */
+/* =========================
+VIDEO PLAYLIST LOAD
+========================= */
 
-loadVideoPlaylist();
+function loadVideoPlaylist(){
+
+if(
+playlistItems.length===0 &&
+player
+){
+
+loadPlaylistItems();
+
+return;
 
 }
 
+highlightActiveTrack();
+
+}
 
 /* =========================
-   FETCH DETAILS
-   ========================= */
+FETCH DETAILS
+========================= */
 
-function fetchSongDetails(
-id,
-index
-){
+function fetchSongDetails(id,index){
 
 fetch(
 `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
@@ -2819,8 +2127,10 @@ fetch(
 
 .then(data=>{
 
-if(!data)return;
+if(!data)
+return;
 
+/* OLD */
 
 const title=
 document.getElementById(
@@ -2832,392 +2142,109 @@ document.getElementById(
 `artist-${index}`
 );
 
-
-if(
-title &&
-data.title
-){
-
+if(title && data.title)
 title.textContent=
 data.title;
 
-}
-
-
-if(
-artist &&
-data.author_name
-){
-
+if(artist && data.author_name)
 artist.textContent=
 data.author_name;
 
-}
+/* VIDEO */
 
-
-/* VIDEO LIST */
-
-updateVideoSongDetails(
-index,
-data.title,
-data.author_name
-);
-
-})
-
-.catch(()=>{});
-
-}
-
-
-/* =========================
-   VIDEO PLAYLIST
-   ========================= */
-
-function loadVideoPlaylist(){
-
-const list=
-document.getElementById(
-"videoSongList"
-);
-
-
-if(
-!playlistItems ||
-playlistItems.length===0
-){
-
-return;
-
-}
-
-
-list.innerHTML="";
-
-
-playlistItems.forEach(
-(id,index)=>{
-
-const item=
-document.createElement(
-"div"
-);
-
-
-item.className=
-"video-song-item";
-
-
-item.id=
-`video-track-${index}`;
-
-
-item.onclick=
-()=>{
-
-playSpecificTrack(
-index
-);
-
-};
-
-
-item.innerHTML=`
-
-<img
-src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
-alt="thumb"
->
-
-<div class="video-song-info">
-
-<div
-class="video-song-title"
-id="video-title-${index}"
->
-Track #${index+1}
-</div>
-
-<div
-class="video-song-artist"
-id="video-artist-${index}"
->
-YouTube Music
-</div>
-
-</div>
-
-`;
-
-
-list.appendChild(item);
-
-
-fetchVideoSongDetails(
-id,
-index
-);
-
-});
-
-
-highlightVideoActiveTrack();
-
-}
-
-
-/* =========================
-   VIDEO DETAILS
-   ========================= */
-
-function fetchVideoSongDetails(
-id,
-index
-){
-
-fetch(
-`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
-)
-
-.then(r=>r.json())
-
-.then(data=>{
-
-if(!data)return;
-
-
-const title=
+const videoTitle=
 document.getElementById(
 `video-title-${index}`
 );
 
-const artist=
+const videoArtist=
 document.getElementById(
 `video-artist-${index}`
 );
 
-
-if(
-title &&
-data.title
-){
-
-title.textContent=
+if(videoTitle && data.title)
+videoTitle.textContent=
 data.title;
 
-}
-
-
-if(
-artist &&
-data.author_name
-){
-
-artist.textContent=
+if(videoArtist && data.author_name)
+videoArtist.textContent=
 data.author_name;
-
-}
 
 })
 
-.catch(()=>{});
-
-}
-
-
-/* =========================
-   UPDATE VIDEO DETAILS
-   ========================= */
-
-function updateVideoSongDetails(
-index,
-titleText,
-artistText
-){
+.catch(()=>{
 
 const title=
+document.getElementById(
+`title-${index}`
+);
+
+const videoTitle=
 document.getElementById(
 `video-title-${index}`
 );
 
-const artist=
-document.getElementById(
-`video-artist-${index}`
-);
+if(title)
+title.textContent="YouTube Music";
 
-
-if(
-title &&
-titleText
-){
-
-title.textContent=
-titleText;
-
-}
-
-
-if(
-artist &&
-artistText
-){
-
-artist.textContent=
-artistText;
-
-}
-
-}
-
-
-/* =========================
-   ACTIVE VIDEO SONG
-   ========================= */
-
-function highlightVideoActiveTrack(){
-
-if(
-!player ||
-typeof player.getPlaylistIndex!==
-"function"
-)return;
-
-
-const current=
-player.getPlaylistIndex();
-
-
-document
-.querySelectorAll(
-".video-song-item"
-)
-.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-index===current
-);
+if(videoTitle)
+videoTitle.textContent="YouTube Music";
 
 });
 
 }
 
-
 /* =========================
-   PLAY SPECIFIC TRACK
-   ========================= */
+PLAY SPECIFIC
+========================= */
 
 function playSpecificTrack(index){
 
-if(!player)return;
-
-
-const id=
-playlistItems[index];
-
-
-if(!id)return;
-
-
-/*
-   IMPORTANT:
-   playVideoAt() ব্যবহার করা হচ্ছে,
-   তাই গান সরাসরি playlist-এর
-   selected index থেকে play হবে।
-*/
-
-try{
-
-player.playVideoAt(index);
-
-}
-catch(e){
-
-/* fallback */
-
-player.loadVideoById(id);
-
-}
-
-
-/* MAIN UI */
+if(!player)
+return;
 
 forceUpdateUI(index);
 
-highlightActiveTrack();
+player.playVideoAt(index);
 
-highlightVideoActiveTrack();
-
-
-/* OLD DRAWER CLOSE */
-
-const drawer=
-document.getElementById(
-"drawer"
-);
-
-const drawerOverlay=
-document.getElementById(
-"overlay"
-);
-
-drawer.classList.remove(
-"open"
-);
-
-drawerOverlay.classList.remove(
-"active"
-);
-
-
-/* VIDEO OPEN থাকলে VIDEO PLAYLIST থাকবে */
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup.classList.contains(
-"active"
-)
-){
-
-document
-.getElementById(
-"videoPlaylist"
-)
-.classList.add(
-"active"
-);
+toggleDrawer();
 
 }
-
-}
-
 
 /* =========================
-   ACTIVE OLD TRACK
-   ========================= */
+VIDEO PLAY SPECIFIC
+========================= */
+
+function playVideoTrack(index){
+
+if(!player)
+return;
+
+forceUpdateUI(index);
+
+player.playVideoAt(index);
+
+highlightActiveTrack();
+
+}
+
+/* =========================
+HIGHLIGHT
+========================= */
 
 function highlightActiveTrack(){
 
 if(
 !player ||
-typeof player.getPlaylistIndex!==
-"function"
-)return;
-
+typeof player.getPlaylistIndex!=="function"
+)
+return;
 
 const current=
 player.getPlaylistIndex();
 
-
 document
-.querySelectorAll(
-".song-item"
-)
+.querySelectorAll(".song-item")
 .forEach(
 (item,index)=>{
 
@@ -3226,100 +2253,80 @@ item.classList.toggle(
 index===current
 );
 
-});
+}
+);
+
+document
+.querySelectorAll(".video-song-item")
+.forEach(
+(item,index)=>{
+
+item.classList.toggle(
+"active",
+index===current
+);
+
+}
+);
 
 }
 
-
 /* =========================
-   UPDATE INFO
-   ========================= */
+UPDATE INFO
+========================= */
 
 function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData!==
-"function"
-)return;
-
+typeof player.getVideoData!=="function"
+)
+return;
 
 try{
 
 const d=
 player.getVideoData();
 
+if(!d || !d.video_id)
+return;
 
-if(
-!d ||
-!d.video_id
-)return;
-
-
-document.getElementById(
-"cover"
-).src=
+document.getElementById("cover")
+.src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
+if(d.title)
+document.getElementById("title")
+.textContent=d.title;
 
-if(d.title){
+if(d.author)
+document.getElementById("artist")
+.textContent=d.author;
 
-document.getElementById(
-"title"
-).textContent=
-d.title;
+highlightActiveTrack();
 
-}
-
-
-if(d.author){
-
-document.getElementById(
-"artist"
-).textContent=
-d.author;
+}catch(e){}
 
 }
-
-
-highlightVideoActiveTrack();
-
-}
-catch(e){}
-
-}
-
 
 /* =========================
-   DRAWER
-   ========================= */
+OLD DRAWER
+========================= */
 
 function toggleDrawer(){
 
 const drawer=
-document.getElementById(
-"drawer"
-);
+document.getElementById("drawer");
 
 const overlay=
-document.getElementById(
-"overlay"
-);
+document.getElementById("overlay");
 
+drawer.classList.toggle("open");
 
-drawer.classList.toggle(
-"open"
-);
-
-overlay.classList.toggle(
-"active"
-);
-
+overlay.classList.toggle("active");
 
 if(
-drawer.classList.contains(
-"open"
-) &&
+drawer.classList.contains("open") &&
 playlistItems.length===0
 ){
 
@@ -3328,16 +2335,6 @@ loadPlaylistItems();
 }
 
 }
-
-
-/* =========================
-   INITIAL ORIENTATION
-   ========================= */
-
-setTimeout(
-handleDeviceOrientation,
-300
-);
 
 </script>
 
