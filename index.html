@@ -263,9 +263,6 @@ pointer-events:none;
 transform:scale(1);
 }
 
-
-/* VIDEO TOUCH DISABLED */
-
 #yt{
 width:100%;
 height:100%;
@@ -284,15 +281,13 @@ pointer-events:none!important;
 
 width:100%;
 
-/*
-   Controller-এর উপরে শেষ হবে
-*/
-height:calc(
-100dvh - 7% - 250px - 155px - 18px
+height:clamp(
+120px,
+calc(100dvh - 6% - 250px - 190px),
+300px
 );
 
-min-height:90px;
-max-height:260px;
+min-height:100px;
 
 margin-top:10px;
 
@@ -321,8 +316,14 @@ opacity .3s ease,
 transform .3s ease,
 visibility .3s ease;
 
-/* playlist নিজে touch নেবে */
-touch-action:pan-y;
+display:flex;
+flex-direction:column;
+
+flex-shrink:0;
+
+position:relative;
+
+z-index:1600;
 }
 
 .video-playlist.active{
@@ -330,7 +331,7 @@ touch-action:pan-y;
 opacity:1;
 visibility:visible;
 
-pointer-events:auto!important;
+pointer-events:auto;
 
 transform:translateY(0);
 }
@@ -354,6 +355,8 @@ border-bottom:1px solid rgba(255,255,255,.13);
 margin-bottom:6px;
 
 flex-shrink:0;
+
+pointer-events:none;
 }
 
 
@@ -365,9 +368,13 @@ flex-shrink:0;
 
 width:100%;
 
-height:calc(100% - 31px);
+height:0;
 
-overflow-y:scroll;
+flex:1;
+
+min-height:0;
+
+overflow-y:auto;
 overflow-x:hidden;
 
 display:flex;
@@ -375,19 +382,22 @@ flex-direction:column;
 
 gap:5px;
 
-padding-right:3px;
+padding-right:2px;
 
 touch-action:pan-y!important;
 
--webkit-overflow-scrolling:touch!important;
+-webkit-overflow-scrolling:touch;
 
 overscroll-behavior:contain;
 
+pointer-events:auto!important;
+
+user-select:none;
+-webkit-user-select:none;
+
 position:relative;
 
-z-index:20;
-
-pointer-events:auto!important;
+z-index:1601;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -446,9 +456,15 @@ background:rgba(255,255,255,.20);
 border-color:rgba(255,255,255,.30);
 }
 
+
+/* NUMBER */
+
 .video-song-number{
 display:none!important;
 }
+
+
+/* THUMB */
 
 .video-song-item img{
 
@@ -463,6 +479,9 @@ flex-shrink:0;
 
 pointer-events:none;
 }
+
+
+/* INFO */
 
 .video-song-info{
 
@@ -649,6 +668,8 @@ overflow:hidden;
 pointer-events:auto;
 
 touch-action:pan-y;
+
+z-index:3001;
 }
 
 
@@ -1323,37 +1344,41 @@ border-radius:18px;
 
 
 /*
-   Playlist controller-এর উপরে শেষ হবে
+   Playlist controller-এর ঠিক উপরে শেষ হবে
 */
 
 .video-playlist{
 
-height:calc(
-100dvh - 6% - 230px - 145px - 18px
-)!important;
-
-min-height:90px!important;
-max-height:260px!important;
+height:clamp(
+120px,
+calc(100dvh - 6% - 230px - 185px),
+260px
+);
 
 margin-top:9px;
 
 padding:7px;
 
-overflow:hidden!important;
+display:flex;
+flex-direction:column;
 
-touch-action:pan-y!important;
+min-height:100px;
 }
 
 .video-song-list{
 
-height:calc(100% - 31px)!important;
+height:0;
 
-overflow-y:scroll!important;
-overflow-x:hidden!important;
+flex:1;
+
+min-height:0;
+
+overflow-y:auto;
+overflow-x:hidden;
 
 touch-action:pan-y!important;
 
--webkit-overflow-scrolling:touch!important;
+-webkit-overflow-scrolling:touch;
 
 pointer-events:auto!important;
 }
@@ -1364,9 +1389,9 @@ padding:7px;
 
 min-height:52px;
 
-touch-action:pan-y!important;
-
 pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item img{
@@ -1402,27 +1427,31 @@ height:210px;
 
 .video-playlist{
 
-height:calc(
-100dvh - 3% - 210px - 140px - 18px
-)!important;
+height:clamp(
+100px,
+calc(100dvh - 3% - 210px - 180px),
+220px
+);
 
-min-height:80px!important;
-max-height:220px!important;
+display:flex;
+flex-direction:column;
 
-overflow:hidden!important;
+min-height:100px;
 }
 
 .video-song-list{
 
-height:calc(100% - 31px)!important;
+height:0;
 
-overflow-y:scroll!important;
+flex:1;
+
+min-height:0;
+
+overflow-y:auto;
 
 touch-action:pan-y!important;
 
--webkit-overflow-scrolling:touch!important;
-
-pointer-events:auto!important;
+-webkit-overflow-scrolling:touch;
 }
 
 }
@@ -1448,27 +1477,36 @@ margin-top:7px;
 
 padding:6px;
 
-height:calc(
-100dvh - 3% - 210px - 135px - 18px
-)!important;
+height:clamp(
+100px,
+calc(100dvh - 3% - 210px - 175px),
+210px
+);
 
-min-height:80px!important;
-max-height:210px!important;
-
-overflow:hidden!important;
+display:flex;
+flex-direction:column;
 }
 
 .video-song-list{
 
-height:calc(100% - 31px)!important;
+height:0;
 
-overflow-y:scroll!important;
+flex:1;
+
+min-height:0;
+
+overflow-y:auto;
 
 touch-action:pan-y!important;
 
--webkit-overflow-scrolling:touch!important;
+-webkit-overflow-scrolling:touch;
+}
+
+.video-song-item{
 
 pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item img{
@@ -1517,88 +1555,6 @@ pointer-events:auto;
 
 background:transparent;
 }
-
-
-/* =========================
-   FINAL TOUCH FIX
-   ========================= */
-
-/*
-   শুধুমাত্র video area touch block
-*/
-.video-popup,
-.video-popup #yt,
-.video-touch-block{
-touch-action:none!important;
-}
-
-
-/*
-   Playlist সম্পূর্ণ touchable
-*/
-.video-playlist,
-.video-song-list,
-.video-song-item{
-pointer-events:auto!important;
-touch-action:pan-y!important;
--webkit-overflow-scrolling:touch!important;
-}
-
-
-/*
-   Main controller সবসময় touchable
-*/
-.player{
-pointer-events:auto!important;
-}
-
-
-/*
-   Playlist-এর ভেতরের image/text
-   parent item-এর touch নষ্ট করবে না
-*/
-.video-song-item img,
-.video-song-info,
-.video-song-title,
-.video-song-artist{
-pointer-events:none!important;
-}
-
-
-/*
-   Playlist যেন controller-এর নিচে না যায়
-*/
-@media(max-width:480px){
-
-.video-playlist{
-height:calc(
-100dvh - 6% - 230px - 145px - 18px
-)!important;
-
-max-height:260px!important;
-
-overflow:hidden!important;
-}
-
-.video-song-list{
-height:calc(100% - 31px)!important;
-
-overflow-y:scroll!important;
-overflow-x:hidden!important;
-
-touch-action:pan-y!important;
-
-pointer-events:auto!important;
-
--webkit-overflow-scrolling:touch!important;
-}
-
-}
-
-
-/* =========================
-   SCRIPT
-   ========================= */
 
 </style>
 </head>
@@ -1667,8 +1623,6 @@ class="video-popup"
 >
 
 <div id="yt"></div>
-
-<!-- শুধু video area touch block -->
 
 <div class="video-touch-block"></div>
 
@@ -1945,9 +1899,7 @@ oninput="changeVolume(this.value)"
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
 let player=null;
-
 let playing=false;
-
 let playlistItems=[];
 
 
@@ -2022,9 +1974,11 @@ playerVars:{
 autoplay:0,
 
 /*
-   YouTube-এর নিজস্ব control visual থাকবে,
-   কিন্তু video-touch-block এর কারণে touch কাজ করবে না।
+   YouTube-এর নিজের control visual থাকতে পারে,
+   কিন্তু video-touch-block থাকার কারণে
+   video area-তে user touch করতে পারবে না।
 */
+
 controls:1,
 
 disablekb:0,
@@ -2164,7 +2118,6 @@ cover.classList.remove(
 function togglePlay(){
 
 if(!player)return;
-
 
 if(playing){
 
@@ -2629,11 +2582,8 @@ highlightActiveTrack();
    ========================= */
 
 let swipeStartX=0;
-
 let swipeStartY=0;
-
 let swipeActive=false;
-
 let swipeFromSeek=false;
 
 
