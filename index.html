@@ -64,24 +64,6 @@ filter:blur(20px);
 transform:scale(1.1);
 }
 
-/* NEW: subtle background movement only while music plays */
-body.music-playing .bg{
-animation:bgSlowMove 20s ease-in-out infinite alternate;
-}
-
-body.popup-active .bg{
-animation:none;
-}
-
-@keyframes bgSlowMove{
-from{
-transform:scale(1);
-}
-to{
-transform:scale(1.025);
-}
-}
-
 .bg:after{
 content:"";
 position:absolute;
@@ -125,7 +107,6 @@ align-items:center;
 gap:6px;
 }
 
-
 .live-dot{
 width:7px;
 height:7px;
@@ -136,11 +117,19 @@ box-shadow:0 0 8px #ff3b30;
 animation:pulse 1.5s infinite;
 }
 
-
 @keyframes pulse{
-0%{opacity:1;transform:scale(1);}
-50%{opacity:.3;transform:scale(.8);}
-100%{opacity:1;transform:scale(1);}
+0%{
+opacity:1;
+transform:scale(1);
+}
+50%{
+opacity:.3;
+transform:scale(.8);
+}
+100%{
+opacity:1;
+transform:scale(1);
+}
 }
 
 
@@ -182,7 +171,7 @@ fill:#fff;
 position:fixed;
 inset:0;
 z-index:1499;
-background:rgba(0,0,0,0.4);
+background:rgba(0,0,0,.4);
 display:none;
 pointer-events:none;
 }
@@ -287,7 +276,7 @@ padding:0 16px 65px;
 
 
 /* =================================================
-   MUSIC PLAYER (CONTROLLER)
+   MUSIC PLAYER
    ================================================= */
 
 .player{
@@ -306,44 +295,6 @@ gap:12px;
 position:relative;
 overflow:hidden;
 touch-action:pan-y;
-}
-
-/* NEW: subtle glass shine */
-
-.player::before{
-content:"";
-position:absolute;
-top:0;
-left:-120%;
-width:70%;
-height:100%;
-background:linear-gradient(
-90deg,
-transparent,
-rgba(255,255,255,.045),
-transparent
-);
-transform:skewX(-20deg);
-pointer-events:none;
-z-index:0;
-animation:glassShine 8s ease-in-out infinite;
-}
-
-.player > *{
-position:relative;
-z-index:2;
-}
-
-@keyframes glassShine{
-0%{
-left:-120%;
-}
-30%{
-left:140%;
-}
-100%{
-left:140%;
-}
 }
 
 
@@ -484,74 +435,6 @@ font-variant-numeric:tabular-nums;
 
 
 /* =========================
-   NEW MINI VISUALIZER
-   ========================= */
-
-.mini-visualizer{
-position:absolute;
-left:18px;
-bottom:8px;
-height:11px;
-display:flex;
-align-items:flex-end;
-gap:2px;
-pointer-events:none;
-z-index:5;
-opacity:.65;
-}
-
-.mini-visualizer span{
-width:2px;
-height:3px;
-border-radius:3px;
-background:#fff;
-animation:miniBars .8s ease-in-out infinite;
-animation-play-state:paused;
-}
-
-body.music-playing .mini-visualizer span{
-animation-play-state:running;
-}
-
-.mini-visualizer span:nth-child(1){
-animation-delay:-.15s;
-}
-
-.mini-visualizer span:nth-child(2){
-animation-delay:-.35s;
-}
-
-.mini-visualizer span:nth-child(3){
-animation-delay:-.55s;
-}
-
-.mini-visualizer span:nth-child(4){
-animation-delay:-.25s;
-}
-
-.mini-visualizer span:nth-child(5){
-animation-delay:-.65s;
-}
-
-.mini-visualizer span:nth-child(6){
-animation-delay:-.45s;
-}
-
-.mini-visualizer span:nth-child(7){
-animation-delay:-.75s;
-}
-
-@keyframes miniBars{
-0%,100%{
-height:3px;
-}
-50%{
-height:11px;
-}
-}
-
-
-/* =========================
    CONTROLS
    ========================= */
 
@@ -636,7 +519,7 @@ box-shadow:0 0 5px rgba(0,0,0,.5);
 @supports (-webkit-touch-callout:none){
 
 .vol-container{
-display:none!important;
+display:none !important;
 }
 
 }
@@ -684,9 +567,9 @@ transform:scale(.90);
 position:fixed;
 inset:0;
 z-index:9999;
-background:transparent!important;
-backdrop-filter:none!important;
--webkit-backdrop-filter:none!important;
+background:transparent !important;
+backdrop-filter:none !important;
+-webkit-backdrop-filter:none !important;
 pointer-events:none;
 display:none;
 }
@@ -702,16 +585,16 @@ top:0;
 right:-100%;
 width:180px;
 height:100dvh;
-background:rgba(20,20,20,.45)!important;
-backdrop-filter:blur(30px) saturate(150%)!important;
--webkit-backdrop-filter:blur(30px) saturate(150%)!important;
-border-left:1px solid rgba(255,255,255,.18)!important;
+background:rgba(20,20,20,.45) !important;
+backdrop-filter:blur(30px) saturate(150%) !important;
+-webkit-backdrop-filter:blur(30px) saturate(150%) !important;
+border-left:1px solid rgba(255,255,255,.18) !important;
 z-index:10000;
 transition:right .35s cubic-bezier(.2,.8,.2,1);
 display:flex;
 flex-direction:column;
 padding:12px 6px;
-box-shadow:-15px 0 40px rgba(0,0,0,.5)!important;
+box-shadow:-15px 0 40px rgba(0,0,0,.5) !important;
 visibility:hidden;
 pointer-events:none;
 }
@@ -962,8 +845,7 @@ Loading...
 id="cover"
 class="cover"
 src="logo.png"
-alt="Album art"
->
+alt="Album art">
 
 </div>
 
@@ -1009,21 +891,6 @@ YouTube Music
 </div>
 
 
-<!-- NEW MINI VISUALIZER -->
-
-<div class="mini-visualizer" id="miniVisualizer">
-
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-
-</div>
-
-
 <!-- CONTROLS -->
 
 <div class="controls">
@@ -1035,13 +902,9 @@ YouTube Music
 class="btn"
 id="videoToggleBtn"
 onclick="toggleVideoPopup()"
-title="Toggle Video Popup"
->
+title="Toggle Video Popup">
 
-<svg
-id="videoToggleIcon"
-viewBox="0 0 24 24"
->
+<svg id="videoToggleIcon" viewBox="0 0 24 24">
 
 <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
 
@@ -1055,13 +918,11 @@ viewBox="0 0 24 24"
 <button
 class="play"
 id="play"
-onclick="togglePlay()"
->
+onclick="togglePlay()">
 
 <svg
 id="play-icon"
-viewBox="0 0 24 24"
->
+viewBox="0 0 24 24">
 
 <path d="M8 5v14l11-7z"/>
 
@@ -1076,8 +937,7 @@ viewBox="0 0 24 24"
 
 <button
 class="btn"
-onclick="toggleVolume()"
->
+onclick="toggleVolume()">
 
 <svg viewBox="0 0 24 24">
 
@@ -1090,8 +950,7 @@ onclick="toggleVolume()"
 
 <div
 class="vol-slider-wrapper"
-id="volWrapper"
->
+id="volWrapper">
 
 <input
 type="range"
@@ -1100,8 +959,7 @@ id="volSlider"
 min="0"
 max="100"
 value="100"
-oninput="changeVolume(this.value)"
->
+oninput="changeVolume(this.value)">
 
 </div>
 
@@ -1113,6 +971,8 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
+<!-- YOUTUBE IFRAME API -->
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -1152,7 +1012,10 @@ hour12:true
 };
 
 document.getElementById("bdTimeVal").textContent=
-new Intl.DateTimeFormat("en-US",options).format(new Date());
+new Intl.DateTimeFormat(
+"en-US",
+options
+).format(new Date());
 
 }
 
@@ -1162,7 +1025,7 @@ setInterval(updateBDTime,1000);
 
 
 /* =========================
-   YOUTUBE API
+   YOUTUBE PLAYER
    ========================= */
 
 function onYouTubeIframeAPIReady(){
@@ -1175,14 +1038,33 @@ height:"100%",
 playerVars:{
 
 autoplay:0,
-controls:1,
-disablekb:0,
-fs:1,
+
+/*
+   IMPORTANT:
+   YouTube-এর ভিতরের সব controls hide
+*/
+controls:0,
+
+/*
+   Keyboard controls বন্ধ
+*/
+disablekb:1,
+
+/*
+   YouTube fullscreen button বন্ধ
+*/
+fs:0,
+
 modestbranding:1,
+
 playsinline:1,
+
 rel:0,
+
 iv_load_policy:3,
+
 listType:"playlist",
+
 list:PLAYLIST_ID
 
 },
@@ -1190,6 +1072,7 @@ list:PLAYLIST_ID
 events:{
 
 onReady:ready,
+
 onStateChange:state
 
 }
@@ -1219,20 +1102,18 @@ setInterval(updateProgress,250);
 function state(e){
 
 const cover=document.getElementById("cover");
+
 const playBtn=document.getElementById("play");
+
 const playIcon=document.getElementById("play-icon");
 
 
 highlightActiveTrack();
 
 
-/* PLAYING */
-
 if(e.data===YT.PlayerState.PLAYING){
 
 playing=true;
-
-document.body.classList.add("music-playing");
 
 playBtn.classList.add("playing");
 
@@ -1244,13 +1125,13 @@ cover.classList.add("spinning");
 updateInfo();
 
 if(playlistItems.length===0){
+
 loadPlaylistItems();
-}
 
 }
 
+}
 
-/* PAUSED / ENDED */
 
 else if(
 e.data===YT.PlayerState.PAUSED ||
@@ -1258,8 +1139,6 @@ e.data===YT.PlayerState.ENDED
 ){
 
 playing=false;
-
-document.body.classList.remove("music-playing");
 
 playBtn.classList.remove("playing");
 
@@ -1301,8 +1180,11 @@ player.playVideo();
 function toggleVideoPopup(){
 
 const popup=document.getElementById("videoPopup");
+
 const overlay=document.getElementById("videoOverlay");
+
 const iconSvg=document.getElementById("videoToggleIcon");
+
 
 popup.classList.toggle("active");
 
@@ -1356,13 +1238,12 @@ const iconSvg=
 document.getElementById("videoToggleIcon");
 
 
-/* ANDROID */
-
 if(isAndroidDevice){
 
 if(isLandscape){
 
 document.body.classList.add("landscape-mode");
+
 
 if(
 popup &&
@@ -1377,6 +1258,7 @@ document.body.classList.add("popup-active");
 
 }
 
+
 if(iconSvg){
 
 iconSvg.innerHTML=
@@ -1386,16 +1268,13 @@ iconSvg.innerHTML=
 
 }else{
 
-document.body.classList.remove("landscape-mode");
+document.body.classList.remove(
+"landscape-mode"
+);
 
 }
 
-}
-
-
-/* iOS / DEFAULT */
-
-else{
+}else{
 
 if(isLandscape){
 
@@ -1531,17 +1410,13 @@ player.previousVideo();
 }
 
 
-/* =========================
-   FORCE UPDATE UI
-   ========================= */
-
 function forceUpdateUI(index){
 
 if(!playlistItems[index])
 return;
 
-const id=playlistItems[index];
-
+const id=
+playlistItems[index];
 
 document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -1556,15 +1431,16 @@ document.getElementById(`artist-${index}`);
 
 if(title){
 
-document.getElementById("title").textContent=
-title.textContent;
+document.getElementById("title")
+.textContent=title.textContent;
 
 }
 
+
 if(artist){
 
-document.getElementById("artist").textContent=
-artist.textContent;
+document.getElementById("artist")
+.textContent=artist.textContent;
 
 }
 
@@ -1606,7 +1482,8 @@ e.stopPropagation();
 
 }
 
-});
+}
+);
 
 
 playerCard.addEventListener(
@@ -1622,7 +1499,8 @@ e.stopPropagation();
 
 }
 
-});
+}
+);
 
 
 playerCard.addEventListener(
@@ -1633,9 +1511,11 @@ if(!swipeActive)
 return;
 
 const endX=e.clientX;
+
 const endY=e.clientY;
 
 const dx=endX-swipeStartX;
+
 const dy=endY-swipeStartY;
 
 
@@ -1647,6 +1527,7 @@ return;
 
 }
 
+
 if(Math.abs(dx)<50){
 
 swipeActive=false;
@@ -1654,6 +1535,7 @@ swipeActive=false;
 return;
 
 }
+
 
 if(Math.abs(dy)>Math.abs(dx)){
 
@@ -1668,15 +1550,19 @@ if(dx<-50){
 
 nextSong();
 
-}else if(dx>50){
+}
+
+else if(dx>50){
 
 previousSong();
 
 }
 
+
 swipeActive=false;
 
-});
+}
+);
 
 
 playerCard.addEventListener(
@@ -1694,9 +1580,13 @@ swipeActive=false;
 let isDragging=false;
 
 
-function getSeekPosition(clientX,el){
+function getSeekPosition(
+clientX,
+el
+){
 
-const rect=el.getBoundingClientRect();
+const rect=
+el.getBoundingClientRect();
 
 if(!rect.width)
 return 0;
@@ -1714,7 +1604,8 @@ Math.min(
 
 function updateSeekVisual(pos){
 
-document.getElementById("fill").style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
 
 
@@ -1723,14 +1614,17 @@ player &&
 typeof player.getDuration==="function"
 ){
 
-const duration=player.getDuration();
+const duration=
+player.getDuration();
 
 if(duration){
 
-document.getElementById("current").textContent=
+document.getElementById("current")
+.textContent=
 format(pos*duration);
 
-document.getElementById("duration").textContent=
+document.getElementById("duration")
+.textContent=
 format(duration);
 
 }
@@ -1740,7 +1634,7 @@ format(duration);
 }
 
 
-/* SEEK DOWN */
+/* SEEK POINTER DOWN */
 
 seekElement.addEventListener(
 "pointerdown",
@@ -1768,13 +1662,11 @@ seekElement
 );
 
 },
-{
-passive:false
-}
+{passive:false}
 );
 
 
-/* SEEK MOVE */
+/* SEEK POINTER MOVE */
 
 seekElement.addEventListener(
 "pointermove",
@@ -1795,13 +1687,11 @@ seekElement
 );
 
 },
-{
-passive:false
-}
+{passive:false}
 );
 
 
-/* SEEK UP */
+/* SEEK POINTER UP */
 
 seekElement.addEventListener(
 "pointerup",
@@ -1853,9 +1743,7 @@ e.pointerId
 }catch(err){}
 
 },
-{
-passive:false
-}
+{passive:false}
 );
 
 
@@ -1894,14 +1782,16 @@ current/duration
 )
 );
 
-
-document.getElementById("fill").style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
 
-document.getElementById("current").textContent=
+document.getElementById("current")
+.textContent=
 format(current);
 
-document.getElementById("duration").textContent=
+document.getElementById("duration")
+.textContent=
 format(duration);
 
 }catch(e){}
@@ -1920,8 +1810,13 @@ return "0:00";
 
 s=Math.floor(s);
 
-return Math.floor(s/60)+":"+
-String(s%60).padStart(2,"0");
+return(
+Math.floor(s/60)
++
+":"
++
+String(s%60).padStart(2,"0")
+);
 
 }
 
@@ -1937,7 +1832,6 @@ if(
 typeof player.getPlaylist!=="function"
 )
 return;
-
 
 playlistItems=
 player.getPlaylist();
@@ -1975,8 +1869,7 @@ item.className="song-item";
 item.id=
 `track-${index}`;
 
-item.onclick=
-()=>{
+item.onclick=()=>{
 playSpecificTrack(index);
 };
 
@@ -1985,22 +1878,19 @@ item.innerHTML=`
 
 <img
 src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
-alt="thumb"
->
+alt="thumb">
 
 <div class="song-item-info">
 
 <div
 class="song-item-title"
-id="title-${index}"
->
+id="title-${index}">
 Track #${index+1}
 </div>
 
 <div
 class="song-item-artist"
-id="artist-${index}"
->
+id="artist-${index}">
 YouTube Music
 </div>
 
@@ -2011,9 +1901,13 @@ YouTube Music
 
 list.appendChild(item);
 
-fetchSongDetails(id,index);
+fetchSongDetails(
+id,
+index
+);
 
-});
+}
+);
 
 
 highlightActiveTrack();
@@ -2027,7 +1921,10 @@ updateInfo();
    FETCH SONG DETAILS
    ========================= */
 
-function fetchSongDetails(id,index){
+function fetchSongDetails(
+id,
+index
+){
 
 fetch(
 `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
@@ -2039,7 +1936,6 @@ fetch(
 
 if(!data)
 return;
-
 
 const title=
 document.getElementById(
@@ -2110,7 +2006,6 @@ typeof player.getPlaylistIndex!=="function"
 )
 return;
 
-
 const current=
 player.getPlaylistIndex();
 
@@ -2125,13 +2020,14 @@ item.classList.toggle(
 index===current
 );
 
-});
+}
+);
 
 }
 
 
 /* =========================
-   UPDATE INFO
+   UPDATE SONG INFO
    ========================= */
 
 function updateInfo(){
@@ -2142,12 +2038,10 @@ typeof player.getVideoData!=="function"
 )
 return;
 
-
 try{
 
 const d=
 player.getVideoData();
-
 
 if(
 !d ||
@@ -2162,16 +2056,16 @@ document.getElementById("cover").src=
 
 if(d.title){
 
-document.getElementById("title").textContent=
-d.title;
+document.getElementById("title")
+.textContent=d.title;
 
 }
 
 
 if(d.author){
 
-document.getElementById("artist").textContent=
-d.author;
+document.getElementById("artist")
+.textContent=d.author;
 
 }
 
