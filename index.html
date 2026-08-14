@@ -230,7 +230,7 @@ background:transparent;
 pointer-events:auto;
 }
 
-/* ইউটিউব স্টাইল ল্যান্ডস্কেপ অটো-হাইডিং কন্ট্রোলস */
+/* ইউটিউব স্টাইল ল্যান্ডস্কেপ টগল কন্ট্রোলস */
 .yt-controls {
 position: absolute;
 bottom: 0;
@@ -796,7 +796,7 @@ gap:10px;
   <div id="yt"></div>
   <div class="popup-blocker" id="popupBlocker"></div>
   
-  <!-- ইউটিউব স্টাইল অটো-হাইডিং কন্ট্রোলস -->
+  <!-- ইউটিউব স্টাইল টগল কন্ট্রোলস -->
   <div class="yt-controls" id="ytControls">
     <div class="yt-progress-bar" id="ytSeek">
       <div class="yt-progress-fill" id="ytFill"></div>
@@ -960,16 +960,17 @@ player.playVideo();
 }
 }
 
-// ইউটিউব কন্ট্রোল অটো-হাইড লজিক
+// ইউটিউব কন্ট্রোল টগল লজিক (টাচ করলে আসবে, আবার টাচ করলে চলেও যাবে)
 const popupBlocker = document.getElementById("popupBlocker");
 const ytControls = document.getElementById("ytControls");
 
 popupBlocker.addEventListener("click", () => {
-ytControls.classList.toggle("show");
 if(ytControls.classList.contains("show")){
-resetControlTimeout();
-} else {
+ytControls.classList.remove("show");
 clearTimeout(controlTimeout);
+}else{
+ytControls.classList.add("show");
+resetControlTimeout();
 }
 });
 
@@ -1116,7 +1117,6 @@ swipeActive=false;
 playerCard.addEventListener("pointercancel",()=>{swipeActive=false;});
 
 let isDragging=false;
-let seekPointerId=null;
 
 function getSeekPosition(clientX, el){
 const rect=el.getBoundingClientRect();
