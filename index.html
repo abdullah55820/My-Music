@@ -182,21 +182,59 @@ fill:#fff;
 
 
 /* =========================
-   YOUTUBE
+   YOUTUBE & POPUP
    ========================= */
 
-#yt{
+.video-popup{
 position:fixed;
-
-width:2px;
-height:2px;
-
-left:-10px;
-bottom:-10px;
-
-opacity:.01;
-
+bottom:140px;
+right:20px;
+width:240px;
+height:135px;
+background:#000;
+border-radius:14px;
+overflow:hidden;
+z-index:999;
+border:1px solid rgba(255,255,255,.25);
+box-shadow:0 15px 35px rgba(0,0,0,0.5);
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+opacity:0;
+visibility:hidden;
 pointer-events:none;
+transform:scale(0.9);
+transition:all .3s cubic-bezier(.2,.8,.2,1);
+}
+
+.video-popup.active{
+opacity:1;
+visibility:visible;
+pointer-events:auto;
+transform:scale(1);
+}
+
+#yt{
+width:100%;
+height:100%;
+border:none;
+}
+
+.close-video{
+position:absolute;
+top:6px;
+right:6px;
+width:22px;
+height:22px;
+background:rgba(0,0,0,0.6);
+color:#fff;
+border:none;
+border-radius:50%;
+font-size:14px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:10;
 }
 
 
@@ -223,7 +261,6 @@ padding:0 16px 65px;
 
 /* =================================================
    MUSIC PLAYER
-   GLASS BLUR ONLY
    ================================================= */
 
 .player{
@@ -238,10 +275,10 @@ border:1px solid rgba(255,255,255,.18);
 
 border-radius:60px;
 
-background:rgba(255,255,255,.06);
+background:transparent;
 
-backdrop-filter:blur(25px) saturate(115%);
--webkit-backdrop-filter:blur(25px) saturate(115%);
+backdrop-filter:blur(30px) saturate(120%);
+-webkit-backdrop-filter:blur(30px) saturate(120%);
 
 box-shadow:
 0 20px 50px rgba(0,0,0,.45);
@@ -489,7 +526,7 @@ display:flex;
 
 align-items:center;
 
-gap:6px;
+gap:8px;
 
 flex-shrink:0;
 }
@@ -616,8 +653,6 @@ cursor:pointer;
 box-shadow:0 0 5px rgba(0,0,0,.5);
 }
 
-
-/* HIDE VOLUME ON IOS */
 
 @supports (-webkit-touch-callout:none){
 
@@ -935,76 +970,6 @@ margin-top:.5px;
 }
 
 
-/* =========================
-   VIDEO POPUP MODAL
-   ========================= */
-
-.video-modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.85);
-backdrop-filter:blur(15px);
--webkit-backdrop-filter:blur(15px);
-z-index:999;
-display:none;
-align-items:center;
-justify-content:center;
-}
-
-.video-modal.active{
-display:flex;
-}
-
-.video-box{
-position:relative;
-width:min(340px, 90%);
-aspect-ratio:9/16;
-border-radius:24px;
-overflow:hidden;
-background:#000;
-border:1px solid rgba(255,255,255,.2);
-box-shadow:0 25px 50px rgba(0,0,0,.6);
-pointer-events:none;
-}
-
-.video-box iframe{
-position:absolute;
-inset:0;
-width:100%;
-height:100%;
-border:0;
-pointer-events:none;
-}
-
-.close-video-btn{
-position:absolute;
-top:12px;
-right:12px;
-background:rgba(0,0,0,.6);
-color:#fff;
-border:1px solid rgba(255,255,255,0.2);
-border-radius:50%;
-width:34px;
-height:34px;
-font-size:20px;
-cursor:pointer;
-pointer-events:auto;
-z-index:1000;
-display:flex;
-align-items:center;
-justify-content:center;
-transition:transform .2s;
-}
-
-.close-video-btn:active{
-transform:scale(.9);
-}
-
-
-/* =========================
-   MOBILE
-   ========================= */
-
 @media(max-width:480px){
 
 .app{
@@ -1068,244 +1033,92 @@ width:170px;
 
 </style>
 </head>
-
 <body>
 
-
+<!-- BACKGROUND -->
 <div class="bg"></div>
 
-
+<!-- TOP WIDGETS -->
 <div class="top-widgets">
 
 <div class="bd-time">
-
 <span>BD</span>
-
 <span class="live-dot"></span>
-
-<span id="bdTimeVal">
---:--:-- --
-</span>
-
+<span id="bdTimeVal">--:--:-- --</span>
 </div>
 
-
-<button
-class="playlist-toggle-btn"
-onclick="toggleDrawer()"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
-"/>
-
-</svg>
-
+<button class="playlist-toggle-btn" onclick="toggleDrawer()">
+<svg viewBox="0 0 24 24"><path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/></svg>
 <span>Playlist</span>
-
 </button>
 
 </div>
 
-
-<div id="yt"></div>
-
-
-<div class="video-modal" id="videoModal">
-<div class="video-box">
-<button class="close-video-btn" onclick="toggleVideoPopup()">&times;</button>
-<div id="popupYtPlayer"></div>
-</div>
+<!-- VIDEO POPUP -->
+<div id="videoPopup" class="video-popup">
+  <div id="yt"></div>
+  <button class="close-video" onclick="toggleVideoMode()">&times;</button>
 </div>
 
+<!-- DRAWER -->
+<div class="drawer-overlay" id="overlay" onclick="toggleDrawer()"></div>
 
-<div
-class="drawer-overlay"
-id="overlay"
-onclick="toggleDrawer()"
-></div>
-
-
-<div
-class="playlist-drawer"
-id="drawer"
->
-
+<div class="playlist-drawer" id="drawer">
 <div class="drawer-header">
-
-<div class="drawer-title">
-Playlist Songs
+<div class="drawer-title">Playlist Songs</div>
+<button class="close-btn" onclick="toggleDrawer()">&times;</button>
+</div>
+<div class="song-list" id="songList">
+<div style="text-align:center;color:rgba(255,255,255,.7);font-size:10px;margin-top:15px;">Loading...</div>
+</div>
 </div>
 
-<button
-class="close-btn"
-onclick="toggleDrawer()"
->
-&times;
-</button>
-
-</div>
-
-
-<div
-class="song-list"
-id="songList"
->
-
-<div
-style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:10px;
-margin-top:15px;
-"
->
-Loading...
-</div>
-
-</div>
-
-</div>
-
-
+<!-- APP -->
 <div class="app">
 
+<section class="player" id="playerCard">
 
-<section
-class="player"
-id="playerCard"
->
-
-
+<!-- COVER -->
 <div class="cover-wrapper">
-
-<img
-id="cover"
-class="cover"
-src="logo.png"
-alt="Album art"
->
-
+<img id="cover" class="cover" src="logo.png" alt="Album art">
 </div>
 
-
+<!-- INFO -->
 <div class="middle">
+<div id="title" class="title">My Playlist</div>
+<div id="artist" class="artist">YouTube Music</div>
 
-<div
-id="title"
-class="title"
->
-My Playlist
+<!-- SEEK -->
+<div class="seek" id="seek">
+<div class="fill" id="fill"></div>
 </div>
 
-
-<div
-id="artist"
-class="artist"
->
-YouTube Music
-</div>
-
-
-<div
-class="seek"
-id="seek"
->
-
-<div
-class="fill"
-id="fill"
-></div>
-
-</div>
-
-
+<!-- TIME -->
 <div class="time-display">
-
-<span id="current">
-0:00
-</span>
-
-/
-
-<span id="duration">
-0:00
-</span>
-
+<span id="current">0:00</span> / <span id="duration">0:00</span>
+</div>
 </div>
 
-</div>
-
-
+<!-- CONTROLS -->
 <div class="controls">
 
-<button class="btn" onclick="toggleVideoPopup()" title="Toggle Video">
-<svg viewBox="0 0 24 24">
-<path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15l5-4-5-4v8z"/>
-</svg>
+<!-- VIDEO TOGGLE BUTTON -->
+<button class="btn" onclick="toggleVideoMode()" title="Video Mode">
+<svg viewBox="0 0 24 24"><path d="M18 4H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"/></svg>
 </button>
 
-
-<button
-class="play"
-id="play"
-onclick="togglePlay()"
->
-
-<svg
-id="play-icon"
-viewBox="0 0 24 24"
->
-
-<path d="M8 5v14l11-7z"/>
-
-</svg>
-
+<button class="play" id="play" onclick="togglePlay()">
+<svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
 </button>
-
 
 <div class="vol-container">
-
-
-<button
-class="btn"
-onclick="toggleVolume()"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M3 9v6h4l5 5V4L7 9H3
-zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05
-c1.48-.73 2.5-2.25 2.5-4.02z
-M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71
-v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z
-"/>
-
-</svg>
-
+<button class="btn" onclick="toggleVolume()">
+<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
 </button>
 
-
-<div
-class="vol-slider-wrapper"
-id="volWrapper"
->
-
-<input
-type="range"
-class="vol-slider"
-id="volSlider"
-min="0"
-max="100"
-value="100"
-oninput="changeVolume(this.value)"
->
-
+<div class="vol-slider-wrapper" id="volWrapper">
+<input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
 </div>
-
 </div>
 
 </div>
@@ -1313,1247 +1126,338 @@ oninput="changeVolume(this.value)"
 </section>
 
 </div>
-<script src="https://www.youtube.com/iframe_api"></script>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* =========================
-   PLAYLIST
-   ========================= */
-
 const PLAYLIST_ID="PLbvY05KVYwoo";
-
 let player=null;
-let popupPlayer=null;
-
 let playing=false;
-
 let playlistItems=[];
-let isVideoOpen=false;
-
-
-/* =========================
-   BD TIME
-   ========================= */
 
 function updateBDTime(){
-
-const options={
-
-timeZone:"Asia/Dhaka",
-
-hour:"2-digit",
-
-minute:"2-digit",
-
-second:"2-digit",
-
-hour12:true
-
-};
-
-
-document.getElementById("bdTimeVal").textContent=
-
-new Intl.DateTimeFormat(
-"en-US",
-options
-).format(new Date());
-
+const options={timeZone:"Asia/Dhaka",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true};
+document.getElementById("bdTimeVal").textContent=new Intl.DateTimeFormat("en-US",options).format(new Date());
 }
-
-
 updateBDTime();
-
 setInterval(updateBDTime,1000);
 
-
-/* =========================
-   YOUTUBE API
-   ========================= */
-
 function onYouTubeIframeAPIReady(){
-
-player=new YT.Player(
-"yt",
-{
-
-width:"2",
-
-height:"2",
-
+player=new YT.Player("yt",{
+width:"100%",
+height:"100%",
 playerVars:{
-
 autoplay:0,
-
 controls:0,
-
 disablekb:1,
-
 fs:0,
-
 modestbranding:1,
-
 playsinline:1,
-
 rel:0,
-
 listType:"playlist",
-
 list:PLAYLIST_ID
-
 },
-
 events:{
-
 onReady:ready,
-
 onStateChange:state
-
 }
-
 });
-
 }
-
-
-/* READY */
 
 function ready(){
-
 loadPlaylistItems();
-
-setInterval(
-updateProgress,
-250
-);
-
+setInterval(updateProgress,250);
 }
-
-
-/* =========================
-   STATE
-   ========================= */
 
 function state(e){
-
-const cover=
-document.getElementById("cover");
-
-const playBtn=
-document.getElementById("play");
-
-const playIcon=
-document.getElementById("play-icon");
-
+const cover=document.getElementById("cover");
+const playBtn=document.getElementById("play");
+const playIcon=document.getElementById("play-icon");
 
 highlightActiveTrack();
 
-
-if(
-e.data===YT.PlayerState.PLAYING
-){
-
+if(e.data===YT.PlayerState.PLAYING){
 playing=true;
-
 playBtn.classList.add("playing");
-
-playIcon.innerHTML=
-'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-
+playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 cover.classList.add("spinning");
-
 updateInfo();
-
-if(isVideoOpen && popupPlayer && typeof popupPlayer.playVideo === "function"){
-const currentTime = player.getCurrentTime();
-popupPlayer.seekTo(currentTime, true);
-popupPlayer.playVideo();
 }
-
-}
-
-
-else if(
-
-e.data===YT.PlayerState.PAUSED ||
-
-e.data===YT.PlayerState.ENDED
-
-){
-
+else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
 playing=false;
-
 playBtn.classList.remove("playing");
-
-playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
+playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
 cover.classList.remove("spinning");
-
-if(isVideoOpen && popupPlayer && typeof popupPlayer.pauseVideo === "function"){
-popupPlayer.pauseVideo();
 }
-
 }
-
-}
-
-
-/* =========================
-   PLAY / PAUSE
-   ========================= */
 
 function togglePlay(){
-
 if(!player)return;
-
-
 if(playing){
-
 player.pauseVideo();
-
-}
-
-else{
-
+}else{
 player.playVideo();
-
+}
 }
 
+/* VIDEO POPUP TOGGLE */
+function toggleVideoMode() {
+const popup = document.getElementById("videoPopup");
+popup.classList.toggle("active");
 }
-
-
-/* =========================
-   VOLUME
-   ========================= */
 
 let volTimer=null;
-
-
 function resetVolTimer(){
-
-if(volTimer)
-clearTimeout(volTimer);
-
-
+if(volTimer)clearTimeout(volTimer);
 volTimer=setTimeout(()=>{
-
-document
-.getElementById("volWrapper")
-.classList.remove("active");
-
+document.getElementById("volWrapper").classList.remove("active");
 },3000);
-
 }
-
 
 function toggleVolume(){
-
-const wrapper=
-document.getElementById("volWrapper");
-
-
-if(
-wrapper.classList.contains("active")
-){
-
+const wrapper=document.getElementById("volWrapper");
+if(wrapper.classList.contains("active")){
 wrapper.classList.remove("active");
-
-if(volTimer)
-clearTimeout(volTimer);
-
-}
-
-else{
-
+if(volTimer)clearTimeout(volTimer);
+}else{
 wrapper.classList.add("active");
-
 resetVolTimer();
-
 }
-
 }
-
 
 function changeVolume(val){
-
-if(
-player &&
-typeof player.setVolume==="function"
-){
-
+if(player && typeof player.setVolume==="function"){
 player.setVolume(val);
-
 }
-
 resetVolTimer();
-
 }
-
-
-/* =========================
-   NEXT / PREVIOUS
-   ========================= */
 
 function nextSong(){
-
-if(
-!player ||
-playlistItems.length===0
-)
-return;
-
-
-const current=
-player.getPlaylistIndex();
-
-
-const next=
-(current+1)%
-playlistItems.length;
-
-
+if(!player || playlistItems.length===0)return;
+const current=player.getPlaylistIndex();
+const next=(current+1)%playlistItems.length;
 forceUpdateUI(next);
-
 player.nextVideo();
-
 }
-
 
 function previousSong(){
-
-if(
-!player ||
-playlistItems.length===0
-)
-return;
-
-
-const current=
-player.getPlaylistIndex();
-
-
-const previous=
-(current-1+
-playlistItems.length)%
-playlistItems.length;
-
-
+if(!player || playlistItems.length===0)return;
+const current=player.getPlaylistIndex();
+const previous=(current-1+playlistItems.length)%playlistItems.length;
 forceUpdateUI(previous);
-
 player.previousVideo();
-
 }
-
 
 function forceUpdateUI(index){
-
-if(
-!playlistItems[index]
-)
-return;
-
-
-const id=
-playlistItems[index];
-
-
-document.getElementById("cover").src=
-
-`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-
-
-const title=
-document.getElementById(
-`title-${index}`
-);
-
-
-const artist=
-document.getElementById(
-`artist-${index}`
-);
-
-
-if(title){
-
-document.getElementById("title")
-.textContent=
-title.textContent;
-
+if(!playlistItems[index])return;
+const id=playlistItems[index];
+document.getElementById("cover").src=`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const title=document.getElementById(`title-${index}`);
+const artist=document.getElementById(`artist-${index}`);
+if(title){document.getElementById("title").textContent=title.textContent;}
+if(artist){document.getElementById("artist").textContent=artist.textContent;}
 }
-
-
-if(artist){
-
-document.getElementById("artist")
-.textContent=
-artist.textContent;
-
-}
-
-}
-
-
-/* =========================
-   VIDEO POPUP LOGIC
-   ========================= */
-
-function toggleVideoPopup(){
-const modal = document.getElementById("videoModal");
-isVideoOpen = !isVideoOpen;
-
-if(isVideoOpen){
-modal.classList.add("active");
-
-if(player && typeof player.getVideoData === "function"){
-const videoData = player.getVideoData();
-const currentTime = player.getCurrentTime() || 0;
-const videoId = videoData.video_id;
-
-if(videoId){
-if(!popupPlayer){
-popupPlayer = new YT.Player("popupYtPlayer", {
-height: "100%",
-width: "100%",
-videoId: videoId,
-playerVars: {
-autoplay: 1,
-controls: 0,
-disablekb: 1,
-fs: 0,
-modestbranding: 1,
-playsinline: 1,
-rel: 0,
-mute: 1
-},
-events: {
-onReady: (e) => {
-e.target.mute();
-e.target.seekTo(currentTime, true);
-if(playing) e.target.playVideo();
-}
-}
-});
-} else {
-if(typeof popupPlayer.loadVideoById === "function"){
-popupPlayer.loadVideoById({
-videoId: videoId,
-startSeconds: currentTime
-});
-popupPlayer.mute();
-if(!playing) popupPlayer.pauseVideo();
-}
-}
-}
-}
-} else {
-modal.classList.remove("active");
-if(popupPlayer && typeof popupPlayer.pauseVideo === "function"){
-popupPlayer.pauseVideo();
-}
-}
-}
-
-
-/* =================================================
-   UNIVERSAL SWIPE
-   ================================================= */
 
 let swipeStartX=0;
-
 let swipeStartY=0;
-
 let swipeActive=false;
-
 let swipeFromSeek=false;
+const playerCard=document.getElementById("playerCard");
+const seekElement=document.getElementById("seek");
 
-
-const playerCard=
-document.getElementById("playerCard");
-
-
-const seekElement=
-document.getElementById("seek");
-
-
-/* POINTER DOWN */
-
-playerCard.addEventListener(
-"pointerdown",
-e=>{
-
+playerCard.addEventListener("pointerdown",e=>{
 swipeStartX=e.clientX;
-
 swipeStartY=e.clientY;
-
-
-swipeFromSeek=
-!!e.target.closest("#seek");
-
-
+swipeFromSeek=!!e.target.closest("#seek");
 swipeActive=true;
-
-
-if(swipeFromSeek){
-
-e.stopPropagation();
-
-}
-
+if(swipeFromSeek){e.stopPropagation();}
 });
 
-
-/* POINTER MOVE */
-
-playerCard.addEventListener(
-"pointermove",
-e=>{
-
-if(!swipeActive)
-return;
-
-
-if(swipeFromSeek){
-
-e.stopPropagation();
-
-}
-
+playerCard.addEventListener("pointermove",e=>{
+if(!swipeActive)return;
+if(swipeFromSeek){e.stopPropagation();}
 });
 
-
-/* POINTER UP */
-
-playerCard.addEventListener(
-"pointerup",
-e=>{
-
-if(!swipeActive)
-return;
-
-
+playerCard.addEventListener("pointerup",e=>{
+if(!swipeActive)return;
 const endX=e.clientX;
-
 const endY=e.clientY;
+const dx=endX-swipeStartX;
+const dy=endY-swipeStartY;
 
+if(swipeFromSeek){swipeActive=false;return;}
+if(Math.abs(dx)<50){swipeActive=false;return;}
+if(Math.abs(dy)>Math.abs(dx)){swipeActive=false;return;}
 
-const dx=
-endX-swipeStartX;
-
-
-const dy=
-endY-swipeStartY;
-
-
-if(swipeFromSeek){
-
+if(dx<-50){nextSong();}
+else if(dx>50){previousSong();}
 swipeActive=false;
-
-return;
-
-}
-
-
-if(
-Math.abs(dx)<50
-){
-
-swipeActive=false;
-
-return;
-
-}
-
-
-if(
-Math.abs(dy)>
-Math.abs(dx)
-){
-
-swipeActive=false;
-
-return;
-
-}
-
-
-if(dx<-50){
-
-nextSong();
-
-}
-
-else if(dx>50){
-
-previousSong();
-
-}
-
-
-swipeActive=false;
-
 });
 
-
-/* CANCEL */
-
-playerCard.addEventListener(
-"pointercancel",
-()=>{
-
-swipeActive=false;
-
-}
-);
-
-
-/* =================================================
-   SEEK BAR
-   ================================================= */
+playerCard.addEventListener("pointercancel",()=>{swipeActive=false;});
 
 let isDragging=false;
-
 let seekPointerId=null;
 
-
-/* POSITION */
-
 function getSeekPosition(clientX){
-
-const rect=
-seekElement.getBoundingClientRect();
-
-
-if(!rect.width)
-return 0;
-
-
-return Math.max(
-0,
-Math.min(
-1,
-(clientX-rect.left)/
-rect.width
-)
-);
-
+const rect=seekElement.getBoundingClientRect();
+if(!rect.width)return 0;
+return Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
 }
-
-
-/* VISUAL */
 
 function updateSeekVisual(pos){
-
-document.getElementById("fill")
-.style.width=
-(pos*100)+"%";
-
-
-if(
-player &&
-typeof player.getDuration==="function"
-){
-
-const duration=
-player.getDuration();
-
-
+document.getElementById("fill").style.width=(pos*100)+"%";
+if(player && typeof player.getDuration==="function"){
+const duration=player.getDuration();
 if(duration){
-
-document.getElementById("current")
-.textContent=
-format(pos*duration);
-
-
-document.getElementById("duration")
-.textContent=
-format(duration);
-
+document.getElementById("current").textContent=format(pos*duration);
+document.getElementById("duration").textContent=format(duration);
+}
+}
 }
 
-}
-
-}
-
-
-/* SEEK START */
-
-seekElement.addEventListener(
-"pointerdown",
-e=>{
-
+seekElement.addEventListener("pointerdown",e=>{
 e.preventDefault();
-
 e.stopPropagation();
-
-
 isDragging=true;
-
 seekPointerId=e.pointerId;
-
-
-try{
-
-seekElement.setPointerCapture(
-e.pointerId
-);
-
-}catch(err){}
-
-
-const pos=
-getSeekPosition(e.clientX);
-
-
+try{seekElement.setPointerCapture(e.pointerId);}catch(err){}
+const pos=getSeekPosition(e.clientX);
 updateSeekVisual(pos);
+},{passive:false});
 
-},
-{
-passive:false
-}
-);
-
-
-/* SEEK MOVE */
-
-seekElement.addEventListener(
-"pointermove",
-e=>{
-
-if(!isDragging)
-return;
-
-
+seekElement.addEventListener("pointermove",e=>{
+if(!isDragging)return;
 e.preventDefault();
-
 e.stopPropagation();
-
-
-const pos=
-getSeekPosition(e.clientX);
-
-
+const pos=getSeekPosition(e.clientX);
 updateSeekVisual(pos);
+},{passive:false});
 
-},
-{
-passive:false
-}
-);
-
-
-/* SEEK END */
-
-seekElement.addEventListener(
-"pointerup",
-e=>{
-
-if(!isDragging)
-return;
-
-
+seekElement.addEventListener("pointerup",e=>{
+if(!isDragging)return;
 e.preventDefault();
-
 e.stopPropagation();
-
-
-const pos=
-getSeekPosition(e.clientX);
-
-
+const pos=getSeekPosition(e.clientX);
 updateSeekVisual(pos);
-
-
-if(
-player &&
-typeof player.getDuration==="function"
-){
-
-const duration=
-player.getDuration();
-
-
-if(duration){
-
-player.seekTo(
-pos*duration,
-true
-);
-
-if(isVideoOpen && popupPlayer && typeof popupPlayer.seekTo === "function"){
-popupPlayer.seekTo(pos * duration, true);
+if(player && typeof player.getDuration==="function"){
+const duration=player.getDuration();
+if(duration){player.seekTo(pos*duration,true);}
 }
-
-}
-
-}
-
-
 isDragging=false;
-
 seekPointerId=null;
+try{seekElement.releasePointerCapture(e.pointerId);}catch(err){}
+},{passive:false});
 
-
-try{
-
-seekElement.releasePointerCapture(
-e.pointerId
-);
-
-}catch(err){}
-
-},
-{
-passive:false
-}
-);
-
-
-/* SEEK CANCEL */
-
-seekElement.addEventListener(
-"pointercancel",
-e=>{
-
+seekElement.addEventListener("pointercancel",e=>{
 isDragging=false;
-
 seekPointerId=null;
-
-}
-);
-
-
-/* SEEK CLICK */
-
-seekElement.addEventListener(
-"click",
-e=>{
-
-if(isDragging)
-return;
-
-
-const pos=
-getSeekPosition(e.clientX);
-
-
-if(player){
-
-const duration=
-player.getDuration();
-
-
-if(duration){
-
-player.seekTo(
-pos*duration,
-true
-);
-
-if(isVideoOpen && popupPlayer && typeof popupPlayer.seekTo === "function"){
-popupPlayer.seekTo(pos * duration, true);
-}
-
-}
-
-}
-
 });
 
-
-/* =========================
-   PROGRESS
-   ========================= */
+seekElement.addEventListener("click",e=>{
+if(isDragging)return;
+const pos=getSeekPosition(e.clientX);
+if(player){
+const duration=player.getDuration();
+if(duration){player.seekTo(pos*duration,true);}
+}
+});
 
 function updateProgress(){
-
-if(isDragging)
-return;
-
-
-if(
-!player ||
-typeof player.getCurrentTime!=="function"
-)
-return;
-
-
+if(isDragging)return;
+if(!player || typeof player.getCurrentTime!=="function")return;
 try{
-
-const current=
-player.getCurrentTime();
-
-
-const duration=
-player.getDuration();
-
-
-if(!duration)
-return;
-
-
-const pos=
-Math.max(
-0,
-Math.min(
-1,
-current/duration
-)
-);
-
-
-document.getElementById("fill")
-.style.width=
-(pos*100)+"%";
-
-
-document.getElementById("current")
-.textContent=
-format(current);
-
-
-document.getElementById("duration")
-.textContent=
-format(duration);
-
-
+const current=player.getCurrentTime();
+const duration=player.getDuration();
+if(!duration)return;
+const pos=Math.max(0,Math.min(1,current/duration));
+document.getElementById("fill").style.width=(pos*100)+"%";
+document.getElementById("current").textContent=format(current);
+document.getElementById("duration").textContent=format(duration);
 }catch(e){}
-
 }
-
-
-/* FORMAT */
 
 function format(s){
-
-if(
-!s ||
-isNaN(s)
-)
-return "0:00";
-
-
+if(!s || isNaN(s))return "0:00";
 s=Math.floor(s);
-
-
-return Math.floor(s/60)
-+
-":"
-+
-String(
-s%60
-).padStart(2,"0");
-
+return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
 }
-
-
-/* =================================================
-   PLAYLIST
-   ================================================= */
 
 function loadPlaylistItems(){
+if(!player || typeof player.getPlaylist!=="function")return;
+playlistItems=player.getPlaylist();
+const list=document.getElementById("songList");
 
-if(
-!player ||
-typeof player.getPlaylist!=="function"
-)
+if(!playlistItems || playlistItems.length===0){
+list.innerHTML=`<div style="text-align:center;color:rgba(255,255,255,.7);font-size:10px;margin-top:15px;">No tracks found</div>`;
 return;
-
-
-playlistItems=
-player.getPlaylist();
-
-
-const list=
-document.getElementById(
-"songList"
-);
-
-
-if(
-!playlistItems ||
-playlistItems.length===0
-){
-
-list.innerHTML=
-`
-<div style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:10px;
-margin-top:15px;
-">
-No tracks found
-</div>
-`;
-
-return;
-
 }
-
 
 list.innerHTML="";
-
-
-playlistItems.forEach(
-(id,index)=>{
-
-const item=
-document.createElement("div");
-
-
-item.className=
-"song-item";
-
-
-item.id=
-`track-${index}`;
-
-
-item.onclick=()=>{
-playSpecificTrack(index);
-};
-
-
-item.innerHTML=
-`
-
-<img
-src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
-alt="thumb"
->
-
+playlistItems.forEach((id,index)=>{
+const item=document.createElement("div");
+item.className="song-item";
+item.id=`track-${index}`;
+item.onclick=()=>{playSpecificTrack(index);};
+item.innerHTML=`
+<img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="thumb">
 <div class="song-item-info">
-
-<div
-class="song-item-title"
-id="title-${index}"
->
-Track #${index+1}
+<div class="song-item-title" id="title-${index}">Track #${index+1}</div>
+<div class="song-item-artist" id="artist-${index}">YouTube Music</div>
 </div>
-
-<div
-class="song-item-artist"
-id="artist-${index}"
->
-YouTube Music
-</div>
-
-</div>
-
 `;
-
-
 list.appendChild(item);
-
-
-fetchSongDetails(
-id,
-index
-);
-
+fetchSongDetails(id,index);
 });
-
-
 highlightActiveTrack();
-
 updateInfo();
-
 }
 
-
-/* DETAILS */
-
-function fetchSongDetails(
-id,
-index
-){
-
-fetch(
-`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
-)
-
-.then(
-r=>r.json()
-)
-
-.then(
-data=>{
-
-if(!data)
-return;
-
-
-const title=
-document.getElementById(
-`title-${index}`
-);
-
-
-const artist=
-document.getElementById(
-`artist-${index}`
-);
-
-
-if(
-title &&
-data.title
-){
-
-title.textContent=
-data.title;
-
-}
-
-
-if(
-artist &&
-data.author_name
-){
-
-artist.textContent=
-data.author_name;
-
-}
-
+function fetchSongDetails(id,index){
+fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
+.then(r=>r.json())
+.then(data=>{
+if(!data)return;
+const title=document.getElementById(`title-${index}`);
+const artist=document.getElementById(`artist-${index}`);
+if(title && data.title){title.textContent=data.title;}
+if(artist && data.author_name){artist.textContent=data.author_name;}
 })
-
-.catch(
-()=>{}
-);
-
+.catch(()=>{});
 }
-
-
-/* PLAY SPECIFIC */
 
 function playSpecificTrack(index){
-
-if(!player)
-return;
-
-
+if(!player)return;
 forceUpdateUI(index);
-
-
 player.playVideoAt(index);
-
-
 toggleDrawer();
-
 }
-
-
-/* ACTIVE TRACK */
 
 function highlightActiveTrack(){
-
-if(
-!player ||
-typeof player.getPlaylistIndex!=="function"
-)
-return;
-
-
-const current=
-player.getPlaylistIndex();
-
-
-document
-.querySelectorAll(".song-item")
-.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-index===current
-);
-
+if(!player || typeof player.getPlaylistIndex!=="function")return;
+const current=player.getPlaylistIndex();
+document.querySelectorAll(".song-item").forEach((item,index)=>{
+item.classList.toggle("active",index===current);
 });
-
 }
-
-
-/* SONG INFO */
 
 function updateInfo(){
-
-if(
-!player ||
-typeof player.getVideoData!=="function"
-)
-return;
-
-
+if(!player || typeof player.getVideoData!=="function")return;
 try{
-
-const d=
-player.getVideoData();
-
-
-if(
-!d ||
-!d.video_id
-)
-return;
-
-
-document.getElementById("cover").src=
-`https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
-
-
-if(d.title){
-
-document.getElementById("title")
-.textContent=d.title;
-
-}
-
-
-if(d.author){
-
-document.getElementById("artist")
-.textContent=d.author;
-
-}
-
-if(isVideoOpen && popupPlayer && typeof popupPlayer.loadVideoById === "function"){
-const currentTime = player.getCurrentTime() || 0;
-popupPlayer.loadVideoById({
-videoId: d.video_id,
-startSeconds: currentTime
-});
-popupPlayer.mute();
-if(!playing) popupPlayer.pauseVideo();
-}
-
+const d=player.getVideoData();
+if(!d || !d.video_id)return;
+document.getElementById("cover").src=`https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+if(d.title){document.getElementById("title").textContent=d.title;}
+if(d.author){document.getElementById("artist").textContent=d.author;}
 }catch(e){}
-
 }
-
-
-/* =========================
-   DRAWER
-   ========================= */
 
 function toggleDrawer(){
-
-const drawer=
-document.getElementById("drawer");
-
-
-const overlay=
-document.getElementById("overlay");
-
-
+const drawer=document.getElementById("drawer");
+const overlay=document.getElementById("overlay");
 drawer.classList.toggle("open");
-
 overlay.classList.toggle("active");
-
 }
 
 </script>
