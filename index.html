@@ -48,7 +48,7 @@ background-position:center center;
 background-size:cover;
 background-repeat:no-repeat;
 
-filter:blur(0px); /* অ্যাপ চালু হলে বা পপআপ হাইড থাকলে ব্যাকগ্রাউন্ড ক্লিয়ার থাকবে */
+filter:blur(0px);
 -webkit-filter:blur(0px);
 transform:scale(1);
 
@@ -889,14 +889,12 @@ document.body.classList.add("popup-active");
 }
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 } else {
-if (popup) {
-popup.classList.remove("active");
+// সোজা (Portrait) করলে পপআপ ওপেনই থাকবে (যদি ল্যান্ডস্কেপে চালু হয়ে থাকে)
+if (popup && popup.classList.contains("active")) {
+overlay.classList.add("active");
+document.body.classList.add("popup-active");
+iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 }
-if (overlay) {
-overlay.classList.remove("active");
-}
-document.body.classList.remove("popup-active");
-iconSvg.innerHTML = '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 }
 }
 
