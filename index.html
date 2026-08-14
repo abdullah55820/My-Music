@@ -36,7 +36,7 @@ overflow-x:hidden!important;
 
 
 /* =========================
-   BACKGROUND
+   BACKGROUND & BLUR STATE
    ========================= */
 
 .bg{
@@ -49,6 +49,7 @@ background-size:cover;
 background-repeat:no-repeat;
 
 z-index:0;
+transition:backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease;
 }
 
 .bg:after{
@@ -56,6 +57,17 @@ content:"";
 position:absolute;
 inset:0;
 background:rgba(0,0,0,.15);
+transition:background .3s ease;
+}
+
+/* যখন পপআপ একটিভ হবে তখন ব্যাকগ্রাউন্ড ব্লার হবে */
+body.popup-active .bg{
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+}
+
+body.popup-active .bg:after{
+background:rgba(0,0,0,.4);
 }
 
 
@@ -182,59 +194,43 @@ fill:#fff;
 
 
 /* =========================
-   YOUTUBE & POPUP
+   CENTERED VIDEO POPUP
    ========================= */
 
 .video-popup{
 position:fixed;
-bottom:140px;
-right:20px;
-width:240px;
-height:135px;
+top:42%;
+left:50%;
+transform:translate(-50%,-50%) scale(0.9);
+width:min(340px, 88%);
+height:190px;
 background:#000;
-border-radius:14px;
+border-radius:18px;
 overflow:hidden;
-z-index:999;
+z-index:99;
 border:1px solid rgba(255,255,255,.25);
-box-shadow:0 15px 35px rgba(0,0,0,0.5);
+box-shadow:0 20px 40px rgba(0,0,0,0.6);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
+
 opacity:0;
 visibility:hidden;
 pointer-events:none;
-transform:scale(0.9);
 transition:all .3s cubic-bezier(.2,.8,.2,1);
 }
 
 .video-popup.active{
 opacity:1;
 visibility:visible;
-pointer-events:auto;
-transform:scale(1);
+pointer-events:none; /* অর্ডারের কারণে পপআপের ওপর ক্লিক করা যাবে না */
+transform:translate(-50%,-50%) scale(1);
 }
 
 #yt{
 width:100%;
 height:100%;
 border:none;
-}
-
-.close-video{
-position:absolute;
-top:6px;
-right:6px;
-width:22px;
-height:22px;
-background:rgba(0,0,0,0.6);
-color:#fff;
-border:none;
-border-radius:50%;
-font-size:14px;
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:10;
+pointer-events:none;
 }
 
 
@@ -245,7 +241,7 @@ z-index:10;
 .app{
 position:relative;
 
-z-index:2;
+z-index:100;
 
 height:100dvh;
 width:100%;
@@ -1054,10 +1050,9 @@ width:170px;
 
 </div>
 
-<!-- VIDEO POPUP -->
+<!-- CENTERED VIDEO POPUP -->
 <div id="videoPopup" class="video-popup">
   <div id="yt"></div>
-  <button class="close-video" onclick="toggleVideoMode()">&times;</button>
 </div>
 
 <!-- DRAWER -->
@@ -1102,9 +1097,9 @@ width:170px;
 <!-- CONTROLS -->
 <div class="controls">
 
-<!-- VIDEO TOGGLE BUTTON -->
-<button class="btn" onclick="toggleVideoMode()" title="Video Mode">
-<svg viewBox="0 0 24 24"><path d="M18 4H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"/></svg>
+<!-- TOGGLE VIDEO / CROSS BUTTON -->
+<button class="btn" id="videoToggleBtn" onclick="toggleVideoPopup()" title="Toggle Video Popup">
+<svg id="videoToggleIcon" viewBox="0 0 24 24"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z"/></svg>
 </button>
 
 <button class="play" id="play" onclick="togglePlay()">
@@ -1201,10 +1196,22 @@ player.playVideo();
 }
 }
 
-/* VIDEO POPUP TOGGLE */
-function toggleVideoMode() {
+/* VIDEO POPUP & ICON TOGGLE LOGIC */
+function toggleVideoPopup() {
 const popup = document.getElementById("videoPopup");
+const iconSvg = document.getElementById("videoToggleIcon");
+const body = document.body;
+
 popup.classList.toggle("active");
+body.classList.toggle("popup-active");
+
+if(popup.classList.contains("active")){
+// Cross Icon when popup is open
+iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
+} else {
+// Default Magic/Sparkle Icon when popup is closed
+iconSvg.innerHTML = '<path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z"/>';
+}
 }
 
 let volTimer=null;
@@ -1328,17 +1335,17 @@ updateSeekVisual(pos);
 },{passive:false});
 
 seekElement.addEventListener("pointermove",e=>{
-if(!isDragging)return;
 e.preventDefault();
 e.stopPropagation();
+if(!isDragging)return;
 const pos=getSeekPosition(e.clientX);
 updateSeekVisual(pos);
 },{passive:false});
 
 seekElement.addEventListener("pointerup",e=>{
-if(!isDragging)return;
 e.preventDefault();
 e.stopPropagation();
+if(!isDragging)return;
 const pos=getSeekPosition(e.clientX);
 updateSeekVisual(pos);
 if(player && typeof player.getDuration==="function"){
