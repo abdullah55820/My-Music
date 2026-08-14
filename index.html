@@ -36,7 +36,7 @@ overflow-x:hidden!important;
 
 
 /* =========================
-   BACKGROUND & ONLY BG BLUR
+   BACKGROUND (NO BLUR)
    ========================= */
 
 .bg{
@@ -59,13 +59,6 @@ content:"";
 position:absolute;
 inset:0;
 background:rgba(0,0,0,.15);
-transition:background .3s ease, backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease;
-}
-
-body.popup-active .bg:after{
-background:rgba(0,0,0,.45);
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
 }
 
 
@@ -161,9 +154,7 @@ fill:#fff;
 position:fixed;
 inset:0;
 z-index:1499;
-background:rgba(0,0,0,0.3);
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
+background:rgba(0,0,0,0.4);
 display:none;
 }
 
@@ -203,13 +194,36 @@ height:100%;
 border:none;
 }
 
-/* পপআপের ভেতরে টাচ পুরোপুরি ব্লক করার জন্য ওভারলে */
 .popup-blocker{
 position:absolute;
 inset:0;
 z-index:20;
 background:transparent;
 pointer-events:auto;
+}
+
+.popup-close-btn{
+position:absolute;
+top:8px;
+right:8px;
+width:28px;
+height:28px;
+background:rgba(0,0,0,0.6);
+border:1px solid rgba(255,255,255,0.3);
+border-radius:50%;
+color:#fff;
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+z-index:25;
+line-height:1;
+transition:transform .2s;
+}
+
+.popup-close-btn:active{
+transform:scale(0.9);
 }
 
 
@@ -230,7 +244,7 @@ padding:0 16px 65px;
 
 
 /* =================================================
-   MUSIC PLAYER
+   MUSIC PLAYER (NO BLUR OVERLAY)
    ================================================= */
 
 .player{
@@ -696,11 +710,12 @@ gap:10px;
 
 </div>
 
-<!-- VIDEO POPUP & OVERLAY -->
-<div id="videoOverlay" class="video-overlay" onclick="toggleVideoPopup()"></div>
+<!-- VIDEO POPUP & OVERLAY (ওভারলে থেকে ক্লিক ইভেন্ট সরিয়ে দেওয়া হয়েছে যাতে বাইরের কোথাও ক্লিক করলে পপআপ বন্ধ না হয়) -->
+<div id="videoOverlay" class="video-overlay"></div>
 <div id="videoPopup" class="video-popup">
   <div id="yt"></div>
   <div class="popup-blocker"></div>
+  <button class="popup-close-btn" onclick="toggleVideoPopup()">&times;</button>
 </div>
 
 <!-- DRAWER -->
@@ -848,11 +863,9 @@ function toggleVideoPopup() {
 const popup = document.getElementById("videoPopup");
 const overlay = document.getElementById("videoOverlay");
 const iconSvg = document.getElementById("videoToggleIcon");
-const body = document.body;
 
 popup.classList.toggle("active");
 overlay.classList.toggle("active");
-body.classList.toggle("popup-active");
 
 if(popup.classList.contains("active")){
 iconSvg.innerHTML = '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
