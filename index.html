@@ -263,6 +263,7 @@ pointer-events:none;
 transform:scale(1);
 }
 
+
 #yt{
 width:100%;
 height:100%;
@@ -281,13 +282,17 @@ pointer-events:none!important;
 
 width:100%;
 
+/*
+   Main controller-এর ঠিক ওপরে শেষ হবে
+*/
+
 height:clamp(
-120px,
-calc(100dvh - 6% - 250px - 190px),
-300px
+105px,
+calc(100dvh - 7% - 250px - 155px),
+240px
 );
 
-min-height:100px;
+min-height:105px;
 
 margin-top:10px;
 
@@ -311,19 +316,19 @@ pointer-events:none;
 
 transform:translateY(-8px);
 
-transition:
-opacity .3s ease,
-transform .3s ease,
-visibility .3s ease;
+/*
+   Scroll ঠিক রাখার জন্য
+*/
 
 display:flex;
 flex-direction:column;
 
-flex-shrink:0;
+overflow:hidden;
 
-position:relative;
-
-z-index:1600;
+transition:
+opacity .3s ease,
+transform .3s ease,
+visibility .3s ease;
 }
 
 .video-playlist.active{
@@ -354,9 +359,7 @@ border-bottom:1px solid rgba(255,255,255,.13);
 
 margin-bottom:6px;
 
-flex-shrink:0;
-
-pointer-events:none;
+flex:0 0 auto;
 }
 
 
@@ -368,9 +371,11 @@ pointer-events:none;
 
 width:100%;
 
-height:0;
+/*
+   Title-এর নিচের পুরো জায়গা নেবে
+*/
 
-flex:1;
+flex:1 1 auto;
 
 min-height:0;
 
@@ -384,20 +389,17 @@ gap:5px;
 
 padding-right:2px;
 
-touch-action:pan-y!important;
+/*
+   MOBILE SCROLL FIX
+*/
+
+touch-action:pan-y;
 
 -webkit-overflow-scrolling:touch;
 
-overscroll-behavior:contain;
+overscroll-behavior-y:contain;
 
-pointer-events:auto!important;
-
-user-select:none;
--webkit-user-select:none;
-
-position:relative;
-
-z-index:1601;
+scrollbar-width:thin;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -427,6 +429,13 @@ padding:7px 8px;
 
 min-height:52px;
 
+/*
+   Item shrink করবে না,
+   তাই অনেক song থাকলে scroll হবে
+*/
+
+flex:0 0 auto;
+
 border-radius:10px;
 
 background:rgba(255,255,255,.07);
@@ -435,11 +444,7 @@ border:1px solid rgba(255,255,255,.08);
 
 cursor:pointer;
 
-touch-action:pan-y!important;
-
-pointer-events:auto!important;
-
-flex-shrink:0;
+touch-action:manipulation;
 
 transition:
 background .2s ease,
@@ -455,9 +460,6 @@ transform:scale(.98);
 background:rgba(255,255,255,.20);
 border-color:rgba(255,255,255,.30);
 }
-
-
-/* NUMBER */
 
 .video-song-number{
 display:none!important;
@@ -476,8 +478,6 @@ border-radius:8px;
 object-fit:cover;
 
 flex-shrink:0;
-
-pointer-events:none;
 }
 
 
@@ -489,8 +489,6 @@ flex:1;
 min-width:0;
 
 overflow:hidden;
-
-pointer-events:none;
 }
 
 .video-song-title{
@@ -668,8 +666,6 @@ overflow:hidden;
 pointer-events:auto;
 
 touch-action:pan-y;
-
-z-index:3001;
 }
 
 
@@ -1344,16 +1340,18 @@ border-radius:18px;
 
 
 /*
-   Playlist controller-এর ঠিক উপরে শেষ হবে
+   Playlist controller-এর ওপরে শেষ হবে
 */
 
 .video-playlist{
 
 height:clamp(
-120px,
-calc(100dvh - 6% - 230px - 185px),
-260px
+105px,
+calc(100dvh - 6% - 230px - 155px),
+240px
 );
+
+min-height:105px;
 
 margin-top:9px;
 
@@ -1362,25 +1360,29 @@ padding:7px;
 display:flex;
 flex-direction:column;
 
-min-height:100px;
+overflow:hidden;
 }
 
 .video-song-list{
 
-height:0;
+/*
+   পুরোনো fixed height রাখা হয়নি
+*/
 
-flex:1;
+flex:1 1 auto;
 
 min-height:0;
+
+height:auto;
 
 overflow-y:auto;
 overflow-x:hidden;
 
-touch-action:pan-y!important;
+touch-action:pan-y;
 
 -webkit-overflow-scrolling:touch;
 
-pointer-events:auto!important;
+overscroll-behavior-y:contain;
 }
 
 .video-song-item{
@@ -1389,9 +1391,9 @@ padding:7px;
 
 min-height:52px;
 
-pointer-events:auto!important;
+flex:0 0 auto;
 
-touch-action:pan-y!important;
+touch-action:manipulation;
 }
 
 .video-song-item img{
@@ -1429,29 +1431,34 @@ height:210px;
 
 height:clamp(
 100px,
-calc(100dvh - 3% - 210px - 180px),
+calc(100dvh - 3% - 210px - 140px),
 220px
 );
+
+min-height:100px;
 
 display:flex;
 flex-direction:column;
 
-min-height:100px;
+overflow:hidden;
 }
 
 .video-song-list{
 
-height:0;
-
-flex:1;
+flex:1 1 auto;
 
 min-height:0;
 
-overflow-y:auto;
+height:auto;
 
-touch-action:pan-y!important;
+overflow-y:auto;
+overflow-x:hidden;
+
+touch-action:pan-y;
 
 -webkit-overflow-scrolling:touch;
+
+overscroll-behavior-y:contain;
 }
 
 }
@@ -1479,34 +1486,43 @@ padding:6px;
 
 height:clamp(
 100px,
-calc(100dvh - 3% - 210px - 175px),
+calc(100dvh - 3% - 210px - 135px),
 210px
 );
 
+min-height:100px;
+
 display:flex;
 flex-direction:column;
+
+overflow:hidden;
 }
 
 .video-song-list{
 
-height:0;
-
-flex:1;
+flex:1 1 auto;
 
 min-height:0;
 
-overflow-y:auto;
+height:auto;
 
-touch-action:pan-y!important;
+overflow-y:auto;
+overflow-x:hidden;
+
+touch-action:pan-y;
 
 -webkit-overflow-scrolling:touch;
+
+overscroll-behavior-y:contain;
 }
 
 .video-song-item{
 
-pointer-events:auto!important;
+width:100%;
 
-touch-action:pan-y!important;
+min-height:52px;
+
+flex:0 0 auto;
 }
 
 .video-song-item img{
@@ -1623,6 +1639,8 @@ class="video-popup"
 >
 
 <div id="yt"></div>
+
+<!-- ONLY VIDEO AREA TOUCH BLOCK -->
 
 <div class="video-touch-block"></div>
 
@@ -1899,7 +1917,9 @@ oninput="changeVolume(this.value)"
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
 let player=null;
+
 let playing=false;
+
 let playlistItems=[];
 
 
@@ -1974,9 +1994,8 @@ playerVars:{
 autoplay:0,
 
 /*
-   YouTube-এর নিজের control visual থাকতে পারে,
-   কিন্তু video-touch-block থাকার কারণে
-   video area-তে user touch করতে পারবে না।
+   YouTube-এর নিজের controls রাখা আছে,
+   কিন্তু iframe touch block করা।
 */
 
 controls:1,
@@ -2118,6 +2137,7 @@ cover.classList.remove(
 function togglePlay(){
 
 if(!player)return;
+
 
 if(playing){
 
@@ -2473,7 +2493,8 @@ function nextSong(){
 if(
 !player ||
 playlistItems.length===0
-)return;
+)
+return;
 
 
 const current=
@@ -2500,7 +2521,8 @@ function previousSong(){
 if(
 !player ||
 playlistItems.length===0
-)return;
+)
+return;
 
 
 const current=
@@ -2582,8 +2604,11 @@ highlightActiveTrack();
    ========================= */
 
 let swipeStartX=0;
+
 let swipeStartY=0;
+
 let swipeActive=false;
+
 let swipeFromSeek=false;
 
 
@@ -3408,6 +3433,8 @@ forceUpdateUI(index);
 player.playVideoAt(index);
 
 
+/* CLOSE OLD DRAWER */
+
 const drawer=
 document.getElementById(
 "drawer"
@@ -3427,6 +3454,11 @@ drawerOverlay.classList.remove(
 "active"
 );
 
+
+/*
+   Video playlist open থাকলে
+   সেটি open-ই থাকবে
+*/
 
 const popup=
 document.getElementById(
