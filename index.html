@@ -400,6 +400,8 @@ visibility:visible;
 pointer-events:auto;
 
 touch-action:pan-y;
+
+z-index:1705;
 }
 
 
@@ -580,13 +582,12 @@ margin-top:2px;
 
 /* =========================================================
    APP
-   FIX: APP ABOVE VIDEO LAYER BUT DOES NOT BLOCK PLAYLIST
 ========================================================= */
 
 .app{
 position:relative;
 
-z-index:3000;
+z-index:1600;
 
 height:100dvh;
 
@@ -600,13 +601,12 @@ justify-content:center;
 
 padding:0 16px 65px;
 
-pointer-events:none;
+pointer-events:auto;
 }
 
 
 /* =========================================================
    MUSIC PLAYER
-   FIX: PLAYER CONTROLS ALWAYS ABOVE VIDEO PLAYLIST
 ========================================================= */
 
 .player{
@@ -639,9 +639,7 @@ overflow:hidden;
 
 touch-action:pan-y;
 
-z-index:3001;
-
-pointer-events:auto;
+z-index:1601;
 }
 
 
@@ -858,9 +856,7 @@ flex-shrink:0;
 
 position:relative;
 
-z-index:3020;
-
-pointer-events:auto;
+z-index:1610;
 }
 
 .btn{
@@ -889,7 +885,7 @@ touch-action:manipulation;
 
 position:relative;
 
-z-index:3021;
+z-index:1611;
 }
 
 .btn svg{
@@ -897,8 +893,6 @@ width:20px;
 height:20px;
 
 fill:#fff;
-
-pointer-events:none;
 }
 
 
@@ -923,8 +917,6 @@ border-radius:20px;
 
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
-
-pointer-events:auto;
 }
 
 .vol-slider-wrapper{
@@ -1028,7 +1020,7 @@ touch-action:manipulation;
 
 position:relative;
 
-z-index:3021;
+z-index:1611;
 }
 
 .play svg{
@@ -1038,8 +1030,6 @@ height:20px;
 fill:#000;
 
 margin-left:2px;
-
-pointer-events:none;
 }
 
 .play.playing svg{
@@ -1963,7 +1953,17 @@ let player=null;
 
 let playing=false;
 
+
+/* =========================================================
+   ORIGINAL PLAYLIST
+========================================================= */
+
 let playlistItems=[];
+
+
+/* =========================================================
+   NEW SORTED PLAYLIST
+========================================================= */
 
 let sortedPlaylistItems=[];
 
@@ -1972,6 +1972,11 @@ let sortedPlaylistData=[];
 let currentSortedIndex=0;
 
 let sortingReady=false;
+
+
+/* =========================================================
+   OTHER VARIABLES
+========================================================= */
 
 let volTimer=null;
 
@@ -2147,7 +2152,9 @@ updateInfo();
 }
 
 else if(
+
 e.data===YT.PlayerState.PAUSED
+
 ){
 
 playing=false;
@@ -2166,7 +2173,9 @@ cover.classList.remove(
 }
 
 else if(
+
 e.data===YT.PlayerState.ENDED
+
 ){
 
 playing=false;
@@ -2181,6 +2190,7 @@ playIcon.innerHTML=
 cover.classList.remove(
 "spinning"
 );
+
 
 if(!changingTrack){
 
@@ -2308,38 +2318,59 @@ iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 
-loadVideoPlaylist();
+/*
+=========================================================
+FIRST OPEN FIX
+=========================================================
+আগের code-এ এখানে loadVideoPlaylist() call হচ্ছিল,
+কিন্তু function ছিল না।
+
+তাই প্রথমবার popup খুললে JavaScript error হচ্ছিল
+এবং height adjustment execute হচ্ছিল না।
+
+এখন existing rendered playlist ব্যবহার করছি।
+=========================================================
+*/
+
+if(
+sortingReady &&
+sortedPlaylistData.length>0
+){
+
+renderVideoPlaylist();
+
+}
+else{
+
+loadPlaylistItems();
+
+}
 
 
 /*
-IMPORTANT FIX:
-প্রথমবার popup open হওয়ার সময়
-layout দুইবার calculate করছি।
+Browser-কে আগে layout করতে দেওয়া হচ্ছে।
+তারপর height calculate হবে।
 */
 
-requestAnimationFrame(
-()=>{
+requestAnimationFrame(()=>{
 
-adjustVideoPlaylistHeight();
-
-requestAnimationFrame(
-()=>{
+requestAnimationFrame(()=>{
 
 adjustVideoPlaylistHeight();
 
 });
 
-}
+});
+
+
+setTimeout(
+adjustVideoPlaylistHeight,
+100
 );
 
 setTimeout(
 adjustVideoPlaylistHeight,
-150
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-350
+300
 );
 
 }
@@ -2370,6 +2401,37 @@ iconSvg.innerHTML=
 
 
 /* =========================================================
+   VIDEO PLAYLIST LOADER
+========================================================= */
+
+function loadVideoPlaylist(){
+
+/*
+Safe wrapper.
+
+যদি playlist already loaded থাকে,
+শুধু render করবে।
+
+না থাকলে main playlist loader চালাবে।
+*/
+
+if(
+sortingReady &&
+sortedPlaylistData.length>0
+){
+
+renderVideoPlaylist();
+
+return;
+
+}
+
+loadPlaylistItems();
+
+}
+
+
+/* =========================================================
    VIDEO PLAYLIST HEIGHT
 ========================================================= */
 
@@ -2394,12 +2456,27 @@ if(
 !popup ||
 !playlist ||
 !playerCard
-)return;
+)
+return;
 
 if(
 !popup.classList.contains("active")
 )
 return;
+
+
+/*
+Landscape-এ playlist hidden।
+*/
+
+if(
+window.innerWidth>
+window.innerHeight
+){
+
+return;
+
+}
 
 
 const popupRect=
@@ -2412,38 +2489,87 @@ playerCard.getBoundingClientRect();
 const top=
 popupRect.bottom+1;
 
-
-/*
-IMPORTANT FIX:
-Player-এর একদম আগে playlist শেষ হবে।
-Controls-এর জায়গায় ঢুকবে না।
-*/
-
 const bottom=
-playerRect.top-8;
+playerRect.top-20;
 
-const available=
+let available=
 bottom-top;
 
 
+/*
+Player-এর control area-এর ওপর playlist
+যাতে না উঠে যায়।
+*/
+
 if(available>70){
 
+let safeHeight=
+Math.min(
+available,
+playerRect.top-top-2
+);
+
+safeHeight=
+Math.max(
+70,
+safeHeight
+);
+
 playlist.style.height=
-Math.floor(available)+"px";
+safeHeight+"px";
 
 playlist.style.maxHeight=
-Math.floor(available)+"px";
+safeHeight+"px";
 
 }
 else{
 
 playlist.style.height=
-"80px";
+"70px";
 
 playlist.style.maxHeight=
-"80px";
+"70px";
 
 }
+
+
+/*
+=========================================================
+FINAL SAFETY CHECK
+=========================================================
+Playlist-এর actual bottom যদি player-এর top-এর কাছে
+বা তার নিচে চলে যায়, height আরও কমিয়ে দিচ্ছি।
+=========================================================
+*/
+
+requestAnimationFrame(()=>{
+
+const finalRect=
+playlist.getBoundingClientRect();
+
+const finalPlayerRect=
+playerCard.getBoundingClientRect();
+
+if(
+finalRect.bottom >
+finalPlayerRect.top
+){
+
+const correctedHeight=
+Math.max(
+70,
+finalPlayerRect.top-top-2
+);
+
+playlist.style.height=
+correctedHeight+"px";
+
+playlist.style.maxHeight=
+correctedHeight+"px";
+
+}
+
+});
 
 }
 
@@ -2483,12 +2609,7 @@ handleDeviceOrientation,
 
 setTimeout(
 adjustVideoPlaylistHeight,
-250
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-500
+300
 );
 
 }
@@ -2591,12 +2712,12 @@ videoPlaylist.classList.add(
 
 setTimeout(
 adjustVideoPlaylistHeight,
-50
+100
 );
 
 setTimeout(
 adjustVideoPlaylistHeight,
-150
+300
 );
 
 }
@@ -2832,18 +2953,22 @@ document.getElementById(
 ).src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
+
 document.getElementById(
 "title"
 ).textContent=
 data.title || "YouTube Music";
+
 
 document.getElementById(
 "artist"
 ).textContent=
 data.artist || "YouTube Music";
 
+
 currentSortedIndex=
 index;
+
 
 highlightActiveTrack();
 
@@ -3291,12 +3416,22 @@ return;
 playlistItems=
 ids;
 
+
+/*
+আগের data reset
+*/
+
 sortedPlaylistItems=[];
 
 sortedPlaylistData=[];
 
 sortingReady=false;
 
+
+/*
+প্রথমে সব video-এর title fetch করি।
+সব title পাওয়া গেলে A-Z sort হবে।
+*/
 
 const requests=
 playlistItems.map(
@@ -3363,6 +3498,12 @@ Promise.all(requests)
 .then(
 results=>{
 
+/*
+=========================================================
+ A-Z SORT
+=========================================================
+*/
+
 results.sort(
 (a,b)=>{
 
@@ -3388,6 +3529,10 @@ item=>item.id
 
 sortingReady=true;
 
+
+/*
+প্রথম song
+*/
 
 let currentId="";
 
@@ -3417,6 +3562,10 @@ currentIndex;
 
 }
 
+
+/*
+UI বানানো
+*/
 
 renderSortedPlaylists();
 
@@ -3631,9 +3780,10 @@ list.appendChild(item);
 
 highlightVideoActiveTrack();
 
+
 setTimeout(
 adjustVideoPlaylistHeight,
-50
+20
 );
 
 }
@@ -3663,6 +3813,7 @@ return div.innerHTML;
 
 /* =========================================================
    PLAY SPECIFIC TRACK
+   A-Z ORDER
 ========================================================= */
 
 function playSpecificTrack(
@@ -3683,12 +3834,27 @@ const id=
 data.id;
 
 
+/*
+Current sorted index
+*/
+
 currentSortedIndex=
 index;
 
 
+/*
+UI আগে update
+*/
+
 forceUpdateUI(index);
 
+
+/*
+YouTube original playlist order বাদ দিয়ে
+direct video ID load করছি।
+
+তাই A-Z order-ই follow করবে।
+*/
 
 changingTrack=true;
 
@@ -3763,19 +3929,14 @@ document
 "active"
 );
 
-requestAnimationFrame(
-()=>{
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
 
-adjustVideoPlaylistHeight();
-
-requestAnimationFrame(
-()=>{
-
-adjustVideoPlaylistHeight();
-
-});
-
-}
+setTimeout(
+adjustVideoPlaylistHeight,
+150
 );
 
 }
@@ -3924,6 +4085,10 @@ d.author;
 
 }
 
+
+/*
+Current video-এর A-Z index
+*/
 
 const sortedIndex=
 sortedPlaylistItems.indexOf(
