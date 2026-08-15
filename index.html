@@ -79,8 +79,10 @@ background:rgba(0,0,0,.35);
 
 .top-widgets{
 position:fixed;
+
 top:14px;
 left:50%;
+
 transform:translateX(-50%);
 
 z-index:2500;
@@ -203,16 +205,6 @@ display:none;
    VIDEO OVERLAY
    ========================= */
 
-/*
-IMPORTANT:
-
-এটা এখন পুরো transparent।
-তাই নিচের main player/control-এর
-উপর কোনো কালো layer পড়বে না।
-
-এবং এটা কখনো touch ধরবে না।
-*/
-
 .video-overlay{
 position:fixed;
 
@@ -220,7 +212,7 @@ inset:0;
 
 z-index:1499;
 
-background:transparent !important;
+background:rgba(0,0,0,.4);
 
 display:none;
 
@@ -229,8 +221,6 @@ pointer-events:none !important;
 
 .video-overlay.active{
 display:block;
-
-background:transparent !important;
 
 pointer-events:none !important;
 }
@@ -311,21 +301,10 @@ opacity:1;
 
 visibility:visible;
 
-/*
-PORTRAIT:
-ভিডিওতে touch OFF
-*/
-
-pointer-events:none;
+pointer-events:auto;
 
 transform:scale(1);
 }
-
-
-/*
-PORTRAIT:
-YouTube iframe-ও touch OFF
-*/
 
 #yt{
 
@@ -336,7 +315,7 @@ border:none;
 
 display:block;
 
-pointer-events:none;
+pointer-events:auto;
 }
 
 
@@ -348,7 +327,8 @@ pointer-events:none;
 
 width:100%;
 
-margin-top:9px;
+/* CHANGED: video → playlist gap */
+margin-top:4px;
 
 max-height:calc(100dvh - 410px);
 
@@ -587,6 +567,125 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
+}
+
+
+/* =========================
+   APP TOUCH LAYER FIX
+   ========================= */
+
+body.popup-active .app{
+z-index:1400;
+}
+
+
+/* =========================
+   LANDSCAPE
+   ========================= */
+
+@media(orientation:landscape){
+
+.video-section{
+
+top:0 !important;
+left:0 !important;
+
+transform:none !important;
+
+width:100vw !important;
+height:100vh !important;
+
+display:block !important;
+
+pointer-events:none !important;
+
+z-index:1700 !important;
+}
+
+.video-popup.active{
+
+width:100vw !important;
+height:100vh !important;
+
+aspect-ratio:auto !important;
+
+top:0 !important;
+left:0 !important;
+
+transform:none !important;
+
+border-radius:0 !important;
+
+border:none !important;
+
+box-shadow:none !important;
+
+pointer-events:auto !important;
+}
+
+.video-playlist{
+
+display:none !important;
+}
+
+.app{
+display:none !important;
+}
+
+.top-widgets{
+display:none !important;
+}
+
+}
+
+
+/* =========================
+   ANDROID LANDSCAPE
+   ========================= */
+
+body.android-device.landscape-mode .video-section{
+
+top:0 !important;
+left:0 !important;
+
+transform:none !important;
+
+width:100vw !important;
+height:100vh !important;
+
+pointer-events:none !important;
+
+z-index:1700 !important;
+}
+
+body.android-device.landscape-mode .video-popup.active{
+
+width:100vw !important;
+height:100vh !important;
+
+aspect-ratio:auto !important;
+
+top:0 !important;
+left:0 !important;
+
+transform:none !important;
+
+border-radius:0 !important;
+
+border:none !important;
+
+box-shadow:none !important;
+
+pointer-events:auto !important;
+}
+
+body.android-device.landscape-mode .video-playlist{
+display:none !important;
+}
+
+body.android-device.landscape-mode .app,
+body.android-device.landscape-mode .top-widgets{
+display:none !important;
 }
 
 
@@ -1374,27 +1473,16 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:16px;
-
-/*
-Portrait-এ touch OFF
-*/
-
-pointer-events:none;
-}
-
-#yt{
-pointer-events:none;
 }
 
 
 /*
-Playlist player-এর ওপরে থাকবে
-এবং touch/scroll কাজ করবে
+Mobile video → playlist gap = 4px
 */
 
 .video-playlist{
 
-margin-top:8px;
+margin-top:4px;
 
 max-height:calc(100dvh - 350px);
 
@@ -1405,8 +1493,6 @@ padding:7px;
 border-radius:14px;
 
 pointer-events:auto;
-
-touch-action:pan-y;
 }
 
 .video-song-list{
@@ -1414,8 +1500,6 @@ touch-action:pan-y;
 height:calc(100% - 27px);
 
 pointer-events:auto;
-
-touch-action:pan-y;
 }
 
 .video-song-item{
@@ -1461,12 +1545,6 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
-
-pointer-events:none;
-}
-
-#yt{
-pointer-events:none;
 }
 
 .video-playlist{
@@ -1474,8 +1552,6 @@ pointer-events:none;
 max-height:calc(100dvh - 300px);
 
 min-height:70px;
-
-pointer-events:auto;
 }
 
 .video-song-item{
@@ -1504,13 +1580,11 @@ width:96%;
 
 .video-playlist{
 
-margin-top:7px;
+margin-top:4px;
 
 padding:6px;
 
 max-height:calc(100dvh - 300px);
-
-pointer-events:auto;
 }
 
 .video-song-item{
@@ -1536,165 +1610,12 @@ font-size:8px;
 
 }
 
-
-/* =========================================================
-   LANDSCAPE
-   ========================================================= */
-
-/*
-ROTATE করলে শুধু তখনই
-YouTube video touch ON হবে।
-*/
-
-@media(orientation:landscape){
-
-.video-section{
-
-top:0 !important;
-
-left:0 !important;
-
-transform:none !important;
-
-width:100vw !important;
-
-height:100vh !important;
-
-display:block !important;
-
-pointer-events:none !important;
-
-z-index:1700 !important;
-}
-
-.video-popup.active{
-
-width:100vw !important;
-
-height:100vh !important;
-
-aspect-ratio:auto !important;
-
-top:0 !important;
-
-left:0 !important;
-
-transform:none !important;
-
-border-radius:0 !important;
-
-border:none !important;
-
-box-shadow:none !important;
-
-/*
-LANDSCAPE:
-ভিডিও touch ON
-*/
-
-pointer-events:auto !important;
-}
-
-#yt{
-
-/*
-LANDSCAPE:
-YouTube iframe touch ON
-*/
-
-pointer-events:auto !important;
-}
-
-.video-playlist{
-
-display:none !important;
-}
-
-.app{
-display:none !important;
-}
-
-.top-widgets{
-display:none !important;
-}
-
-}
-
-
-/* =========================
-   ANDROID LANDSCAPE
-   ========================= */
-
-body.android-device.landscape-mode .video-section{
-
-top:0 !important;
-
-left:0 !important;
-
-transform:none !important;
-
-width:100vw !important;
-
-height:100vh !important;
-
-pointer-events:none !important;
-
-z-index:1700 !important;
-}
-
-body.android-device.landscape-mode .video-popup.active{
-
-width:100vw !important;
-
-height:100vh !important;
-
-aspect-ratio:auto !important;
-
-top:0 !important;
-
-left:0 !important;
-
-transform:none !important;
-
-border-radius:0 !important;
-
-border:none !important;
-
-box-shadow:none !important;
-
-pointer-events:auto !important;
-}
-
-body.android-device.landscape-mode #yt{
-
-pointer-events:auto !important;
-}
-
-body.android-device.landscape-mode .video-playlist{
-display:none !important;
-}
-
-body.android-device.landscape-mode .app,
-body.android-device.landscape-mode .top-widgets{
-display:none !important;
-}
-
 </style>
 </head>
 
 <body>
 
-
-<!-- =========================
-     BACKGROUND
-     ========================= -->
-
 <div class="bg"></div>
-
-
-<!-- =========================
-     TOP WIDGETS
-     ========================= -->
 
 <div class="top-widgets">
 
@@ -1709,7 +1630,6 @@ display:none !important;
 </span>
 
 </div>
-
 
 <button
 class="playlist-toggle-btn"
@@ -1731,27 +1651,16 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 </div>
 
 
-<!-- =========================
-     VIDEO OVERLAY
-     ========================= -->
-
 <div
 id="videoOverlay"
 class="video-overlay">
 </div>
 
 
-<!-- =========================
-     VIDEO SECTION
-     ========================= -->
-
 <div
 class="video-section"
 id="videoSection"
 >
-
-
-<!-- VIDEO -->
 
 <div
 id="videoPopup"
@@ -1763,10 +1672,6 @@ class="video-popup"
 </div>
 
 
-<!-- =========================
-     VIDEO PLAYLIST
-     ========================= -->
-
 <div
 id="videoPlaylist"
 class="video-playlist"
@@ -1775,7 +1680,6 @@ class="video-playlist"
 <div class="video-playlist-title">
 Playlist Songs
 </div>
-
 
 <div
 class="video-song-list"
@@ -1800,10 +1704,6 @@ Loading...
 </div>
 
 
-<!-- =========================
-     DRAWER OVERLAY
-     ========================= -->
-
 <div
 class="drawer-overlay"
 id="overlay"
@@ -1811,10 +1711,6 @@ onclick="toggleDrawer()"
 >
 </div>
 
-
-<!-- =========================
-     OLD PLAYLIST DRAWER
-     ========================= -->
 
 <div
 class="playlist-drawer"
@@ -1858,19 +1754,12 @@ Loading...
 </div>
 
 
-<!-- =========================
-     APP
-     ========================= -->
-
 <div class="app">
 
 <section
 class="player"
 id="playerCard"
 >
-
-
-<!-- COVER -->
 
 <div class="cover-wrapper">
 
@@ -1883,8 +1772,6 @@ alt="Album art"
 
 </div>
 
-
-<!-- INFO -->
 
 <div class="middle">
 
@@ -1904,8 +1791,6 @@ YouTube Music
 </div>
 
 
-<!-- SEEK -->
-
 <div
 class="seek"
 id="seek"
@@ -1919,8 +1804,6 @@ id="fill"
 
 </div>
 
-
-<!-- TIME -->
 
 <div class="time-display">
 
@@ -1939,12 +1822,7 @@ id="fill"
 </div>
 
 
-<!-- CONTROLS -->
-
 <div class="controls">
-
-
-<!-- VIDEO BUTTON -->
 
 <button
 class="btn"
@@ -1967,8 +1845,6 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 </button>
 
 
-<!-- PLAY -->
-
 <button
 class="play"
 id="play"
@@ -1988,8 +1864,6 @@ M8 5v14l11-7z
 
 </button>
 
-
-<!-- VOLUME -->
 
 <div class="vol-container">
 
@@ -2037,12 +1911,7 @@ oninput="changeVolume(this.value)"
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
-
 <script>
-
-/* =========================
-   PLAYLIST
-   ========================= */
 
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
@@ -2053,10 +1922,6 @@ let playing=false;
 let playlistItems=[];
 
 
-/* =========================
-   DEVICE
-   ========================= */
-
 const isAndroidDevice=
 /Android/i.test(navigator.userAgent);
 
@@ -2065,7 +1930,6 @@ if(isAndroidDevice){
 document.body.classList.add(
 "android-device"
 );
-
 }
 
 
@@ -2189,11 +2053,9 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
-
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
-
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -2223,7 +2085,6 @@ loadPlaylistItems();
 }
 
 }
-
 
 else if(
 
@@ -2304,12 +2165,10 @@ document.getElementById(
 "videoToggleIcon"
 );
 
-
 const opening=
 !popup.classList.contains(
 "active"
 );
-
 
 if(opening){
 
@@ -2329,10 +2188,8 @@ document.body.classList.add(
 "popup-active"
 );
 
-
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
 
 loadVideoPlaylist();
 
@@ -2356,7 +2213,6 @@ videoPlaylist.classList.remove(
 document.body.classList.remove(
 "popup-active"
 );
-
 
 iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
@@ -2387,19 +2243,16 @@ document.getElementById(
 "playerCard"
 );
 
-
 if(
 !popup ||
 !playlist ||
 !playerCard
 )return;
 
-
 if(
 !popup.classList.contains("active")
 )
 return;
-
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -2408,14 +2261,19 @@ const playerRect=
 playerCard.getBoundingClientRect();
 
 const top=
-popupRect.bottom+8;
+popupRect.bottom+4;
+
+
+/*
+CHANGED:
+Playlist → control gap = 20px
+*/
 
 const bottom=
-playerRect.top-10;
+playerRect.top-20;
 
 const available=
 bottom-top;
-
 
 if(available>70){
 
@@ -2505,7 +2363,6 @@ document.getElementById(
 "videoToggleIcon"
 );
 
-
 if(isAndroidDevice){
 
 if(isLandscape){
@@ -2513,7 +2370,6 @@ if(isLandscape){
 document.body.classList.add(
 "landscape-mode"
 );
-
 
 if(
 popup &&
@@ -2539,7 +2395,6 @@ videoPlaylist.classList.remove(
 );
 
 }
-
 
 if(iconSvg){
 
@@ -2604,7 +2459,9 @@ popup.classList.contains("active") &&
 !isLandscape
 ){
 
-videoPlaylist.classList.add("active");
+videoPlaylist.classList.add(
+"active"
+);
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -2621,7 +2478,6 @@ adjustVideoPlaylistHeight,
    ========================= */
 
 let volTimer=null;
-
 
 function resetVolTimer(){
 
@@ -2657,7 +2513,6 @@ const wrapper=
 document.getElementById(
 "volWrapper"
 );
-
 
 if(
 wrapper.classList.contains(
@@ -2720,15 +2575,12 @@ playlistItems.length===0
 )
 return;
 
-
 const current=
 player.getPlaylistIndex();
-
 
 const next=
 (current+1)%
 playlistItems.length;
-
 
 forceUpdateUI(next);
 
@@ -2749,16 +2601,13 @@ playlistItems.length===0
 )
 return;
 
-
 const current=
 player.getPlaylistIndex();
-
 
 const previous=
 (current-1+
 playlistItems.length)%
 playlistItems.length;
-
 
 forceUpdateUI(previous);
 
@@ -2776,16 +2625,13 @@ function forceUpdateUI(index){
 if(!playlistItems[index])
 return;
 
-
 const id=
 playlistItems[index];
-
 
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-
 
 const title=
 document.getElementById(
@@ -2797,7 +2643,6 @@ document.getElementById(
 `artist-${index}`
 );
 
-
 if(title){
 
 document.getElementById(
@@ -2807,7 +2652,6 @@ title.textContent;
 
 }
 
-
 if(artist){
 
 document.getElementById(
@@ -2816,7 +2660,6 @@ document.getElementById(
 artist.textContent;
 
 }
-
 
 highlightVideoActiveTrack();
 
@@ -2835,7 +2678,6 @@ let swipeActive=false;
 
 let swipeFromSeek=false;
 
-
 const playerCard=
 document.getElementById(
 "playerCard"
@@ -2845,7 +2687,6 @@ const seekElement=
 document.getElementById(
 "seek"
 );
-
 
 playerCard.addEventListener(
 "pointerdown",
@@ -2873,7 +2714,6 @@ e.stopPropagation();
 }
 );
 
-
 playerCard.addEventListener(
 "pointermove",
 e=>{
@@ -2890,14 +2730,12 @@ e.stopPropagation();
 }
 );
 
-
 playerCard.addEventListener(
 "pointerup",
 e=>{
 
 if(!swipeActive)
 return;
-
 
 const endX=e.clientX;
 
@@ -2909,7 +2747,6 @@ endX-swipeStartX;
 const dy=
 endY-swipeStartY;
 
-
 if(swipeFromSeek){
 
 swipeActive=false;
@@ -2918,7 +2755,6 @@ return;
 
 }
 
-
 if(Math.abs(dx)<50){
 
 swipeActive=false;
@@ -2926,7 +2762,6 @@ swipeActive=false;
 return;
 
 }
-
 
 if(Math.abs(dy)>
 Math.abs(dx)
@@ -2937,7 +2772,6 @@ swipeActive=false;
 return;
 
 }
-
 
 if(dx<-50){
 
@@ -2950,12 +2784,10 @@ previousSong();
 
 }
 
-
 swipeActive=false;
 
 }
 );
-
 
 playerCard.addEventListener(
 "pointercancel",
@@ -2973,7 +2805,6 @@ swipeActive=false;
 
 let isDragging=false;
 
-
 function getSeekPosition(
 clientX,
 el
@@ -2982,10 +2813,8 @@ el
 const rect=
 el.getBoundingClientRect();
 
-
 if(!rect.width)
 return 0;
-
 
 return Math.max(
 0,
@@ -2998,7 +2827,6 @@ rect.width
 
 }
 
-
 function updateSeekVisual(pos){
 
 document.getElementById(
@@ -3006,7 +2834,6 @@ document.getElementById(
 )
 .style.width=
 (pos*100)+"%";
-
 
 if(
 player &&
@@ -3016,7 +2843,6 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
-
 
 if(duration){
 
@@ -3040,7 +2866,6 @@ duration
 
 }
 
-
 seekElement.addEventListener(
 "pointerdown",
 e=>{
@@ -3051,7 +2876,6 @@ e.stopPropagation();
 
 isDragging=true;
 
-
 try{
 
 seekElement.setPointerCapture(
@@ -3061,7 +2885,6 @@ e.pointerId
 }
 catch(err){}
 
-
 updateSeekVisual(
 getSeekPosition(
 e.clientX,
@@ -3072,7 +2895,6 @@ seekElement
 },
 {passive:false}
 );
-
 
 seekElement.addEventListener(
 "pointermove",
@@ -3082,10 +2904,8 @@ e.preventDefault();
 
 e.stopPropagation();
 
-
 if(!isDragging)
 return;
-
 
 updateSeekVisual(
 getSeekPosition(
@@ -3098,7 +2918,6 @@ seekElement
 {passive:false}
 );
 
-
 seekElement.addEventListener(
 "pointerup",
 e=>{
@@ -3107,10 +2926,8 @@ e.preventDefault();
 
 e.stopPropagation();
 
-
 if(!isDragging)
 return;
-
 
 const pos=
 getSeekPosition(
@@ -3118,9 +2935,7 @@ e.clientX,
 seekElement
 );
 
-
 updateSeekVisual(pos);
-
 
 if(
 player &&
@@ -3130,7 +2945,6 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
-
 
 if(duration){
 
@@ -3143,9 +2957,7 @@ true
 
 }
 
-
 isDragging=false;
-
 
 try{
 
@@ -3170,14 +2982,12 @@ function updateProgress(){
 if(isDragging)
 return;
 
-
 if(
 !player ||
 typeof player.getCurrentTime!==
 "function"
 )
 return;
-
 
 try{
 
@@ -3187,10 +2997,8 @@ player.getCurrentTime();
 const duration=
 player.getDuration();
 
-
 if(!duration)
 return;
-
 
 const pos=
 Math.max(
@@ -3201,19 +3009,16 @@ current/duration
 )
 );
 
-
 document.getElementById(
 "fill"
 )
 .style.width=
 (pos*100)+"%";
 
-
 document.getElementById(
 "current"
 ).textContent=
 format(current);
-
 
 document.getElementById(
 "duration"
@@ -3241,9 +3046,7 @@ return "0:00";
 
 }
 
-
 s=Math.floor(s);
-
 
 return Math.floor(s/60)+":"+
 String(
@@ -3268,16 +3071,13 @@ typeof player.getPlaylist!==
 )
 return;
 
-
 playlistItems=
 player.getPlaylist();
-
 
 const list=
 document.getElementById(
 "songList"
 );
-
 
 if(
 !playlistItems ||
@@ -3293,9 +3093,7 @@ return;
 
 }
 
-
 list.innerHTML="";
-
 
 playlistItems.forEach(
 (id,index)=>{
@@ -3311,7 +3109,6 @@ item.className=
 item.id=
 `track-${index}`;
 
-
 item.onclick=()=>{
 
 playSpecificTrack(
@@ -3319,7 +3116,6 @@ index
 );
 
 };
-
 
 item.innerHTML=`
 
@@ -3348,9 +3144,7 @@ YouTube Music
 
 `;
 
-
 list.appendChild(item);
-
 
 fetchSongDetails(
 id,
@@ -3358,7 +3152,6 @@ index
 );
 
 });
-
 
 loadVideoPlaylist();
 
@@ -3394,7 +3187,6 @@ data=>{
 if(!data)
 return;
 
-
 const title=
 document.getElementById(
 `title-${index}`
@@ -3404,7 +3196,6 @@ const artist=
 document.getElementById(
 `artist-${index}`
 );
-
 
 if(
 title &&
@@ -3416,7 +3207,6 @@ data.title;
 
 }
 
-
 if(
 artist &&
 data.author_name
@@ -3426,7 +3216,6 @@ artist.textContent=
 data.author_name;
 
 }
-
 
 updateVideoSongDetails(
 index,
@@ -3455,7 +3244,6 @@ document.getElementById(
 "videoSongList"
 );
 
-
 if(
 !playlistItems ||
 playlistItems.length===0
@@ -3478,9 +3266,7 @@ return;
 
 }
 
-
 list.innerHTML="";
-
 
 playlistItems.forEach(
 (id,index)=>{
@@ -3495,7 +3281,6 @@ item.className=
 
 item.id=
 `video-track-${index}`;
-
 
 item.addEventListener(
 "click",
@@ -3514,7 +3299,6 @@ index
 passive:false
 }
 );
-
 
 item.innerHTML=`
 
@@ -3544,9 +3328,7 @@ YouTube Music
 
 `;
 
-
 list.appendChild(item);
-
 
 fetchVideoSongDetails(
 id,
@@ -3554,7 +3336,6 @@ index
 );
 
 });
-
 
 highlightVideoActiveTrack();
 
@@ -3586,7 +3367,6 @@ data=>{
 if(!data)
 return;
 
-
 const title=
 document.getElementById(
 `video-title-${index}`
@@ -3597,7 +3377,6 @@ document.getElementById(
 `video-artist-${index}`
 );
 
-
 if(
 title &&
 data.title
@@ -3607,7 +3386,6 @@ title.textContent=
 data.title;
 
 }
-
 
 if(
 artist &&
@@ -3649,7 +3427,6 @@ document.getElementById(
 `video-artist-${index}`
 );
 
-
 if(
 title &&
 titleText
@@ -3659,7 +3436,6 @@ title.textContent=
 titleText;
 
 }
-
 
 if(
 artist &&
@@ -3687,10 +3463,8 @@ typeof player.getPlaylistIndex!==
 )
 return;
 
-
 const current=
 player.getPlaylistIndex();
-
 
 document
 .querySelectorAll(
@@ -3720,9 +3494,7 @@ index
 if(!player)
 return;
 
-
 forceUpdateUI(index);
-
 
 try{
 
@@ -3735,9 +3507,6 @@ return;
 
 }
 
-
-/* CLOSE OLD RIGHT DRAWER */
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -3748,7 +3517,6 @@ document.getElementById(
 "overlay"
 );
 
-
 drawer.classList.remove(
 "open"
 );
@@ -3757,14 +3525,10 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-
-/* KEEP VIDEO PLAYLIST OPEN */
-
 const popup=
 document.getElementById(
 "videoPopup"
 );
-
 
 if(
 popup.classList.contains(
@@ -3787,7 +3551,6 @@ adjustVideoPlaylistHeight,
 
 }
 
-
 highlightVideoActiveTrack();
 
 }
@@ -3806,10 +3569,8 @@ typeof player.getPlaylistIndex!==
 )
 return;
 
-
 const current=
 player.getPlaylistIndex();
-
 
 document
 .querySelectorAll(
@@ -3841,12 +3602,10 @@ typeof player.getVideoData!==
 )
 return;
 
-
 try{
 
 const d=
 player.getVideoData();
-
 
 if(
 !d ||
@@ -3854,12 +3613,10 @@ if(
 )
 return;
 
-
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
-
 
 if(d.title){
 
@@ -3870,7 +3627,6 @@ d.title;
 
 }
 
-
 if(d.author){
 
 document.getElementById(
@@ -3879,7 +3635,6 @@ document.getElementById(
 d.author;
 
 }
-
 
 highlightVideoActiveTrack();
 
@@ -3911,7 +3666,6 @@ return;
 
 }
 
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -3922,7 +3676,6 @@ document.getElementById(
 "overlay"
 );
 
-
 drawer.classList.toggle(
 "open"
 );
@@ -3930,7 +3683,6 @@ drawer.classList.toggle(
 overlay.classList.toggle(
 "active"
 );
-
 
 if(
 drawer.classList.contains(
@@ -3964,11 +3716,6 @@ adjustVideoPlaylistHeight,
 /* =========================
    EXTRA TOUCH SAFETY
    ========================= */
-
-/*
-Playlist-এর touch কোনোভাবেই
-video/player layer-এ যাবে না।
-*/
 
 const videoList=
 document.getElementById(
@@ -4011,10 +3758,6 @@ passive:true
 }
 );
 
-
-/*
-Playlist container safe.
-*/
 
 const videoPlaylist=
 document.getElementById(
