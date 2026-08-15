@@ -1324,9 +1324,6 @@ padding:4px 9px;
 width:180px;
 }
 
-
-/* VIDEO */
-
 .video-section{
 top:6%;
 
@@ -1699,10 +1696,6 @@ class="video-popup"
 </div>
 
 
-<!-- =====================================================
-     VIDEO PLAYLIST
-===================================================== -->
-
 <div
 id="videoPlaylist"
 class="video-playlist"
@@ -1819,7 +1812,7 @@ alt="Album art"
 id="title"
 class="title"
 >
-My Playlist
+Loading playlist...
 </div>
 
 
@@ -1955,24 +1948,36 @@ oninput="changeVolume(this.value)"
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
 let player=null;
+
 let playing=false;
 
+/*
+ORIGINAL YOUTUBE PLAYLIST IDS
+*/
 let playlistItems=[];
+
+/*
+SORTED DISPLAY PLAYLIST
+Each item contains:
+id
+originalIndex
+title
+artist
+*/
+let sortedPlaylistItems=[];
 
 let volTimer=null;
 
 let isDragging=false;
 
 let swipeStartX=0;
+
 let swipeStartY=0;
 
 let swipeActive=false;
+
 let swipeFromSeek=false;
 
-
-/* =========================================================
-   ANDROID
-========================================================= */
 
 const isAndroidDevice=
 /Android/i.test(navigator.userAgent);
@@ -1982,7 +1987,6 @@ if(isAndroidDevice){
 document.body.classList.add(
 "android-device"
 );
-
 }
 
 
@@ -2081,21 +2085,11 @@ onStateChange:state
 
 function ready(){
 
+loadPlaylistItems();
+
 setInterval(
 updateProgress,
 250
-);
-
-
-/*
-YouTube playlist load হওয়ার পর
-কিছু সময় দিচ্ছি যাতে getPlaylist()
-সঠিকভাবে পাওয়া যায়।
-*/
-
-setTimeout(
-loadPlaylistItems,
-1000
 );
 
 }
@@ -2117,6 +2111,11 @@ const playIcon=
 document.getElementById("play-icon");
 
 
+highlightActiveTrack();
+
+highlightVideoActiveTrack();
+
+
 if(
 e.data===YT.PlayerState.PLAYING
 ){
@@ -2136,33 +2135,14 @@ cover.classList.add(
 
 updateInfo();
 
-highlightCurrentByVideoId();
-
 }
 
-
 else if(
-e.data===YT.PlayerState.PAUSED
-){
 
-playing=false;
+e.data===YT.PlayerState.PAUSED ||
 
-playBtn.classList.remove(
-"playing"
-);
-
-playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
-cover.classList.remove(
-"spinning"
-);
-
-}
-
-
-else if(
 e.data===YT.PlayerState.ENDED
+
 ){
 
 playing=false;
@@ -2176,16 +2156,6 @@ playIcon.innerHTML=
 
 cover.classList.remove(
 "spinning"
-);
-
-
-/*
-A-Z list অনুযায়ী next
-*/
-
-setTimeout(
-playNextSorted,
-100
 );
 
 }
@@ -2199,8 +2169,7 @@ playNextSorted,
 
 function togglePlay(){
 
-if(!player)
-return;
+if(!player)return;
 
 try{
 
@@ -2211,22 +2180,7 @@ player.pauseVideo();
 }
 else{
 
-const id=
-getCurrentVideoId();
-
-if(
-!id &&
-playlistItems.length>0
-){
-
-playSpecificTrack(0);
-
-}
-else{
-
 player.playVideo();
-
-}
 
 }
 
@@ -2349,8 +2303,7 @@ if(
 !popup ||
 !playlist ||
 !playerCard
-)
-return;
+)return;
 
 if(
 !popup.classList.contains("active")
@@ -2619,69 +2572,11 @@ typeof player.setVolume===
 "function"
 ){
 
-player.setVolume(
-Number(val)
-);
+player.setVolume(val);
 
 }
 
 resetVolTimer();
-
-}
-
-
-/* =========================================================
-   CURRENT VIDEO ID
-========================================================= */
-
-function getCurrentVideoId(){
-
-if(
-!player ||
-typeof player.getVideoData!==
-"function"
-)
-return "";
-
-try{
-
-const data=
-player.getVideoData();
-
-if(
-data &&
-data.video_id
-){
-
-return data.video_id;
-
-}
-
-}
-catch(e){}
-
-return "";
-
-}
-
-
-/* =========================================================
-   CURRENT SORTED INDEX
-========================================================= */
-
-function getCurrentSortedIndex(){
-
-const currentId=
-getCurrentVideoId();
-
-if(!currentId)
-return -1;
-
-
-return playlistItems.findIndex(
-item=>
-item.id===currentId
-);
 
 }
 
@@ -2692,43 +2587,24 @@ item.id===currentId
 
 function nextSong(){
 
-playNextSorted();
-
-}
-
-
-/* =========================================================
-   NEXT A-Z
-========================================================= */
-
-function playNextSorted(){
-
 if(
 !player ||
-playlistItems.length===0
+!playlistItems.length
 )
 return;
 
 
 const current=
-getCurrentSortedIndex();
+player.getPlaylistIndex();
 
-
-let next=0;
-
-
-if(current>=0){
-
-next=
+const next=
 (current+1)%
 playlistItems.length;
 
-}
 
+forceUpdateUI(next);
 
-playSpecificTrack(
-next
-);
+player.nextVideo();
 
 }
 
@@ -2741,32 +2617,23 @@ function previousSong(){
 
 if(
 !player ||
-playlistItems.length===0
+!playlistItems.length
 )
 return;
 
 
 const current=
-getCurrentSortedIndex();
+player.getPlaylistIndex();
 
-
-let previous=
-playlistItems.length-1;
-
-
-if(current>=0){
-
-previous=
+const previous=
 (current-1+
 playlistItems.length)%
 playlistItems.length;
 
-}
 
+forceUpdateUI(previous);
 
-playSpecificTrack(
-previous
-);
+player.previousVideo();
 
 }
 
@@ -2777,17 +2644,12 @@ previous
 
 function forceUpdateUI(index){
 
-if(
-!playlistItems[index]
-)
+if(!playlistItems[index])
 return;
 
 
-const item=
-playlistItems[index];
-
 const id=
-item.id;
+playlistItems[index];
 
 
 document.getElementById(
@@ -2796,21 +2658,40 @@ document.getElementById(
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 
+try{
+
+const data=
+player.getVideoData();
+
+if(data && data.video_id===id){
+
+if(data.title){
+
 document.getElementById(
 "title"
 ).textContent=
-item.title ||
-"Loading...";
+data.title;
 
+}
+
+if(data.author){
 
 document.getElementById(
 "artist"
 ).textContent=
-item.artist ||
-"YouTube Music";
+data.author;
+
+}
+
+}
+
+}
+catch(e){}
 
 
-highlightCurrentByVideoId();
+highlightActiveTrack();
+
+highlightVideoActiveTrack();
 
 }
 
@@ -2859,11 +2740,9 @@ if(!swipeActive)
 return;
 
 
-const endX=
-e.clientX;
+const endX=e.clientX;
 
-const endY=
-e.clientY;
+const endY=e.clientY;
 
 
 const dx=
@@ -3234,30 +3113,18 @@ typeof player.getPlaylist!==
 return;
 
 
-let ids=[];
-
-
-try{
-
-ids=
-player.getPlaylist() || [];
-
-}
-catch(e){
-
-ids=[];
-
-}
+const originalItems=
+player.getPlaylist();
 
 
 if(
-!ids ||
-ids.length===0
+!originalItems ||
+originalItems.length===0
 ){
 
 setTimeout(
 loadPlaylistItems,
-700
+600
 );
 
 return;
@@ -3266,46 +3133,410 @@ return;
 
 
 /*
-প্রথমে সব ID রাখছি।
+=========================================================
+ORIGINAL YOUTUBE PLAYLIST
+=========================================================
 */
 
 playlistItems=
-ids.map(
+originalItems.slice();
+
+
+/*
+=========================================================
+CREATE SORTED DISPLAY COPY
+=========================================================
+*/
+
+sortedPlaylistItems=
+originalItems.map(
 (id,index)=>({
 
 id:id,
 
+originalIndex:index,
+
 title:`Track #${index+1}`,
 
-artist:"YouTube Music",
-
-originalIndex:index
+artist:"YouTube Music"
 
 })
 );
 
 
 /*
-প্রথম render
+=========================================================
+SHOW FIRST SONG THUMBNAIL IMMEDIATELY
+=========================================================
+*/
+
+if(
+sortedPlaylistItems.length>0
+){
+
+const first=
+sortedPlaylistItems[0];
+
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${first.id}/hqdefault.jpg`;
+
+}
+
+
+/*
+=========================================================
+FETCH ALL TITLES
+=========================================================
+*/
+
+let loaded=0;
+
+
+sortedPlaylistItems.forEach(
+(song)=>{
+
+fetch(
+`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${song.id}`
+)
+
+.then(
+r=>r.json()
+)
+
+.then(
+data=>{
+
+if(data){
+
+song.title=
+data.title ||
+song.title;
+
+song.artist=
+data.author_name ||
+"YouTube Music";
+
+}
+
+}
+)
+
+.catch(
+()=>{}
+)
+
+.finally(
+()=>{
+
+loaded++;
+
+
+if(
+loaded===
+sortedPlaylistItems.length
+){
+
+/*
+A-Z SORT
+*/
+
+sortedPlaylistItems.sort(
+(a,b)=>
+a.title.localeCompare(
+b.title,
+undefined,
+{
+numeric:true,
+sensitivity:"base"
+}
+)
+);
+
+
+/*
+SHOW FIRST A-Z SONG
+*/
+
+if(
+sortedPlaylistItems.length>0
+){
+
+const first=
+sortedPlaylistItems[0];
+
+
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${first.id}/hqdefault.jpg`;
+
+
+document.getElementById(
+"title"
+).textContent=
+first.title;
+
+
+document.getElementById(
+"artist"
+).textContent=
+first.artist;
+
+}
+
+
+/*
+RENDER
 */
 
 renderSortedPlaylist();
 
-loadVideoPlaylist();
+}
 
-
-/*
-প্রতিটি video-এর title আনব।
-*/
-
-playlistItems.forEach(
-item=>{
-
-fetchSongDetails(
-item.id
+}
 );
 
 });
+
+
+/*
+FALLBACK IN CASE NOEMBED IS SLOW
+*/
+
+setTimeout(
+()=>{
+
+if(
+loaded<
+sortedPlaylistItems.length
+){
+
+sortedPlaylistItems.sort(
+(a,b)=>
+a.title.localeCompare(
+b.title,
+undefined,
+{
+numeric:true,
+sensitivity:"base"
+}
+);
+
+renderSortedPlaylist();
+
+}
+
+},
+5000
+);
+
+}
+
+
+/* =========================================================
+   RENDER SORTED PLAYLIST
+========================================================= */
+
+function renderSortedPlaylist(){
+
+const list=
+document.getElementById(
+"songList"
+);
+
+const videoList=
+document.getElementById(
+"videoSongList"
+);
+
+
+if(list){
+
+list.innerHTML="";
+
+}
+
+
+if(videoList){
+
+videoList.innerHTML="";
+
+}
+
+
+/*
+=========================================================
+OLD DRAWER
+=========================================================
+*/
+
+sortedPlaylistItems.forEach(
+(song,index)=>{
+
+const item=
+document.createElement(
+"div"
+);
+
+
+item.className=
+"song-item";
+
+
+item.id=
+`track-${song.originalIndex}`;
+
+
+item.onclick=()=>{
+
+playSpecificTrack(
+song.originalIndex
+);
+
+};
+
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${song.id}/hqdefault.jpg"
+alt="thumb"
+>
+
+<div class="song-item-info">
+
+<div class="song-item-title">
+
+${escapeHTML(song.title)}
+
+</div>
+
+<div class="song-item-artist">
+
+${escapeHTML(song.artist)}
+
+</div>
+
+</div>
+
+`;
+
+
+list.appendChild(
+item
+);
+
+});
+
+
+/*
+=========================================================
+VIDEO PLAYLIST
+=========================================================
+*/
+
+if(videoList){
+
+sortedPlaylistItems.forEach(
+(song,index)=>{
+
+const item=
+document.createElement(
+"div"
+);
+
+
+item.className=
+"video-song-item";
+
+
+item.id=
+`video-track-${song.originalIndex}`;
+
+
+item.addEventListener(
+"click",
+function(e){
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+playSpecificTrack(
+song.originalIndex
+);
+
+},
+{
+passive:false
+}
+);
+
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${song.id}/hqdefault.jpg"
+alt="thumb"
+draggable="false"
+>
+
+<div class="video-song-info">
+
+<div class="video-song-title">
+
+${escapeHTML(song.title)}
+
+</div>
+
+<div class="video-song-artist">
+
+${escapeHTML(song.artist)}
+
+</div>
+
+</div>
+
+`;
+
+
+videoList.appendChild(
+item
+);
+
+});
+
+}
+
+
+highlightActiveTrack();
+
+highlightVideoActiveTrack();
+
+adjustVideoPlaylistHeight();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(text){
+
+if(!text)
+return "";
+
+const div=
+document.createElement("div");
+
+div.textContent=
+text;
+
+return div.innerHTML;
 
 }
 
@@ -3315,7 +3546,8 @@ item.id
 ========================================================= */
 
 function fetchSongDetails(
-id
+id,
+index
 ){
 
 fetch(
@@ -3333,49 +3565,37 @@ if(!data)
 return;
 
 
-/*
-ID দিয়ে item খুঁজছি।
-Index ব্যবহার করছি না।
-*/
-
-const item=
-playlistItems.find(
-x=>
-x.id===id
+const title=
+document.getElementById(
+`title-${index}`
 );
 
-if(!item)
-return;
+const artist=
+document.getElementById(
+`artist-${index}`
+);
 
 
-if(data.title){
+if(
+title &&
+data.title
+){
 
-item.title=
+title.textContent=
 data.title;
 
 }
 
 
-if(data.author_name){
+if(
+artist &&
+data.author_name
+){
 
-item.artist=
+artist.textContent=
 data.author_name;
 
 }
-
-
-/*
-Title পাওয়ার সাথে সাথে
-A-Z আবার sort হবে।
-*/
-
-sortPlaylistAZ();
-
-renderSortedPlaylist();
-
-loadVideoPlaylist();
-
-highlightCurrentByVideoId();
 
 }
 )
@@ -3383,120 +3603,6 @@ highlightCurrentByVideoId();
 .catch(
 ()=>{}
 );
-
-}
-
-
-/* =========================================================
-   SORT A-Z
-========================================================= */
-
-function sortPlaylistAZ(){
-
-playlistItems.sort(
-(a,b)=>{
-
-const aTitle=
-(a.title || "")
-.trim();
-
-const bTitle=
-(b.title || "")
-.trim();
-
-
-return aTitle.localeCompare(
-bTitle,
-undefined,
-{
-numeric:true,
-sensitivity:"base"
-}
-);
-
-}
-);
-
-}
-
-
-/* =========================================================
-   RENDER SORTED MAIN PLAYLIST
-========================================================= */
-
-function renderSortedPlaylist(){
-
-const list=
-document.getElementById(
-"songList"
-);
-
-if(!list)
-return;
-
-
-list.innerHTML="";
-
-
-playlistItems.forEach(
-(item,index)=>{
-
-const div=
-document.createElement(
-"div"
-);
-
-div.className=
-"song-item";
-
-
-div.dataset.videoId=
-item.id;
-
-
-div.innerHTML=`
-
-<img
-src="https://i.ytimg.com/vi/${item.id}/hqdefault.jpg"
-alt="thumb"
->
-
-<div class="song-item-info">
-
-<div
-class="song-item-title"
->
-${escapeHTML(item.title)}
-</div>
-
-<div
-class="song-item-artist"
->
-${escapeHTML(item.artist)}
-</div>
-
-</div>
-
-`;
-
-
-div.onclick=()=>{
-
-playSpecificTrack(
-index
-);
-
-};
-
-
-list.appendChild(
-div
-);
-
-});
-
-
-highlightCurrentByVideoId();
 
 }
 
@@ -3512,13 +3618,10 @@ document.getElementById(
 "videoSongList"
 );
 
-if(!list)
-return;
-
 
 if(
-!playlistItems ||
-playlistItems.length===0
+!sortedPlaylistItems ||
+sortedPlaylistItems.length===0
 ){
 
 list.innerHTML=`
@@ -3529,7 +3632,9 @@ color:rgba(255,255,255,.7);
 font-size:9px;
 padding:10px;
 ">
+
 Loading...
+
 </div>
 
 `;
@@ -3542,50 +3647,24 @@ return;
 list.innerHTML="";
 
 
-playlistItems.forEach(
-(item,index)=>{
+sortedPlaylistItems.forEach(
+(song,index)=>{
 
-const div=
+const item=
 document.createElement(
 "div"
 );
 
-div.className=
+
+item.className=
 "video-song-item";
 
 
-div.dataset.videoId=
-item.id;
+item.id=
+`video-track-${song.originalIndex}`;
 
 
-div.innerHTML=`
-
-<img
-src="https://i.ytimg.com/vi/${item.id}/hqdefault.jpg"
-alt="thumb"
-draggable="false"
->
-
-<div class="video-song-info">
-
-<div
-class="video-song-title"
->
-${escapeHTML(item.title)}
-</div>
-
-<div
-class="video-song-artist"
->
-${escapeHTML(item.artist)}
-</div>
-
-</div>
-
-`;
-
-
-div.addEventListener(
+item.addEventListener(
 "click",
 function(e){
 
@@ -3593,8 +3672,9 @@ e.preventDefault();
 
 e.stopPropagation();
 
+
 playSpecificTrack(
-index
+song.originalIndex
 );
 
 },
@@ -3604,14 +3684,41 @@ passive:false
 );
 
 
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${song.id}/hqdefault.jpg"
+alt="thumb"
+draggable="false"
+>
+
+<div class="video-song-info">
+
+<div
+class="video-song-title"
+>
+${escapeHTML(song.title)}
+</div>
+
+<div
+class="video-song-artist"
+>
+${escapeHTML(song.artist)}
+</div>
+
+</div>
+
+`;
+
+
 list.appendChild(
-div
+item
 );
 
 });
 
 
-highlightCurrentByVideoId();
+highlightVideoActiveTrack();
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -3622,111 +3729,116 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   ESCAPE HTML
+   UPDATE VIDEO DETAILS
 ========================================================= */
 
-function escapeHTML(text){
+function updateVideoSongDetails(
+index,
+titleText,
+artistText
+){
+
+const title=
+document.getElementById(
+`video-title-${index}`
+);
+
+const artist=
+document.getElementById(
+`video-artist-${index}`
+);
+
 
 if(
-text===undefined ||
-text===null
+title &&
+titleText
+){
+
+title.textContent=
+titleText;
+
+}
+
+
+if(
+artist &&
+artistText
+){
+
+artist.textContent=
+artistText;
+
+}
+
+}
+
+
+/* =========================================================
+   VIDEO ACTIVE SONG
+========================================================= */
+
+function highlightVideoActiveTrack(){
+
+if(
+!player ||
+typeof player.getPlaylistIndex!==
+"function"
 )
-return "";
+return;
 
-return String(text)
 
-.replace(
-/&/g,
-"&amp;"
+const current=
+player.getPlaylistIndex();
+
+
+document
+.querySelectorAll(
+".video-song-item"
 )
+.forEach(
+(item)=>{
 
-.replace(
-/</g,
-"&lt;"
+const originalIndex=
+parseInt(
+item.id.replace(
+"video-track-",
+""
 )
-
-.replace(
-/>/g,
-"&gt;"
-)
-
-.replace(
-/"/g,
-"&quot;"
-)
-
-.replace(
-/'/g,
-"&#039;"
 );
+
+item.classList.toggle(
+"active",
+originalIndex===current
+);
+
+});
 
 }
 
 
 /* =========================================================
    PLAY SPECIFIC TRACK
-   *** MAIN FIX ***
 ========================================================= */
 
 function playSpecificTrack(
 index
 ){
 
-if(
-!player ||
-!playlistItems[index]
-)
+if(!player)
 return;
 
-
-const item=
-playlistItems[index];
-
-const id=
-item.id;
-
-
-/*
-আগেই control UI update
-*/
 
 forceUpdateUI(index);
 
 
-/*
-সবচেয়ে গুরুত্বপূর্ণ:
-
-আগে ছিল:
-
-player.playVideoAt(index)
-
-এখন আর সেটা নেই।
-
-কারণ sorted index এবং YouTube-এর
-original playlist index এক না।
-
-সরাসরি VIDEO ID load করছি।
-*/
-
 try{
 
-player.loadVideoById({
-
-videoId:id
-
-});
+player.playVideoAt(index);
 
 }
 catch(e){
 
-try{
-
-player.loadVideoById(
-id
-);
-
-}
-catch(err){}
+return;
 
 }
 
@@ -3756,8 +3868,7 @@ drawerOverlay.classList.remove(
 
 
 /*
-VIDEO PLAYLIST OPEN থাকলে
-open থাকবে।
+VIDEO PLAYLIST STAYS OPEN
 */
 
 const popup=
@@ -3767,7 +3878,6 @@ document.getElementById(
 
 
 if(
-popup &&
 popup.classList.contains(
 "active"
 )
@@ -3789,27 +3899,29 @@ adjustVideoPlaylistHeight,
 }
 
 
-/*
-Active song
-*/
+highlightActiveTrack();
 
-highlightCurrentByVideoId();
+highlightVideoActiveTrack();
 
 }
 
 
 /* =========================================================
-   HIGHLIGHT CURRENT BY VIDEO ID
+   OLD DRAWER ACTIVE
 ========================================================= */
 
-function highlightCurrentByVideoId(){
+function highlightActiveTrack(){
 
-const currentId=
-getCurrentVideoId();
-
-
-if(!currentId)
+if(
+!player ||
+typeof player.getPlaylistIndex!==
+"function"
+)
 return;
+
+
+const current=
+player.getPlaylistIndex();
 
 
 document
@@ -3817,28 +3929,19 @@ document
 ".song-item"
 )
 .forEach(
-item=>{
+(item)=>{
 
-item.classList.toggle(
-"active",
-item.dataset.videoId===
-currentId
-);
-
-});
-
-
-document
-.querySelectorAll(
-".video-song-item"
+const originalIndex=
+parseInt(
+item.id.replace(
+"track-",
+""
 )
-.forEach(
-item=>{
+);
 
 item.classList.toggle(
 "active",
-item.dataset.videoId===
-currentId
+originalIndex===current
 );
 
 });
@@ -3847,25 +3950,7 @@ currentId
 
 
 /* =========================================================
-   OLD ACTIVE FUNCTIONS
-========================================================= */
-
-function highlightActiveTrack(){
-
-highlightCurrentByVideoId();
-
-}
-
-
-function highlightVideoActiveTrack(){
-
-highlightCurrentByVideoId();
-
-}
-
-
-/* =========================================================
-   UPDATE INFO
+   UPDATE MAIN INFO
 ========================================================= */
 
 function updateInfo(){
@@ -3891,14 +3976,10 @@ if(
 return;
 
 
-const id=
-d.video_id;
-
-
 document.getElementById(
 "cover"
 ).src=
-`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+`https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 
 if(d.title){
@@ -3921,7 +4002,9 @@ d.author;
 }
 
 
-highlightCurrentByVideoId();
+highlightActiveTrack();
+
+highlightVideoActiveTrack();
 
 }
 catch(e){}
@@ -4010,33 +4093,34 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   CURRENT SONG SYNC
-========================================================= */
-
-setInterval(
-()=>{
-
-if(!player)
-return;
-
-highlightCurrentByVideoId();
-
-},
-500
-);
-
-
-/* =========================================================
-   RELOAD PLAYLIST ORDER
+   FINAL
 ========================================================= */
 
 /*
-Website reload করলে YouTube playlist-এর
-বর্তমান songs আবার নেওয়া হবে।
+PORTRAIT:
 
-তারপর title অনুযায়ী A-Z হবে।
+Video popup touch OFF.
+YouTube iframe touch OFF.
+Video playlist scroll/click ON.
 
-Control/list দুটোই একই video ID ব্যবহার করবে।
+LANDSCAPE:
+
+YouTube iframe touch ON.
+YouTube controls work.
+Video playlist hidden.
+
+PLAYLIST:
+
+Website display = A-Z by SONG TITLE.
+
+Original YouTube playlist index is preserved,
+so clicking a sorted song still plays the correct
+YouTube playlist item.
+
+PLAYER:
+
+First A-Z song thumbnail + title is shown
+after playlist metadata loads.
 */
 
 </script>
