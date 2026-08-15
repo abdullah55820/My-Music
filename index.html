@@ -216,6 +216,10 @@ background:rgba(0,0,0,.4);
 
 display:none;
 
+/*
+IMPORTANT:
+Overlay কখনো touch block করবে না
+*/
 pointer-events:none !important;
 }
 
@@ -301,9 +305,14 @@ opacity:1;
 
 visibility:visible;
 
-pointer-events:none;
+/*
+VIDEO POPUP MUST RECEIVE TOUCH
+*/
+pointer-events:auto;
 
 transform:scale(1);
+
+touch-action:auto;
 }
 
 #yt{
@@ -315,8 +324,13 @@ border:none;
 
 display:block;
 
-/* VIDEO TOUCH OFF */
-pointer-events:none !important;
+/*
+IMPORTANT:
+YouTube iframe touch enabled
+*/
+pointer-events:auto !important;
+
+touch-action:auto !important;
 }
 
 
@@ -328,8 +342,11 @@ pointer-events:none !important;
 
 width:100%;
 
-/* VIDEO → PLAYLIST GAP */
-margin-top:1px;
+/*
+VIDEO → PLAYLIST:
+আরও কম gap
+*/
+margin-top:2px;
 
 max-height:calc(100dvh - 410px);
 
@@ -464,12 +481,14 @@ display:flex;
 
 align-items:center;
 
-gap:9px;
+gap:8px;
 
 width:100%;
 
-/* SONG একটু বড় */
-min-height:53px;
+/*
+SONG একটু বড়
+*/
+min-height:52px;
 
 padding:7px 8px;
 
@@ -517,8 +536,8 @@ display:none;
 
 .video-song-item img{
 
-width:44px;
-height:44px;
+width:43px;
+height:43px;
 
 border-radius:7px;
 
@@ -576,8 +595,14 @@ margin-top:2px;
    APP TOUCH LAYER FIX
    ========================= */
 
+/*
+IMPORTANT:
+Video popup open হলেও main control
+video overlay-এর নিচে যাবে না।
+*/
+
 body.popup-active .app{
-z-index:1400;
+z-index:1800;
 }
 
 
@@ -599,6 +624,9 @@ height:100vh !important;
 
 display:block !important;
 
+/*
+SECTION itself doesn't catch touch
+*/
 pointer-events:none !important;
 
 z-index:1700 !important;
@@ -622,7 +650,20 @@ border:none !important;
 
 box-shadow:none !important;
 
-pointer-events:none !important;
+/*
+CRITICAL:
+Rotate করার পর YouTube touch enabled
+*/
+pointer-events:auto !important;
+
+touch-action:auto !important;
+}
+
+#yt{
+
+pointer-events:auto !important;
+
+touch-action:auto !important;
 }
 
 .video-playlist{
@@ -678,7 +719,16 @@ border:none !important;
 
 box-shadow:none !important;
 
-pointer-events:none !important;
+pointer-events:auto !important;
+
+touch-action:auto !important;
+}
+
+body.android-device.landscape-mode #yt{
+
+pointer-events:auto !important;
+
+touch-action:auto !important;
 }
 
 body.android-device.landscape-mode .video-playlist{
@@ -1475,16 +1525,15 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:16px;
-
-pointer-events:none !important;
 }
 
 
-/* VIDEO → PLAYLIST GAP = 1px */
-
+/*
+Mobile video → playlist gap
+*/
 .video-playlist{
 
-margin-top:1px;
+margin-top:2px;
 
 max-height:calc(100dvh - 350px);
 
@@ -1506,20 +1555,19 @@ pointer-events:auto;
 
 .video-song-item{
 
-/* একটু বড় */
 min-height:50px;
 
 padding:6px 7px;
 
-gap:8px;
+gap:7px;
 
 pointer-events:auto;
 }
 
 .video-song-item img{
 
-width:42px;
-height:42px;
+width:41px;
+height:41px;
 }
 
 .video-song-title{
@@ -1548,8 +1596,6 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
-
-pointer-events:none !important;
 }
 
 .video-playlist{
@@ -1557,8 +1603,6 @@ pointer-events:none !important;
 max-height:calc(100dvh - 300px);
 
 min-height:70px;
-
-margin-top:1px;
 }
 
 .video-song-item{
@@ -1587,7 +1631,7 @@ width:96%;
 
 .video-playlist{
 
-margin-top:1px;
+margin-top:2px;
 
 padding:6px;
 
@@ -1598,7 +1642,7 @@ max-height:calc(100dvh - 300px);
 
 min-height:46px;
 
-padding:6px;
+padding:5px;
 }
 
 .video-song-item img{
@@ -2268,11 +2312,12 @@ const playerRect=
 playerCard.getBoundingClientRect();
 
 const top=
-popupRect.bottom+1;
+popupRect.bottom+2;
 
 
 /*
-Playlist → control gap = 20px
+PLAYLIST → CONTROL GAP
+আগের মতো 20px
 */
 
 const bottom=
@@ -3795,6 +3840,57 @@ passive:true
 );
 
 videoPlaylist.addEventListener(
+"touchend",
+e=>{
+
+e.stopPropagation();
+
+},
+{
+passive:true
+}
+);
+
+
+/* =========================
+   FINAL VIDEO TOUCH SAFETY
+   ========================= */
+
+/*
+Rotate হওয়ার পরেও YouTube video যেন
+নিজের touch controls পায়।
+*/
+
+const videoPopup=
+document.getElementById(
+"videoPopup"
+);
+
+videoPopup.addEventListener(
+"touchstart",
+e=>{
+
+e.stopPropagation();
+
+},
+{
+passive:true
+}
+);
+
+videoPopup.addEventListener(
+"touchmove",
+e=>{
+
+e.stopPropagation();
+
+},
+{
+passive:true
+}
+);
+
+videoPopup.addEventListener(
 "touchend",
 e=>{
 
