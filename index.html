@@ -196,9 +196,6 @@ height:14px;
 fill:#fff;
 }
 
-
-/* HIDE TOP PLAYLIST BUTTON WHEN VIDEO IS OPEN */
-
 body.popup-active .playlist-toggle-btn{
 display:none;
 }
@@ -208,9 +205,14 @@ display:none;
    VIDEO OVERLAY
    ========================= */
 
+/*
+IMPORTANT:
+Overlay পুরো screen touch block করবে না।
+এটা শুধু visual layer.
+*/
+
 .video-overlay{
 position:fixed;
-
 inset:0;
 
 z-index:1499;
@@ -219,17 +221,13 @@ background:rgba(0,0,0,.4);
 
 display:none;
 
-/*
-IMPORTANT:
-Overlay কখনো touch ধরবে না
-*/
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 .video-overlay.active{
 display:block;
 
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 
@@ -258,8 +256,8 @@ flex-direction:column;
 align-items:center;
 
 /*
-Parent নিজে touch ধরবে না।
-Child playlist নিজে touch ধরবে।
+Parent touch ধরবে না।
+Playlist নিজে touch ধরবে।
 */
 pointer-events:none;
 }
@@ -296,9 +294,6 @@ opacity:0;
 
 visibility:hidden;
 
-/*
-VIDEO TOUCH COMPLETELY OFF
-*/
 pointer-events:none;
 
 transform:scale(.92);
@@ -316,7 +311,7 @@ opacity:1;
 visibility:visible;
 
 /*
-VIDEO-তে touch যাবে না
+ভিডিওর ওপর touch সম্পূর্ণ OFF
 */
 pointer-events:none;
 
@@ -324,10 +319,11 @@ transform:scale(1);
 }
 
 
-/* =========================
-   YOUTUBE IFRAME
-   ========================= */
-
+/*
+YouTube iframe-এর touch OFF।
+ভিডিও দেখা যাবে,
+কিন্তু ভিডিওর ওপর tap/drag/click যাবে না।
+*/
 #yt{
 
 width:100%;
@@ -337,10 +333,9 @@ border:none;
 
 display:block;
 
-/*
-YouTube video/control-এও touch যাবে না
-*/
-pointer-events:none !important;
+pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 
@@ -383,7 +378,7 @@ opacity .3s ease,
 visibility .3s ease;
 
 /*
-Playlist touch ON
+Playlist নিজে touch ধরবে
 */
 pointer-events:none;
 
@@ -395,7 +390,11 @@ overscroll-behavior:contain;
 
 position:relative;
 
-z-index:1505;
+z-index:1600;
+
+display:flex;
+
+flex-direction:column;
 }
 
 .video-playlist.active{
@@ -404,18 +403,13 @@ opacity:1;
 
 visibility:visible;
 
-/*
-VERY IMPORTANT
-Playlist নিজে touch ধরবে
-*/
-pointer-events:auto;
+pointer-events:auto!important;
 
-touch-action:pan-y;
+touch-action:pan-y!important;
 
 -webkit-user-select:none;
 user-select:none;
 
--webkit-touch-callout:none;
 }
 
 
@@ -455,7 +449,7 @@ height:calc(100% - 27px);
 
 max-height:none;
 
-overflow-y:auto;
+overflow-y:scroll;
 
 overflow-x:hidden;
 
@@ -465,7 +459,7 @@ flex-direction:column;
 
 gap:5px;
 
-touch-action:pan-y;
+touch-action:pan-y!important;
 
 -webkit-overflow-scrolling:touch;
 
@@ -475,7 +469,9 @@ scrollbar-width:thin;
 
 position:relative;
 
-z-index:1506;
+z-index:1601;
+
+pointer-events:auto!important;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -514,7 +510,7 @@ border:1px solid rgba(255,255,255,.08);
 
 cursor:pointer;
 
-touch-action:manipulation;
+touch-action:pan-y!important;
 
 -webkit-tap-highlight-color:transparent;
 
@@ -525,13 +521,10 @@ border-color .2s ease;
 
 flex-shrink:0;
 
-position:relative;
-
-z-index:1507;
+pointer-events:auto!important;
 }
 
 .video-song-item:active{
-
 transform:scale(.98);
 
 background:rgba(255,255,255,.18);
@@ -543,9 +536,6 @@ background:rgba(255,255,255,.20);
 
 border-color:rgba(255,255,255,.30);
 }
-
-
-/* NUMBER REMOVED */
 
 .video-song-number{
 display:none;
@@ -621,56 +611,55 @@ margin-top:2px;
 
 .video-section{
 
-top:0 !important;
-left:0 !important;
+top:0!important;
+left:0!important;
 
-transform:none !important;
+transform:none!important;
 
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
 
-display:block !important;
+display:block!important;
 
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 .video-popup.active{
 
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
 
-aspect-ratio:auto !important;
+aspect-ratio:auto!important;
 
-top:0 !important;
-left:0 !important;
+top:0!important;
+left:0!important;
 
-transform:none !important;
+transform:none!important;
 
-border-radius:0 !important;
+border-radius:0!important;
 
-border:none !important;
+border:none!important;
 
-box-shadow:none !important;
+box-shadow:none!important;
 
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 #yt{
-
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 .video-playlist{
 
-display:none !important;
+display:none!important;
 }
 
 .app{
-display:none !important;
+display:none!important;
 }
 
 .top-widgets{
-display:none !important;
+display:none!important;
 }
 
 }
@@ -682,50 +671,49 @@ display:none !important;
 
 body.android-device.landscape-mode .video-section{
 
-top:0 !important;
-left:0 !important;
+top:0!important;
+left:0!important;
 
-transform:none !important;
+transform:none!important;
 
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
 
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 body.android-device.landscape-mode .video-popup.active{
 
-width:100vw !important;
-height:100vh !important;
+width:100vw!important;
+height:100vh!important;
 
-aspect-ratio:auto !important;
+aspect-ratio:auto!important;
 
-top:0 !important;
-left:0 !important;
+top:0!important;
+left:0!important;
 
-transform:none !important;
+transform:none!important;
 
-border-radius:0 !important;
+border-radius:0!important;
 
-border:none !important;
+border:none!important;
 
-box-shadow:none !important;
+box-shadow:none!important;
 
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 body.android-device.landscape-mode #yt{
-
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 body.android-device.landscape-mode .video-playlist{
-display:none !important;
+display:none!important;
 }
 
 body.android-device.landscape-mode .app,
 body.android-device.landscape-mode .top-widgets{
-display:none !important;
+display:none!important;
 }
 
 
@@ -757,6 +745,11 @@ padding:0 16px 65px;
    MUSIC PLAYER
    ========================= */
 
+/*
+MAIN CONTROL CLEAN
+কোনো কালো shadow/background/blur নেই।
+*/
+
 .player{
 
 width:min(440px,94%);
@@ -770,17 +763,20 @@ border:1px solid rgba(255,255,255,.18);
 border-radius:60px;
 
 /*
-আগের .35 থেকে কমিয়ে .14
-এখন বেশি glassy এবং কম কালো
+আগের কালো background বাদ
 */
-background:rgba(20,20,20,.14);
+background:transparent;
 
-backdrop-filter:blur(20px);
+/*
+আগের blur বাদ
+*/
+backdrop-filter:none;
+-webkit-backdrop-filter:none;
 
--webkit-backdrop-filter:blur(20px);
-
-box-shadow:
-0 20px 50px rgba(0,0,0,.45);
+/*
+কোনো shadow নেই
+*/
+box-shadow:none;
 
 display:flex;
 
@@ -850,7 +846,7 @@ position:absolute;
 width:16px;
 height:16px;
 
-background:rgba(20,20,20,.75);
+background:rgba(20,20,20,.85);
 
 border:2px solid rgba(255,255,255,.3);
 
@@ -1063,7 +1059,7 @@ align-items:center;
 
 gap:4px;
 
-background:rgba(0,0,0,.20);
+background:rgba(0,0,0,.25);
 
 border:1px solid rgba(255,255,255,.15);
 
@@ -1168,8 +1164,7 @@ align-items:center;
 
 justify-content:center;
 
-box-shadow:
-0 4px 15px rgba(0,0,0,.3);
+box-shadow:none;
 
 cursor:pointer;
 
@@ -1455,9 +1450,14 @@ border-radius:58px;
 gap:10px;
 
 /*
-Mobile-এও হালকা glass
+Mobile-এও কোনো shadow/black background নেই
 */
-background:rgba(20,20,20,.14);
+background:transparent;
+
+backdrop-filter:none;
+-webkit-backdrop-filter:none;
+
+box-shadow:none;
 }
 
 .cover-wrapper{
@@ -1478,6 +1478,8 @@ font-size:11px;
 
 width:42px;
 height:42px;
+
+box-shadow:none;
 }
 
 .top-widgets{
@@ -1522,16 +1524,20 @@ height:auto;
 
 border-radius:16px;
 
-pointer-events:none !important;
+/*
+ভিডিও touch OFF
+*/
+pointer-events:none!important;
 }
 
 #yt{
-pointer-events:none !important;
+pointer-events:none!important;
+touch-action:none!important;
 }
 
 
 /*
-Mobile playlist
+Playlist player-এর ওপরে থাকবে
 */
 .video-playlist{
 
@@ -1545,16 +1551,20 @@ padding:7px;
 
 border-radius:14px;
 
-pointer-events:auto;
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-list{
 
 height:calc(100% - 27px);
 
-overflow-y:auto;
+overflow-y:scroll!important;
 
-touch-action:pan-y;
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item{
@@ -1564,6 +1574,10 @@ min-height:46px;
 padding:5px 6px;
 
 gap:7px;
+
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item img{
@@ -1598,8 +1612,6 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
-
-pointer-events:none !important;
 }
 
 .video-playlist{
@@ -1608,7 +1620,9 @@ max-height:calc(100dvh - 300px);
 
 min-height:70px;
 
-pointer-events:auto;
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item{
@@ -1643,7 +1657,9 @@ padding:6px;
 
 max-height:calc(100dvh - 300px);
 
-pointer-events:auto;
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item{
@@ -1651,6 +1667,10 @@ pointer-events:auto;
 min-height:42px;
 
 padding:5px;
+
+pointer-events:auto!important;
+
+touch-action:pan-y!important;
 }
 
 .video-song-item img{
@@ -3204,13 +3224,15 @@ document.getElementById(
 
 document.getElementById(
 "current"
-).textContent=
+)
+.textContent=
 format(current);
 
 
 document.getElementById(
 "duration"
-).textContent=
+)
+.textContent=
 format(duration);
 
 }
@@ -3491,8 +3513,9 @@ item.id=
 
 
 /*
-Song tap directly এখানেই handle হবে
+CLICK + TOUCH
 */
+
 item.addEventListener(
 "click",
 e=>{
@@ -3896,10 +3919,6 @@ catch(e){}
 
 function toggleDrawer(){
 
-/*
-Video open থাকলে right playlist খুলবে না।
-*/
-
 const popup=
 document.getElementById(
 "videoPopup"
@@ -3967,12 +3986,61 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================
-   EXTRA TOUCH SAFETY
+   IMPORTANT TOUCH FIX
    ========================= */
 
 /*
-Playlist-এর touch video বা player-এর কাছে
-যেতে দেবে না।
+ভিডিওর touch সম্পূর্ণ বন্ধ।
+*/
+
+const videoPopup=
+document.getElementById(
+"videoPopup"
+);
+
+videoPopup.addEventListener(
+"touchstart",
+e=>{
+
+e.preventDefault();
+
+e.stopPropagation();
+
+},
+{
+passive:false
+}
+);
+
+videoPopup.addEventListener(
+"touchmove",
+e=>{
+
+e.preventDefault();
+
+e.stopPropagation();
+
+},
+{
+passive:false
+});
+
+videoPopup.addEventListener(
+"touchend",
+e=>{
+
+e.preventDefault();
+
+e.stopPropagation();
+
+},
+{
+passive:false
+});
+
+
+/*
+Playlist-এর touch কখনো video-তে যাবে না।
 */
 
 const videoList=
@@ -3989,8 +4057,7 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-);
+});
 
 videoList.addEventListener(
 "touchmove",
@@ -4001,8 +4068,7 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-);
+});
 
 videoList.addEventListener(
 "touchend",
@@ -4013,12 +4079,11 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-);
+});
 
 
 /*
-Playlist container-এর touch safe
+Playlist container-এর touch safe।
 */
 
 const videoPlaylist=
@@ -4035,8 +4100,7 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-);
+});
 
 videoPlaylist.addEventListener(
 "touchmove",
@@ -4047,8 +4111,7 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-);
+});
 
 videoPlaylist.addEventListener(
 "touchend",
@@ -4059,9 +4122,7 @@ e.stopPropagation();
 },
 {
 passive:true
-}
-
-);
+});
 
 </script>
 
