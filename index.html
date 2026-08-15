@@ -223,8 +223,7 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
-   IMPORTANT:
-   NEVER receive touch.
+   NEVER receive touch
 ========================================================= */
 
 .video-overlay{
@@ -273,6 +272,8 @@ pointer-events:none;
 
 /* =========================================================
    VIDEO POPUP
+   POPUP ITSELF NEVER RECEIVES TOUCH
+   YOUTUBE IFRAME RECEIVES TOUCH
 ========================================================= */
 
 .video-popup{
@@ -317,7 +318,9 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
-pointer-events:auto;
+/* IMPORTANT:
+   Popup container itself does NOT receive touch */
+pointer-events:none!important;
 
 transform:scale(1);
 }
@@ -325,7 +328,7 @@ transform:scale(1);
 
 /* =========================================================
    YOUTUBE IFRAME
-   NEVER disable pointer-events
+   YOUTUBE ITSELF RECEIVES TOUCH
 ========================================================= */
 
 #yt{
@@ -1346,6 +1349,12 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:16px;
+
+pointer-events:none!important;
+}
+
+.video-popup.active{
+pointer-events:none!important;
 }
 
 .video-playlist{
@@ -1418,6 +1427,12 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
+
+pointer-events:none!important;
+}
+
+.video-popup.active{
+pointer-events:none!important;
 }
 
 .video-playlist{
@@ -1448,6 +1463,11 @@ height:40px;
 
 .video-section{
 width:96%;
+}
+
+.video-popup,
+.video-popup.active{
+pointer-events:none!important;
 }
 
 .video-playlist{
@@ -1484,7 +1504,8 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   VIDEO GETS 100% TOUCH CONTROL
+   POPUP DOES NOT RECEIVE TOUCH
+   YOUTUBE IFRAME DOES
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1524,7 +1545,8 @@ border:none!important;
 
 box-shadow:none!important;
 
-pointer-events:auto!important;
+/* IMPORTANT */
+pointer-events:none!important;
 
 z-index:1701!important;
 }
@@ -1539,6 +1561,8 @@ width:100%!important;
 height:100%!important;
 
 pointer-events:auto!important;
+
+touch-action:auto;
 
 z-index:1702!important;
 }
@@ -1595,7 +1619,8 @@ border:none!important;
 
 box-shadow:none!important;
 
-pointer-events:auto!important;
+/* IMPORTANT */
+pointer-events:none!important;
 
 z-index:1701!important;
 }
@@ -1609,6 +1634,8 @@ width:100%!important;
 height:100%!important;
 
 pointer-events:auto!important;
+
+touch-action:auto;
 
 z-index:1702!important;
 }
@@ -2270,7 +2297,7 @@ document.body.classList.remove(
 );
 
 iconSvg.innerHTML=
-'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1-1v-3.5l4 4v-11l-4 4z"/>';
+'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
 
@@ -3839,16 +3866,13 @@ adjustVideoPlaylistHeight,
 /*
 IMPORTANT:
 
-কোনো touchstart / touchmove / touchend
-listener playlist-এর উপর দেওয়া হয়নি।
-
-তাই:
-
-1. Playlist scroll = native
-2. Playlist tap = native click
-3. Video iframe = নিজের touch পাবে
-4. Rotate video = পুরো iframe touch পাবে
-5. Control = video overlay touch পাবে না
+1. Video popup container নিজে touch receive করবে না।
+2. YouTube iframe নিজের touch receive করবে।
+3. YouTube-এর play/pause/fullscreen/control কাজ করবে।
+4. Video playlist native scroll করবে।
+5. Playlist song tap করে song change হবে।
+6. কোনো touchstart/touchmove listener playlist-এর উপর দেওয়া হয়নি।
+7. Landscape mode-এও popup container touch নেবে না।
 */
 
 </script>
