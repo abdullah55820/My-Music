@@ -223,6 +223,7 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
+   PORTRAIT:
    NEVER RECEIVE TOUCH
 ========================================================= */
 
@@ -237,16 +238,12 @@ display:none;
 background:transparent;
 
 pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 .video-overlay.active{
 display:block;
 
 pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 
@@ -271,18 +268,16 @@ flex-direction:column;
 align-items:center;
 
 pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 
 /* =========================================================
    VIDEO POPUP
-   COMPLETELY NO TOUCH
+   PORTRAIT:
+   POPUP ITSELF CANNOT RECEIVE TOUCH
 ========================================================= */
 
-.video-popup,
-.video-popup.active{
+.video-popup{
 position:relative;
 
 width:100%;
@@ -309,7 +304,6 @@ visibility:hidden;
 
 /* IMPORTANT */
 pointer-events:none!important;
-touch-action:none!important;
 
 transform:scale(.92);
 
@@ -326,8 +320,9 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
+/* IMPORTANT:
+   portrait video cannot receive touch */
 pointer-events:none!important;
-touch-action:none!important;
 
 transform:scale(1);
 }
@@ -335,7 +330,8 @@ transform:scale(1);
 
 /* =========================================================
    YOUTUBE IFRAME
-   COMPLETELY NO TOUCH
+   PORTRAIT:
+   TOUCH OFF
 ========================================================= */
 
 #yt{
@@ -350,9 +346,9 @@ border:0;
 
 display:block;
 
-/* IMPORTANT:
-   YouTube iframe cannot receive ANY touch/click */
+/* IMPORTANT */
 pointer-events:none!important;
+
 touch-action:none!important;
 
 z-index:1702;
@@ -1347,14 +1343,9 @@ top:6%;
 width:94%;
 
 z-index:1700;
-
-pointer-events:none!important;
-
-touch-action:none!important;
 }
 
-.video-popup,
-.video-popup.active{
+.video-popup{
 width:100%;
 
 aspect-ratio:16 / 9;
@@ -1363,15 +1354,8 @@ height:auto;
 
 border-radius:16px;
 
+/* portrait touch OFF */
 pointer-events:none!important;
-
-touch-action:none!important;
-}
-
-#yt{
-pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 .video-playlist{
@@ -1440,21 +1424,12 @@ font-size:9px;
 top:3%;
 }
 
-.video-popup,
-.video-popup.active{
+.video-popup{
 aspect-ratio:16 / 9;
 
 height:auto;
 
 pointer-events:none!important;
-
-touch-action:none!important;
-}
-
-#yt{
-pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 .video-playlist{
@@ -1485,19 +1460,6 @@ height:40px;
 
 .video-section{
 width:96%;
-}
-
-.video-popup,
-.video-popup.active{
-pointer-events:none!important;
-
-touch-action:none!important;
-}
-
-#yt{
-pointer-events:none!important;
-
-touch-action:none!important;
 }
 
 .video-playlist{
@@ -1534,7 +1496,7 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   VIDEO POPUP ALSO COMPLETELY NO TOUCH
+   VIDEO GETS FULL TOUCH CONTROL
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1552,13 +1514,10 @@ display:block!important;
 
 pointer-events:none!important;
 
-touch-action:none!important;
-
 z-index:1700!important;
 }
 
-.video-popup.active,
-.video-popup{
+.video-popup.active{
 position:absolute!important;
 
 top:0!important;
@@ -1577,9 +1536,9 @@ border:none!important;
 
 box-shadow:none!important;
 
-/* IMPORTANT */
-pointer-events:none!important;
-touch-action:none!important;
+/* IMPORTANT:
+   landscape popup receives touch */
+pointer-events:auto!important;
 
 z-index:1701!important;
 }
@@ -1593,9 +1552,11 @@ left:0!important;
 width:100%!important;
 height:100%!important;
 
-/* IMPORTANT */
-pointer-events:none!important;
-touch-action:none!important;
+/* IMPORTANT:
+   landscape YouTube receives touch */
+pointer-events:auto!important;
+
+touch-action:auto!important;
 
 z-index:1702!important;
 }
@@ -1630,13 +1591,10 @@ height:100vh!important;
 
 pointer-events:none!important;
 
-touch-action:none!important;
-
 z-index:1700!important;
 }
 
-body.android-device.landscape-mode .video-popup.active,
-body.android-device.landscape-mode .video-popup{
+body.android-device.landscape-mode .video-popup.active{
 position:absolute!important;
 
 top:0!important;
@@ -1656,8 +1614,7 @@ border:none!important;
 box-shadow:none!important;
 
 /* IMPORTANT */
-pointer-events:none!important;
-touch-action:none!important;
+pointer-events:auto!important;
 
 z-index:1701!important;
 }
@@ -1671,8 +1628,9 @@ width:100%!important;
 height:100%!important;
 
 /* IMPORTANT */
-pointer-events:none!important;
-touch-action:none!important;
+pointer-events:auto!important;
+
+touch-action:auto!important;
 
 z-index:1702!important;
 }
@@ -1732,7 +1690,6 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 <!-- =====================================================
      VIDEO OVERLAY
-     NEVER TOUCH
 ===================================================== -->
 
 <div
@@ -3410,9 +3367,8 @@ item.id=
 
 
 /*
-IMPORTANT:
-Only the SONG ITEM handles click.
-Playlist itself remains scrollable.
+Only SONG ITEM handles click.
+Playlist container/list has no click handler.
 */
 
 item.addEventListener(
@@ -3896,95 +3852,32 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   FINAL VIDEO TOUCH FIX
+   FINAL TOUCH FIX
 ========================================================= */
 
 /*
-VIDEO POPUP:
+PORTRAIT:
 
-1. Video popup receives NO pointer events.
-2. YouTube iframe receives NO pointer events.
-3. YouTube iframe receives NO touch.
-4. Video controls cannot be touched.
-5. Video swipe cannot work.
-6. Video tap cannot work.
-7. Video playlist BELOW the video still works.
-8. Playlist scrolling still works.
-9. Playlist song tapping still works.
-10. Main player controls still work.
+1. video-popup = pointer-events:none
+2. #yt = pointer-events:none
+3. video-overlay = pointer-events:none
+4. video-playlist = pointer-events:auto
+5. video-song-list = native vertical scrolling
+6. video-song-item = click only
+
+LANDSCAPE:
+
+1. video-popup = pointer-events:auto
+2. #yt = pointer-events:auto
+3. #yt = touch-action:auto
+4. video playlist hidden
+5. YouTube iframe gets full touch control
+
+So:
+
+PORTRAIT  -> Video touch OFF
+LANDSCAPE -> Video touch ON
 */
-
-document.addEventListener(
-"touchstart",
-function(e){
-
-if(
-e.target.closest &&
-e.target.closest(
-"#videoPopup"
-)
-){
-
-e.preventDefault();
-
-e.stopPropagation();
-
-}
-
-},
-{
-passive:false,
-capture:true
-}
-);
-
-document.addEventListener(
-"touchmove",
-function(e){
-
-if(
-e.target.closest &&
-e.target.closest(
-"#videoPopup"
-)
-){
-
-e.preventDefault();
-
-e.stopPropagation();
-
-}
-
-},
-{
-passive:false,
-capture:true
-}
-);
-
-document.addEventListener(
-"touchend",
-function(e){
-
-if(
-e.target.closest &&
-e.target.closest(
-"#videoPopup"
-)
-){
-
-e.preventDefault();
-
-e.stopPropagation();
-
-}
-
-},
-{
-passive:false,
-capture:true
-}
-);
 
 </script>
 
