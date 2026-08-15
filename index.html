@@ -223,7 +223,7 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
-   NEVER receive touch
+   NEVER RECEIVE TOUCH
 ========================================================= */
 
 .video-overlay{
@@ -237,12 +237,16 @@ display:none;
 background:transparent;
 
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 .video-overlay.active{
 display:block;
 
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 
@@ -266,17 +270,19 @@ display:flex;
 flex-direction:column;
 align-items:center;
 
-pointer-events:none;
+pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 
 /* =========================================================
    VIDEO POPUP
-   POPUP ITSELF NEVER RECEIVES TOUCH
-   YOUTUBE IFRAME RECEIVES TOUCH
+   COMPLETELY NO TOUCH
 ========================================================= */
 
-.video-popup{
+.video-popup,
+.video-popup.active{
 position:relative;
 
 width:100%;
@@ -301,7 +307,9 @@ box-shadow:
 opacity:0;
 visibility:hidden;
 
-pointer-events:none;
+/* IMPORTANT */
+pointer-events:none!important;
+touch-action:none!important;
 
 transform:scale(.92);
 
@@ -318,9 +326,8 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
-/* IMPORTANT:
-   Popup container itself does NOT receive touch */
 pointer-events:none!important;
+touch-action:none!important;
 
 transform:scale(1);
 }
@@ -328,7 +335,7 @@ transform:scale(1);
 
 /* =========================================================
    YOUTUBE IFRAME
-   YOUTUBE ITSELF RECEIVES TOUCH
+   COMPLETELY NO TOUCH
 ========================================================= */
 
 #yt{
@@ -343,9 +350,10 @@ border:0;
 
 display:block;
 
-pointer-events:auto!important;
-
-touch-action:auto;
+/* IMPORTANT:
+   YouTube iframe cannot receive ANY touch/click */
+pointer-events:none!important;
+touch-action:none!important;
 
 z-index:1702;
 }
@@ -1339,9 +1347,14 @@ top:6%;
 width:94%;
 
 z-index:1700;
+
+pointer-events:none!important;
+
+touch-action:none!important;
 }
 
-.video-popup{
+.video-popup,
+.video-popup.active{
 width:100%;
 
 aspect-ratio:16 / 9;
@@ -1351,10 +1364,14 @@ height:auto;
 border-radius:16px;
 
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
-.video-popup.active{
+#yt{
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 .video-playlist{
@@ -1423,16 +1440,21 @@ font-size:9px;
 top:3%;
 }
 
-.video-popup{
+.video-popup,
+.video-popup.active{
 aspect-ratio:16 / 9;
 
 height:auto;
 
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
-.video-popup.active{
+#yt{
 pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 .video-playlist{
@@ -1468,6 +1490,14 @@ width:96%;
 .video-popup,
 .video-popup.active{
 pointer-events:none!important;
+
+touch-action:none!important;
+}
+
+#yt{
+pointer-events:none!important;
+
+touch-action:none!important;
 }
 
 .video-playlist{
@@ -1504,8 +1534,7 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   POPUP DOES NOT RECEIVE TOUCH
-   YOUTUBE IFRAME DOES
+   VIDEO POPUP ALSO COMPLETELY NO TOUCH
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1523,10 +1552,13 @@ display:block!important;
 
 pointer-events:none!important;
 
+touch-action:none!important;
+
 z-index:1700!important;
 }
 
-.video-popup.active{
+.video-popup.active,
+.video-popup{
 position:absolute!important;
 
 top:0!important;
@@ -1547,6 +1579,7 @@ box-shadow:none!important;
 
 /* IMPORTANT */
 pointer-events:none!important;
+touch-action:none!important;
 
 z-index:1701!important;
 }
@@ -1560,9 +1593,9 @@ left:0!important;
 width:100%!important;
 height:100%!important;
 
-pointer-events:auto!important;
-
-touch-action:auto;
+/* IMPORTANT */
+pointer-events:none!important;
+touch-action:none!important;
 
 z-index:1702!important;
 }
@@ -1597,10 +1630,13 @@ height:100vh!important;
 
 pointer-events:none!important;
 
+touch-action:none!important;
+
 z-index:1700!important;
 }
 
-body.android-device.landscape-mode .video-popup.active{
+body.android-device.landscape-mode .video-popup.active,
+body.android-device.landscape-mode .video-popup{
 position:absolute!important;
 
 top:0!important;
@@ -1621,6 +1657,7 @@ box-shadow:none!important;
 
 /* IMPORTANT */
 pointer-events:none!important;
+touch-action:none!important;
 
 z-index:1701!important;
 }
@@ -1633,9 +1670,9 @@ inset:0!important;
 width:100%!important;
 height:100%!important;
 
-pointer-events:auto!important;
-
-touch-action:auto;
+/* IMPORTANT */
+pointer-events:none!important;
+touch-action:none!important;
 
 z-index:1702!important;
 }
@@ -3375,8 +3412,7 @@ item.id=
 /*
 IMPORTANT:
 Only the SONG ITEM handles click.
-No touch event is attached to the
-playlist container or song list.
+Playlist itself remains scrollable.
 */
 
 item.addEventListener(
@@ -3860,20 +3896,95 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   FINAL TOUCH FIX
+   FINAL VIDEO TOUCH FIX
 ========================================================= */
 
 /*
-IMPORTANT:
+VIDEO POPUP:
 
-1. Video popup container নিজে touch receive করবে না।
-2. YouTube iframe নিজের touch receive করবে।
-3. YouTube-এর play/pause/fullscreen/control কাজ করবে।
-4. Video playlist native scroll করবে।
-5. Playlist song tap করে song change হবে।
-6. কোনো touchstart/touchmove listener playlist-এর উপর দেওয়া হয়নি।
-7. Landscape mode-এও popup container touch নেবে না।
+1. Video popup receives NO pointer events.
+2. YouTube iframe receives NO pointer events.
+3. YouTube iframe receives NO touch.
+4. Video controls cannot be touched.
+5. Video swipe cannot work.
+6. Video tap cannot work.
+7. Video playlist BELOW the video still works.
+8. Playlist scrolling still works.
+9. Playlist song tapping still works.
+10. Main player controls still work.
 */
+
+document.addEventListener(
+"touchstart",
+function(e){
+
+if(
+e.target.closest &&
+e.target.closest(
+"#videoPopup"
+)
+){
+
+e.preventDefault();
+
+e.stopPropagation();
+
+}
+
+},
+{
+passive:false,
+capture:true
+}
+);
+
+document.addEventListener(
+"touchmove",
+function(e){
+
+if(
+e.target.closest &&
+e.target.closest(
+"#videoPopup"
+)
+){
+
+e.preventDefault();
+
+e.stopPropagation();
+
+}
+
+},
+{
+passive:false,
+capture:true
+}
+);
+
+document.addEventListener(
+"touchend",
+function(e){
+
+if(
+e.target.closest &&
+e.target.closest(
+"#videoPopup"
+)
+){
+
+e.preventDefault();
+
+e.stopPropagation();
+
+}
+
+},
+{
+passive:false,
+capture:true
+}
+);
 
 </script>
 
