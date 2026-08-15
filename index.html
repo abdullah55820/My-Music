@@ -223,8 +223,6 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
-   PORTRAIT:
-   NEVER RECEIVE TOUCH
 ========================================================= */
 
 .video-overlay{
@@ -273,8 +271,6 @@ pointer-events:none!important;
 
 /* =========================================================
    VIDEO POPUP
-   PORTRAIT:
-   POPUP ITSELF CANNOT RECEIVE TOUCH
 ========================================================= */
 
 .video-popup{
@@ -302,7 +298,6 @@ box-shadow:
 opacity:0;
 visibility:hidden;
 
-/* IMPORTANT */
 pointer-events:none!important;
 
 transform:scale(.92);
@@ -320,8 +315,6 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
-/* IMPORTANT:
-   portrait video cannot receive touch */
 pointer-events:none!important;
 
 transform:scale(1);
@@ -330,8 +323,6 @@ transform:scale(1);
 
 /* =========================================================
    YOUTUBE IFRAME
-   PORTRAIT:
-   TOUCH OFF
 ========================================================= */
 
 #yt{
@@ -346,7 +337,6 @@ border:0;
 
 display:block;
 
-/* IMPORTANT */
 pointer-events:none!important;
 
 touch-action:none!important;
@@ -1334,9 +1324,6 @@ padding:4px 9px;
 width:180px;
 }
 
-
-/* VIDEO */
-
 .video-section{
 top:6%;
 
@@ -1354,7 +1341,6 @@ height:auto;
 
 border-radius:16px;
 
-/* portrait touch OFF */
 pointer-events:none!important;
 }
 
@@ -1496,7 +1482,6 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   VIDEO GETS FULL TOUCH CONTROL
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1536,8 +1521,6 @@ border:none!important;
 
 box-shadow:none!important;
 
-/* IMPORTANT:
-   landscape popup receives touch */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1552,8 +1535,6 @@ left:0!important;
 width:100%!important;
 height:100%!important;
 
-/* IMPORTANT:
-   landscape YouTube receives touch */
 pointer-events:auto!important;
 
 touch-action:auto!important;
@@ -1613,7 +1594,6 @@ border:none!important;
 
 box-shadow:none!important;
 
-/* IMPORTANT */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1627,7 +1607,6 @@ inset:0!important;
 width:100%!important;
 height:100%!important;
 
-/* IMPORTANT */
 pointer-events:auto!important;
 
 touch-action:auto!important;
@@ -1649,9 +1628,7 @@ display:none!important;
 <div class="bg"></div>
 
 
-<!-- =====================================================
-     TOP WIDGETS
-===================================================== -->
+<!-- TOP WIDGETS -->
 
 <div class="top-widgets">
 
@@ -1688,9 +1665,7 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 </div>
 
 
-<!-- =====================================================
-     VIDEO OVERLAY
-===================================================== -->
+<!-- VIDEO OVERLAY -->
 
 <div
 id="videoOverlay"
@@ -1698,9 +1673,7 @@ class="video-overlay">
 </div>
 
 
-<!-- =====================================================
-     VIDEO SECTION
-===================================================== -->
+<!-- VIDEO SECTION -->
 
 <div
 class="video-section"
@@ -1717,9 +1690,7 @@ class="video-popup"
 </div>
 
 
-<!-- =====================================================
-     VIDEO PLAYLIST
-===================================================== -->
+<!-- VIDEO PLAYLIST -->
 
 <div
 id="videoPlaylist"
@@ -1754,9 +1725,7 @@ Loading...
 </div>
 
 
-<!-- =====================================================
-     OLD DRAWER
-===================================================== -->
+<!-- OLD DRAWER -->
 
 <div
 class="drawer-overlay"
@@ -1808,9 +1777,7 @@ Loading...
 </div>
 
 
-<!-- =====================================================
-     MAIN APP
-===================================================== -->
+<!-- MAIN APP -->
 
 <div class="app">
 
@@ -1976,7 +1943,30 @@ let player=null;
 
 let playing=false;
 
+
+/* =========================================================
+   ORIGINAL PLAYLIST
+========================================================= */
+
 let playlistItems=[];
+
+
+/* =========================================================
+   NEW SORTED PLAYLIST
+========================================================= */
+
+let sortedPlaylistItems=[];
+
+let sortedPlaylistData=[];
+
+let currentSortedIndex=0;
+
+let sortingReady=false;
+
+
+/* =========================================================
+   OTHER VARIABLES
+========================================================= */
 
 let volTimer=null;
 
@@ -1989,6 +1979,8 @@ let swipeStartY=0;
 let swipeActive=false;
 
 let swipeFromSeek=false;
+
+let changingTrack=false;
 
 
 const isAndroidDevice=
@@ -2147,19 +2139,30 @@ cover.classList.add(
 
 updateInfo();
 
-if(
-playlistItems.length===0
-){
-
-loadPlaylistItems();
-
-}
-
 }
 
 else if(
 
-e.data===YT.PlayerState.PAUSED ||
+e.data===YT.PlayerState.PAUSED
+
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
+}
+
+else if(
 
 e.data===YT.PlayerState.ENDED
 
@@ -2177,6 +2180,28 @@ playIcon.innerHTML=
 cover.classList.remove(
 "spinning"
 );
+
+
+/*
+IMPORTANT:
+
+YouTube-এর original playlist order
+follow না করে আমাদের A-Z order-এর
+পরের song play হবে।
+*/
+
+if(!changingTrack){
+
+setTimeout(
+()=>{
+
+nextSong();
+
+},
+100
+);
+
+}
 
 }
 
@@ -2200,7 +2225,34 @@ player.pauseVideo();
 }
 else{
 
+if(
+sortedPlaylistItems.length>0 &&
+sortingReady
+){
+
+const currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+if(!currentId){
+
+player.loadVideoById(
+sortedPlaylistItems[currentSortedIndex]
+);
+
+}
+else{
+
 player.playVideo();
+
+}
+
+}
+else{
+
+player.playVideo();
+
+}
 
 }
 
@@ -2602,75 +2654,145 @@ resetVolTimer();
 
 
 /* =========================================================
-   NEXT
+   NEXT SONG - A-Z
 ========================================================= */
 
 function nextSong(){
 
 if(
 !player ||
-playlistItems.length===0
+sortedPlaylistItems.length===0
 )
 return;
 
 
-const current=
-player.getPlaylistIndex();
+let currentId="";
 
-const next=
-(current+1)%
-playlistItems.length;
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
 
 
-forceUpdateUI(next);
+/*
+Current video-এর sorted index বের করা
+*/
 
-player.nextVideo();
+if(currentId){
+
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+
+/*
+A-Z-এর পরের song
+*/
+
+const nextIndex=
+(currentSortedIndex+1)%
+sortedPlaylistItems.length;
+
+
+currentSortedIndex=
+nextIndex;
+
+
+playSpecificTrack(
+nextIndex
+);
 
 }
 
 
 /* =========================================================
-   PREVIOUS
+   PREVIOUS SONG - A-Z
 ========================================================= */
 
 function previousSong(){
 
 if(
 !player ||
-playlistItems.length===0
+sortedPlaylistItems.length===0
 )
 return;
 
 
-const current=
-player.getPlaylistIndex();
+let currentId="";
 
-const previous=
-(current-1+
-playlistItems.length)%
-playlistItems.length;
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
 
 
-forceUpdateUI(previous);
+if(currentId){
 
-player.previousVideo();
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+
+const previousIndex=
+(currentSortedIndex-1+
+sortedPlaylistItems.length)%
+sortedPlaylistItems.length;
+
+
+currentSortedIndex=
+previousIndex;
+
+
+playSpecificTrack(
+previousIndex
+);
 
 }
 
 
 /* =========================================================
-   FORCE UPDATE
+   FORCE UPDATE UI
 ========================================================= */
 
 function forceUpdateUI(index){
 
-if(!playlistItems[index])
+if(
+!sortedPlaylistData[index]
+)
 return;
 
 
-const id=
-playlistItems[index];
+const data=
+sortedPlaylistData[index];
 
+const id=
+data.id;
 
 document.getElementById(
 "cover"
@@ -2678,35 +2800,20 @@ document.getElementById(
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 
-const title=
-document.getElementById(
-`title-${index}`
-);
-
-const artist=
-document.getElementById(
-`artist-${index}`
-);
-
-
-if(title){
-
 document.getElementById(
 "title"
 ).textContent=
-title.textContent;
+data.title || "YouTube Music";
 
-}
-
-
-if(artist){
 
 document.getElementById(
 "artist"
 ).textContent=
-artist.textContent;
+data.artist || "YouTube Music";
 
-}
+
+currentSortedIndex=
+index;
 
 
 highlightActiveTrack();
@@ -3120,7 +3227,7 @@ s%60
 
 
 /* =========================================================
-   LOAD PLAYLIST
+   LOAD ORIGINAL PLAYLIST
 ========================================================= */
 
 function loadPlaylistItems(){
@@ -3133,19 +3240,13 @@ typeof player.getPlaylist!==
 return;
 
 
-playlistItems=
+const ids=
 player.getPlaylist();
 
 
-const list=
-document.getElementById(
-"songList"
-);
-
-
 if(
-!playlistItems ||
-playlistItems.length===0
+!ids ||
+ids.length===0
 ){
 
 setTimeout(
@@ -3158,11 +3259,204 @@ return;
 }
 
 
+playlistItems=
+ids;
+
+
+/*
+আগের data reset
+*/
+
+sortedPlaylistItems=[];
+
+sortedPlaylistData=[];
+
+sortingReady=false;
+
+
+/*
+প্রথমে সব video-এর title fetch করি।
+সব title পাওয়া গেলে A-Z sort হবে।
+*/
+
+const requests=
+playlistItems.map(
+(id,index)=>{
+
+return fetch(
+`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
+)
+
+.then(
+r=>r.json()
+)
+
+.then(
+data=>{
+
+return {
+
+id:id,
+
+title:
+(data && data.title)
+?
+data.title
+:
+`Track #${index+1}`,
+
+artist:
+(data && data.author_name)
+?
+data.author_name
+:
+"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+)
+
+.catch(
+()=>{
+
+return {
+
+id:id,
+
+title:`Track #${index+1}`,
+
+artist:"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+);
+
+});
+
+
+Promise.all(requests)
+.then(
+results=>{
+
+/*
+=========================================================
+ A-Z SORT
+=========================================================
+*/
+
+results.sort(
+(a,b)=>{
+
+return a.title.localeCompare(
+b.title,
+undefined,
+{
+numeric:true,
+sensitivity:"base"
+}
+);
+
+});
+
+
+sortedPlaylistData=
+results;
+
+sortedPlaylistItems=
+results.map(
+item=>item.id
+);
+
+sortingReady=true;
+
+
+/*
+প্রথম song
+*/
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+
+if(currentId){
+
+const currentIndex=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(currentIndex!==-1){
+
+currentSortedIndex=
+currentIndex;
+
+}
+
+}
+
+
+/*
+UI বানানো
+*/
+
+renderSortedPlaylists();
+
+highlightActiveTrack();
+
+highlightVideoActiveTrack();
+
+updateInfo();
+
+}
+);
+
+}
+
+
+/* =========================================================
+   RENDER SORTED PLAYLISTS
+========================================================= */
+
+function renderSortedPlaylists(){
+
+renderMainPlaylist();
+
+renderVideoPlaylist();
+
+}
+
+
+/* =========================================================
+   MAIN DRAWER SORTED PLAYLIST
+========================================================= */
+
+function renderMainPlaylist(){
+
+const list=
+document.getElementById(
+"songList"
+);
+
+
 list.innerHTML="";
 
 
-playlistItems.forEach(
-(id,index)=>{
+sortedPlaylistData.forEach(
+(data,index)=>{
 
 const item=
 document.createElement(
@@ -3190,7 +3484,7 @@ index
 item.innerHTML=`
 
 <img
-src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
+src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
 alt="thumb"
 >
 
@@ -3200,14 +3494,14 @@ alt="thumb"
 class="song-item-title"
 id="title-${index}"
 >
-Track #${index+1}
+${escapeHtml(data.title)}
 </div>
 
 <div
 class="song-item-artist"
 id="artist-${index}"
 >
-YouTube Music
+${escapeHtml(data.artist)}
 </div>
 
 </div>
@@ -3217,105 +3511,16 @@ YouTube Music
 
 list.appendChild(item);
 
-
-fetchSongDetails(
-id,
-index
-);
-
 });
 
-
-loadVideoPlaylist();
-
-highlightActiveTrack();
-
-highlightVideoActiveTrack();
-
-updateInfo();
-
 }
 
 
 /* =========================================================
-   FETCH DETAILS
+   VIDEO PLAYLIST SORTED
 ========================================================= */
 
-function fetchSongDetails(
-id,
-index
-){
-
-fetch(
-`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
-)
-
-.then(
-r=>r.json()
-)
-
-.then(
-data=>{
-
-if(!data)
-return;
-
-
-const title=
-document.getElementById(
-`title-${index}`
-);
-
-
-const artist=
-document.getElementById(
-`artist-${index}`
-);
-
-
-if(
-title &&
-data.title
-){
-
-title.textContent=
-data.title;
-
-}
-
-
-if(
-artist &&
-data.author_name
-){
-
-artist.textContent=
-data.author_name;
-
-}
-
-
-updateVideoSongDetails(
-index,
-data.title,
-data.author_name
-);
-
-}
-)
-
-.catch(
-()=>{}
-);
-
-}
-
-
-/* =========================================================
-   VIDEO PLAYLIST
-========================================================= */
-
-function loadVideoPlaylist(){
+function renderVideoPlaylist(){
 
 const list=
 document.getElementById(
@@ -3324,8 +3529,8 @@ document.getElementById(
 
 
 if(
-!playlistItems ||
-playlistItems.length===0
+!sortedPlaylistData ||
+sortedPlaylistData.length===0
 ){
 
 list.innerHTML=`
@@ -3349,8 +3554,8 @@ return;
 list.innerHTML="";
 
 
-playlistItems.forEach(
-(id,index)=>{
+sortedPlaylistData.forEach(
+(data,index)=>{
 
 const item=
 document.createElement(
@@ -3365,11 +3570,6 @@ item.className=
 item.id=
 `video-track-${index}`;
 
-
-/*
-Only SONG ITEM handles click.
-Playlist container/list has no click handler.
-*/
 
 item.addEventListener(
 "click",
@@ -3393,7 +3593,7 @@ passive:false
 item.innerHTML=`
 
 <img
-src="https://i.ytimg.com/vi/${id}/hqdefault.jpg"
+src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
 alt="thumb"
 draggable="false"
 >
@@ -3404,14 +3604,14 @@ draggable="false"
 class="video-song-title"
 id="video-title-${index}"
 >
-Track #${index+1}
+${escapeHtml(data.title)}
 </div>
 
 <div
 class="video-song-artist"
 id="video-artist-${index}"
 >
-YouTube Music
+${escapeHtml(data.artist)}
 </div>
 
 </div>
@@ -3420,12 +3620,6 @@ YouTube Music
 
 
 list.appendChild(item);
-
-
-fetchVideoSongDetails(
-id,
-index
-);
 
 });
 
@@ -3441,177 +3635,99 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   VIDEO SONG DETAILS
+   ESCAPE HTML
 ========================================================= */
 
-function fetchVideoSongDetails(
-id,
-index
-){
+function escapeHtml(text){
 
-fetch(
-`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
-)
+if(!text)
+return "";
 
-.then(
-r=>r.json()
-)
-
-.then(
-data=>{
-
-if(!data)
-return;
-
-
-const title=
-document.getElementById(
-`video-title-${index}`
+const div=
+document.createElement(
+"div"
 );
 
+div.textContent=
+text;
 
-const artist=
-document.getElementById(
-`video-artist-${index}`
-);
-
-
-if(
-title &&
-data.title
-){
-
-title.textContent=
-data.title;
-
-}
-
-
-if(
-artist &&
-data.author_name
-){
-
-artist.textContent=
-data.author_name;
-
-}
-
-}
-)
-
-.catch(
-()=>{}
-);
-
-}
-
-
-/* =========================================================
-   UPDATE VIDEO DETAILS
-========================================================= */
-
-function updateVideoSongDetails(
-index,
-titleText,
-artistText
-){
-
-const title=
-document.getElementById(
-`video-title-${index}`
-);
-
-const artist=
-document.getElementById(
-`video-artist-${index}`
-);
-
-
-if(
-title &&
-titleText
-){
-
-title.textContent=
-titleText;
-
-}
-
-
-if(
-artist &&
-artistText
-){
-
-artist.textContent=
-artistText;
-
-}
-
-}
-
-
-/* =========================================================
-   VIDEO ACTIVE SONG
-========================================================= */
-
-function highlightVideoActiveTrack(){
-
-if(
-!player ||
-typeof player.getPlaylistIndex!==
-"function"
-)
-return;
-
-
-const current=
-player.getPlaylistIndex();
-
-
-document
-.querySelectorAll(
-".video-song-item"
-)
-.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-index===current
-);
-
-});
+return div.innerHTML;
 
 }
 
 
 /* =========================================================
    PLAY SPECIFIC TRACK
+   A-Z ORDER
 ========================================================= */
 
 function playSpecificTrack(
 index
 ){
 
-if(!player)
+if(
+!player ||
+!sortedPlaylistData[index]
+)
 return;
 
+
+const data=
+sortedPlaylistData[index];
+
+const id=
+data.id;
+
+
+/*
+Current sorted index
+*/
+
+currentSortedIndex=
+index;
+
+
+/*
+UI আগে update
+*/
 
 forceUpdateUI(index);
 
 
+/*
+YouTube original playlist order বাদ দিয়ে
+direct video ID load করছি।
+
+তাই A-Z order-ই follow করবে।
+*/
+
+changingTrack=true;
+
+
 try{
 
-player.playVideoAt(index);
+player.loadVideoById(
+id
+);
 
 }
 catch(e){
 
+changingTrack=false;
+
 return;
 
 }
+
+
+setTimeout(
+()=>{
+
+changingTrack=false;
+
+},
+700
+);
 
 
 /* OLD DRAWER CLOSE */
@@ -3674,21 +3790,28 @@ highlightVideoActiveTrack();
 
 
 /* =========================================================
-   OLD DRAWER ACTIVE
+   ACTIVE MAIN TRACK
 ========================================================= */
 
 function highlightActiveTrack(){
 
 if(
 !player ||
-typeof player.getPlaylistIndex!==
-"function"
+sortedPlaylistItems.length===0
 )
 return;
 
 
-const current=
-player.getPlaylistIndex();
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
 
 
 document
@@ -3700,7 +3823,49 @@ document
 
 item.classList.toggle(
 "active",
-index===current
+sortedPlaylistItems[index]===currentId
+);
+
+});
+
+}
+
+
+/* =========================================================
+   ACTIVE VIDEO TRACK
+========================================================= */
+
+function highlightVideoActiveTrack(){
+
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
+
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+
+document
+.querySelectorAll(
+".video-song-item"
+)
+.forEach(
+(item,index)=>{
+
+item.classList.toggle(
+"active",
+sortedPlaylistItems[index]===currentId
 );
 
 });
@@ -3757,6 +3922,23 @@ document.getElementById(
 "artist"
 ).textContent=
 d.author;
+
+}
+
+
+/*
+Current video-এর A-Z index
+*/
+
+const sortedIndex=
+sortedPlaylistItems.indexOf(
+d.video_id
+);
+
+if(sortedIndex!==-1){
+
+currentSortedIndex=
+sortedIndex;
 
 }
 
@@ -3825,7 +4007,7 @@ opening
 
 if(
 opening &&
-playlistItems.length===0
+!sortingReady
 ){
 
 loadPlaylistItems();
@@ -3849,35 +4031,6 @@ setTimeout(
 adjustVideoPlaylistHeight,
 600
 );
-
-
-/* =========================================================
-   FINAL TOUCH FIX
-========================================================= */
-
-/*
-PORTRAIT:
-
-1. video-popup = pointer-events:none
-2. #yt = pointer-events:none
-3. video-overlay = pointer-events:none
-4. video-playlist = pointer-events:auto
-5. video-song-list = native vertical scrolling
-6. video-song-item = click only
-
-LANDSCAPE:
-
-1. video-popup = pointer-events:auto
-2. #yt = pointer-events:auto
-3. #yt = touch-action:auto
-4. video playlist hidden
-5. YouTube iframe gets full touch control
-
-So:
-
-PORTRAIT  -> Video touch OFF
-LANDSCAPE -> Video touch ON
-*/
 
 </script>
 
