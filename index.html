@@ -212,21 +212,25 @@ inset:0;
 
 z-index:1499;
 
-background:rgba(0,0,0,.4);
+/*
+IMPORTANT:
+Transparent রাখলাম যাতে video popup
+open করলে নিচের control কালো না হয়ে যায়।
+*/
+
+background:transparent!important;
 
 display:none;
 
-/*
-IMPORTANT:
-Overlay কখনো touch block করবে না
-*/
-pointer-events:none !important;
+pointer-events:none!important;
 }
 
 .video-overlay.active{
 display:block;
 
-pointer-events:none !important;
+background:transparent!important;
+
+pointer-events:none!important;
 }
 
 
@@ -305,14 +309,9 @@ opacity:1;
 
 visibility:visible;
 
-/*
-VIDEO POPUP MUST RECEIVE TOUCH
-*/
 pointer-events:auto;
 
 transform:scale(1);
-
-touch-action:auto;
 }
 
 #yt{
@@ -324,13 +323,7 @@ border:none;
 
 display:block;
 
-/*
-IMPORTANT:
-YouTube iframe touch enabled
-*/
-pointer-events:auto !important;
-
-touch-action:auto !important;
+pointer-events:auto;
 }
 
 
@@ -342,11 +335,8 @@ touch-action:auto !important;
 
 width:100%;
 
-/*
-VIDEO → PLAYLIST:
-আরও কম gap
-*/
-margin-top:2px;
+/* VIDEO → PLAYLIST GAP VERY SMALL */
+margin-top:1px;
 
 max-height:calc(100dvh - 410px);
 
@@ -387,6 +377,11 @@ overscroll-behavior:contain;
 position:relative;
 
 z-index:1705;
+
+/*
+Playlist itself must not block the video.
+Only its song list receives touch.
+*/
 }
 
 .video-playlist.active{
@@ -459,6 +454,10 @@ overscroll-behavior:contain;
 scrollbar-width:thin;
 
 pointer-events:auto;
+
+position:relative;
+
+z-index:1706;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -481,14 +480,12 @@ display:flex;
 
 align-items:center;
 
-gap:8px;
+gap:9px;
 
 width:100%;
 
-/*
-SONG একটু বড়
-*/
-min-height:52px;
+/* SONG ITEMS SLIGHTLY BIGGER */
+min-height:54px;
 
 padding:7px 8px;
 
@@ -500,7 +497,7 @@ border:1px solid rgba(255,255,255,.08);
 
 cursor:pointer;
 
-touch-action:manipulation;
+touch-action:pan-y;
 
 -webkit-tap-highlight-color:transparent;
 
@@ -512,6 +509,10 @@ border-color .2s ease;
 flex-shrink:0;
 
 pointer-events:auto;
+
+position:relative;
+
+z-index:1707;
 }
 
 .video-song-item:active{
@@ -536,16 +537,18 @@ display:none;
 
 .video-song-item img{
 
-width:43px;
-height:43px;
+width:44px;
+height:44px;
 
-border-radius:7px;
+border-radius:8px;
 
 object-fit:cover;
 
 flex-shrink:0;
 
 pointer-events:none;
+
+-webkit-user-drag:none;
 }
 
 
@@ -595,14 +598,8 @@ margin-top:2px;
    APP TOUCH LAYER FIX
    ========================= */
 
-/*
-IMPORTANT:
-Video popup open হলেও main control
-video overlay-এর নিচে যাবে না।
-*/
-
 body.popup-active .app{
-z-index:1800;
+z-index:1400;
 }
 
 
@@ -624,9 +621,6 @@ height:100vh !important;
 
 display:block !important;
 
-/*
-SECTION itself doesn't catch touch
-*/
 pointer-events:none !important;
 
 z-index:1700 !important;
@@ -650,20 +644,14 @@ border:none !important;
 
 box-shadow:none !important;
 
-/*
-CRITICAL:
-Rotate করার পর YouTube touch enabled
-*/
 pointer-events:auto !important;
 
-touch-action:auto !important;
+z-index:1701 !important;
 }
 
 #yt{
 
 pointer-events:auto !important;
-
-touch-action:auto !important;
 }
 
 .video-playlist{
@@ -721,14 +709,12 @@ box-shadow:none !important;
 
 pointer-events:auto !important;
 
-touch-action:auto !important;
+z-index:1701 !important;
 }
 
 body.android-device.landscape-mode #yt{
 
 pointer-events:auto !important;
-
-touch-action:auto !important;
 }
 
 body.android-device.landscape-mode .video-playlist{
@@ -1530,10 +1516,12 @@ border-radius:16px;
 
 /*
 Mobile video → playlist gap
+VERY SMALL
 */
+
 .video-playlist{
 
-margin-top:2px;
+margin-top:1px;
 
 max-height:calc(100dvh - 350px);
 
@@ -1544,6 +1532,8 @@ padding:7px;
 border-radius:14px;
 
 pointer-events:auto;
+
+touch-action:pan-y;
 }
 
 .video-song-list{
@@ -1551,23 +1541,32 @@ pointer-events:auto;
 height:calc(100% - 27px);
 
 pointer-events:auto;
+
+touch-action:pan-y;
+
+overflow-y:auto;
+
+-webkit-overflow-scrolling:touch;
 }
 
 .video-song-item{
 
-min-height:50px;
+/* BIGGER SONG */
+min-height:52px;
 
 padding:6px 7px;
 
-gap:7px;
+gap:8px;
 
 pointer-events:auto;
+
+touch-action:pan-y;
 }
 
 .video-song-item img{
 
-width:41px;
-height:41px;
+width:42px;
+height:42px;
 }
 
 .video-song-title{
@@ -1603,17 +1602,19 @@ height:auto;
 max-height:calc(100dvh - 300px);
 
 min-height:70px;
+
+margin-top:1px;
 }
 
 .video-song-item{
 
-min-height:46px;
+min-height:48px;
 }
 
 .video-song-item img{
 
-width:39px;
-height:39px;
+width:40px;
+height:40px;
 }
 
 }
@@ -1631,7 +1632,7 @@ width:96%;
 
 .video-playlist{
 
-margin-top:2px;
+margin-top:1px;
 
 padding:6px;
 
@@ -1640,15 +1641,17 @@ max-height:calc(100dvh - 300px);
 
 .video-song-item{
 
-min-height:46px;
+min-height:48px;
 
-padding:5px;
+padding:5px 6px;
+
+gap:7px;
 }
 
 .video-song-item img{
 
-width:38px;
-height:38px;
+width:39px;
+height:39px;
 }
 
 .video-song-title{
@@ -2312,12 +2315,11 @@ const playerRect=
 playerCard.getBoundingClientRect();
 
 const top=
-popupRect.bottom+2;
-
+popupRect.bottom+1;
 
 /*
-PLAYLIST → CONTROL GAP
-আগের মতো 20px
+Playlist → control gap
+kept small but enough to avoid overlap.
 */
 
 const bottom=
@@ -3768,6 +3770,12 @@ adjustVideoPlaylistHeight,
    EXTRA TOUCH SAFETY
    ========================= */
 
+/*
+IMPORTANT:
+এখানে preventDefault নেই।
+তাই Playlist-এর native vertical scroll বন্ধ হবে না।
+*/
+
 const videoList=
 document.getElementById(
 "videoSongList"
@@ -3810,6 +3818,11 @@ passive:true
 );
 
 
+/*
+Playlist container-ও video iframe-এর touch
+নষ্ট করবে না।
+*/
+
 const videoPlaylist=
 document.getElementById(
 "videoPlaylist"
@@ -3840,57 +3853,6 @@ passive:true
 );
 
 videoPlaylist.addEventListener(
-"touchend",
-e=>{
-
-e.stopPropagation();
-
-},
-{
-passive:true
-}
-);
-
-
-/* =========================
-   FINAL VIDEO TOUCH SAFETY
-   ========================= */
-
-/*
-Rotate হওয়ার পরেও YouTube video যেন
-নিজের touch controls পায়।
-*/
-
-const videoPopup=
-document.getElementById(
-"videoPopup"
-);
-
-videoPopup.addEventListener(
-"touchstart",
-e=>{
-
-e.stopPropagation();
-
-},
-{
-passive:true
-}
-);
-
-videoPopup.addEventListener(
-"touchmove",
-e=>{
-
-e.stopPropagation();
-
-},
-{
-passive:true
-}
-);
-
-videoPopup.addEventListener(
 "touchend",
 e=>{
 
