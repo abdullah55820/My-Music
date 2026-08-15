@@ -580,12 +580,13 @@ margin-top:2px;
 
 /* =========================================================
    APP
+   FIX: APP ABOVE VIDEO LAYER BUT DOES NOT BLOCK PLAYLIST
 ========================================================= */
 
 .app{
 position:relative;
 
-z-index:1600;
+z-index:3000;
 
 height:100dvh;
 
@@ -599,12 +600,13 @@ justify-content:center;
 
 padding:0 16px 65px;
 
-pointer-events:auto;
+pointer-events:none;
 }
 
 
 /* =========================================================
    MUSIC PLAYER
+   FIX: PLAYER CONTROLS ALWAYS ABOVE VIDEO PLAYLIST
 ========================================================= */
 
 .player{
@@ -637,7 +639,9 @@ overflow:hidden;
 
 touch-action:pan-y;
 
-z-index:1601;
+z-index:3001;
+
+pointer-events:auto;
 }
 
 
@@ -854,7 +858,9 @@ flex-shrink:0;
 
 position:relative;
 
-z-index:1610;
+z-index:3020;
+
+pointer-events:auto;
 }
 
 .btn{
@@ -880,6 +886,10 @@ padding:0;
 touch-action:manipulation;
 
 -webkit-tap-highlight-color:transparent;
+
+position:relative;
+
+z-index:3021;
 }
 
 .btn svg{
@@ -887,6 +897,8 @@ width:20px;
 height:20px;
 
 fill:#fff;
+
+pointer-events:none;
 }
 
 
@@ -911,6 +923,8 @@ border-radius:20px;
 
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
+
+pointer-events:auto;
 }
 
 .vol-slider-wrapper{
@@ -1011,6 +1025,10 @@ flex-shrink:0;
 touch-action:manipulation;
 
 -webkit-tap-highlight-color:transparent;
+
+position:relative;
+
+z-index:3021;
 }
 
 .play svg{
@@ -1020,6 +1038,8 @@ height:20px;
 fill:#000;
 
 margin-left:2px;
+
+pointer-events:none;
 }
 
 .play.playing svg{
@@ -1943,17 +1963,7 @@ let player=null;
 
 let playing=false;
 
-
-/* =========================================================
-   ORIGINAL PLAYLIST
-========================================================= */
-
 let playlistItems=[];
-
-
-/* =========================================================
-   NEW SORTED PLAYLIST
-========================================================= */
 
 let sortedPlaylistItems=[];
 
@@ -1962,11 +1972,6 @@ let sortedPlaylistData=[];
 let currentSortedIndex=0;
 
 let sortingReady=false;
-
-
-/* =========================================================
-   OTHER VARIABLES
-========================================================= */
 
 let volTimer=null;
 
@@ -2142,9 +2147,7 @@ updateInfo();
 }
 
 else if(
-
 e.data===YT.PlayerState.PAUSED
-
 ){
 
 playing=false;
@@ -2163,9 +2166,7 @@ cover.classList.remove(
 }
 
 else if(
-
 e.data===YT.PlayerState.ENDED
-
 ){
 
 playing=false;
@@ -2180,15 +2181,6 @@ playIcon.innerHTML=
 cover.classList.remove(
 "spinning"
 );
-
-
-/*
-IMPORTANT:
-
-YouTube-এর original playlist order
-follow না করে আমাদের A-Z order-এর
-পরের song play হবে।
-*/
 
 if(!changingTrack){
 
@@ -2318,9 +2310,36 @@ iconSvg.innerHTML=
 
 loadVideoPlaylist();
 
+
+/*
+IMPORTANT FIX:
+প্রথমবার popup open হওয়ার সময়
+layout দুইবার calculate করছি।
+*/
+
+requestAnimationFrame(
+()=>{
+
+adjustVideoPlaylistHeight();
+
+requestAnimationFrame(
+()=>{
+
+adjustVideoPlaylistHeight();
+
+});
+
+}
+);
+
 setTimeout(
 adjustVideoPlaylistHeight,
-50
+150
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+350
 );
 
 }
@@ -2393,8 +2412,15 @@ playerCard.getBoundingClientRect();
 const top=
 popupRect.bottom+1;
 
+
+/*
+IMPORTANT FIX:
+Player-এর একদম আগে playlist শেষ হবে।
+Controls-এর জায়গায় ঢুকবে না।
+*/
+
 const bottom=
-playerRect.top-20;
+playerRect.top-8;
 
 const available=
 bottom-top;
@@ -2403,10 +2429,10 @@ bottom-top;
 if(available>70){
 
 playlist.style.height=
-available+"px";
+Math.floor(available)+"px";
 
 playlist.style.maxHeight=
-available+"px";
+Math.floor(available)+"px";
 
 }
 else{
@@ -2434,7 +2460,12 @@ handleDeviceOrientation();
 
 setTimeout(
 adjustVideoPlaylistHeight,
-100
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
 );
 
 }
@@ -2452,7 +2483,12 @@ handleDeviceOrientation,
 
 setTimeout(
 adjustVideoPlaylistHeight,
-300
+250
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+500
 );
 
 }
@@ -2555,7 +2591,12 @@ videoPlaylist.classList.add(
 
 setTimeout(
 adjustVideoPlaylistHeight,
-100
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
 );
 
 }
@@ -2678,10 +2719,6 @@ player.getVideoData().video_id;
 catch(e){}
 
 
-/*
-Current video-এর sorted index বের করা
-*/
-
 if(currentId){
 
 const found=
@@ -2697,10 +2734,6 @@ currentSortedIndex=found;
 
 }
 
-
-/*
-A-Z-এর পরের song
-*/
 
 const nextIndex=
 (currentSortedIndex+1)%
@@ -2799,22 +2832,18 @@ document.getElementById(
 ).src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
-
 document.getElementById(
 "title"
 ).textContent=
 data.title || "YouTube Music";
-
 
 document.getElementById(
 "artist"
 ).textContent=
 data.artist || "YouTube Music";
 
-
 currentSortedIndex=
 index;
-
 
 highlightActiveTrack();
 
@@ -3262,22 +3291,12 @@ return;
 playlistItems=
 ids;
 
-
-/*
-আগের data reset
-*/
-
 sortedPlaylistItems=[];
 
 sortedPlaylistData=[];
 
 sortingReady=false;
 
-
-/*
-প্রথমে সব video-এর title fetch করি।
-সব title পাওয়া গেলে A-Z sort হবে।
-*/
 
 const requests=
 playlistItems.map(
@@ -3344,12 +3363,6 @@ Promise.all(requests)
 .then(
 results=>{
 
-/*
-=========================================================
- A-Z SORT
-=========================================================
-*/
-
 results.sort(
 (a,b)=>{
 
@@ -3375,10 +3388,6 @@ item=>item.id
 
 sortingReady=true;
 
-
-/*
-প্রথম song
-*/
 
 let currentId="";
 
@@ -3408,10 +3417,6 @@ currentIndex;
 
 }
 
-
-/*
-UI বানানো
-*/
 
 renderSortedPlaylists();
 
@@ -3658,7 +3663,6 @@ return div.innerHTML;
 
 /* =========================================================
    PLAY SPECIFIC TRACK
-   A-Z ORDER
 ========================================================= */
 
 function playSpecificTrack(
@@ -3679,27 +3683,12 @@ const id=
 data.id;
 
 
-/*
-Current sorted index
-*/
-
 currentSortedIndex=
 index;
 
 
-/*
-UI আগে update
-*/
-
 forceUpdateUI(index);
 
-
-/*
-YouTube original playlist order বাদ দিয়ে
-direct video ID load করছি।
-
-তাই A-Z order-ই follow করবে।
-*/
 
 changingTrack=true;
 
@@ -3774,9 +3763,19 @@ document
 "active"
 );
 
-setTimeout(
-adjustVideoPlaylistHeight,
-80
+requestAnimationFrame(
+()=>{
+
+adjustVideoPlaylistHeight();
+
+requestAnimationFrame(
+()=>{
+
+adjustVideoPlaylistHeight();
+
+});
+
+}
 );
 
 }
@@ -3925,10 +3924,6 @@ d.author;
 
 }
 
-
-/*
-Current video-এর A-Z index
-*/
 
 const sortedIndex=
 sortedPlaylistItems.indexOf(
