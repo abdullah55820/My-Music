@@ -223,8 +223,6 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
-   PORTRAIT:
-   NEVER RECEIVE TOUCH
 ========================================================= */
 
 .video-overlay{
@@ -267,14 +265,12 @@ display:flex;
 flex-direction:column;
 align-items:center;
 
-pointer-events:none!important;
+pointer-events:none;
 }
 
 
 /* =========================================================
    VIDEO POPUP
-   PORTRAIT:
-   POPUP ITSELF CANNOT RECEIVE TOUCH
 ========================================================= */
 
 .video-popup{
@@ -302,8 +298,7 @@ box-shadow:
 opacity:0;
 visibility:hidden;
 
-/* IMPORTANT */
-pointer-events:none!important;
+pointer-events:none;
 
 transform:scale(.92);
 
@@ -320,9 +315,7 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
-/* IMPORTANT:
-   portrait video cannot receive touch */
-pointer-events:none!important;
+pointer-events:auto;
 
 transform:scale(1);
 }
@@ -330,8 +323,6 @@ transform:scale(1);
 
 /* =========================================================
    YOUTUBE IFRAME
-   PORTRAIT:
-   TOUCH OFF
 ========================================================= */
 
 #yt{
@@ -346,10 +337,9 @@ border:0;
 
 display:block;
 
-/* IMPORTANT */
-pointer-events:none!important;
+pointer-events:auto!important;
 
-touch-action:none!important;
+touch-action:auto;
 
 z-index:1702;
 }
@@ -901,6 +891,20 @@ fill:#fff;
 
 
 /* =========================================================
+   FULLSCREEN BUTTON
+   HIDDEN UNTIL VIDEO POPUP OPENS
+========================================================= */
+
+.fullscreen-btn{
+display:none;
+}
+
+.fullscreen-btn.visible{
+display:flex;
+}
+
+
+/* =========================================================
    VOLUME
 ========================================================= */
 
@@ -1353,9 +1357,6 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:16px;
-
-/* portrait touch OFF */
-pointer-events:none!important;
 }
 
 .video-playlist{
@@ -1428,8 +1429,6 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
-
-pointer-events:none!important;
 }
 
 .video-playlist{
@@ -1496,7 +1495,7 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   VIDEO GETS FULL TOUCH CONTROL
+   VIDEO GETS 100% TOUCH CONTROL
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1536,8 +1535,6 @@ border:none!important;
 
 box-shadow:none!important;
 
-/* IMPORTANT:
-   landscape popup receives touch */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1552,11 +1549,7 @@ left:0!important;
 width:100%!important;
 height:100%!important;
 
-/* IMPORTANT:
-   landscape YouTube receives touch */
 pointer-events:auto!important;
-
-touch-action:auto!important;
 
 z-index:1702!important;
 }
@@ -1566,7 +1559,7 @@ display:none!important;
 }
 
 .app{
-display:none!important;
+display:flex!important;
 }
 
 .top-widgets{
@@ -1613,7 +1606,6 @@ border:none!important;
 
 box-shadow:none!important;
 
-/* IMPORTANT */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1627,16 +1619,12 @@ inset:0!important;
 width:100%!important;
 height:100%!important;
 
-/* IMPORTANT */
 pointer-events:auto!important;
-
-touch-action:auto!important;
 
 z-index:1702!important;
 }
 
 body.android-device.landscape-mode .video-playlist,
-body.android-device.landscape-mode .app,
 body.android-device.landscape-mode .top-widgets{
 display:none!important;
 }
@@ -1881,6 +1869,8 @@ id="fill">
 
 <div class="controls">
 
+<!-- VIDEO POPUP BUTTON -->
+
 <button
 class="btn"
 id="videoToggleBtn"
@@ -1902,6 +1892,35 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 </button>
 
 
+<!-- =====================================================
+     NEW FULLSCREEN BUTTON
+     ONLY SHOWS WHEN POPUP IS OPEN
+===================================================== -->
+
+<button
+class="btn fullscreen-btn"
+id="fullscreenBtn"
+onclick="toggleVideoFullscreen()"
+title="Fullscreen"
+aria-label="Fullscreen"
+>
+
+<svg
+id="fullscreenIcon"
+viewBox="0 0 24 24"
+>
+
+<path d="
+M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h3v-3h2v5h-5v-2h3v-2zm2-7h-2V7h-3V5h5v5z
+"/>
+
+</svg>
+
+</button>
+
+
+<!-- PLAY -->
+
 <button
 class="play"
 id="play"
@@ -1921,6 +1940,8 @@ M8 5v14l11-7z
 
 </button>
 
+
+<!-- VOLUME -->
 
 <div class="vol-container">
 
@@ -1990,6 +2011,10 @@ let swipeActive=false;
 
 let swipeFromSeek=false;
 
+
+/* =========================================================
+   ANDROID
+========================================================= */
 
 const isAndroidDevice=
 /Android/i.test(navigator.userAgent);
@@ -2236,6 +2261,11 @@ document.getElementById(
 "videoToggleIcon"
 );
 
+const fullscreenBtn=
+document.getElementById(
+"fullscreenBtn"
+);
+
 const opening=
 !popup.classList.contains(
 "active"
@@ -2259,6 +2289,14 @@ videoPlaylist.classList.add(
 document.body.classList.add(
 "popup-active"
 );
+
+
+/* SHOW FULLSCREEN BUTTON */
+
+fullscreenBtn.classList.add(
+"visible"
+);
+
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
@@ -2290,12 +2328,176 @@ document.body.classList.remove(
 "popup-active"
 );
 
+
+/* HIDE FULLSCREEN BUTTON */
+
+fullscreenBtn.classList.remove(
+"visible"
+);
+
+
+/* EXIT FULLSCREEN IF ACTIVE */
+
+if(
+document.fullscreenElement
+){
+
+document.exitFullscreen()
+.catch(()=>{});
+
+}
+
+
 iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
 
 }
+
+
+/* =========================================================
+   VIDEO FULLSCREEN
+========================================================= */
+
+function toggleVideoFullscreen(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const fullscreenIcon=
+document.getElementById(
+"fullscreenIcon"
+);
+
+
+if(
+!popup ||
+!popup.classList.contains("active")
+){
+
+return;
+
+}
+
+
+/* EXIT FULLSCREEN */
+
+if(document.fullscreenElement){
+
+if(document.exitFullscreen){
+
+document.exitFullscreen()
+.catch(()=>{});
+
+}
+
+return;
+
+}
+
+
+/* ENTER FULLSCREEN */
+
+try{
+
+if(
+popup.requestFullscreen
+){
+
+popup.requestFullscreen()
+.then(()=>{
+
+fullscreenIcon.innerHTML=
+'<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 8v3h2v-3h3v-2h-5v2zm0-8h-3v2h3v3h2V5h-2v3z"/>';
+
+})
+.catch(()=>{});
+
+}
+
+else if(
+popup.webkitRequestFullscreen
+){
+
+popup.webkitRequestFullscreen();
+
+}
+
+}
+catch(e){}
+
+}
+
+
+/* =========================================================
+   FULLSCREEN CHANGE
+========================================================= */
+
+document.addEventListener(
+"fullscreenchange",
+()=>{
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const fullscreenIcon=
+document.getElementById(
+"fullscreenIcon"
+);
+
+if(
+!document.fullscreenElement
+){
+
+fullscreenIcon.innerHTML=
+'<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h3v-3h2v5h-5v-2h3v-2zm2-7h-2V7h-3V5h5v5z"/>';
+
+}
+
+else{
+
+if(popup){
+
+popup.style.pointerEvents=
+"auto";
+
+}
+
+}
+
+}
+);
+
+
+/* =========================================================
+   WEBKIT FULLSCREEN CHANGE
+========================================================= */
+
+document.addEventListener(
+"webkitfullscreenchange",
+()=>{
+
+const fullscreenIcon=
+document.getElementById(
+"fullscreenIcon"
+);
+
+if(
+!document.webkitFullscreenElement
+){
+
+fullscreenIcon.innerHTML=
+'<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h3v-3h2v5h-5v-2h3v-2zm2-7h-2V7h-3V5h5v5z"/>';
+
+}
+
+}
+);
 
 
 /* =========================================================
@@ -2438,6 +2640,11 @@ document.getElementById(
 "videoToggleIcon"
 );
 
+const fullscreenBtn=
+document.getElementById(
+"fullscreenBtn"
+);
+
 
 if(isLandscape){
 
@@ -2461,6 +2668,18 @@ document.body.classList.add(
 );
 
 }
+
+
+/* SHOW FULLSCREEN BUTTON IN LANDSCAPE TOO */
+
+if(fullscreenBtn){
+
+fullscreenBtn.classList.add(
+"visible"
+);
+
+}
+
 
 if(videoPlaylist){
 
@@ -2496,6 +2715,14 @@ popup.classList.contains(
 "active"
 )
 ){
+
+if(fullscreenBtn){
+
+fullscreenBtn.classList.add(
+"visible"
+);
+
+}
 
 videoPlaylist.classList.add(
 "active"
@@ -3367,8 +3594,9 @@ item.id=
 
 
 /*
-Only SONG ITEM handles click.
-Playlist container/list has no click handler.
+Only song item handles click.
+Playlist container remains native
+for scrolling.
 */
 
 item.addEventListener(
@@ -3852,31 +4080,19 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   FINAL TOUCH FIX
+   FINAL
 ========================================================= */
 
 /*
-PORTRAIT:
+FULLSCREEN BUTTON:
 
-1. video-popup = pointer-events:none
-2. #yt = pointer-events:none
-3. video-overlay = pointer-events:none
-4. video-playlist = pointer-events:auto
-5. video-song-list = native vertical scrolling
-6. video-song-item = click only
-
-LANDSCAPE:
-
-1. video-popup = pointer-events:auto
-2. #yt = pointer-events:auto
-3. #yt = touch-action:auto
-4. video playlist hidden
-5. YouTube iframe gets full touch control
-
-So:
-
-PORTRAIT  -> Video touch OFF
-LANDSCAPE -> Video touch ON
+1. Popup closed = hidden
+2. Popup opened = visible
+3. Button is OUTSIDE popup
+4. Clicking fullscreen makes videoPopup fullscreen
+5. Fullscreen video keeps pointer/touch enabled
+6. Rotate in fullscreen remains touch-enabled
+7. Popup playlist remains independently scrollable
 */
 
 </script>
