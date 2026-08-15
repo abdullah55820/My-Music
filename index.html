@@ -219,6 +219,10 @@ background:rgba(0,0,0,.4);
 
 display:none;
 
+/*
+IMPORTANT:
+Overlay কখনো touch ধরবে না
+*/
 pointer-events:none !important;
 }
 
@@ -233,13 +237,6 @@ pointer-events:none !important;
    VIDEO SECTION
    ========================= */
 
-/*
-IMPORTANT:
-z-index 1700 করা হয়েছে যাতে
-video playlist-এর touch নিচের .app
-layer দ্বারা block না হয়।
-*/
-
 .video-section{
 
 position:fixed;
@@ -252,8 +249,7 @@ transform:translateX(-50%);
 
 width:min(420px,94%);
 
-/* FIX */
-z-index:1700;
+z-index:1501;
 
 display:flex;
 
@@ -261,6 +257,10 @@ flex-direction:column;
 
 align-items:center;
 
+/*
+Parent নিজে touch ধরবে না।
+Child playlist নিজে touch ধরবে।
+*/
 pointer-events:none;
 }
 
@@ -285,7 +285,7 @@ border-radius:18px;
 
 overflow:hidden;
 
-z-index:1701;
+z-index:1502;
 
 border:1px solid rgba(255,255,255,.25);
 
@@ -296,6 +296,9 @@ opacity:0;
 
 visibility:hidden;
 
+/*
+VIDEO TOUCH COMPLETELY OFF
+*/
 pointer-events:none;
 
 transform:scale(.92);
@@ -312,10 +315,18 @@ opacity:1;
 
 visibility:visible;
 
-pointer-events:auto;
+/*
+VIDEO-তে touch যাবে না
+*/
+pointer-events:none;
 
 transform:scale(1);
 }
+
+
+/* =========================
+   YOUTUBE IFRAME
+   ========================= */
 
 #yt{
 
@@ -326,7 +337,10 @@ border:none;
 
 display:block;
 
-pointer-events:auto;
+/*
+YouTube video/control-এও touch যাবে না
+*/
+pointer-events:none !important;
 }
 
 
@@ -368,7 +382,9 @@ transition:
 opacity .3s ease,
 visibility .3s ease;
 
-/* FIX */
+/*
+Playlist touch ON
+*/
 pointer-events:none;
 
 touch-action:pan-y;
@@ -379,7 +395,7 @@ overscroll-behavior:contain;
 
 position:relative;
 
-z-index:1705;
+z-index:1505;
 }
 
 .video-playlist.active{
@@ -388,13 +404,18 @@ opacity:1;
 
 visibility:visible;
 
-/* FIX */
+/*
+VERY IMPORTANT
+Playlist নিজে touch ধরবে
+*/
 pointer-events:auto;
 
 touch-action:pan-y;
 
 -webkit-user-select:none;
 user-select:none;
+
+-webkit-touch-callout:none;
 }
 
 
@@ -452,8 +473,9 @@ overscroll-behavior:contain;
 
 scrollbar-width:thin;
 
-/* FIX */
-pointer-events:auto;
+position:relative;
+
+z-index:1506;
 }
 
 .video-song-list::-webkit-scrollbar{
@@ -503,11 +525,13 @@ border-color .2s ease;
 
 flex-shrink:0;
 
-/* FIX */
-pointer-events:auto;
+position:relative;
+
+z-index:1507;
 }
 
 .video-song-item:active{
+
 transform:scale(.98);
 
 background:rgba(255,255,255,.18);
@@ -521,7 +545,7 @@ border-color:rgba(255,255,255,.30);
 }
 
 
-/* NUMBER REMOVED VISUALLY */
+/* NUMBER REMOVED */
 
 .video-song-number{
 display:none;
@@ -542,6 +566,8 @@ object-fit:cover;
 flex-shrink:0;
 
 pointer-events:none;
+
+-webkit-user-drag:none;
 }
 
 
@@ -588,20 +614,6 @@ margin-top:2px;
 
 
 /* =========================
-   APP TOUCH LAYER FIX
-   ========================= */
-
-/*
-Popup open থাকলে .app নিচে থাকবে।
-তাই playlist-এর touch আর block করবে না।
-*/
-
-body.popup-active .app{
-z-index:1400;
-}
-
-
-/* =========================
    LANDSCAPE
    ========================= */
 
@@ -620,8 +632,6 @@ height:100vh !important;
 display:block !important;
 
 pointer-events:none !important;
-
-z-index:1700 !important;
 }
 
 .video-popup.active{
@@ -642,7 +652,12 @@ border:none !important;
 
 box-shadow:none !important;
 
-pointer-events:auto !important;
+pointer-events:none !important;
+}
+
+#yt{
+
+pointer-events:none !important;
 }
 
 .video-playlist{
@@ -676,8 +691,6 @@ width:100vw !important;
 height:100vh !important;
 
 pointer-events:none !important;
-
-z-index:1700 !important;
 }
 
 body.android-device.landscape-mode .video-popup.active{
@@ -698,7 +711,12 @@ border:none !important;
 
 box-shadow:none !important;
 
-pointer-events:auto !important;
+pointer-events:none !important;
+}
+
+body.android-device.landscape-mode #yt{
+
+pointer-events:none !important;
 }
 
 body.android-device.landscape-mode .video-playlist{
@@ -751,9 +769,14 @@ border:1px solid rgba(255,255,255,.18);
 
 border-radius:60px;
 
-background:rgba(20,20,20,.35);
+/*
+আগের .35 থেকে কমিয়ে .14
+এখন বেশি glassy এবং কম কালো
+*/
+background:rgba(20,20,20,.14);
 
 backdrop-filter:blur(20px);
+
 -webkit-backdrop-filter:blur(20px);
 
 box-shadow:
@@ -827,7 +850,7 @@ position:absolute;
 width:16px;
 height:16px;
 
-background:rgba(20,20,20,.85);
+background:rgba(20,20,20,.75);
 
 border:2px solid rgba(255,255,255,.3);
 
@@ -1040,7 +1063,7 @@ align-items:center;
 
 gap:4px;
 
-background:rgba(0,0,0,.25);
+background:rgba(0,0,0,.20);
 
 border:1px solid rgba(255,255,255,.15);
 
@@ -1430,6 +1453,11 @@ padding:12px 14px;
 border-radius:58px;
 
 gap:10px;
+
+/*
+Mobile-এও হালকা glass
+*/
+background:rgba(20,20,20,.14);
 }
 
 .cover-wrapper{
@@ -1482,9 +1510,6 @@ width:180px;
 top:6%;
 
 width:94%;
-
-/* FIX */
-z-index:1700;
 }
 
 .video-popup{
@@ -1496,13 +1521,18 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:16px;
+
+pointer-events:none !important;
+}
+
+#yt{
+pointer-events:none !important;
 }
 
 
 /*
-Mobile-এ playlist player-এর ওপরে থাকবে
+Mobile playlist
 */
-
 .video-playlist{
 
 margin-top:8px;
@@ -1515,7 +1545,6 @@ padding:7px;
 
 border-radius:14px;
 
-/* FIX */
 pointer-events:auto;
 }
 
@@ -1523,8 +1552,9 @@ pointer-events:auto;
 
 height:calc(100% - 27px);
 
-/* FIX */
-pointer-events:auto;
+overflow-y:auto;
+
+touch-action:pan-y;
 }
 
 .video-song-item{
@@ -1534,9 +1564,6 @@ min-height:46px;
 padding:5px 6px;
 
 gap:7px;
-
-/* FIX */
-pointer-events:auto;
 }
 
 .video-song-item img{
@@ -1571,6 +1598,8 @@ top:3%;
 aspect-ratio:16 / 9;
 
 height:auto;
+
+pointer-events:none !important;
 }
 
 .video-playlist{
@@ -1578,6 +1607,8 @@ height:auto;
 max-height:calc(100dvh - 300px);
 
 min-height:70px;
+
+pointer-events:auto;
 }
 
 .video-song-item{
@@ -1611,6 +1642,8 @@ margin-top:7px;
 padding:6px;
 
 max-height:calc(100dvh - 300px);
+
+pointer-events:auto;
 }
 
 .video-song-item{
@@ -2270,10 +2303,6 @@ const opening=
 
 if(opening){
 
-/*
-OPEN
-*/
-
 popup.classList.add(
 "active"
 );
@@ -2301,10 +2330,6 @@ adjustVideoPlaylistHeight();
 
 }
 else{
-
-/*
-CLOSE
-*/
 
 popup.classList.remove(
 "active"
@@ -2372,12 +2397,6 @@ popup.getBoundingClientRect();
 const playerRect=
 playerCard.getBoundingClientRect();
 
-
-/*
-Playlist top video-এর নিচে।
-
-Playlist bottom player-এর একটু ওপরে।
-*/
 
 const top=
 popupRect.bottom+8;
@@ -3472,9 +3491,8 @@ item.id=
 
 
 /*
-Touch/click directly এখানে handle হবে.
+Song tap directly এখানেই handle হবে
 */
-
 item.addEventListener(
 "click",
 e=>{
@@ -3953,9 +3971,8 @@ adjustVideoPlaylistHeight,
    ========================= */
 
 /*
-Playlist-এর touch যেন video overlay,
-player swipe বা অন্য কোনো layer
-ধরে না ফেলে।
+Playlist-এর touch video বা player-এর কাছে
+যেতে দেবে না।
 */
 
 const videoList=
@@ -4001,8 +4018,7 @@ passive:true
 
 
 /*
-Playlist container-এর touch-ও
-safe রাখা।
+Playlist container-এর touch safe
 */
 
 const videoPlaylist=
@@ -4044,6 +4060,7 @@ e.stopPropagation();
 {
 passive:true
 }
+
 );
 
 </script>
