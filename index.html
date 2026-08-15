@@ -223,7 +223,8 @@ display:none;
 
 /* =========================================================
    VIDEO OVERLAY
-   PORTRAIT = NO TOUCH
+   PORTRAIT:
+   NEVER RECEIVE TOUCH
 ========================================================= */
 
 .video-overlay{
@@ -272,6 +273,8 @@ pointer-events:none!important;
 
 /* =========================================================
    VIDEO POPUP
+   PORTRAIT:
+   POPUP ITSELF CANNOT RECEIVE TOUCH
 ========================================================= */
 
 .video-popup{
@@ -299,6 +302,7 @@ box-shadow:
 opacity:0;
 visibility:hidden;
 
+/* IMPORTANT */
 pointer-events:none!important;
 
 transform:scale(.92);
@@ -316,6 +320,8 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
+/* IMPORTANT:
+   portrait video cannot receive touch */
 pointer-events:none!important;
 
 transform:scale(1);
@@ -323,7 +329,9 @@ transform:scale(1);
 
 
 /* =========================================================
-   YOUTUBE
+   YOUTUBE IFRAME
+   PORTRAIT:
+   TOUCH OFF
 ========================================================= */
 
 #yt{
@@ -338,6 +346,7 @@ border:0;
 
 display:block;
 
+/* IMPORTANT */
 pointer-events:none!important;
 
 touch-action:none!important;
@@ -576,225 +585,6 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
-}
-
-
-/* =========================================================
-   CUSTOM FULLSCREEN BUTTON
-   ONLY SHOWS WHEN POPUP IS OPEN
-========================================================= */
-
-.video-fullscreen-btn{
-display:none;
-
-width:34px;
-height:34px;
-
-position:fixed;
-
-right:16px;
-bottom:20px;
-
-z-index:20000;
-
-border:0;
-
-border-radius:50%;
-
-background:rgba(0,0,0,.55);
-
-color:#fff;
-
-align-items:center;
-justify-content:center;
-
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
-
-box-shadow:
-0 4px 15px rgba(0,0,0,.45);
-
-cursor:pointer;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-}
-
-.video-fullscreen-btn svg{
-width:20px;
-height:20px;
-
-fill:#fff;
-}
-
-.video-fullscreen-btn:active{
-transform:scale(.88);
-}
-
-
-/* ONLY POPUP ACTIVE */
-
-body.popup-active .video-fullscreen-btn{
-display:flex;
-}
-
-
-/* =========================================================
-   CUSTOM ROTATE BUTTON
-   ONLY SHOWS AFTER FULLSCREEN
-========================================================= */
-
-.video-rotate-btn{
-display:none;
-
-position:fixed;
-
-right:18px;
-bottom:24px;
-
-width:42px;
-height:42px;
-
-z-index:30000;
-
-border:0;
-
-border-radius:50%;
-
-background:rgba(0,0,0,.60);
-
-color:#fff;
-
-align-items:center;
-justify-content:center;
-
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
-
-box-shadow:
-0 4px 18px rgba(0,0,0,.55);
-
-cursor:pointer;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-}
-
-.video-rotate-btn svg{
-width:24px;
-height:24px;
-
-fill:none;
-
-stroke:#fff;
-
-stroke-width:2;
-stroke-linecap:round;
-stroke-linejoin:round;
-}
-
-.video-rotate-btn:active{
-transform:scale(.88);
-}
-
-
-/* =========================================================
-   FULLSCREEN MODE
-========================================================= */
-
-body.video-fullscreen{
-overflow:hidden!important;
-}
-
-body.video-fullscreen .bg,
-body.video-fullscreen .top-widgets,
-body.video-fullscreen .app,
-body.video-fullscreen .video-playlist,
-body.video-fullscreen .video-overlay{
-display:none!important;
-}
-
-body.video-fullscreen .video-section{
-position:fixed!important;
-
-inset:0!important;
-
-top:0!important;
-left:0!important;
-
-width:100vw!important;
-height:100vh!important;
-
-transform:none!important;
-
-display:block!important;
-
-z-index:25000!important;
-
-pointer-events:none!important;
-}
-
-body.video-fullscreen .video-popup{
-position:absolute!important;
-
-inset:0!important;
-
-top:0!important;
-left:0!important;
-
-width:100vw!important;
-height:100vh!important;
-
-aspect-ratio:auto!important;
-
-border-radius:0!important;
-
-border:none!important;
-
-box-shadow:none!important;
-
-opacity:1!important;
-visibility:visible!important;
-
-transform:none!important;
-
-pointer-events:auto!important;
-
-z-index:25001!important;
-}
-
-body.video-fullscreen #yt{
-position:absolute!important;
-
-inset:0!important;
-
-width:100%!important;
-height:100%!important;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-
-z-index:25002!important;
-}
-
-body.video-fullscreen .video-fullscreen-btn{
-display:none!important;
-}
-
-body.video-fullscreen .video-rotate-btn{
-display:flex!important;
-}
-
-
-/* =========================================================
-   ROTATED / LANDSCAPE FULLSCREEN
-========================================================= */
-
-body.video-fullscreen.landscape-mode .video-rotate-btn{
-display:flex!important;
 }
 
 
@@ -1111,73 +901,6 @@ fill:#fff;
 
 
 /* =========================================================
-   VIDEO BUTTON
-========================================================= */
-
-#videoToggleBtn{
-display:flex;
-}
-
-#videoToggleBtn svg{
-width:20px;
-height:20px;
-}
-
-
-/* =========================================================
-   PLAY
-========================================================= */
-
-.play{
-width:44px;
-height:44px;
-
-border-radius:50%;
-
-border:0;
-
-background:#fff;
-
-color:#000;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-box-shadow:
-0 4px 15px rgba(0,0,0,.3);
-
-cursor:pointer;
-
-flex-shrink:0;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-}
-
-.play svg{
-width:20px;
-height:20px;
-
-fill:#000;
-
-margin-left:2px;
-}
-
-.play.playing svg{
-margin-left:0;
-}
-
-.btn:active,
-.play:active{
-transform:scale(.90);
-}
-
-
-/* =========================================================
    VOLUME
 ========================================================= */
 
@@ -1263,6 +986,59 @@ box-shadow:0 0 5px rgba(0,0,0,.5);
 display:none!important;
 }
 
+}
+
+
+/* =========================================================
+   PLAY
+========================================================= */
+
+.play{
+width:44px;
+height:44px;
+
+border-radius:50%;
+
+border:0;
+
+background:#fff;
+
+color:#000;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+box-shadow:
+0 4px 15px rgba(0,0,0,.3);
+
+cursor:pointer;
+
+flex-shrink:0;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+}
+
+.play svg{
+width:20px;
+height:20px;
+
+fill:#000;
+
+margin-left:2px;
+}
+
+.play.playing svg{
+margin-left:0;
+}
+
+.btn:active,
+.play:active{
+transform:scale(.90);
 }
 
 
@@ -1558,6 +1334,9 @@ padding:4px 9px;
 width:180px;
 }
 
+
+/* VIDEO */
+
 .video-section{
 top:6%;
 
@@ -1575,6 +1354,7 @@ height:auto;
 
 border-radius:16px;
 
+/* portrait touch OFF */
 pointer-events:none!important;
 }
 
@@ -1715,8 +1495,8 @@ font-size:8.5px;
 
 
 /* =========================================================
-   NORMAL LANDSCAPE
-   VIDEO TOUCH ON
+   LANDSCAPE
+   VIDEO GETS FULL TOUCH CONTROL
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1756,6 +1536,8 @@ border:none!important;
 
 box-shadow:none!important;
 
+/* IMPORTANT:
+   landscape popup receives touch */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1770,6 +1552,8 @@ left:0!important;
 width:100%!important;
 height:100%!important;
 
+/* IMPORTANT:
+   landscape YouTube receives touch */
 pointer-events:auto!important;
 
 touch-action:auto!important;
@@ -1829,6 +1613,7 @@ border:none!important;
 
 box-shadow:none!important;
 
+/* IMPORTANT */
 pointer-events:auto!important;
 
 z-index:1701!important;
@@ -1842,6 +1627,7 @@ inset:0!important;
 width:100%!important;
 height:100%!important;
 
+/* IMPORTANT */
 pointer-events:auto!important;
 
 touch-action:auto!important;
@@ -1931,7 +1717,9 @@ class="video-popup"
 </div>
 
 
-<!-- VIDEO PLAYLIST -->
+<!-- =====================================================
+     VIDEO PLAYLIST
+===================================================== -->
 
 <div
 id="videoPlaylist"
@@ -1964,59 +1752,6 @@ Loading...
 </div>
 
 </div>
-
-
-<!-- =====================================================
-     CUSTOM FULLSCREEN BUTTON
-     ONLY POPUP OPEN
-===================================================== -->
-
-<button
-id="videoFullscreenBtn"
-class="video-fullscreen-btn"
-onclick="toggleVideoFullscreen()"
-title="Full Screen"
->
-
-<svg
-id="fullscreenIcon"
-viewBox="0 0 24 24"
->
-
-<path d="
-M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z
-"/>
-
-</svg>
-
-</button>
-
-
-<!-- =====================================================
-     ROTATE BUTTON
-     ONLY FULLSCREEN
-===================================================== -->
-
-<button
-id="videoRotateBtn"
-class="video-rotate-btn"
-onclick="rotateVideo()"
-title="Rotate"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M20 11a8.1 8.1 0 0 0-14.9-4L3 10
-M3 5v5h5
-
-M4 13a8.1 8.1 0 0 0 14.9 4L21 14
-M21 19v-5h-5
-"/>
-
-</svg>
-
-</button>
 
 
 <!-- =====================================================
@@ -2146,8 +1881,6 @@ id="fill">
 
 <div class="controls">
 
-<!-- VIDEO POPUP BUTTON -->
-
 <button
 class="btn"
 id="videoToggleBtn"
@@ -2169,8 +1902,6 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 </button>
 
 
-<!-- PLAY -->
-
 <button
 class="play"
 id="play"
@@ -2190,8 +1921,6 @@ M8 5v14l11-7z
 
 </button>
 
-
-<!-- VOLUME -->
 
 <div class="vol-container">
 
@@ -2260,10 +1989,6 @@ let swipeStartY=0;
 let swipeActive=false;
 
 let swipeFromSeek=false;
-
-let videoFullscreen=false;
-
-let fullscreenLandscape=false;
 
 
 const isAndroidDevice=
@@ -2397,6 +2122,7 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
+
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
@@ -2518,11 +2244,6 @@ const opening=
 
 if(opening){
 
-/* EXIT FULLSCREEN STATE FIRST */
-
-exitVideoFullscreen();
-
-
 popup.classList.add(
 "active"
 );
@@ -2542,6 +2263,7 @@ document.body.classList.add(
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
+
 loadVideoPlaylist();
 
 setTimeout(
@@ -2551,8 +2273,6 @@ adjustVideoPlaylistHeight,
 
 }
 else{
-
-exitVideoFullscreen();
 
 popup.classList.remove(
 "active"
@@ -2576,300 +2296,6 @@ iconSvg.innerHTML=
 }
 
 }
-
-
-/* =========================================================
-   CUSTOM FULLSCREEN
-========================================================= */
-
-async function toggleVideoFullscreen(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-!popup ||
-!popup.classList.contains("active")
-){
-
-return;
-}
-
-
-/* Already fullscreen */
-
-if(videoFullscreen){
-
-exitVideoFullscreen();
-
-return;
-
-}
-
-
-videoFullscreen=true;
-
-fullscreenLandscape=false;
-
-document.body.classList.add(
-"video-fullscreen"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-
-/* Try native fullscreen where supported */
-
-try{
-
-if(
-popup.requestFullscreen &&
-!document.fullscreenElement
-){
-
-await popup.requestFullscreen();
-
-}
-
-}
-catch(e){
-
-/* CSS fullscreen fallback */
-
-}
-
-
-/* Try landscape automatically */
-
-try{
-
-if(
-screen.orientation &&
-screen.orientation.lock
-){
-
-await screen.orientation.lock(
-"landscape"
-);
-
-fullscreenLandscape=true;
-
-document.body.classList.add(
-"landscape-mode"
-);
-
-}
-
-}
-catch(e){
-
-/*
-iOS Safari may not allow
-orientation.lock().
-CSS fullscreen still works.
-*/
-
-if(
-window.innerWidth>
-window.innerHeight
-){
-
-fullscreenLandscape=true;
-
-document.body.classList.add(
-"landscape-mode"
-);
-
-}
-
-}
-
-}
-
-
-/* =========================================================
-   EXIT FULLSCREEN
-========================================================= */
-
-async function exitVideoFullscreen(){
-
-if(!videoFullscreen){
-
-return;
-
-}
-
-videoFullscreen=false;
-
-fullscreenLandscape=false;
-
-document.body.classList.remove(
-"video-fullscreen"
-);
-
-document.body.classList.remove(
-"landscape-mode"
-);
-
-
-/* Exit native fullscreen */
-
-try{
-
-if(document.fullscreenElement){
-
-await document.exitFullscreen();
-
-}
-
-}
-catch(e){}
-
-
-/* Unlock orientation */
-
-try{
-
-if(
-screen.orientation &&
-screen.orientation.unlock
-){
-
-screen.orientation.unlock();
-
-}
-
-}
-catch(e){}
-
-}
-
-
-/* =========================================================
-   ROTATE BUTTON
-========================================================= */
-
-async function rotateVideo(){
-
-if(!videoFullscreen){
-
-return;
-
-}
-
-
-const isCurrentlyLandscape=
-window.innerWidth>
-window.innerHeight ||
-fullscreenLandscape;
-
-
-/* =====================================================
-   TRY REAL DEVICE ORIENTATION
-===================================================== */
-
-try{
-
-if(
-screen.orientation &&
-screen.orientation.lock
-){
-
-if(isCurrentlyLandscape){
-
-await screen.orientation.lock(
-"portrait"
-);
-
-fullscreenLandscape=false;
-
-document.body.classList.remove(
-"landscape-mode"
-);
-
-}
-else{
-
-await screen.orientation.lock(
-"landscape"
-);
-
-fullscreenLandscape=true;
-
-document.body.classList.add(
-"landscape-mode"
-);
-
-}
-
-return;
-
-}
-
-}
-catch(e){}
-
-
-/* =====================================================
-   FALLBACK
-===================================================== */
-
-fullscreenLandscape=
-!fullscreenLandscape;
-
-document.body.classList.toggle(
-"landscape-mode",
-fullscreenLandscape
-);
-
-
-/*
-On browsers that don't allow orientation.lock(),
-the CSS mode will still update.
-The browser itself may require physical rotation.
-*/
-
-}
-
-
-/* =========================================================
-   NATIVE FULLSCREEN CHANGE
-========================================================= */
-
-document.addEventListener(
-"fullscreenchange",
-()=>{
-
-if(
-!document.fullscreenElement &&
-videoFullscreen
-){
-
-/*
-Native fullscreen closed externally.
-Keep popup open but leave custom fullscreen.
-*/
-
-videoFullscreen=false;
-
-fullscreenLandscape=false;
-
-document.body.classList.remove(
-"video-fullscreen"
-);
-
-document.body.classList.remove(
-"landscape-mode"
-);
-
-}
-
-}
-);
 
 
 /* =========================================================
@@ -2904,15 +2330,13 @@ if(
 )
 return;
 
-if(videoFullscreen)
-return;
-
 
 const popupRect=
 popup.getBoundingClientRect();
 
 const playerRect=
 playerCard.getBoundingClientRect();
+
 
 const top=
 popupRect.bottom+1;
@@ -2954,20 +2378,6 @@ window.addEventListener(
 "resize",
 ()=>{
 
-if(
-videoFullscreen &&
-window.innerWidth>
-window.innerHeight
-){
-
-fullscreenLandscape=true;
-
-document.body.classList.add(
-"landscape-mode"
-);
-
-}
-
 handleDeviceOrientation();
 
 setTimeout(
@@ -2984,24 +2394,7 @@ window.addEventListener(
 ()=>{
 
 setTimeout(
-()=>{
-
-if(videoFullscreen){
-
-fullscreenLandscape=
-window.innerWidth>
-window.innerHeight;
-
-document.body.classList.toggle(
-"landscape-mode",
-fullscreenLandscape
-);
-
-}
-
-handleDeviceOrientation();
-
-},
+handleDeviceOrientation,
 150
 );
 
@@ -3020,19 +2413,10 @@ adjustVideoPlaylistHeight,
 
 function handleDeviceOrientation(){
 
-/*
-Do not interfere with our custom fullscreen.
-*/
-
-if(videoFullscreen){
-
-return;
-
-}
-
 const isLandscape=
 window.innerWidth>
 window.innerHeight;
+
 
 const popup=
 document.getElementById(
@@ -3104,6 +2488,7 @@ else{
 document.body.classList.remove(
 "landscape-mode"
 );
+
 
 if(
 popup &&
@@ -3228,12 +2613,14 @@ playlistItems.length===0
 )
 return;
 
+
 const current=
 player.getPlaylistIndex();
 
 const next=
 (current+1)%
 playlistItems.length;
+
 
 forceUpdateUI(next);
 
@@ -3254,6 +2641,7 @@ playlistItems.length===0
 )
 return;
 
+
 const current=
 player.getPlaylistIndex();
 
@@ -3261,6 +2649,7 @@ const previous=
 (current-1+
 playlistItems.length)%
 playlistItems.length;
+
 
 forceUpdateUI(previous);
 
@@ -3278,13 +2667,16 @@ function forceUpdateUI(index){
 if(!playlistItems[index])
 return;
 
+
 const id=
 playlistItems[index];
+
 
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
 
 const title=
 document.getElementById(
@@ -3296,6 +2688,7 @@ document.getElementById(
 `artist-${index}`
 );
 
+
 if(title){
 
 document.getElementById(
@@ -3305,6 +2698,7 @@ title.textContent;
 
 }
 
+
 if(artist){
 
 document.getElementById(
@@ -3313,6 +2707,7 @@ document.getElementById(
 artist.textContent;
 
 }
+
 
 highlightActiveTrack();
 
@@ -3335,6 +2730,7 @@ document.getElementById(
 "seek"
 );
 
+
 playerCard.addEventListener(
 "pointerdown",
 e=>{
@@ -3355,6 +2751,7 @@ swipeActive=true;
 }
 );
 
+
 playerCard.addEventListener(
 "pointerup",
 e=>{
@@ -3362,15 +2759,18 @@ e=>{
 if(!swipeActive)
 return;
 
+
 const endX=e.clientX;
 
 const endY=e.clientY;
+
 
 const dx=
 endX-swipeStartX;
 
 const dy=
 endY-swipeStartY;
+
 
 if(swipeFromSeek){
 
@@ -3380,6 +2780,7 @@ return;
 
 }
 
+
 if(Math.abs(dx)<50){
 
 swipeActive=false;
@@ -3387,6 +2788,7 @@ swipeActive=false;
 return;
 
 }
+
 
 if(
 Math.abs(dy)>
@@ -3399,6 +2801,7 @@ return;
 
 }
 
+
 if(dx<-50){
 
 nextSong();
@@ -3410,10 +2813,12 @@ previousSong();
 
 }
 
+
 swipeActive=false;
 
 }
 );
+
 
 playerCard.addEventListener(
 "pointercancel",
@@ -3437,8 +2842,10 @@ el
 const rect=
 el.getBoundingClientRect();
 
+
 if(!rect.width)
 return 0;
+
 
 return Math.max(
 0,
@@ -3459,6 +2866,7 @@ document.getElementById(
 ).style.width=
 (pos*100)+"%";
 
+
 if(
 player &&
 typeof player.getDuration===
@@ -3467,6 +2875,7 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
+
 
 if(duration){
 
@@ -3501,6 +2910,7 @@ e.stopPropagation();
 
 isDragging=true;
 
+
 try{
 
 seekElement.setPointerCapture(
@@ -3509,6 +2919,7 @@ e.pointerId
 
 }
 catch(err){}
+
 
 updateSeekVisual(
 getSeekPosition(
@@ -3531,9 +2942,11 @@ e=>{
 if(!isDragging)
 return;
 
+
 e.preventDefault();
 
 e.stopPropagation();
+
 
 updateSeekVisual(
 getSeekPosition(
@@ -3556,9 +2969,11 @@ e=>{
 if(!isDragging)
 return;
 
+
 e.preventDefault();
 
 e.stopPropagation();
+
 
 const pos=
 getSeekPosition(
@@ -3566,7 +2981,9 @@ e.clientX,
 seekElement
 );
 
+
 updateSeekVisual(pos);
+
 
 if(
 player &&
@@ -3576,6 +2993,7 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
+
 
 if(duration){
 
@@ -3588,7 +3006,9 @@ true
 
 }
 
+
 isDragging=false;
+
 
 try{
 
@@ -3615,12 +3035,14 @@ function updateProgress(){
 if(isDragging)
 return;
 
+
 if(
 !player ||
 typeof player.getCurrentTime!==
 "function"
 )
 return;
+
 
 try{
 
@@ -3630,8 +3052,10 @@ player.getCurrentTime();
 const duration=
 player.getDuration();
 
+
 if(!duration)
 return;
+
 
 const pos=
 Math.max(
@@ -3642,15 +3066,18 @@ current/duration
 )
 );
 
+
 document.getElementById(
 "fill"
 ).style.width=
 (pos*100)+"%";
 
+
 document.getElementById(
 "current"
 ).textContent=
 format(current);
+
 
 document.getElementById(
 "duration"
@@ -3678,7 +3105,9 @@ return "0:00";
 
 }
 
+
 s=Math.floor(s);
+
 
 return Math.floor(s/60)+":"+
 String(
@@ -3703,13 +3132,16 @@ typeof player.getPlaylist!==
 )
 return;
 
+
 playlistItems=
 player.getPlaylist();
+
 
 const list=
 document.getElementById(
 "songList"
 );
+
 
 if(
 !playlistItems ||
@@ -3725,7 +3157,9 @@ return;
 
 }
 
+
 list.innerHTML="";
+
 
 playlistItems.forEach(
 (id,index)=>{
@@ -3735,11 +3169,14 @@ document.createElement(
 "div"
 );
 
+
 item.className=
 "song-item";
 
+
 item.id=
 `track-${index}`;
+
 
 item.onclick=()=>{
 
@@ -3748,6 +3185,7 @@ index
 );
 
 };
+
 
 item.innerHTML=`
 
@@ -3776,7 +3214,9 @@ YouTube Music
 
 `;
 
+
 list.appendChild(item);
+
 
 fetchSongDetails(
 id,
@@ -3784,6 +3224,7 @@ index
 );
 
 });
+
 
 loadVideoPlaylist();
 
@@ -3819,15 +3260,18 @@ data=>{
 if(!data)
 return;
 
+
 const title=
 document.getElementById(
 `title-${index}`
 );
 
+
 const artist=
 document.getElementById(
 `artist-${index}`
 );
+
 
 if(
 title &&
@@ -3839,6 +3283,7 @@ data.title;
 
 }
 
+
 if(
 artist &&
 data.author_name
@@ -3848,6 +3293,7 @@ artist.textContent=
 data.author_name;
 
 }
+
 
 updateVideoSongDetails(
 index,
@@ -3876,6 +3322,7 @@ document.getElementById(
 "videoSongList"
 );
 
+
 if(
 !playlistItems ||
 playlistItems.length===0
@@ -3898,7 +3345,9 @@ return;
 
 }
 
+
 list.innerHTML="";
+
 
 playlistItems.forEach(
 (id,index)=>{
@@ -3908,11 +3357,19 @@ document.createElement(
 "div"
 );
 
+
 item.className=
 "video-song-item";
 
+
 item.id=
 `video-track-${index}`;
+
+
+/*
+Only SONG ITEM handles click.
+Playlist container/list has no click handler.
+*/
 
 item.addEventListener(
 "click",
@@ -3931,6 +3388,7 @@ index
 passive:false
 }
 );
+
 
 item.innerHTML=`
 
@@ -3960,7 +3418,9 @@ YouTube Music
 
 `;
 
+
 list.appendChild(item);
+
 
 fetchVideoSongDetails(
 id,
@@ -3968,6 +3428,7 @@ index
 );
 
 });
+
 
 highlightVideoActiveTrack();
 
@@ -4002,15 +3463,18 @@ data=>{
 if(!data)
 return;
 
+
 const title=
 document.getElementById(
 `video-title-${index}`
 );
 
+
 const artist=
 document.getElementById(
 `video-artist-${index}`
 );
+
 
 if(
 title &&
@@ -4021,6 +3485,7 @@ title.textContent=
 data.title;
 
 }
+
 
 if(
 artist &&
@@ -4062,6 +3527,7 @@ document.getElementById(
 `video-artist-${index}`
 );
 
+
 if(
 title &&
 titleText
@@ -4071,6 +3537,7 @@ title.textContent=
 titleText;
 
 }
+
 
 if(
 artist &&
@@ -4098,8 +3565,10 @@ typeof player.getPlaylistIndex!==
 )
 return;
 
+
 const current=
 player.getPlaylistIndex();
+
 
 document
 .querySelectorAll(
@@ -4129,7 +3598,9 @@ index
 if(!player)
 return;
 
+
 forceUpdateUI(index);
+
 
 try{
 
@@ -4155,6 +3626,7 @@ document.getElementById(
 "overlay"
 );
 
+
 drawer.classList.remove(
 "open"
 );
@@ -4170,6 +3642,7 @@ const popup=
 document.getElementById(
 "videoPopup"
 );
+
 
 if(
 popup.classList.contains(
@@ -4192,6 +3665,7 @@ adjustVideoPlaylistHeight,
 
 }
 
+
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
@@ -4212,8 +3686,10 @@ typeof player.getPlaylistIndex!==
 )
 return;
 
+
 const current=
 player.getPlaylistIndex();
+
 
 document
 .querySelectorAll(
@@ -4245,10 +3721,12 @@ typeof player.getVideoData!==
 )
 return;
 
+
 try{
 
 const d=
 player.getVideoData();
+
 
 if(
 !d ||
@@ -4256,10 +3734,12 @@ if(
 )
 return;
 
+
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+
 
 if(d.title){
 
@@ -4270,6 +3750,7 @@ d.title;
 
 }
 
+
 if(d.author){
 
 document.getElementById(
@@ -4278,6 +3759,7 @@ document.getElementById(
 d.author;
 
 }
+
 
 highlightActiveTrack();
 
@@ -4300,6 +3782,7 @@ document.getElementById(
 "videoPopup"
 );
 
+
 if(
 popup &&
 popup.classList.contains(
@@ -4311,6 +3794,7 @@ return;
 
 }
 
+
 const drawer=
 document.getElementById(
 "drawer"
@@ -4321,10 +3805,12 @@ document.getElementById(
 "overlay"
 );
 
+
 const opening=
 !drawer.classList.contains(
 "open"
 );
+
 
 drawer.classList.toggle(
 "open",
@@ -4335,6 +3821,7 @@ overlay.classList.toggle(
 "active",
 opening
 );
+
 
 if(
 opening &&
@@ -4357,6 +3844,7 @@ handleDeviceOrientation,
 300
 );
 
+
 setTimeout(
 adjustVideoPlaylistHeight,
 600
@@ -4364,43 +3852,31 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-   FINAL BEHAVIOUR
+   FINAL TOUCH FIX
 ========================================================= */
 
 /*
-POPUP CLOSED
---------------
-Full Screen button = HIDDEN
-Rotate button       = HIDDEN
+PORTRAIT:
 
+1. video-popup = pointer-events:none
+2. #yt = pointer-events:none
+3. video-overlay = pointer-events:none
+4. video-playlist = pointer-events:auto
+5. video-song-list = native vertical scrolling
+6. video-song-item = click only
 
-POPUP OPEN
---------------
-Full Screen button = VISIBLE
-Rotate button       = HIDDEN
+LANDSCAPE:
 
-Video touch         = OFF
-Playlist touch      = ON
+1. video-popup = pointer-events:auto
+2. #yt = pointer-events:auto
+3. #yt = touch-action:auto
+4. video playlist hidden
+5. YouTube iframe gets full touch control
 
+So:
 
-FULLSCREEN
---------------
-Full Screen button = HIDDEN
-Rotate button       = VISIBLE
-
-Video touch         = ON
-Playlist            = HIDDEN
-
-
-ROTATE
---------------
-Attempts:
-screen.orientation.lock("landscape")
-or
-screen.orientation.lock("portrait")
-
-If browser does not support orientation lock,
-CSS landscape-mode fallback is used.
+PORTRAIT  -> Video touch OFF
+LANDSCAPE -> Video touch ON
 */
 
 </script>
