@@ -315,7 +315,7 @@ backface-visibility:hidden;
 opacity:1;
 visibility:visible;
 
-pointer-events:auto!important;
+pointer-events:none!important;
 
 transform:scale(1);
 }
@@ -337,15 +337,11 @@ border:0;
 
 display:block;
 
-pointer-events:none;
+pointer-events:none!important;
 
-touch-action:none;
+touch-action:none!important;
 
 z-index:1702;
-}
-
-.video-popup.active #yt{
-pointer-events:auto;
 }
 
 
@@ -1418,7 +1414,7 @@ font-size:9px;
    SMALL HEIGHT
 ========================================================= */
 
-@media(max-height:700px) and (orientation:portrait){
+@media(max-height:700px){
 
 .video-section{
 top:3%;
@@ -1491,176 +1487,6 @@ font-size:10px;
 font-size:8.5px;
 }
 
-}
-
-
-/* =========================================================
-   LANDSCAPE (শুধুমাত্র ল্যান্ডস্কেপ মোডে ফুলস্ক্রিন থাকবে)
-========================================================= */
-
-@media(orientation:landscape){
-
-.video-section{
-top:0!important;
-left:0!important;
-
-transform:none!important;
-
-width:100vw!important;
-height:100vh!important;
-
-display:block!important;
-
-pointer-events:none!important;
-
-z-index:1700!important;
-}
-
-.video-popup.active{
-position:absolute!important;
-
-top:0!important;
-left:0!important;
-
-width:100vw!important;
-height:100vh!important;
-
-aspect-ratio:auto!important;
-
-transform:none!important;
-
-border-radius:0!important;
-
-border:none!important;
-
-box-shadow:none!important;
-
-pointer-events:auto!important;
-
-z-index:1701!important;
-}
-
-#yt{
-position:absolute!important;
-
-top:0!important;
-left:0!important;
-
-width:100%!important;
-height:100%!important;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-
-z-index:1702!important;
-}
-
-.video-playlist{
-display:none!important;
-}
-
-.app{
-display:none!important;
-}
-
-.top-widgets{
-display:none!important;
-}
-
-}
-
-
-/* =========================================================
-   ANDROID LANDSCAPE
-========================================================= */
-
-body.android-device.landscape-mode .video-section{
-top:0!important;
-left:0!important;
-
-transform:none!important;
-
-width:100vw!important;
-height:100vh!important;
-
-pointer-events:none!important;
-
-z-index:1700!important;
-}
-
-body.android-device.landscape-mode .video-popup.active{
-position:absolute!important;
-
-top:0!important;
-left:0!important;
-
-width:100vw!important;
-height:100vh!important;
-
-aspect-ratio:auto!important;
-
-transform:none!important;
-
-border-radius:0!important;
-
-border:none!important;
-
-box-shadow:none!important;
-
-pointer-events:auto!important;
-
-z-index:1701!important;
-}
-
-body.android-device.landscape-mode #yt{
-position:absolute!important;
-
-inset:0!important;
-
-width:100%!important;
-height:100%!important;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-
-z-index:1702!important;
-}
-
-body.android-device.landscape-mode .video-playlist,
-body.android-device.landscape-mode .app,
-body.android-device.landscape-mode .top-widgets{
-display:none!important;
-}
-
-
-/* =========================================================
-   DESKTOP ONLY VIEW
-========================================================= */
-
-@media(min-width: 1024px) {
-
-  /* মেইন কন্ট্রোল প্লেয়ার নিচে ফিক্সড থাকবে */
-  .app {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 25px !important;
-    left: 0 !important;
-    width: 100% !important;
-    padding: 0 !important;
-    justify-content: center !important;
-    z-index: 1600 !important;
-  }
-
-  .player {
-    width: 440px !important;
-    pointer-events: auto !important;
-  }
-
-  .top-widgets {
-    display: flex !important;
-  }
 }
 
 </style>
@@ -1768,7 +1594,7 @@ Loading...
 </div>
 
 
-<!-- OLD DRAWER -->
+<!-- DRAWER -->
 
 <div
 class="drawer-overlay"
@@ -1986,17 +1812,7 @@ let player=null;
 
 let playing=false;
 
-
-/* =========================================================
-   ORIGINAL PLAYLIST
-========================================================= */
-
 let playlistItems=[];
-
-
-/* =========================================================
-   NEW SORTED PLAYLIST
-========================================================= */
 
 let sortedPlaylistItems=[];
 
@@ -2005,11 +1821,6 @@ let sortedPlaylistData=[];
 let currentSortedIndex=0;
 
 let sortingReady=false;
-
-
-/* =========================================================
-   OTHER VARIABLES
-========================================================= */
 
 let volTimer=null;
 
@@ -2024,17 +1835,6 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
-
-
-const isAndroidDevice=
-/Android/i.test(navigator.userAgent);
-
-if(isAndroidDevice){
-
-document.body.classList.add(
-"android-device"
-);
-}
 
 
 /* =========================================================
@@ -2157,11 +1957,9 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
-
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
-
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -2185,9 +1983,7 @@ updateInfo();
 }
 
 else if(
-
 e.data===YT.PlayerState.PAUSED
-
 ){
 
 playing=false;
@@ -2206,9 +2002,7 @@ cover.classList.remove(
 }
 
 else if(
-
 e.data===YT.PlayerState.ENDED
-
 ){
 
 playing=false;
@@ -2224,15 +2018,10 @@ cover.classList.remove(
 "spinning"
 );
 
-
 if(!changingTrack){
 
 setTimeout(
-()=>{
-
-nextSong();
-
-},
+nextSong,
 100
 );
 
@@ -2258,31 +2047,25 @@ if(playing){
 player.pauseVideo();
 
 }
-else{
 
-if(
-sortedPlaylistItems.length>0 &&
-sortingReady
-){
+else{
 
 const currentId=
 player.getVideoData() &&
 player.getVideoData().video_id;
 
-if(!currentId){
+if(
+sortedPlaylistItems.length>0 &&
+sortingReady &&
+!currentId
+){
 
 player.loadVideoById(
 sortedPlaylistItems[currentSortedIndex]
 );
 
 }
-else{
 
-player.playVideo();
-
-}
-
-}
 else{
 
 player.playVideo();
@@ -2328,7 +2111,6 @@ const opening=
 "active"
 );
 
-
 if(opening){
 
 popup.classList.add(
@@ -2350,7 +2132,6 @@ document.body.classList.add(
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
-
 if(
 sortingReady &&
 sortedPlaylistData.length>0
@@ -2359,12 +2140,12 @@ sortedPlaylistData.length>0
 renderVideoPlaylist();
 
 }
+
 else{
 
 loadPlaylistItems();
 
 }
-
 
 requestAnimationFrame(()=>{
 
@@ -2375,7 +2156,6 @@ adjustVideoPlaylistHeight();
 });
 
 });
-
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -2388,6 +2168,7 @@ adjustVideoPlaylistHeight,
 );
 
 }
+
 else{
 
 popup.classList.remove(
@@ -2410,28 +2191,6 @@ iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
-
-}
-
-
-/* =========================================================
-   VIDEO PLAYLIST LOADER
-========================================================= */
-
-function loadVideoPlaylist(){
-
-if(
-sortingReady &&
-sortedPlaylistData.length>0
-){
-
-renderVideoPlaylist();
-
-return;
-
-}
-
-loadPlaylistItems();
 
 }
 
@@ -2469,23 +2228,11 @@ if(
 )
 return;
 
-
-if(
-window.innerWidth>
-window.innerHeight
-){
-
-return;
-
-}
-
-
 const popupRect=
 popup.getBoundingClientRect();
 
 const playerRect=
 playerCard.getBoundingClientRect();
-
 
 const top=
 popupRect.bottom+1;
@@ -2495,7 +2242,6 @@ playerRect.top-20;
 
 let available=
 bottom-top;
-
 
 if(available>70){
 
@@ -2518,6 +2264,7 @@ playlist.style.maxHeight=
 safeHeight+"px";
 
 }
+
 else{
 
 playlist.style.height=
@@ -2527,7 +2274,6 @@ playlist.style.maxHeight=
 "70px";
 
 }
-
 
 requestAnimationFrame(()=>{
 
@@ -2569,8 +2315,6 @@ window.addEventListener(
 "resize",
 ()=>{
 
-handleDeviceOrientation();
-
 setTimeout(
 adjustVideoPlaylistHeight,
 50
@@ -2583,135 +2327,6 @@ adjustVideoPlaylistHeight,
 
 }
 );
-
-
-window.addEventListener(
-"orientationchange",
-()=>{
-
-setTimeout(
-handleDeviceOrientation,
-150
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-300
-);
-
-}
-);
-
-
-/* =========================================================
-   ORIENTATION
-========================================================= */
-
-function handleDeviceOrientation(){
-
-const isLandscape=
-window.innerWidth>
-window.innerHeight;
-
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const overlay=
-document.getElementById(
-"videoOverlay"
-);
-
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const iconSvg=
-document.getElementById(
-"videoToggleIcon"
-);
-
-
-if(isLandscape){
-
-if(
-popup &&
-!popup.classList.contains(
-"active"
-)
-){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-}
-
-if(videoPlaylist){
-
-videoPlaylist.classList.remove(
-"active"
-);
-
-}
-
-document.body.classList.add(
-"landscape-mode"
-);
-
-
-if(iconSvg){
-
-iconSvg.innerHTML=
-'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
-}
-
-}
-else{
-
-document.body.classList.remove(
-"landscape-mode"
-);
-
-
-if(
-popup &&
-popup.classList.contains(
-"active"
-)
-){
-
-videoPlaylist.classList.add(
-"active"
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-100
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-300
-);
-
-}
-
-}
-
-}
 
 
 /* =========================================================
@@ -2772,6 +2387,7 @@ volTimer
 }
 
 }
+
 else{
 
 wrapper.classList.add(
@@ -2803,7 +2419,7 @@ resetVolTimer();
 
 
 /* =========================================================
-   NEXT SONG - A-Z
+   NEXT SONG
 ========================================================= */
 
 function nextSong(){
@@ -2814,7 +2430,6 @@ sortedPlaylistItems.length===0
 )
 return;
 
-
 let currentId="";
 
 try{
@@ -2825,7 +2440,6 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
-
 
 if(currentId){
 
@@ -2842,15 +2456,12 @@ currentSortedIndex=found;
 
 }
 
-
 const nextIndex=
 (currentSortedIndex+1)%
 sortedPlaylistItems.length;
 
-
 currentSortedIndex=
 nextIndex;
-
 
 playSpecificTrack(
 nextIndex
@@ -2860,7 +2471,7 @@ nextIndex
 
 
 /* =========================================================
-   PREVIOUS SONG - A-Z
+   PREVIOUS SONG
 ========================================================= */
 
 function previousSong(){
@@ -2871,7 +2482,6 @@ sortedPlaylistItems.length===0
 )
 return;
 
-
 let currentId="";
 
 try{
@@ -2882,7 +2492,6 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
-
 
 if(currentId){
 
@@ -2899,16 +2508,13 @@ currentSortedIndex=found;
 
 }
 
-
 const previousIndex=
 (currentSortedIndex-1+
 sortedPlaylistItems.length)%
 sortedPlaylistItems.length;
 
-
 currentSortedIndex=
 previousIndex;
-
 
 playSpecificTrack(
 previousIndex
@@ -2928,34 +2534,26 @@ if(
 )
 return;
 
-
 const data=
 sortedPlaylistData[index];
-
-const id=
-data.id;
 
 document.getElementById(
 "cover"
 ).src=
-`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-
+`https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
 
 document.getElementById(
 "title"
 ).textContent=
 data.title || "YouTube Music";
 
-
 document.getElementById(
 "artist"
 ).textContent=
 data.artist || "YouTube Music";
 
-
 currentSortedIndex=
 index;
-
 
 highlightActiveTrack();
 
@@ -2978,7 +2576,6 @@ document.getElementById(
 "seek"
 );
 
-
 playerCard.addEventListener(
 "pointerdown",
 e=>{
@@ -2999,7 +2596,6 @@ swipeActive=true;
 }
 );
 
-
 playerCard.addEventListener(
 "pointerup",
 e=>{
@@ -3007,18 +2603,17 @@ e=>{
 if(!swipeActive)
 return;
 
+const endX=
+e.clientX;
 
-const endX=e.clientX;
-
-const endY=e.clientY;
-
+const endY=
+e.clientY;
 
 const dx=
 endX-swipeStartX;
 
 const dy=
 endY-swipeStartY;
-
 
 if(swipeFromSeek){
 
@@ -3028,7 +2623,6 @@ return;
 
 }
 
-
 if(Math.abs(dx)<50){
 
 swipeActive=false;
@@ -3036,7 +2630,6 @@ swipeActive=false;
 return;
 
 }
-
 
 if(
 Math.abs(dy)>
@@ -3049,24 +2642,22 @@ return;
 
 }
 
-
 if(dx<-50){
 
 nextSong();
 
 }
+
 else if(dx>50){
 
 previousSong();
 
 }
 
-
 swipeActive=false;
 
 }
 );
-
 
 playerCard.addEventListener(
 "pointercancel",
@@ -3090,10 +2681,8 @@ el
 const rect=
 el.getBoundingClientRect();
 
-
 if(!rect.width)
 return 0;
-
 
 return Math.max(
 0,
@@ -3106,14 +2695,12 @@ rect.width
 
 }
 
-
 function updateSeekVisual(pos){
 
 document.getElementById(
 "fill"
 ).style.width=
 (pos*100)+"%";
-
 
 if(
 player &&
@@ -3123,7 +2710,6 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
-
 
 if(duration){
 
@@ -3147,7 +2733,6 @@ duration
 
 }
 
-
 seekElement.addEventListener(
 "pointerdown",
 e=>{
@@ -3158,7 +2743,6 @@ e.stopPropagation();
 
 isDragging=true;
 
-
 try{
 
 seekElement.setPointerCapture(
@@ -3168,7 +2752,6 @@ e.pointerId
 }
 catch(err){}
 
-
 updateSeekVisual(
 getSeekPosition(
 e.clientX,
@@ -3181,7 +2764,6 @@ seekElement
 passive:false
 }
 );
-
 
 seekElement.addEventListener(
 "pointermove",
@@ -3190,11 +2772,9 @@ e=>{
 if(!isDragging)
 return;
 
-
 e.preventDefault();
 
 e.stopPropagation();
-
 
 updateSeekVisual(
 getSeekPosition(
@@ -3209,7 +2789,6 @@ passive:false
 }
 );
 
-
 seekElement.addEventListener(
 "pointerup",
 e=>{
@@ -3217,11 +2796,9 @@ e=>{
 if(!isDragging)
 return;
 
-
 e.preventDefault();
 
 e.stopPropagation();
-
 
 const pos=
 getSeekPosition(
@@ -3229,9 +2806,7 @@ e.clientX,
 seekElement
 );
 
-
 updateSeekVisual(pos);
-
 
 if(
 player &&
@@ -3241,7 +2816,6 @@ typeof player.getDuration===
 
 const duration=
 player.getDuration();
-
 
 if(duration){
 
@@ -3254,9 +2828,7 @@ true
 
 }
 
-
 isDragging=false;
-
 
 try{
 
@@ -3283,14 +2855,12 @@ function updateProgress(){
 if(isDragging)
 return;
 
-
 if(
 !player ||
 typeof player.getCurrentTime!==
 "function"
 )
 return;
-
 
 try{
 
@@ -3300,10 +2870,8 @@ player.getCurrentTime();
 const duration=
 player.getDuration();
 
-
 if(!duration)
 return;
-
 
 const pos=
 Math.max(
@@ -3314,18 +2882,15 @@ current/duration
 )
 );
 
-
 document.getElementById(
 "fill"
 ).style.width=
 (pos*100)+"%";
 
-
 document.getElementById(
 "current"
 ).textContent=
 format(current);
-
 
 document.getElementById(
 "duration"
@@ -3353,9 +2918,7 @@ return "0:00";
 
 }
 
-
 s=Math.floor(s);
-
 
 return Math.floor(s/60)+":"+
 String(
@@ -3368,7 +2931,7 @@ s%60
 
 
 /* =========================================================
-   LOAD ORIGINAL PLAYLIST
+   LOAD PLAYLIST
 ========================================================= */
 
 function loadPlaylistItems(){
@@ -3380,10 +2943,8 @@ typeof player.getPlaylist!==
 )
 return;
 
-
 const ids=
 player.getPlaylist();
-
 
 if(
 !ids ||
@@ -3399,17 +2960,14 @@ return;
 
 }
 
-
 playlistItems=
 ids;
-
 
 sortedPlaylistItems=[];
 
 sortedPlaylistData=[];
 
 sortingReady=false;
-
 
 const requests=
 playlistItems.map(
@@ -3471,7 +3029,6 @@ originalIndex:index
 
 });
 
-
 Promise.all(requests)
 .then(
 results=>{
@@ -3490,7 +3047,6 @@ sensitivity:"base"
 
 });
 
-
 sortedPlaylistData=
 results;
 
@@ -3500,7 +3056,6 @@ item=>item.id
 );
 
 sortingReady=true;
-
 
 let currentId="";
 
@@ -3512,7 +3067,6 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
-
 
 if(currentId){
 
@@ -3530,7 +3084,6 @@ currentIndex;
 
 }
 
-
 renderSortedPlaylists();
 
 highlightActiveTrack();
@@ -3546,7 +3099,7 @@ updateInfo();
 
 
 /* =========================================================
-   RENDER SORTED PLAYLISTS
+   RENDER PLAYLISTS
 ========================================================= */
 
 function renderSortedPlaylists(){
@@ -3559,7 +3112,7 @@ renderVideoPlaylist();
 
 
 /* =========================================================
-   MAIN DRAWER SORTED PLAYLIST
+   MAIN PLAYLIST
 ========================================================= */
 
 function renderMainPlaylist(){
@@ -3569,9 +3122,7 @@ document.getElementById(
 "songList"
 );
 
-
 list.innerHTML="";
-
 
 sortedPlaylistData.forEach(
 (data,index)=>{
@@ -3581,14 +3132,11 @@ document.createElement(
 "div"
 );
 
-
 item.className=
 "song-item";
 
-
 item.id=
 `track-${index}`;
-
 
 item.onclick=()=>{
 
@@ -3597,7 +3145,6 @@ index
 );
 
 };
-
 
 item.innerHTML=`
 
@@ -3610,14 +3157,12 @@ alt="thumb"
 
 <div
 class="song-item-title"
-id="title-${index}"
 >
 ${escapeHtml(data.title)}
 </div>
 
 <div
 class="song-item-artist"
-id="artist-${index}"
 >
 ${escapeHtml(data.artist)}
 </div>
@@ -3625,7 +3170,6 @@ ${escapeHtml(data.artist)}
 </div>
 
 `;
-
 
 list.appendChild(item);
 
@@ -3635,7 +3179,7 @@ list.appendChild(item);
 
 
 /* =========================================================
-   VIDEO PLAYLIST SORTED
+   VIDEO PLAYLIST
 ========================================================= */
 
 function renderVideoPlaylist(){
@@ -3644,7 +3188,6 @@ const list=
 document.getElementById(
 "videoSongList"
 );
-
 
 if(
 !sortedPlaylistData ||
@@ -3668,9 +3211,7 @@ return;
 
 }
 
-
 list.innerHTML="";
-
 
 sortedPlaylistData.forEach(
 (data,index)=>{
@@ -3680,14 +3221,11 @@ document.createElement(
 "div"
 );
 
-
 item.className=
 "video-song-item";
 
-
 item.id=
 `video-track-${index}`;
-
 
 item.addEventListener(
 "click",
@@ -3707,7 +3245,6 @@ passive:false
 }
 );
 
-
 item.innerHTML=`
 
 <img
@@ -3720,14 +3257,12 @@ draggable="false"
 
 <div
 class="video-song-title"
-id="video-title-${index}"
 >
 ${escapeHtml(data.title)}
 </div>
 
 <div
 class="video-song-artist"
-id="video-artist-${index}"
 >
 ${escapeHtml(data.artist)}
 </div>
@@ -3736,14 +3271,11 @@ ${escapeHtml(data.artist)}
 
 `;
 
-
 list.appendChild(item);
 
 });
 
-
 highlightVideoActiveTrack();
-
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -3777,7 +3309,6 @@ return div.innerHTML;
 
 /* =========================================================
    PLAY SPECIFIC TRACK
-   A-Z ORDER
 ========================================================= */
 
 function playSpecificTrack(
@@ -3790,23 +3321,18 @@ if(
 )
 return;
 
-
 const data=
 sortedPlaylistData[index];
 
 const id=
 data.id;
 
-
 currentSortedIndex=
 index;
 
-
 forceUpdateUI(index);
 
-
 changingTrack=true;
-
 
 try{
 
@@ -3823,7 +3349,6 @@ return;
 
 }
 
-
 setTimeout(
 ()=>{
 
@@ -3832,7 +3357,6 @@ changingTrack=false;
 },
 700
 );
-
 
 const drawer=
 document.getElementById(
@@ -3844,7 +3368,6 @@ document.getElementById(
 "overlay"
 );
 
-
 drawer.classList.remove(
 "open"
 );
@@ -3853,12 +3376,10 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-
 const popup=
 document.getElementById(
 "videoPopup"
 );
-
 
 if(
 popup.classList.contains(
@@ -3886,7 +3407,6 @@ adjustVideoPlaylistHeight,
 
 }
 
-
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
@@ -3906,7 +3426,6 @@ sortedPlaylistItems.length===0
 )
 return;
 
-
 let currentId="";
 
 try{
@@ -3917,7 +3436,6 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
-
 
 document
 .querySelectorAll(
@@ -3948,7 +3466,6 @@ sortedPlaylistItems.length===0
 )
 return;
 
-
 let currentId="";
 
 try{
@@ -3959,7 +3476,6 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
-
 
 document
 .querySelectorAll(
@@ -3979,7 +3495,7 @@ sortedPlaylistItems[index]===currentId
 
 
 /* =========================================================
-   UPDATE MAIN INFO
+   UPDATE INFO
 ========================================================= */
 
 function updateInfo(){
@@ -3991,12 +3507,10 @@ typeof player.getVideoData!==
 )
 return;
 
-
 try{
 
 const d=
 player.getVideoData();
-
 
 if(
 !d ||
@@ -4004,12 +3518,10 @@ if(
 )
 return;
 
-
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
-
 
 if(d.title){
 
@@ -4020,7 +3532,6 @@ d.title;
 
 }
 
-
 if(d.author){
 
 document.getElementById(
@@ -4029,7 +3540,6 @@ document.getElementById(
 d.author;
 
 }
-
 
 const sortedIndex=
 sortedPlaylistItems.indexOf(
@@ -4043,7 +3553,6 @@ sortedIndex;
 
 }
 
-
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
@@ -4055,7 +3564,7 @@ catch(e){}
 
 
 /* =========================================================
-   OLD DRAWER
+   DRAWER
 ========================================================= */
 
 function toggleDrawer(){
@@ -4064,7 +3573,6 @@ const popup=
 document.getElementById(
 "videoPopup"
 );
-
 
 if(
 popup &&
@@ -4077,7 +3585,6 @@ return;
 
 }
 
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -4088,12 +3595,10 @@ document.getElementById(
 "overlay"
 );
 
-
 const opening=
 !drawer.classList.contains(
 "open"
 );
-
 
 drawer.classList.toggle(
 "open",
@@ -4104,7 +3609,6 @@ overlay.classList.toggle(
 "active",
 opening
 );
-
 
 if(
 opening &&
@@ -4121,12 +3625,6 @@ loadPlaylistItems();
 /* =========================================================
    INITIAL
 ========================================================= */
-
-setTimeout(
-handleDeviceOrientation,
-300
-);
-
 
 setTimeout(
 adjustVideoPlaylistHeight,
