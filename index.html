@@ -965,57 +965,245 @@ transform:scale(.90);
 }
 
 /* =========================================================
-DESKTOP POPUP MODE (ডেস্কটপ লেআউট আপডেট)
+DESKTOP
+VIDEO OFF = ORIGINAL STYLE
+VIDEO ON = SPECIAL ARRANGEMENT
+ONLY 769PX+
 ========================================================= */
 
-@media(min-width: 769px) {
+@media(min-width:769px){
 
-    .app {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 40px;
-    }
+/* ---------------------------------------------------------
+DESKTOP NORMAL / VIDEO OFF
+--------------------------------------------------------- */
 
-    .player {
-        width: 380px;
-        margin-right: auto;
-        transform: none;
-    }
+.app{
+height:100dvh;
+width:100%;
 
-    .video-section {
-        position: static;
-        transform: none;
-        width: 420px;
-        opacity: 1;
-        display: block;
-        margin-left: 30px;
-        pointer-events: auto;
-    }
+display:flex;
 
-    .video-popup {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transform: scale(1);
-        position: relative;
-        margin-bottom: 10px;
-    }
+align-items:flex-end;
+justify-content:center;
 
-    .video-playlist {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        position: relative;
-        max-height: 380px;
-        height: auto;
-    }
+padding:0 40px 65px;
+}
 
-    .top-widgets {
-        display: none;
-    }
+.player{
+width:min(560px,70vw);
+
+height:120px;
+
+margin:0;
+
+transform:none;
+}
+
+.video-section{
+display:none;
+
+position:fixed;
+
+top:4vh;
+right:4vw;
+left:auto;
+
+transform:none;
+
+width:min(620px,42vw);
+
+height:92dvh;
+
+z-index:1700;
+
+pointer-events:none;
+}
+
+.top-widgets{
+display:flex;
+
+top:14px;
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+
+/* ---------------------------------------------------------
+DESKTOP VIDEO ON
+--------------------------------------------------------- */
+
+body.popup-active .app{
+
+display:flex;
+
+align-items:flex-end;
+justify-content:flex-start;
+
+padding:0 40px 65px;
+}
+
+body.popup-active .player{
+
+width:min(760px,52vw);
+
+margin:0;
+
+transform:none;
+
+z-index:1601;
+}
+
+body.popup-active .video-section{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:stretch;
+
+position:fixed;
+
+top:4vh;
+right:4vw;
+left:auto;
+
+transform:none;
+
+width:min(620px,42vw);
+
+height:92dvh;
+
+opacity:1;
+
+pointer-events:none;
+
+z-index:1700;
+}
+
+body.popup-active .video-popup{
+
+position:relative;
+
+width:100%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+flex-shrink:0;
+
+margin:0;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+transform:scale(1);
+
+border-radius:18px;
+
+z-index:1701;
+}
+
+body.popup-active .video-playlist{
+
+width:100%;
+
+flex:1;
+
+min-height:100px;
+
+height:auto;
+
+max-height:none;
+
+margin-top:10px;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+position:relative;
+
+z-index:1705;
+
+overflow:hidden;
+}
+
+body.popup-active .video-song-list{
+
+height:calc(100% - 27px);
+
+overflow-y:auto;
+
+overflow-x:hidden;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
+}
+
+body.popup-active .top-widgets{
+
+display:flex;
+
+top:14px;
+
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
+body.popup-active .controls{
+z-index:1610;
+}
+
+body.popup-active .video-song-item{
+cursor:pointer;
+pointer-events:auto;
+}
+
+
+/* ---------------------------------------------------------
+DESKTOP SMALL HEIGHT
+--------------------------------------------------------- */
+
+@media(max-height:800px){
+
+body.popup-active .video-section{
+
+top:3vh;
+
+height:94dvh;
+}
+
+body.popup-active .video-popup{
+
+border-radius:15px;
+}
+
+body.popup-active .video-playlist{
+
+margin-top:7px;
+}
 
 }
+
+}
+
 
 /* =========================================================
 MOBILE
@@ -1151,6 +1339,7 @@ font-size:9px;
 
 }
 
+
 /* =========================================================
 SMALL HEIGHT
 ========================================================= */
@@ -1184,6 +1373,7 @@ height:40px;
 }
 
 }
+
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1225,6 +1415,7 @@ font-size:8.5px;
 }
 
 }
+
 
 /* =========================================================
 DRAWER
@@ -1501,6 +1692,7 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </div>
 
+
 <!-- =========================================================
 VIDEO OVERLAY
 ========================================================= -->
@@ -1509,6 +1701,7 @@ VIDEO OVERLAY
 id="videoOverlay"
 class="video-overlay">
 </div>
+
 
 <!-- =========================================================
 VIDEO SECTION
@@ -1527,6 +1720,7 @@ class="video-popup"
 <div id="yt"></div>
 
 </div>
+
 
 <!-- VIDEO PLAYLIST -->
 
@@ -1560,6 +1754,7 @@ Loading...
 </div>
 
 </div>
+
 
 <!-- =========================================================
 DRAWER
@@ -1611,6 +1806,7 @@ Loading...
 </div>
 
 </div>
+
 
 <!-- =========================================================
 MAIN APP
@@ -1700,6 +1896,7 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
+
 <button
 class="play"
 id="play"
@@ -1718,6 +1915,7 @@ M8 5v14l11-7z
 </svg>
 
 </button>
+
 
 <div class="vol-container">
 
@@ -1761,6 +1959,7 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -1786,6 +1985,7 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
+
 
 /* =========================================================
 BD TIME
@@ -1822,6 +2022,7 @@ setInterval(
 updateBDTime,
 1000
 );
+
 
 /* =========================================================
 YOUTUBE API
@@ -1871,6 +2072,7 @@ onStateChange:state
 
 }
 
+
 /* =========================================================
 READY
 ========================================================= */
@@ -1885,6 +2087,7 @@ updateProgress,
 );
 
 }
+
 
 /* =========================================================
 PLAYER STATE
@@ -1974,6 +2177,7 @@ nextSong,
 
 }
 
+
 /* =========================================================
 PLAY / PAUSE
 ========================================================= */
@@ -2020,6 +2224,7 @@ player.playVideo();
 catch(e){}
 
 }
+
 
 /* =========================================================
 VIDEO POPUP
@@ -2135,8 +2340,10 @@ iconSvg.innerHTML=
 
 }
 
+
 /* =========================================================
 VIDEO PLAYLIST HEIGHT
+DESKTOP + MOBILE SEPARATE
 ========================================================= */
 
 function adjustVideoPlaylistHeight(){
@@ -2156,6 +2363,11 @@ document.getElementById(
 "playerCard"
 );
 
+const videoSection=
+document.getElementById(
+"videoSection"
+);
+
 if(
 !popup ||
 !playlist ||
@@ -2167,6 +2379,48 @@ if(
 !popup.classList.contains("active")
 )
 return;
+
+
+/* =========================================================
+DESKTOP
+========================================================= */
+
+if(window.innerWidth>=769){
+
+if(!videoSection)
+return;
+
+const sectionRect=
+videoSection.getBoundingClientRect();
+
+const popupRect=
+popup.getBoundingClientRect();
+
+const available=
+sectionRect.bottom -
+popupRect.bottom -
+10;
+
+const safeHeight=
+Math.max(
+100,
+available
+);
+
+playlist.style.height=
+safeHeight+"px";
+
+playlist.style.maxHeight=
+safeHeight+"px";
+
+return;
+
+}
+
+
+/* =========================================================
+MOBILE / SMALL SCREEN
+========================================================= */
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -2243,6 +2497,7 @@ correctedHeight+"px";
 
 }
 
+
 /* =========================================================
 RESIZE
 ========================================================= */
@@ -2263,6 +2518,7 @@ adjustVideoPlaylistHeight,
 
 }
 );
+
 
 /* =========================================================
 VOLUME
@@ -2350,6 +2606,7 @@ resetVolTimer();
 
 }
 
+
 /* =========================================================
 NEXT SONG
 ========================================================= */
@@ -2400,6 +2657,7 @@ nextIndex
 );
 
 }
+
 
 /* =========================================================
 PREVIOUS SONG
@@ -2453,6 +2711,7 @@ previousIndex
 
 }
 
+
 /* =========================================================
 FORCE UPDATE UI
 ========================================================= */
@@ -2488,6 +2747,7 @@ highlightActiveTrack();
 highlightVideoActiveTrack();
 
 }
+
 
 /* =========================================================
 SWIPE
@@ -2591,6 +2851,7 @@ swipeActive=false;
 
 }
 );
+
 
 /* =========================================================
 SEEK
@@ -2761,6 +3022,7 @@ passive:false
 }
 );
 
+
 /* =========================================================
 PROGRESS
 ========================================================= */
@@ -2817,6 +3079,7 @@ catch(e){}
 
 }
 
+
 /* =========================================================
 FORMAT
 ========================================================= */
@@ -2842,6 +3105,7 @@ s%60
 );
 
 }
+
 
 /* =========================================================
 LOAD PLAYLIST
@@ -3006,6 +3270,7 @@ updateInfo();
 
 }
 
+
 /* =========================================================
 RENDER PLAYLISTS
 ========================================================= */
@@ -3016,6 +3281,7 @@ renderMainPlaylist();
 renderVideoPlaylist();
 
 }
+
 
 /* =========================================================
 MAIN PLAYLIST
@@ -3078,6 +3344,7 @@ list.appendChild(item);
 });
 
 }
+
 
 /* =========================================================
 VIDEO PLAYLIST
@@ -3180,6 +3447,7 @@ adjustVideoPlaylistHeight,
 
 }
 
+
 /* =========================================================
 ESCAPE HTML
 ========================================================= */
@@ -3199,6 +3467,7 @@ div.textContent=text;
 return div.innerHTML;
 
 }
+
 
 /* =========================================================
 PLAY SPECIFIC TRACK
@@ -3295,10 +3564,11 @@ adjustVideoPlaylistHeight,
 }
 
 highlightActiveTrack();
-highlightVideoActiveTask=highlightVideoActiveTrack;
+
 highlightVideoActiveTrack();
 
 }
+
 
 /* =========================================================
 ACTIVE MAIN TRACK
@@ -3339,6 +3609,7 @@ sortedPlaylistItems[index]===currentId
 
 }
 
+
 /* =========================================================
 ACTIVE VIDEO TRACK
 ========================================================= */
@@ -3377,6 +3648,7 @@ sortedPlaylistItems[index]===currentId
 });
 
 }
+
 
 /* =========================================================
 UPDATE INFO
@@ -3442,6 +3714,7 @@ catch(e){}
 
 }
 
+
 /* =========================================================
 DRAWER
 ========================================================= */
@@ -3499,6 +3772,7 @@ loadPlaylistItems();
 }
 
 }
+
 
 /* =========================================================
 INITIAL
