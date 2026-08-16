@@ -346,6 +346,59 @@ z-index:1702;
 
 
 /* =========================================================
+   VIDEO FULLSCREEN BUTTON
+========================================================= */
+
+.video-fullscreen-btn{
+position:absolute;
+
+right:10px;
+bottom:10px;
+
+width:38px;
+height:38px;
+
+border:1px solid rgba(255,255,255,.25);
+
+border-radius:50%;
+
+background:rgba(0,0,0,.55);
+
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
+display:none;
+
+align-items:center;
+justify-content:center;
+
+color:#fff;
+
+cursor:pointer;
+
+z-index:1800;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+box-shadow:
+0 4px 15px rgba(0,0,0,.4);
+}
+
+.video-fullscreen-btn svg{
+width:20px;
+height:20px;
+
+fill:#fff;
+}
+
+.video-fullscreen-btn:active{
+transform:scale(.9);
+}
+
+
+/* =========================================================
    VIDEO PLAYLIST
 ========================================================= */
 
@@ -893,19 +946,6 @@ width:20px;
 height:20px;
 
 fill:#fff;
-}
-
-
-/* =========================================================
-   FULLSCREEN BUTTON
-========================================================= */
-
-.fullscreen-btn{
-display:flex;
-}
-
-body.iphone-device .fullscreen-btn{
-display:none!important;
 }
 
 
@@ -1504,155 +1544,35 @@ font-size:8.5px;
 
 
 /* =========================================================
-   FULLSCREEN VIDEO
+   LANDSCAPE
+   IMPORTANT:
+   এখানে আর popup নিজে থেকে OPEN হবে না।
 ========================================================= */
-
-#yt:fullscreen{
-width:100vw!important;
-height:100vh!important;
-
-background:#000!important;
-}
-
-#yt:-webkit-full-screen{
-width:100vw!important;
-height:100vh!important;
-
-background:#000!important;
-}
-
-
-/*
-Fullscreen mode-এ iframe ছাড়া অন্য কিছু দেখা যাবে না।
-*/
-
-body.video-fullscreen .video-popup{
-border-radius:0!important;
-border:none!important;
-
-box-shadow:none!important;
-}
-
-body.video-fullscreen .video-section{
-top:0!important;
-left:0!important;
-
-width:100vw!important;
-height:100vh!important;
-
-transform:none!important;
-}
-
-body.video-fullscreen .video-popup{
-width:100vw!important;
-height:100vh!important;
-
-aspect-ratio:auto!important;
-}
-
-body.video-fullscreen #yt{
-width:100%!important;
-height:100%!important;
-
-pointer-events:auto!important;
-touch-action:auto!important;
-}
-
-
-/*
-IMPORTANT:
-Landscape হলেই আর fullscreen হবে না।
-Normal website visible থাকবে।
-*/
 
 @media(orientation:landscape){
 
 .video-section{
-top:6%;
-left:50%;
-
-transform:translateX(-50%);
-
-width:min(700px,90vw);
-
-height:auto;
-
-display:flex;
-
-pointer-events:none!important;
-
-z-index:1700;
-}
-
-.video-popup{
-position:relative;
-
-width:100%;
-
-height:auto;
-
-aspect-ratio:16 / 9;
-
-border-radius:18px;
-
-pointer-events:none!important;
-
-transform:scale(.92);
-}
-
-.video-popup.active{
-transform:scale(1);
-
-pointer-events:none!important;
-}
-
-#yt{
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-pointer-events:none!important;
-
-touch-action:none!important;
-}
-
-.video-playlist{
-display:block;
-}
-
-.app{
-display:flex;
-}
-
-.top-widgets{
-display:flex;
-}
-
-}
-
-
-/*
-Actual fullscreen হলে শুধু video fullscreen।
-*/
-
-@media(orientation:landscape){
-
-body.video-fullscreen .video-section{
 top:0!important;
 left:0!important;
+
+transform:none!important;
 
 width:100vw!important;
 height:100vh!important;
 
-transform:none!important;
-
 display:block!important;
+
+pointer-events:none!important;
+
+z-index:1700!important;
 }
 
-body.video-fullscreen .video-popup{
+
+/*
+শুধু popup ACTIVE হলে full screen layout হবে।
+*/
+
+.video-popup.active{
 position:absolute!important;
 
 top:0!important;
@@ -1670,12 +1590,17 @@ border-radius:0!important;
 border:none!important;
 
 box-shadow:none!important;
+
+pointer-events:auto!important;
+
+z-index:1701!important;
 }
 
-body.video-fullscreen #yt{
+#yt{
 position:absolute!important;
 
-inset:0!important;
+top:0!important;
+left:0!important;
 
 width:100%!important;
 height:100%!important;
@@ -1683,11 +1608,11 @@ height:100%!important;
 pointer-events:auto!important;
 
 touch-action:auto!important;
+
+z-index:1702!important;
 }
 
-body.video-fullscreen .video-playlist,
-body.video-fullscreen .app,
-body.video-fullscreen .top-widgets{
+.video-playlist{
 display:none!important;
 }
 
@@ -1695,64 +1620,10 @@ display:none!important;
 
 
 /* =========================================================
-   ANDROID LANDSCAPE NORMAL MODE
+   ANDROID LANDSCAPE
 ========================================================= */
 
-body.android-device.landscape-mode:not(.video-fullscreen) .video-section{
-top:6%!important;
-left:50%!important;
-
-transform:translateX(-50%)!important;
-
-width:min(700px,90vw)!important;
-height:auto!important;
-
-pointer-events:none!important;
-
-z-index:1700!important;
-}
-
-body.android-device.landscape-mode:not(.video-fullscreen) .video-popup{
-position:relative!important;
-
-top:auto!important;
-left:auto!important;
-
-width:100%!important;
-height:auto!important;
-
-aspect-ratio:16 / 9!important;
-
-transform:scale(.92)!important;
-
-border-radius:18px!important;
-
-border:1px solid rgba(255,255,255,.25)!important;
-
-box-shadow:0 25px 50px rgba(0,0,0,.7)!important;
-
-pointer-events:none!important;
-}
-
-body.android-device.landscape-mode:not(.video-fullscreen) #yt{
-position:absolute!important;
-
-inset:0!important;
-
-width:100%!important;
-height:100%!important;
-
-pointer-events:none!important;
-
-touch-action:none!important;
-}
-
-
-/* =========================================================
-   ANDROID ACTUAL FULLSCREEN
-========================================================= */
-
-body.android-device.video-fullscreen .video-section{
+body.android-device.landscape-mode .video-section{
 top:0!important;
 left:0!important;
 
@@ -1766,7 +1637,7 @@ pointer-events:none!important;
 z-index:1700!important;
 }
 
-body.android-device.video-fullscreen .video-popup{
+body.android-device.landscape-mode .video-popup.active{
 position:absolute!important;
 
 top:0!important;
@@ -1785,12 +1656,12 @@ border:none!important;
 
 box-shadow:none!important;
 
-pointer-events:none!important;
+pointer-events:auto!important;
 
 z-index:1701!important;
 }
 
-body.android-device.video-fullscreen #yt{
+body.android-device.landscape-mode #yt{
 position:absolute!important;
 
 inset:0!important;
@@ -1805,10 +1676,57 @@ touch-action:auto!important;
 z-index:1702!important;
 }
 
-body.android-device.video-fullscreen .video-playlist,
-body.android-device.video-fullscreen .app,
-body.android-device.video-fullscreen .top-widgets{
+body.android-device.landscape-mode .video-playlist,
+body.android-device.landscape-mode .app,
+body.android-device.landscape-mode .top-widgets{
 display:none!important;
+}
+
+
+/* =========================================================
+   REAL FULLSCREEN
+========================================================= */
+
+.video-popup.real-fullscreen{
+position:fixed!important;
+
+inset:0!important;
+
+width:100vw!important;
+
+height:100vh!important;
+
+max-width:none!important;
+
+aspect-ratio:auto!important;
+
+border-radius:0!important;
+
+border:none!important;
+
+transform:none!important;
+
+z-index:99999!important;
+
+background:#000!important;
+}
+
+.video-popup.real-fullscreen #yt{
+position:absolute!important;
+
+inset:0!important;
+
+width:100%!important;
+
+height:100%!important;
+
+pointer-events:auto!important;
+
+touch-action:auto!important;
+}
+
+.video-popup.real-fullscreen .video-fullscreen-btn{
+display:flex!important;
 }
 
 </style>
@@ -1877,6 +1795,29 @@ class="video-popup"
 >
 
 <div id="yt"></div>
+
+
+<!-- FULLSCREEN BUTTON -->
+
+<button
+id="videoFullscreenBtn"
+class="video-fullscreen-btn"
+onclick="toggleVideoFullscreen(event)"
+title="Fullscreen"
+>
+
+<svg
+id="fullscreenIcon"
+viewBox="0 0 24 24"
+>
+
+<path d="
+M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z
+"/>
+
+</svg>
+
+</button>
 
 </div>
 
@@ -2039,9 +1980,6 @@ id="fill">
 
 <div class="controls">
 
-
-<!-- VIDEO POPUP BUTTON -->
-
 <button
 class="btn"
 id="videoToggleBtn"
@@ -2063,31 +2001,6 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 </button>
 
 
-<!-- FULLSCREEN BUTTON -->
-
-<button
-class="btn fullscreen-btn"
-id="fullscreenBtn"
-onclick="fullscreenVideo()"
-title="Fullscreen Video"
->
-
-<svg
-id="fullscreenIcon"
-viewBox="0 0 24 24"
->
-
-<path d="
-M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zm0-12h-3v2h3v3h2V5h-5v2z
-"/>
-
-</svg>
-
-</button>
-
-
-<!-- PLAY BUTTON -->
-
 <button
 class="play"
 id="play"
@@ -2107,8 +2020,6 @@ M8 5v14l11-7z
 
 </button>
 
-
-<!-- VOLUME -->
 
 <div class="vol-container">
 
@@ -2166,49 +2077,6 @@ let playing=false;
 
 
 /* =========================================================
-   DEVICE DETECTION
-========================================================= */
-
-const isAndroidDevice=
-/Android/i.test(navigator.userAgent);
-
-const isIPhone=
-/iPhone/i.test(navigator.userAgent);
-
-if(isAndroidDevice){
-
-document.body.classList.add(
-"android-device"
-);
-
-}
-
-if(isIPhone){
-
-document.body.classList.add(
-"iphone-device"
-);
-
-
-/*
-iPhone-এ fullscreen button force hide
-*/
-
-const fsBtn=
-document.getElementById(
-"fullscreenBtn"
-);
-
-if(fsBtn){
-
-fsBtn.style.display="none";
-
-}
-
-}
-
-
-/* =========================================================
    ORIGINAL PLAYLIST
 ========================================================= */
 
@@ -2245,6 +2113,74 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
+
+
+/* =========================================================
+   DEVICE DETECTION
+========================================================= */
+
+const isAndroidDevice=
+/Android/i.test(navigator.userAgent);
+
+
+/*
+শুধু iPhone-এ fullscreen button hide হবে।
+
+iPad-কে এখানে iPhone হিসেবে ধরা হচ্ছে না।
+*/
+
+const isIPhone=
+/iPhone|iPod/i.test(navigator.userAgent);
+
+
+if(isAndroidDevice){
+
+document.body.classList.add(
+"android-device"
+);
+
+
+/*
+Android landscape class শুধু তখন ব্যবহার হবে
+যখন popup manually active/fullscreen হয়েছে।
+*/
+
+}
+
+
+/* =========================================================
+   SHOW FULLSCREEN BUTTON
+========================================================= */
+
+function setupFullscreenButton(){
+
+const btn=
+document.getElementById(
+"videoFullscreenBtn"
+);
+
+if(!btn)
+return;
+
+
+/*
+iPhone-এ button পুরোপুরি hide।
+*/
+
+if(isIPhone){
+
+btn.style.display="none";
+
+}
+else{
+
+btn.style.display="flex";
+
+}
+
+}
+
+setupFullscreenButton();
 
 
 /* =========================================================
@@ -2539,6 +2475,24 @@ const opening=
 );
 
 
+/*
+Fullscreen থাকলে আগে বের করা হবে।
+*/
+
+if(
+document.fullscreenElement
+){
+
+try{
+
+document.exitFullscreen();
+
+}
+catch(e){}
+
+}
+
+
 if(opening){
 
 popup.classList.add(
@@ -2617,7 +2571,7 @@ document.body.classList.remove(
 );
 
 iconSvg.innerHTML=
-'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1-1v-3.5l4 4v-11l-4 4z"/>';
+'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
 
@@ -2625,13 +2579,22 @@ iconSvg.innerHTML=
 
 
 /* =========================================================
-   FULLSCREEN VIDEO
+   FULLSCREEN
 ========================================================= */
 
-function fullscreenVideo(){
+async function toggleVideoFullscreen(e){
+
+if(e){
+
+e.preventDefault();
+
+e.stopPropagation();
+
+}
+
 
 /*
-iPhone-এ কিছুই করবে না
+iPhone-এ কোনো কাজ করবে না।
 */
 
 if(isIPhone){
@@ -2640,218 +2603,75 @@ return;
 
 }
 
-if(!player){
-
-return;
-
-}
-
-
-/*
-Video popup automatically open করে fullscreen করার আগে
-*/
 
 const popup=
 document.getElementById(
 "videoPopup"
 );
 
-const overlay=
-document.getElementById(
-"videoOverlay"
-);
-
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
-
-
-if(
-!popup.classList.contains(
-"active"
-)
-){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
-
-videoPlaylist.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-if(
-sortingReady &&
-sortedPlaylistData.length>0
-){
-
-renderVideoPlaylist();
-
-}
-
-setTimeout(
-adjustVideoPlaylistHeight,
-100
-);
-
-}
-
-
-/*
-YouTube iframe
-*/
-
-const iframe=
-player.getIframe();
-
-
-if(!iframe){
-
+if(!popup)
 return;
 
-}
-
-
-/*
-Already fullscreen হলে বের করে দাও
-*/
-
-if(
-document.fullscreenElement ||
-document.webkitFullscreenElement
-){
-
-exitVideoFullscreen();
-
-return;
-
-}
-
-
-/*
-Browser fullscreen API
-*/
 
 try{
 
 if(
-iframe.requestFullscreen
-){
-
-const result=
-iframe.requestFullscreen();
-
-if(
-result &&
-typeof result.then==="function"
-){
-
-result.then(()=>{
-
-document.body.classList.add(
-"video-fullscreen"
-);
-
-})
-.catch(()=>{
-
-});
-
-}
-
-return;
-
-}
-
-
-/*
-Safari/WebKit fallback
-*/
-
-if(
-iframe.webkitRequestFullscreen
-){
-
-iframe.webkitRequestFullscreen();
-
-document.body.classList.add(
-"video-fullscreen"
-);
-
-return;
-
-}
-
-
-/*
-Older browser fallback
-*/
-
-if(
-iframe.webkitEnterFullscreen
-){
-
-iframe.webkitEnterFullscreen();
-
-document.body.classList.add(
-"video-fullscreen"
-);
-
-}
-
-}
-catch(e){}
-
-}
-
-
-/* =========================================================
-   EXIT VIDEO FULLSCREEN
-========================================================= */
-
-function exitVideoFullscreen(){
-
-try{
-
-if(
-document.exitFullscreen
-&&
 document.fullscreenElement
 ){
 
-document.exitFullscreen();
+await document.exitFullscreen();
 
 return;
 
 }
+
+
+/*
+Popup active না থাকলে আগে popup open হবে।
+*/
 
 if(
-document.webkitExitFullscreen
-&&
-document.webkitFullscreenElement
+!popup.classList.contains("active")
 ){
 
-document.webkitExitFullscreen();
+toggleVideoPopup();
 
-return;
-
-}
-
-}
-catch(e){}
-
-document.body.classList.remove(
-"video-fullscreen"
+await new Promise(
+resolve=>setTimeout(resolve,100)
 );
+
+}
+
+
+/*
+Fullscreen target হিসেবে popup।
+*/
+
+if(
+popup.requestFullscreen
+){
+
+await popup.requestFullscreen();
+
+}
+
+else if(
+popup.webkitRequestFullscreen
+){
+
+popup.webkitRequestFullscreen();
+
+}
+
+}
+catch(err){
+
+console.log(
+"Fullscreen error:",
+err
+);
+
+}
 
 }
 
@@ -2864,50 +2684,71 @@ document.addEventListener(
 "fullscreenchange",
 ()=>{
 
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const btn=
+document.getElementById(
+"videoFullscreenBtn"
+);
+
+if(!popup)
+return;
+
+
 if(
 document.fullscreenElement
 ){
 
-document.body.classList.add(
-"video-fullscreen"
+popup.classList.add(
+"real-fullscreen"
 );
+
+document.body.classList.add(
+"popup-active"
+);
+
+if(btn && !isIPhone){
+
+btn.style.display="flex";
+
+}
 
 }
 else{
 
-document.body.classList.remove(
-"video-fullscreen"
-);
-
-}
-
-}
+popup.classList.remove(
+"real-fullscreen"
 );
 
 
-document.addEventListener(
-"webkitfullscreenchange",
-()=>{
+/*
+Fullscreen থেকে বের হলেও popup open থাকবে।
+এখানে site-কে fullscreen করা হচ্ছে না।
+*/
 
 if(
-document.webkitFullscreenElement
+popup.classList.contains("active")
 ){
 
 document.body.classList.add(
-"video-fullscreen"
+"popup-active"
 );
 
 }
 else{
 
 document.body.classList.remove(
-"video-fullscreen"
+"popup-active"
 );
 
 }
 
 }
-);
+
+});
 
 
 /* =========================================================
@@ -2967,13 +2808,21 @@ return;
 
 
 /*
-Fullscreen হলে height calculation দরকার নেই
+Actual browser fullscreen হলে playlist দরকার নেই।
 */
 
 if(
-document.body.classList.contains(
-"video-fullscreen"
-)
+document.fullscreenElement
+){
+
+return;
+
+}
+
+
+if(
+window.innerWidth>
+window.innerHeight
 ){
 
 return;
@@ -3070,6 +2919,11 @@ window.addEventListener(
 "resize",
 ()=>{
 
+/*
+শুধু orientation class update হবে।
+কখনো popup নিজে থেকে open হবে না।
+*/
+
 handleDeviceOrientation();
 
 setTimeout(
@@ -3106,6 +2960,9 @@ adjustVideoPlaylistHeight,
 
 /* =========================================================
    ORIENTATION
+   IMPORTANT:
+   আগে এখানে landscape হলেই popup OPEN হচ্ছিল।
+   এখন সেটা পুরোপুরি বন্ধ।
 ========================================================= */
 
 function handleDeviceOrientation(){
@@ -3126,19 +2983,48 @@ document.getElementById(
 );
 
 
+if(!popup)
+return;
+
+
 /*
-IMPORTANT:
+শুধু manually opened popup-এর জন্য
+Android landscape class দেওয়া হবে।
 
-Landscape হলেই popup আর automatically open হবে না।
-
-আগের code-এর automatic popup logic এখানে রাখা হয়নি।
+Site খুললেই popup আর open হবে না।
 */
 
 if(isLandscape){
 
+if(
+popup.classList.contains("active")
+){
+
 document.body.classList.add(
 "landscape-mode"
 );
+
+if(videoPlaylist){
+
+videoPlaylist.classList.remove(
+"active"
+);
+
+}
+
+}
+else{
+
+/*
+সবচেয়ে গুরুত্বপূর্ণ fix:
+landscape হলেও popup খুলবে না।
+*/
+
+document.body.classList.remove(
+"landscape-mode"
+);
+
+}
 
 }
 else{
@@ -3148,16 +3034,9 @@ document.body.classList.remove(
 );
 
 
-/*
-Popup আগে থেকেই manually open থাকলে
-playlist আবার visible থাকবে।
-*/
-
 if(
-popup &&
-popup.classList.contains(
-"active"
-)
+popup.classList.contains("active") &&
+!document.fullscreenElement
 ){
 
 videoPlaylist.classList.add(
@@ -3978,6 +3857,10 @@ item=>item.id
 sortingReady=true;
 
 
+/*
+প্রথম song
+*/
+
 let currentId="";
 
 try{
@@ -4006,6 +3889,10 @@ currentIndex;
 
 }
 
+
+/*
+UI বানানো
+*/
 
 renderSortedPlaylists();
 
@@ -4274,12 +4161,25 @@ const id=
 data.id;
 
 
+/*
+Current sorted index
+*/
+
 currentSortedIndex=
 index;
 
 
+/*
+UI আগে update
+*/
+
 forceUpdateUI(index);
 
+
+/*
+YouTube original playlist order বাদ দিয়ে
+direct video ID load করছি।
+*/
 
 changingTrack=true;
 
@@ -4607,9 +4507,8 @@ loadPlaylistItems();
 ========================================================= */
 
 /*
-IMPORTANT:
-এখানে শুধু orientation class set হবে।
-কোনো popup automatically open হবে না।
+শুধু orientation state check করবে।
+Popup আর auto-open করবে না।
 */
 
 setTimeout(
@@ -4617,9 +4516,20 @@ handleDeviceOrientation,
 300
 );
 
+
 setTimeout(
 adjustVideoPlaylistHeight,
 600
+);
+
+
+/*
+Fullscreen button আবার নিশ্চিত করা।
+*/
+
+setTimeout(
+setupFullscreenButton,
+500
 );
 
 </script>
