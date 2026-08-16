@@ -1630,6 +1630,39 @@ body.android-device.landscape-mode .top-widgets{
 display:none!important;
 }
 
+
+/* =========================================================
+   DESKTOP ONLY VIEW (ডেস্কটপের জন্য আলাদা লেআউট)
+========================================================= */
+
+@media(min-width: 1024px) {
+  .video-section {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 650px !important;
+    flex-direction: row !important;
+    gap: 20px !important;
+    align-items: flex-start !important;
+    pointer-events: auto !important;
+  }
+
+  .video-popup {
+    width: 100% !important;
+    max-width: 650px !important;
+    pointer-events: auto !important;
+  }
+
+  .app {
+    display: flex !important;
+    padding-bottom: 30px !important;
+  }
+
+  .player {
+    width: 440px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -2318,20 +2351,6 @@ iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 
-/*
-=========================================================
-FIRST OPEN FIX
-=========================================================
-আগের code-এ এখানে loadVideoPlaylist() call হচ্ছিল,
-কিন্তু function ছিল না।
-
-তাই প্রথমবার popup খুললে JavaScript error হচ্ছিল
-এবং height adjustment execute হচ্ছিল না।
-
-এখন existing rendered playlist ব্যবহার করছি।
-=========================================================
-*/
-
 if(
 sortingReady &&
 sortedPlaylistData.length>0
@@ -2346,11 +2365,6 @@ loadPlaylistItems();
 
 }
 
-
-/*
-Browser-কে আগে layout করতে দেওয়া হচ্ছে।
-তারপর height calculate হবে।
-*/
 
 requestAnimationFrame(()=>{
 
@@ -2406,15 +2420,6 @@ iconSvg.innerHTML=
 
 function loadVideoPlaylist(){
 
-/*
-Safe wrapper.
-
-যদি playlist already loaded থাকে,
-শুধু render করবে।
-
-না থাকলে main playlist loader চালাবে।
-*/
-
 if(
 sortingReady &&
 sortedPlaylistData.length>0
@@ -2465,10 +2470,6 @@ if(
 return;
 
 
-/*
-Landscape-এ playlist hidden।
-*/
-
 if(
 window.innerWidth>
 window.innerHeight
@@ -2495,11 +2496,6 @@ playerRect.top-20;
 let available=
 bottom-top;
 
-
-/*
-Player-এর control area-এর ওপর playlist
-যাতে না উঠে যায়।
-*/
 
 if(available>70){
 
@@ -2532,15 +2528,6 @@ playlist.style.maxHeight=
 
 }
 
-
-/*
-=========================================================
-FINAL SAFETY CHECK
-=========================================================
-Playlist-এর actual bottom যদি player-এর top-এর কাছে
-বা তার নিচে চলে যায়, height আরও কমিয়ে দিচ্ছি।
-=========================================================
-*/
 
 requestAnimationFrame(()=>{
 
@@ -3417,21 +3404,12 @@ playlistItems=
 ids;
 
 
-/*
-আগের data reset
-*/
-
 sortedPlaylistItems=[];
 
 sortedPlaylistData=[];
 
 sortingReady=false;
 
-
-/*
-প্রথমে সব video-এর title fetch করি।
-সব title পাওয়া গেলে A-Z sort হবে।
-*/
 
 const requests=
 playlistItems.map(
@@ -3498,12 +3476,6 @@ Promise.all(requests)
 .then(
 results=>{
 
-/*
-=========================================================
- A-Z SORT
-=========================================================
-*/
-
 results.sort(
 (a,b)=>{
 
@@ -3529,10 +3501,6 @@ item=>item.id
 
 sortingReady=true;
 
-
-/*
-প্রথম song
-*/
 
 let currentId="";
 
@@ -3562,10 +3530,6 @@ currentIndex;
 
 }
 
-
-/*
-UI বানানো
-*/
 
 renderSortedPlaylists();
 
@@ -3834,27 +3798,12 @@ const id=
 data.id;
 
 
-/*
-Current sorted index
-*/
-
 currentSortedIndex=
 index;
 
 
-/*
-UI আগে update
-*/
-
 forceUpdateUI(index);
 
-
-/*
-YouTube original playlist order বাদ দিয়ে
-direct video ID load করছি।
-
-তাই A-Z order-ই follow করবে।
-*/
 
 changingTrack=true;
 
@@ -3885,8 +3834,6 @@ changingTrack=false;
 );
 
 
-/* OLD DRAWER CLOSE */
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -3906,8 +3853,6 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-
-/* VIDEO PLAYLIST STAYS OPEN */
 
 const popup=
 document.getElementById(
@@ -4085,10 +4030,6 @@ d.author;
 
 }
 
-
-/*
-Current video-এর A-Z index
-*/
 
 const sortedIndex=
 sortedPlaylistItems.indexOf(
