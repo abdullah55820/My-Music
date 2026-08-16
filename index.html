@@ -1632,34 +1632,72 @@ display:none!important;
 
 
 /* =========================================================
-   DESKTOP ONLY VIEW (ডেস্কটপের জন্য আলাদা লেআউট)
+   DESKTOP ONLY VIEW (ডেস্কটপের জন্য সম্পূর্ণ লেআউট)
 ========================================================= */
 
 @media(min-width: 1024px) {
+
+  /* ডেস্কটপে স্ক্রিনের মাঝখানে ভিডিও এবং প্লেলিস্ট পাশাপাশি দেখাবে */
   .video-section {
-    top: 50% !important;
+    position: fixed !important;
+    top: 42% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 650px !important;
+    width: 850px !important;
+    max-width: 95vw !important;
+    display: flex !important;
     flex-direction: row !important;
     gap: 20px !important;
     align-items: flex-start !important;
+    justify-content: center !important;
     pointer-events: auto !important;
   }
 
   .video-popup {
-    width: 100% !important;
-    max-width: 650px !important;
+    width: 520px !important;
+    aspect-ratio: 16 / 9 !important;
+    flex-shrink: 0 !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* ডেস্কটপে ভিডিওর ডানপাশে বা পাশেই প্লেলিস্ট শো করবে */
+  .video-playlist {
+    display: block !important;
+    width: 310px !important;
+    height: 292px !important;
+    max-height: 292px !important;
+    margin-top: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     pointer-events: auto !important;
   }
 
+  .video-song-list {
+    height: calc(100% - 27px) !important;
+    pointer-events: auto !important;
+  }
+
+  /* ডেস্কটপে মেইন মিউজিক প্লেয়ার এবং কন্ট্রোলগুলো নিচে দৃশ্যমান রাখা */
   .app {
     display: flex !important;
-    padding-bottom: 30px !important;
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    z-index: 1600 !important;
   }
 
   .player {
     width: 440px !important;
+    pointer-events: auto !important;
+  }
+
+  .top-widgets {
+    display: flex !important;
   }
 }
 
