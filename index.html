@@ -963,9 +963,6 @@ transform:scale(.90);
 
 /* =========================================================
 DESKTOP
-VIDEO OFF = ORIGINAL STYLE
-VIDEO ON = WHOLE PLAYER MOVES LEFT
-ONLY 769PX+
 ========================================================= */
 
 @media(min-width:769px){
@@ -1046,15 +1043,15 @@ padding:0 40px 65px;
 body.popup-active .player{
 
 /*
-   পুরো controller বামে যাবে।
-   ভিতরের controls আলাদা করে সরানো হচ্ছে না।
+   পুরো controller এখন আগের থেকে একটু ডানে।
+   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
 */
 
 width:min(760px,52vw);
 
 margin:0;
 
-transform:translateX(-55px) scale(.92);
+transform:translateX(-5px) scale(.92);
 
 transform-origin:left bottom;
 
@@ -1161,7 +1158,16 @@ display:flex;
 
 top:14px;
 
-left:50%;
+/*
+   BD time controller-এর visual center-এর
+   ঠিক ওপর থাকবে।
+   Controller = 760px পর্যন্ত, scale = .92,
+   তাই center হিসাব করে position করা হয়েছে।
+*/
+
+left:calc(
+35px + min(349.6px, 23.92vw)
+);
 
 transform:translateX(-50%);
 
@@ -1173,9 +1179,9 @@ display:none;
 }
 
 /*
-   এখানে কোনো transform নেই।
-   তাই পুরো controller-এর ভিতরের item
-   আলাদা করে বামে যাবে না।
+   কোনো transform নেই।
+   তাই controller-এর ভিতরের item
+   আলাদা করে বামে/ডানে যাবে না।
 */
 
 body.popup-active .controls{
@@ -2354,7 +2360,6 @@ iconSvg.innerHTML=
 
 /* =========================================================
 VIDEO PLAYLIST HEIGHT
-DESKTOP + MOBILE SEPARATE
 ========================================================= */
 
 function adjustVideoPlaylistHeight(){
