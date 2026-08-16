@@ -784,9 +784,6 @@ flex-shrink:0;
 position:relative;
 
 z-index:1610;
-
-transition:
-transform .35s cubic-bezier(.2,.8,.2,1);
 }
 
 .btn{
@@ -967,7 +964,7 @@ transform:scale(.90);
 /* =========================================================
 DESKTOP
 VIDEO OFF = ORIGINAL STYLE
-VIDEO ON = SPECIAL ARRANGEMENT
+VIDEO ON = WHOLE PLAYER MOVES LEFT
 ONLY 769PX+
 ========================================================= */
 
@@ -997,6 +994,7 @@ height:120px;
 margin:0;
 
 transform:none;
+transform-origin:left bottom;
 }
 
 .video-section{
@@ -1047,50 +1045,21 @@ padding:0 40px 65px;
 
 body.popup-active .player{
 
+/*
+   পুরো controller বামে যাবে।
+   ভিতরের controls আলাদা করে সরানো হচ্ছে না।
+*/
+
 width:min(760px,52vw);
 
 margin:0;
 
-transform:none;
+transform:translateX(-55px) scale(.92);
+
+transform-origin:left bottom;
 
 z-index:1601;
 }
-
-/* =========================================================
-FIX 1:
-DESKTOP VIDEO ON → BD TIME MOVES LEFT
-SO IT DOES NOT OVERLAP VIDEO POPUP
-========================================================= */
-
-body.popup-active .top-widgets{
-
-display:flex;
-
-top:14px;
-
-/* আগে 50% ছিল */
-left:25%;
-
-transform:translateX(-50%);
-
-z-index:2500;
-}
-
-
-/* =========================================================
-FIX 2:
-DESKTOP VIDEO ON → FULL CONTROLLER MOVES LEFT
-SO IT DOES NOT OVERLAP PLAYLIST
-========================================================= */
-
-body.popup-active .controls{
-
-z-index:1610;
-
-/* পুরো controls group বামে */
-transform:translateX(-45px);
-}
-
 
 body.popup-active .video-section{
 
@@ -1186,8 +1155,31 @@ touch-action:pan-y;
 -webkit-overflow-scrolling:touch;
 }
 
+body.popup-active .top-widgets{
+
+display:flex;
+
+top:14px;
+
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
 body.popup-active .playlist-toggle-btn{
 display:none;
+}
+
+/*
+   এখানে কোনো transform নেই।
+   তাই পুরো controller-এর ভিতরের item
+   আলাদা করে বামে যাবে না।
+*/
+
+body.popup-active .controls{
+z-index:1610;
 }
 
 body.popup-active .video-song-item{
