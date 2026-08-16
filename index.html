@@ -966,16 +966,9 @@ transform:scale(.90);
 
 /* =========================================================
 DESKTOP
-VIDEO OFF = ORIGINAL STYLE
-VIDEO ON = SPECIAL ARRANGEMENT
-ONLY 769PX+
 ========================================================= */
 
 @media(min-width:769px){
-
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
 
 .app{
 height:100dvh;
@@ -1031,9 +1024,9 @@ z-index:2500;
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
 DESKTOP VIDEO ON
---------------------------------------------------------- */
+========================================================= */
 
 body.popup-active .app{
 
@@ -1167,8 +1160,18 @@ body.popup-active .playlist-toggle-btn{
 display:none;
 }
 
+
+/* =========================================================
+ONLY MOVE TIME + CONTROLS LEFT
+VIDEO / PLAYLIST UNCHANGED
+========================================================= */
+
+body.popup-active .middle{
+transform:translateX(-35px);
+}
+
 body.popup-active .controls{
-z-index:1610;
+transform:translateX(-35px);
 }
 
 body.popup-active .video-song-item{
@@ -1177,9 +1180,9 @@ pointer-events:auto;
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
 DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
+========================================================= */
 
 @media(max-height:800px){
 
@@ -1655,22 +1658,12 @@ margin-top:.5px;
 
 <div class="bg"></div>
 
-<!-- =========================================================
-TOP WIDGETS
-========================================================= -->
-
 <div class="top-widgets">
 
 <div class="bd-time">
-
 <span>BD</span>
-
 <span class="live-dot"></span>
-
-<span id="bdTimeVal">
---:--:-- --
-</span>
-
+<span id="bdTimeVal">--:--:-- --</span>
 </div>
 
 <button
@@ -1679,11 +1672,9 @@ onclick="toggleDrawer()"
 >
 
 <svg viewBox="0 0 24 24">
-
 <path d="
 M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 "/>
-
 </svg>
 
 <span>Playlist</span>
@@ -1693,19 +1684,11 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 </div>
 
 
-<!-- =========================================================
-VIDEO OVERLAY
-========================================================= -->
-
 <div
 id="videoOverlay"
 class="video-overlay">
 </div>
 
-
-<!-- =========================================================
-VIDEO SECTION
-========================================================= -->
 
 <div
 class="video-section"
@@ -1721,8 +1704,6 @@ class="video-popup"
 
 </div>
 
-
-<!-- VIDEO PLAYLIST -->
 
 <div
 id="videoPlaylist"
@@ -1755,10 +1736,6 @@ Loading...
 
 </div>
 
-
-<!-- =========================================================
-DRAWER
-========================================================= -->
 
 <div
 class="drawer-overlay"
@@ -1807,10 +1784,6 @@ Loading...
 
 </div>
 
-
-<!-- =========================================================
-MAIN APP
-========================================================= -->
 
 <div class="app">
 
@@ -1994,21 +1967,14 @@ BD TIME
 function updateBDTime(){
 
 const options={
-
 timeZone:"Asia/Dhaka",
-
 hour:"2-digit",
 minute:"2-digit",
 second:"2-digit",
-
 hour12:true
-
 };
 
-document.getElementById(
-"bdTimeVal"
-).textContent=
-
+document.getElementById("bdTimeVal").textContent=
 new Intl.DateTimeFormat(
 "en-US",
 options
@@ -2040,32 +2006,21 @@ height:"100%",
 playerVars:{
 
 autoplay:0,
-
 controls:1,
-
 disablekb:0,
-
 fs:1,
-
 modestbranding:1,
-
 playsinline:1,
-
 rel:0,
-
 iv_load_policy:3,
-
 listType:"playlist",
-
 list:PLAYLIST_ID
 
 },
 
 events:{
-
 onReady:ready,
 onStateChange:state
-
 }
 
 });
@@ -2095,14 +2050,9 @@ PLAYER STATE
 
 function state(e){
 
-const cover=
-document.getElementById("cover");
-
-const playBtn=
-document.getElementById("play");
-
-const playIcon=
-document.getElementById("play-icon");
+const cover=document.getElementById("cover");
+const playBtn=document.getElementById("play");
+const playIcon=document.getElementById("play-icon");
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
@@ -2113,16 +2063,12 @@ e.data===YT.PlayerState.PLAYING
 
 playing=true;
 
-playBtn.classList.add(
-"playing"
-);
+playBtn.classList.add("playing");
 
 playIcon.innerHTML=
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add(
-"spinning"
-);
+cover.classList.add("spinning");
 
 updateInfo();
 
@@ -2134,16 +2080,12 @@ e.data===YT.PlayerState.PAUSED
 
 playing=false;
 
-playBtn.classList.remove(
-"playing"
-);
+playBtn.classList.remove("playing");
 
 playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
 
 }
 
@@ -2153,16 +2095,12 @@ e.data===YT.PlayerState.ENDED
 
 playing=false;
 
-playBtn.classList.remove(
-"playing"
-);
+playBtn.classList.remove("playing");
 
 playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove(
-"spinning"
-);
+cover.classList.remove("spinning");
 
 if(!changingTrack){
 
@@ -2233,47 +2171,27 @@ VIDEO POPUP
 function toggleVideoPopup(){
 
 const popup=
-document.getElementById(
-"videoPopup"
-);
+document.getElementById("videoPopup");
 
 const overlay=
-document.getElementById(
-"videoOverlay"
-);
+document.getElementById("videoOverlay");
 
 const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
+document.getElementById("videoPlaylist");
 
 const iconSvg=
-document.getElementById(
-"videoToggleIcon"
-);
+document.getElementById("videoToggleIcon");
 
 const opening=
-!popup.classList.contains(
-"active"
-);
+!popup.classList.contains("active");
 
 if(opening){
 
-popup.classList.add(
-"active"
-);
+popup.classList.add("active");
+overlay.classList.add("active");
+videoPlaylist.classList.add("active");
 
-overlay.classList.add(
-"active"
-);
-
-videoPlaylist.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
+document.body.classList.add("popup-active");
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
@@ -2286,7 +2204,6 @@ sortedPlaylistData.length>0
 renderVideoPlaylist();
 
 }
-
 else{
 
 loadPlaylistItems();
@@ -2317,21 +2234,11 @@ adjustVideoPlaylistHeight,
 
 else{
 
-popup.classList.remove(
-"active"
-);
+popup.classList.remove("active");
+overlay.classList.remove("active");
+videoPlaylist.classList.remove("active");
 
-overlay.classList.remove(
-"active"
-);
-
-videoPlaylist.classList.remove(
-"active"
-);
-
-document.body.classList.remove(
-"popup-active"
-);
+document.body.classList.remove("popup-active");
 
 iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
@@ -2343,30 +2250,14 @@ iconSvg.innerHTML=
 
 /* =========================================================
 VIDEO PLAYLIST HEIGHT
-DESKTOP + MOBILE SEPARATE
 ========================================================= */
 
 function adjustVideoPlaylistHeight(){
 
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const playlist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const playerCard=
-document.getElementById(
-"playerCard"
-);
-
-const videoSection=
-document.getElementById(
-"videoSection"
-);
+const popup=document.getElementById("videoPopup");
+const playlist=document.getElementById("videoPlaylist");
+const playerCard=document.getElementById("playerCard");
+const videoSection=document.getElementById("videoSection");
 
 if(
 !popup ||
@@ -2379,11 +2270,6 @@ if(
 !popup.classList.contains("active")
 )
 return;
-
-
-/* =========================================================
-DESKTOP
-========================================================= */
 
 if(window.innerWidth>=769){
 
@@ -2416,11 +2302,6 @@ safeHeight+"px";
 return;
 
 }
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -2527,23 +2408,15 @@ VOLUME
 function resetVolTimer(){
 
 if(volTimer){
-
-clearTimeout(
-volTimer
-);
-
+clearTimeout(volTimer);
 }
 
 volTimer=setTimeout(
 ()=>{
 
 document
-.getElementById(
-"volWrapper"
-)
-.classList.remove(
-"active"
-);
+.getElementById("volWrapper")
+.classList.remove("active");
 
 },
 3000
@@ -2554,35 +2427,22 @@ document
 function toggleVolume(){
 
 const wrapper=
-document.getElementById(
-"volWrapper"
-);
+document.getElementById("volWrapper");
 
 if(
-wrapper.classList.contains(
-"active"
-)
+wrapper.classList.contains("active")
 ){
 
-wrapper.classList.remove(
-"active"
-);
+wrapper.classList.remove("active");
 
 if(volTimer){
-
-clearTimeout(
-volTimer
-);
-
+clearTimeout(volTimer);
 }
 
 }
-
 else{
 
-wrapper.classList.add(
-"active"
-);
+wrapper.classList.add("active");
 
 resetVolTimer();
 
@@ -2594,8 +2454,7 @@ function changeVolume(val){
 
 if(
 player &&
-typeof player.setVolume===
-"function"
+typeof player.setVolume==="function"
 ){
 
 player.setVolume(val);
@@ -2633,14 +2492,10 @@ catch(e){}
 if(currentId){
 
 const found=
-sortedPlaylistItems.indexOf(
-currentId
-);
+sortedPlaylistItems.indexOf(currentId);
 
 if(found!==-1){
-
 currentSortedIndex=found;
-
 }
 
 }
@@ -2649,12 +2504,9 @@ const nextIndex=
 (currentSortedIndex+1)%
 sortedPlaylistItems.length;
 
-currentSortedIndex=
-nextIndex;
+currentSortedIndex=nextIndex;
 
-playSpecificTrack(
-nextIndex
-);
+playSpecificTrack(nextIndex);
 
 }
 
@@ -2685,14 +2537,10 @@ catch(e){}
 if(currentId){
 
 const found=
-sortedPlaylistItems.indexOf(
-currentId
-);
+sortedPlaylistItems.indexOf(currentId);
 
 if(found!==-1){
-
 currentSortedIndex=found;
-
 }
 
 }
@@ -2702,12 +2550,9 @@ const previousIndex=
 sortedPlaylistItems.length)%
 sortedPlaylistItems.length;
 
-currentSortedIndex=
-previousIndex;
+currentSortedIndex=previousIndex;
 
-playSpecificTrack(
-previousIndex
-);
+playSpecificTrack(previousIndex);
 
 }
 
@@ -2726,19 +2571,13 @@ return;
 const data=
 sortedPlaylistData[index];
 
-document.getElementById(
-"cover"
-).src=
+document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
 
-document.getElementById(
-"title"
-).textContent=
+document.getElementById("title").textContent=
 data.title || "YouTube Music";
 
-document.getElementById(
-"artist"
-).textContent=
+document.getElementById("artist").textContent=
 data.artist || "YouTube Music";
 
 currentSortedIndex=index;
@@ -2754,14 +2593,10 @@ SWIPE
 ========================================================= */
 
 const playerCard=
-document.getElementById(
-"playerCard"
-);
+document.getElementById("playerCard");
 
 const seekElement=
-document.getElementById(
-"seek"
-);
+document.getElementById("seek");
 
 playerCard.addEventListener(
 "pointerdown",
@@ -2827,15 +2662,10 @@ return;
 }
 
 if(dx<-50){
-
 nextSong();
-
 }
-
 else if(dx>50){
-
 previousSong();
-
 }
 
 swipeActive=false;
@@ -2846,9 +2676,7 @@ swipeActive=false;
 playerCard.addEventListener(
 "pointercancel",
 ()=>{
-
 swipeActive=false;
-
 }
 );
 
@@ -2881,15 +2709,12 @@ rect.width
 
 function updateSeekVisual(pos){
 
-document.getElementById(
-"fill"
-).style.width=
+document.getElementById("fill").style.width=
 (pos*100)+"%";
 
 if(
 player &&
-typeof player.getDuration===
-"function"
+typeof player.getDuration==="function"
 ){
 
 const duration=
@@ -2897,14 +2722,10 @@ player.getDuration();
 
 if(duration){
 
-document.getElementById(
-"current"
-).textContent=
+document.getElementById("current").textContent=
 format(pos*duration);
 
-document.getElementById(
-"duration"
-).textContent=
+document.getElementById("duration").textContent=
 format(duration);
 
 }
@@ -2924,9 +2745,7 @@ isDragging=true;
 
 try{
 
-seekElement.setPointerCapture(
-e.pointerId
-);
+seekElement.setPointerCapture(e.pointerId);
 
 }
 catch(err){}
@@ -2987,8 +2806,7 @@ updateSeekVisual(pos);
 
 if(
 player &&
-typeof player.getDuration===
-"function"
+typeof player.getDuration==="function"
 ){
 
 const duration=
@@ -3034,8 +2852,7 @@ return;
 
 if(
 !player ||
-typeof player.getCurrentTime!==
-"function"
+typeof player.getCurrentTime!=="function"
 )
 return;
 
@@ -3059,19 +2876,13 @@ current/duration
 )
 );
 
-document.getElementById(
-"fill"
-).style.width=
+document.getElementById("fill").style.width=
 (pos*100)+"%";
 
-document.getElementById(
-"current"
-).textContent=
+document.getElementById("current").textContent=
 format(current);
 
-document.getElementById(
-"duration"
-).textContent=
+document.getElementById("duration").textContent=
 format(duration);
 
 }
@@ -3100,9 +2911,7 @@ s=Math.floor(s);
 return Math.floor(s/60)+":"+
 String(
 s%60
-).padStart(
-2,"0"
-);
+).padStart(2,"0");
 
 }
 
@@ -3115,8 +2924,7 @@ function loadPlaylistItems(){
 
 if(
 !player ||
-typeof player.getPlaylist!==
-"function"
+typeof player.getPlaylist!=="function"
 )
 return;
 
@@ -3245,14 +3053,11 @@ catch(e){}
 if(currentId){
 
 const currentIndex=
-sortedPlaylistItems.indexOf(
-currentId
-);
+sortedPlaylistItems.indexOf(currentId);
 
 if(currentIndex!==-1){
 
-currentSortedIndex=
-currentIndex;
+currentSortedIndex=currentIndex;
 
 }
 
@@ -3290,9 +3095,7 @@ MAIN PLAYLIST
 function renderMainPlaylist(){
 
 const list=
-document.getElementById(
-"songList"
-);
+document.getElementById("songList");
 
 list.innerHTML="";
 
@@ -3300,21 +3103,16 @@ sortedPlaylistData.forEach(
 (data,index)=>{
 
 const item=
-document.createElement(
-"div"
-);
+document.createElement("div");
 
-item.className=
-"song-item";
+item.className="song-item";
 
 item.id=
 `track-${index}`;
 
 item.onclick=()=>{
 
-playSpecificTrack(
-index
-);
+playSpecificTrack(index);
 
 };
 
@@ -3353,9 +3151,7 @@ VIDEO PLAYLIST
 function renderVideoPlaylist(){
 
 const list=
-document.getElementById(
-"videoSongList"
-);
+document.getElementById("videoSongList");
 
 if(
 !sortedPlaylistData ||
@@ -3385,12 +3181,9 @@ sortedPlaylistData.forEach(
 (data,index)=>{
 
 const item=
-document.createElement(
-"div"
-);
+document.createElement("div");
 
-item.className=
-"video-song-item";
+item.className="video-song-item";
 
 item.id=
 `video-track-${index}`;
@@ -3402,9 +3195,7 @@ function(e){
 e.preventDefault();
 e.stopPropagation();
 
-playSpecificTrack(
-index
-);
+playSpecificTrack(index);
 
 },
 {
@@ -3458,9 +3249,7 @@ if(!text)
 return "";
 
 const div=
-document.createElement(
-"div"
-);
+document.createElement("div");
 
 div.textContent=text;
 
@@ -3515,41 +3304,25 @@ changingTrack=false;
 );
 
 const drawer=
-document.getElementById(
-"drawer"
-);
+document.getElementById("drawer");
 
 const drawerOverlay=
-document.getElementById(
-"overlay"
-);
+document.getElementById("overlay");
 
-drawer.classList.remove(
-"open"
-);
+drawer.classList.remove("open");
 
-drawerOverlay.classList.remove(
-"active"
-);
+drawerOverlay.classList.remove("active");
 
 const popup=
-document.getElementById(
-"videoPopup"
-);
+document.getElementById("videoPopup");
 
 if(
-popup.classList.contains(
-"active"
-)
+popup.classList.contains("active")
 ){
 
 document
-.getElementById(
-"videoPlaylist"
-)
-.classList.add(
-"active"
-);
+.getElementById("videoPlaylist")
+.classList.add("active");
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -3564,7 +3337,6 @@ adjustVideoPlaylistHeight,
 }
 
 highlightActiveTrack();
-
 highlightVideoActiveTrack();
 
 }
@@ -3594,9 +3366,7 @@ player.getVideoData().video_id;
 catch(e){}
 
 document
-.querySelectorAll(
-".song-item"
-)
+.querySelectorAll(".song-item")
 .forEach(
 (item,index)=>{
 
@@ -3634,9 +3404,7 @@ player.getVideoData().video_id;
 catch(e){}
 
 document
-.querySelectorAll(
-".video-song-item"
-)
+.querySelectorAll(".video-song-item")
 .forEach(
 (item,index)=>{
 
@@ -3658,8 +3426,7 @@ function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData!==
-"function"
+typeof player.getVideoData!=="function"
 )
 return;
 
@@ -3674,31 +3441,23 @@ if(
 )
 return;
 
-document.getElementById(
-"cover"
-).src=
+document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 if(d.title){
 
-document.getElementById(
-"title"
-).textContent=d.title;
+document.getElementById("title").textContent=d.title;
 
 }
 
 if(d.author){
 
-document.getElementById(
-"artist"
-).textContent=d.author;
+document.getElementById("artist").textContent=d.author;
 
 }
 
 const sortedIndex=
-sortedPlaylistItems.indexOf(
-d.video_id
-);
+sortedPlaylistItems.indexOf(d.video_id);
 
 if(sortedIndex!==-1){
 
@@ -3722,15 +3481,11 @@ DRAWER
 function toggleDrawer(){
 
 const popup=
-document.getElementById(
-"videoPopup"
-);
+document.getElementById("videoPopup");
 
 if(
 popup &&
-popup.classList.contains(
-"active"
-)
+popup.classList.contains("active")
 ){
 
 return;
@@ -3738,19 +3493,13 @@ return;
 }
 
 const drawer=
-document.getElementById(
-"drawer"
-);
+document.getElementById("drawer");
 
 const overlay=
-document.getElementById(
-"overlay"
-);
+document.getElementById("overlay");
 
 const opening=
-!drawer.classList.contains(
-"open"
-);
+!drawer.classList.contains("open");
 
 drawer.classList.toggle(
 "open",
