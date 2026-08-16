@@ -965,45 +965,55 @@ transform:scale(.90);
 }
 
 /* =========================================================
-DESKTOP POPUP MODE (শুধুমাত্র ডেস্কটপের জন্য আপডেট করা অংশ)
+DESKTOP POPUP MODE (ডেস্কটপ লেআউট আপডেট)
 ========================================================= */
 
-@media(min-width:769px){
+@media(min-width: 769px) {
 
-.video-section{
-top: 55%; /* ভিডিওটি নিচে নামানোর জন্য */
-left: auto;
-right: 35px;
+    .app {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 40px;
+    }
 
-transform: translateY(-50%) translateX(70px);
+    .player {
+        width: 380px;
+        margin-right: auto;
+        transform: none;
+    }
 
-width: min(440px, 42vw);
+    .video-section {
+        position: static;
+        transform: none;
+        width: 420px;
+        opacity: 1;
+        display: block;
+        margin-left: 30px;
+        pointer-events: auto;
+    }
 
-opacity: 0;
+    .video-popup {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: scale(1);
+        position: relative;
+        margin-bottom: 10px;
+    }
 
-transition:
-transform .4s cubic-bezier(.2,.8,.2,1),
-opacity .3s ease;
-}
+    .video-playlist {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        position: relative;
+        max-height: 380px;
+        height: auto;
+    }
 
-body.popup-active .video-section{
-transform: translateY(-50%) translateX(0);
-opacity: 1;
-}
-
-/* প্লেয়ার বাম দিকে সরানোর জন্য */
-body.popup-active .app{
-justify-content: flex-start;
-}
-
-body.popup-active .player{
-transform: translateX(40px); /* প্লেয়ার বামে সরানোর মাপ */
-}
-
-/* কন্ট্রোল আরও বামে সরানোর জন্য */
-body.popup-active .controls{
-transform: translateX(-40px); /* কন্ট্রোল আরও বাম দিকে সেট করা হয়েছে */
-}
+    .top-widgets {
+        display: none;
+    }
 
 }
 
