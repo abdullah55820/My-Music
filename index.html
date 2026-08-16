@@ -1632,17 +1632,17 @@ display:none!important;
 
 
 /* =========================================================
-   DESKTOP ONLY VIEW (ডেস্কটপে মোবাইলের মতো লুক)
+   DESKTOP ONLY VIEW (ডেস্কটপে আইকন ক্লিক করলে সেন্টারে আসবে)
 ========================================================= */
 
 @media(min-width: 1024px) {
 
-  /* ডেস্কটপে ভিডিও সেকশনটি মোবাইলের মতো মাঝখানে এবং লম্বালম্বী আকারে দেখাবে */
+  /* ডেস্কটপে ভিডিও সেকশনটি বাই ডিফল্ট লুকিয়ে থাকবে */
   .video-section {
     position: fixed !important;
     top: 42% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translate(-50%, -50%) scale(0.92) !important;
     width: 380px !important;
     max-width: 95vw !important;
     display: flex !important;
@@ -1650,38 +1650,41 @@ display:none!important;
     gap: 8px !important;
     align-items: center !important;
     justify-content: center !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1), visibility .3s ease !important;
+  }
+
+  /* ভিডিও আইকন ক্লিক করার পর যখন .active ক্লাস যোগ হবে, তখন সেন্টারে ভেসে উঠবে */
+  .video-section:has(.video-popup.active) {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translate(-50%, -50%) scale(1) !important;
     pointer-events: auto !important;
   }
 
-  /* ভিডিও পপআপ মোবাইলের মতো 16:9 অনুপাতে থাকবে */
+  /* ভিডিও পপআপ সাইজ */
   .video-popup {
     width: 100% !important;
     aspect-ratio: 16 / 9 !important;
     flex-shrink: 0 !important;
-    pointer-events: auto !important;
-    opacity: 1 !important;
-    visibility: visible !important;
     border-radius: 18px !important;
   }
 
-  /* ভিডিওর ঠিক নিচে প্লেলিস্ট সুন্দরভাবে সেট করা থাকবে */
+  /* ভিডিওর নিচের প্লেলিস্ট */
   .video-playlist {
-    display: block !important;
     width: 100% !important;
     height: 220px !important;
     max-height: 220px !important;
     margin-top: 0 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
   }
 
   .video-song-list {
     height: calc(100% - 27px) !important;
-    pointer-events: auto !important;
   }
 
-  /* আপনার মেইন কন্ট্রোল প্লেয়ারটি নিচে আগের মতোই থাকবে */
+  /* মেইন কন্ট্রোল প্লেয়ার নিচে ফিক্সড থাকবে */
   .app {
     display: flex !important;
     position: fixed !important;
