@@ -346,59 +346,6 @@ z-index:1702;
 
 
 /* =========================================================
-   VIDEO FULLSCREEN BUTTON
-========================================================= */
-
-.video-fullscreen-btn{
-position:absolute;
-
-right:10px;
-bottom:10px;
-
-width:38px;
-height:38px;
-
-border:1px solid rgba(255,255,255,.25);
-
-border-radius:50%;
-
-background:rgba(0,0,0,.55);
-
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
-
-display:none;
-
-align-items:center;
-justify-content:center;
-
-color:#fff;
-
-cursor:pointer;
-
-z-index:1800;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-
-box-shadow:
-0 4px 15px rgba(0,0,0,.4);
-}
-
-.video-fullscreen-btn svg{
-width:20px;
-height:20px;
-
-fill:#fff;
-}
-
-.video-fullscreen-btn:active{
-transform:scale(.9);
-}
-
-
-/* =========================================================
    VIDEO PLAYLIST
 ========================================================= */
 
@@ -1545,8 +1492,6 @@ font-size:8.5px;
 
 /* =========================================================
    LANDSCAPE
-   IMPORTANT:
-   এখানে আর popup নিজে থেকে OPEN হবে না।
 ========================================================= */
 
 @media(orientation:landscape){
@@ -1566,11 +1511,6 @@ pointer-events:none!important;
 
 z-index:1700!important;
 }
-
-
-/*
-শুধু popup ACTIVE হলে full screen layout হবে।
-*/
 
 .video-popup.active{
 position:absolute!important;
@@ -1613,6 +1553,14 @@ z-index:1702!important;
 }
 
 .video-playlist{
+display:none!important;
+}
+
+.app{
+display:none!important;
+}
+
+.top-widgets{
 display:none!important;
 }
 
@@ -1682,53 +1630,6 @@ body.android-device.landscape-mode .top-widgets{
 display:none!important;
 }
 
-
-/* =========================================================
-   REAL FULLSCREEN
-========================================================= */
-
-.video-popup.real-fullscreen{
-position:fixed!important;
-
-inset:0!important;
-
-width:100vw!important;
-
-height:100vh!important;
-
-max-width:none!important;
-
-aspect-ratio:auto!important;
-
-border-radius:0!important;
-
-border:none!important;
-
-transform:none!important;
-
-z-index:99999!important;
-
-background:#000!important;
-}
-
-.video-popup.real-fullscreen #yt{
-position:absolute!important;
-
-inset:0!important;
-
-width:100%!important;
-
-height:100%!important;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-}
-
-.video-popup.real-fullscreen .video-fullscreen-btn{
-display:flex!important;
-}
-
 </style>
 </head>
 
@@ -1795,29 +1696,6 @@ class="video-popup"
 >
 
 <div id="yt"></div>
-
-
-<!-- FULLSCREEN BUTTON -->
-
-<button
-id="videoFullscreenBtn"
-class="video-fullscreen-btn"
-onclick="toggleVideoFullscreen(event)"
-title="Fullscreen"
->
-
-<svg
-id="fullscreenIcon"
-viewBox="0 0 24 24"
->
-
-<path d="
-M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z
-"/>
-
-</svg>
-
-</button>
 
 </div>
 
@@ -2115,72 +1993,15 @@ let swipeFromSeek=false;
 let changingTrack=false;
 
 
-/* =========================================================
-   DEVICE DETECTION
-========================================================= */
-
 const isAndroidDevice=
 /Android/i.test(navigator.userAgent);
-
-
-/*
-শুধু iPhone-এ fullscreen button hide হবে।
-
-iPad-কে এখানে iPhone হিসেবে ধরা হচ্ছে না।
-*/
-
-const isIPhone=
-/iPhone|iPod/i.test(navigator.userAgent);
-
 
 if(isAndroidDevice){
 
 document.body.classList.add(
 "android-device"
 );
-
-
-/*
-Android landscape class শুধু তখন ব্যবহার হবে
-যখন popup manually active/fullscreen হয়েছে।
-*/
-
 }
-
-
-/* =========================================================
-   SHOW FULLSCREEN BUTTON
-========================================================= */
-
-function setupFullscreenButton(){
-
-const btn=
-document.getElementById(
-"videoFullscreenBtn"
-);
-
-if(!btn)
-return;
-
-
-/*
-iPhone-এ button পুরোপুরি hide।
-*/
-
-if(isIPhone){
-
-btn.style.display="none";
-
-}
-else{
-
-btn.style.display="flex";
-
-}
-
-}
-
-setupFullscreenButton();
 
 
 /* =========================================================
@@ -2475,24 +2296,6 @@ const opening=
 );
 
 
-/*
-Fullscreen থাকলে আগে বের করা হবে।
-*/
-
-if(
-document.fullscreenElement
-){
-
-try{
-
-document.exitFullscreen();
-
-}
-catch(e){}
-
-}
-
-
 if(opening){
 
 popup.classList.add(
@@ -2515,6 +2318,20 @@ iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 
+/*
+=========================================================
+FIRST OPEN FIX
+=========================================================
+আগের code-এ এখানে loadVideoPlaylist() call হচ্ছিল,
+কিন্তু function ছিল না।
+
+তাই প্রথমবার popup খুললে JavaScript error হচ্ছিল
+এবং height adjustment execute হচ্ছিল না।
+
+এখন existing rendered playlist ব্যবহার করছি।
+=========================================================
+*/
+
 if(
 sortingReady &&
 sortedPlaylistData.length>0
@@ -2529,6 +2346,11 @@ loadPlaylistItems();
 
 }
 
+
+/*
+Browser-কে আগে layout করতে দেওয়া হচ্ছে।
+তারপর height calculate হবে।
+*/
 
 requestAnimationFrame(()=>{
 
@@ -2579,183 +2401,19 @@ iconSvg.innerHTML=
 
 
 /* =========================================================
-   FULLSCREEN
-========================================================= */
-
-async function toggleVideoFullscreen(e){
-
-if(e){
-
-e.preventDefault();
-
-e.stopPropagation();
-
-}
-
-
-/*
-iPhone-এ কোনো কাজ করবে না।
-*/
-
-if(isIPhone){
-
-return;
-
-}
-
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(!popup)
-return;
-
-
-try{
-
-if(
-document.fullscreenElement
-){
-
-await document.exitFullscreen();
-
-return;
-
-}
-
-
-/*
-Popup active না থাকলে আগে popup open হবে।
-*/
-
-if(
-!popup.classList.contains("active")
-){
-
-toggleVideoPopup();
-
-await new Promise(
-resolve=>setTimeout(resolve,100)
-);
-
-}
-
-
-/*
-Fullscreen target হিসেবে popup।
-*/
-
-if(
-popup.requestFullscreen
-){
-
-await popup.requestFullscreen();
-
-}
-
-else if(
-popup.webkitRequestFullscreen
-){
-
-popup.webkitRequestFullscreen();
-
-}
-
-}
-catch(err){
-
-console.log(
-"Fullscreen error:",
-err
-);
-
-}
-
-}
-
-
-/* =========================================================
-   FULLSCREEN CHANGE
-========================================================= */
-
-document.addEventListener(
-"fullscreenchange",
-()=>{
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const btn=
-document.getElementById(
-"videoFullscreenBtn"
-);
-
-if(!popup)
-return;
-
-
-if(
-document.fullscreenElement
-){
-
-popup.classList.add(
-"real-fullscreen"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-if(btn && !isIPhone){
-
-btn.style.display="flex";
-
-}
-
-}
-else{
-
-popup.classList.remove(
-"real-fullscreen"
-);
-
-
-/*
-Fullscreen থেকে বের হলেও popup open থাকবে।
-এখানে site-কে fullscreen করা হচ্ছে না।
-*/
-
-if(
-popup.classList.contains("active")
-){
-
-document.body.classList.add(
-"popup-active"
-);
-
-}
-else{
-
-document.body.classList.remove(
-"popup-active"
-);
-
-}
-
-}
-
-});
-
-
-/* =========================================================
    VIDEO PLAYLIST LOADER
 ========================================================= */
 
 function loadVideoPlaylist(){
+
+/*
+Safe wrapper.
+
+যদি playlist already loaded থাকে,
+শুধু render করবে।
+
+না থাকলে main playlist loader চালাবে।
+*/
 
 if(
 sortingReady &&
@@ -2808,17 +2466,8 @@ return;
 
 
 /*
-Actual browser fullscreen হলে playlist দরকার নেই।
+Landscape-এ playlist hidden।
 */
-
-if(
-document.fullscreenElement
-){
-
-return;
-
-}
-
 
 if(
 window.innerWidth>
@@ -2846,6 +2495,11 @@ playerRect.top-20;
 let available=
 bottom-top;
 
+
+/*
+Player-এর control area-এর ওপর playlist
+যাতে না উঠে যায়।
+*/
 
 if(available>70){
 
@@ -2878,6 +2532,15 @@ playlist.style.maxHeight=
 
 }
 
+
+/*
+=========================================================
+FINAL SAFETY CHECK
+=========================================================
+Playlist-এর actual bottom যদি player-এর top-এর কাছে
+বা তার নিচে চলে যায়, height আরও কমিয়ে দিচ্ছি।
+=========================================================
+*/
 
 requestAnimationFrame(()=>{
 
@@ -2919,11 +2582,6 @@ window.addEventListener(
 "resize",
 ()=>{
 
-/*
-শুধু orientation class update হবে।
-কখনো popup নিজে থেকে open হবে না।
-*/
-
 handleDeviceOrientation();
 
 setTimeout(
@@ -2960,9 +2618,6 @@ adjustVideoPlaylistHeight,
 
 /* =========================================================
    ORIENTATION
-   IMPORTANT:
-   আগে এখানে landscape হলেই popup OPEN হচ্ছিল।
-   এখন সেটা পুরোপুরি বন্ধ।
 ========================================================= */
 
 function handleDeviceOrientation(){
@@ -2977,32 +2632,44 @@ document.getElementById(
 "videoPopup"
 );
 
+const overlay=
+document.getElementById(
+"videoOverlay"
+);
+
 const videoPlaylist=
 document.getElementById(
 "videoPlaylist"
 );
 
+const iconSvg=
+document.getElementById(
+"videoToggleIcon"
+);
 
-if(!popup)
-return;
-
-
-/*
-শুধু manually opened popup-এর জন্য
-Android landscape class দেওয়া হবে।
-
-Site খুললেই popup আর open হবে না।
-*/
 
 if(isLandscape){
 
 if(
-popup.classList.contains("active")
+popup &&
+!popup.classList.contains(
+"active"
+)
 ){
 
-document.body.classList.add(
-"landscape-mode"
+popup.classList.add(
+"active"
 );
+
+overlay.classList.add(
+"active"
+);
+
+document.body.classList.add(
+"popup-active"
+);
+
+}
 
 if(videoPlaylist){
 
@@ -3012,17 +2679,15 @@ videoPlaylist.classList.remove(
 
 }
 
-}
-else{
-
-/*
-সবচেয়ে গুরুত্বপূর্ণ fix:
-landscape হলেও popup খুলবে না।
-*/
-
-document.body.classList.remove(
+document.body.classList.add(
 "landscape-mode"
 );
+
+
+if(iconSvg){
+
+iconSvg.innerHTML=
+'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 }
 
@@ -3035,8 +2700,10 @@ document.body.classList.remove(
 
 
 if(
-popup.classList.contains("active") &&
-!document.fullscreenElement
+popup &&
+popup.classList.contains(
+"active"
+)
 ){
 
 videoPlaylist.classList.add(
@@ -3831,6 +3498,12 @@ Promise.all(requests)
 .then(
 results=>{
 
+/*
+=========================================================
+ A-Z SORT
+=========================================================
+*/
+
 results.sort(
 (a,b)=>{
 
@@ -4179,6 +3852,8 @@ forceUpdateUI(index);
 /*
 YouTube original playlist order বাদ দিয়ে
 direct video ID load করছি।
+
+তাই A-Z order-ই follow করবে।
 */
 
 changingTrack=true;
@@ -4506,11 +4181,6 @@ loadPlaylistItems();
    INITIAL
 ========================================================= */
 
-/*
-শুধু orientation state check করবে।
-Popup আর auto-open করবে না।
-*/
-
 setTimeout(
 handleDeviceOrientation,
 300
@@ -4520,16 +4190,6 @@ handleDeviceOrientation,
 setTimeout(
 adjustVideoPlaylistHeight,
 600
-);
-
-
-/*
-Fullscreen button আবার নিশ্চিত করা।
-*/
-
-setTimeout(
-setupFullscreenButton,
-500
 );
 
 </script>
