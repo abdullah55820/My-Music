@@ -967,10 +967,6 @@ DESKTOP
 
 @media(min-width:769px){
 
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
-
 .app{
 height:100dvh;
 width:100%;
@@ -1025,11 +1021,6 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
-
-/* ---------------------------------------------------------
-DESKTOP VIDEO ON
---------------------------------------------------------- */
-
 body.popup-active .app{
 
 display:flex;
@@ -1041,11 +1032,6 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
-
-/*
-   পুরো controller এখন আগের থেকে একটু ডানে।
-   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
-*/
 
 width:min(760px,52vw);
 
@@ -1158,13 +1144,6 @@ display:flex;
 
 top:14px;
 
-/*
-   BD time controller-এর visual center-এর
-   ঠিক ওপর থাকবে।
-   Controller = 760px পর্যন্ত, scale = .92,
-   তাই center হিসাব করে position করা হয়েছে।
-*/
-
 left:calc(
 35px + min(349.6px, 23.92vw)
 );
@@ -1178,12 +1157,6 @@ body.popup-active .playlist-toggle-btn{
 display:none;
 }
 
-/*
-   কোনো transform নেই।
-   তাই controller-এর ভিতরের item
-   আলাদা করে বামে/ডানে যাবে না।
-*/
-
 body.popup-active .controls{
 z-index:1610;
 }
@@ -1192,11 +1165,6 @@ body.popup-active .video-song-item{
 cursor:pointer;
 pointer-events:auto;
 }
-
-
-/* ---------------------------------------------------------
-DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
 
 @media(max-height:800px){
 
@@ -1220,7 +1188,6 @@ margin-top:7px;
 }
 
 }
-
 
 /* =========================================================
 MOBILE
@@ -1356,7 +1323,6 @@ font-size:9px;
 
 }
 
-
 /* =========================================================
 SMALL HEIGHT
 ========================================================= */
@@ -1390,7 +1356,6 @@ height:40px;
 }
 
 }
-
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1432,7 +1397,6 @@ font-size:8.5px;
 }
 
 }
-
 
 /* =========================================================
 DRAWER
@@ -1672,10 +1636,6 @@ margin-top:.5px;
 
 <div class="bg"></div>
 
-<!-- =========================================================
-TOP WIDGETS
-========================================================= -->
-
 <div class="top-widgets">
 
 <div class="bd-time">
@@ -1709,20 +1669,10 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </div>
 
-
-<!-- =========================================================
-VIDEO OVERLAY
-========================================================= -->
-
 <div
 id="videoOverlay"
 class="video-overlay">
 </div>
-
-
-<!-- =========================================================
-VIDEO SECTION
-========================================================= -->
 
 <div
 class="video-section"
@@ -1737,9 +1687,6 @@ class="video-popup"
 <div id="yt"></div>
 
 </div>
-
-
-<!-- VIDEO PLAYLIST -->
 
 <div
 id="videoPlaylist"
@@ -1771,11 +1718,6 @@ Loading...
 </div>
 
 </div>
-
-
-<!-- =========================================================
-DRAWER
-========================================================= -->
 
 <div
 class="drawer-overlay"
@@ -1823,11 +1765,6 @@ Loading...
 </div>
 
 </div>
-
-
-<!-- =========================================================
-MAIN APP
-========================================================= -->
 
 <div class="app">
 
@@ -1913,7 +1850,6 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
-
 <button
 class="play"
 id="play"
@@ -1932,7 +1868,6 @@ M8 5v14l11-7z
 </svg>
 
 </button>
-
 
 <div class="vol-container">
 
@@ -1975,7 +1910,6 @@ oninput="changeVolume(this.value)"
 </section>
 
 </div>
-
 
 <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -2396,11 +2330,6 @@ if(
 )
 return;
 
-
-/* =========================================================
-DESKTOP
-========================================================= */
-
 if(window.innerWidth>=769){
 
 if(!videoSection)
@@ -2432,11 +2361,6 @@ safeHeight+"px";
 return;
 
 }
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -3788,6 +3712,121 @@ loadPlaylistItems();
 }
 
 }
+
+
+/* =========================================================
+FULLSCREEN EXIT FIX
+========================================================= */
+
+let wasPlayingBeforeFullscreen=false;
+let fullscreenWasActive=false;
+
+
+/*
+   Check whether YouTube/browser is currently fullscreen.
+*/
+function checkFullscreenState(){
+
+const isFullscreen=
+!!document.fullscreenElement ||
+!!document.webkitFullscreenElement;
+
+
+/* ---------------------------------------------------------
+ENTERING FULLSCREEN
+--------------------------------------------------------- */
+
+if(isFullscreen){
+
+fullscreenWasActive=true;
+
+if(
+player &&
+typeof player.getPlayerState==="function"
+){
+
+try{
+
+wasPlayingBeforeFullscreen=
+player.getPlayerState()===
+YT.PlayerState.PLAYING;
+
+}
+catch(e){}
+
+}
+
+return;
+
+}
+
+
+/* ---------------------------------------------------------
+LEAVING FULLSCREEN
+--------------------------------------------------------- */
+
+if(
+fullscreenWasActive &&
+wasPlayingBeforeFullscreen &&
+player
+){
+
+fullscreenWasActive=false;
+
+setTimeout(()=>{
+
+try{
+
+/*
+   Only resume if YouTube actually became paused.
+   If it is already playing, do nothing.
+*/
+
+if(
+player &&
+typeof player.getPlayerState==="function" &&
+player.getPlayerState()===
+YT.PlayerState.PAUSED
+){
+
+player.playVideo();
+
+}
+
+}
+catch(e){}
+
+},180);
+
+}
+
+else{
+
+fullscreenWasActive=false;
+
+}
+
+}
+
+
+/* ---------------------------------------------------------
+STANDARD BROWSER FULLSCREEN
+--------------------------------------------------------- */
+
+document.addEventListener(
+"fullscreenchange",
+checkFullscreenState
+);
+
+
+/* ---------------------------------------------------------
+SAFARI / iOS WEBKIT FULLSCREEN
+--------------------------------------------------------- */
+
+document.addEventListener(
+"webkitfullscreenchange",
+checkFullscreenState
+);
 
 
 /* =========================================================
