@@ -967,6 +967,10 @@ DESKTOP
 
 @media(min-width:769px){
 
+/* ---------------------------------------------------------
+DESKTOP NORMAL / VIDEO OFF
+--------------------------------------------------------- */
+
 .app{
 height:100dvh;
 width:100%;
@@ -1021,6 +1025,11 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
+
+/* ---------------------------------------------------------
+DESKTOP VIDEO ON
+--------------------------------------------------------- */
+
 body.popup-active .app{
 
 display:flex;
@@ -1032,6 +1041,11 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
+
+/*
+   পুরো controller এখন আগের থেকে একটু ডানে।
+   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
+*/
 
 width:min(760px,52vw);
 
@@ -1144,6 +1158,13 @@ display:flex;
 
 top:14px;
 
+/*
+   BD time controller-এর visual center-এর
+   ঠিক ওপর থাকবে।
+   Controller = 760px পর্যন্ত, scale = .92,
+   তাই center হিসাব করে position করা হয়েছে।
+*/
+
 left:calc(
 35px + min(349.6px, 23.92vw)
 );
@@ -1157,6 +1178,12 @@ body.popup-active .playlist-toggle-btn{
 display:none;
 }
 
+/*
+   কোনো transform নেই।
+   তাই controller-এর ভিতরের item
+   আলাদা করে বামে/ডানে যাবে না।
+*/
+
 body.popup-active .controls{
 z-index:1610;
 }
@@ -1165,6 +1192,11 @@ body.popup-active .video-song-item{
 cursor:pointer;
 pointer-events:auto;
 }
+
+
+/* ---------------------------------------------------------
+DESKTOP SMALL HEIGHT
+--------------------------------------------------------- */
 
 @media(max-height:800px){
 
@@ -1188,6 +1220,7 @@ margin-top:7px;
 }
 
 }
+
 
 /* =========================================================
 MOBILE
@@ -1323,6 +1356,7 @@ font-size:9px;
 
 }
 
+
 /* =========================================================
 SMALL HEIGHT
 ========================================================= */
@@ -1356,6 +1390,7 @@ height:40px;
 }
 
 }
+
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1397,6 +1432,7 @@ font-size:8.5px;
 }
 
 }
+
 
 /* =========================================================
 DRAWER
@@ -1673,6 +1709,7 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </div>
 
+
 <!-- =========================================================
 VIDEO OVERLAY
 ========================================================= -->
@@ -1681,6 +1718,7 @@ VIDEO OVERLAY
 id="videoOverlay"
 class="video-overlay">
 </div>
+
 
 <!-- =========================================================
 VIDEO SECTION
@@ -1699,6 +1737,9 @@ class="video-popup"
 <div id="yt"></div>
 
 </div>
+
+
+<!-- VIDEO PLAYLIST -->
 
 <div
 id="videoPlaylist"
@@ -1730,6 +1771,7 @@ Loading...
 </div>
 
 </div>
+
 
 <!-- =========================================================
 DRAWER
@@ -1781,6 +1823,7 @@ Loading...
 </div>
 
 </div>
+
 
 <!-- =========================================================
 MAIN APP
@@ -1870,6 +1913,7 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
+
 <button
 class="play"
 id="play"
@@ -1889,6 +1933,7 @@ M8 5v14l11-7z
 
 </button>
 
+
 <div class="vol-container">
 
 <button
@@ -1899,7 +1944,7 @@ onclick="toggleVolume()"
 <svg viewBox="0 0 24 24">
 
 <path d="
-M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s2.99-7.86-7-8.77z
+M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z
 "/>
 
 </svg>
@@ -1931,25 +1976,12 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* =========================================================
-YOUTUBE CONFIG
-========================================================= */
-
 const PLAYLIST_ID="PLbvY05KVYwoo";
-
-/* =========================================================
-PASTE YOUR YOUTUBE DATA API v3 KEY HERE
-========================================================= */
-
-const API_KEY="PASTE_YOUR_YOUTUBE_API_KEY_HERE";
-
-/* =========================================================
-PLAYER VARIABLES
-========================================================= */
 
 let player=null;
 let playing=false;
@@ -1970,6 +2002,7 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
+
 
 /* =========================================================
 BD TIME
@@ -2006,6 +2039,7 @@ setInterval(
 updateBDTime,
 1000
 );
+
 
 /* =========================================================
 YOUTUBE API
@@ -2055,6 +2089,7 @@ onStateChange:state
 
 }
 
+
 /* =========================================================
 READY
 ========================================================= */
@@ -2069,6 +2104,7 @@ updateProgress,
 );
 
 }
+
 
 /* =========================================================
 PLAYER STATE
@@ -2158,6 +2194,7 @@ nextSong,
 
 }
 
+
 /* =========================================================
 PLAY / PAUSE
 ========================================================= */
@@ -2204,6 +2241,7 @@ player.playVideo();
 catch(e){}
 
 }
+
 
 /* =========================================================
 VIDEO POPUP
@@ -2319,6 +2357,7 @@ iconSvg.innerHTML=
 
 }
 
+
 /* =========================================================
 VIDEO PLAYLIST HEIGHT
 ========================================================= */
@@ -2357,6 +2396,11 @@ if(
 )
 return;
 
+
+/* =========================================================
+DESKTOP
+========================================================= */
+
 if(window.innerWidth>=769){
 
 if(!videoSection)
@@ -2388,6 +2432,11 @@ safeHeight+"px";
 return;
 
 }
+
+
+/* =========================================================
+MOBILE / SMALL SCREEN
+========================================================= */
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -2464,6 +2513,7 @@ correctedHeight+"px";
 
 }
 
+
 /* =========================================================
 RESIZE
 ========================================================= */
@@ -2484,6 +2534,7 @@ adjustVideoPlaylistHeight,
 
 }
 );
+
 
 /* =========================================================
 VOLUME
@@ -2571,6 +2622,7 @@ resetVolTimer();
 
 }
 
+
 /* =========================================================
 NEXT SONG
 ========================================================= */
@@ -2621,6 +2673,7 @@ nextIndex
 );
 
 }
+
 
 /* =========================================================
 PREVIOUS SONG
@@ -2674,6 +2727,7 @@ previousIndex
 
 }
 
+
 /* =========================================================
 FORCE UPDATE UI
 ========================================================= */
@@ -2709,6 +2763,7 @@ highlightActiveTrack();
 highlightVideoActiveTrack();
 
 }
+
 
 /* =========================================================
 SWIPE
@@ -2812,6 +2867,7 @@ swipeActive=false;
 
 }
 );
+
 
 /* =========================================================
 SEEK
@@ -2982,6 +3038,7 @@ passive:false
 }
 );
 
+
 /* =========================================================
 PROGRESS
 ========================================================= */
@@ -3038,6 +3095,7 @@ catch(e){}
 
 }
 
+
 /* =========================================================
 FORMAT
 ========================================================= */
@@ -3063,6 +3121,7 @@ s%60
 );
 
 }
+
 
 /* =========================================================
 LOAD PLAYLIST
@@ -3226,949 +3285,6 @@ updateInfo();
 );
 
 }
-<!-- ========================= PART 2 / 2 ========================= -->
-
-<script>
-
-const PLAYLIST_ID="PLbvY05KVYwoo";
-
-/* API KEY এখানে বসাবে */
-const YOUTUBE_API_KEY="AIzaSyA9dqRG2VMfpRqagmbRONVr2LP0gUGdWT8";
-
-let player=null;
-let playing=false;
-
-let playlistItems=[];
-let sortedPlaylistItems=[];
-let sortedPlaylistData=[];
-
-let currentSortedIndex=0;
-let sortingReady=false;
-
-let volTimer=null;
-let isDragging=false;
-
-let swipeStartX=0;
-let swipeStartY=0;
-let swipeActive=false;
-let swipeFromSeek=false;
-
-let changingTrack=false;
-
-
-/* =========================================================
-BD TIME
-========================================================= */
-
-function updateBDTime(){
-
-const options={
-timeZone:"Asia/Dhaka",
-hour:"2-digit",
-minute:"2-digit",
-second:"2-digit",
-hour12:true
-};
-
-document.getElementById("bdTimeVal").textContent=
-new Intl.DateTimeFormat("en-US",options).format(new Date());
-
-}
-
-updateBDTime();
-
-setInterval(updateBDTime,1000);
-
-
-/* =========================================================
-YOUTUBE API
-========================================================= */
-
-function onYouTubeIframeAPIReady(){
-
-player=new YT.Player("yt",{
-
-width:"100%",
-height:"100%",
-
-playerVars:{
-autoplay:0,
-controls:1,
-disablekb:0,
-fs:1,
-modestbranding:1,
-playsinline:1,
-rel:0,
-iv_load_policy:3,
-listType:"playlist",
-list:PLAYLIST_ID
-},
-
-events:{
-onReady:ready,
-onStateChange:state
-}
-
-});
-
-}
-
-
-/* =========================================================
-READY
-========================================================= */
-
-function ready(){
-
-loadPlaylistItems();
-
-setInterval(updateProgress,250);
-
-}
-
-
-/* =========================================================
-PLAYER STATE
-========================================================= */
-
-function state(e){
-
-const cover=document.getElementById("cover");
-const playBtn=document.getElementById("play");
-const playIcon=document.getElementById("play-icon");
-
-highlightActiveTrack();
-highlightVideoActiveTrack();
-
-if(e.data===YT.PlayerState.PLAYING){
-
-playing=true;
-
-playBtn.classList.add("playing");
-
-playIcon.innerHTML=
-'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-
-cover.classList.add("spinning");
-
-updateInfo();
-
-}
-
-else if(e.data===YT.PlayerState.PAUSED){
-
-playing=false;
-
-playBtn.classList.remove("playing");
-
-playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
-cover.classList.remove("spinning");
-
-}
-
-else if(e.data===YT.PlayerState.ENDED){
-
-playing=false;
-
-playBtn.classList.remove("playing");
-
-playIcon.innerHTML=
-'<path d="M8 5v14l11-7z"/>';
-
-cover.classList.remove("spinning");
-
-if(!changingTrack){
-
-setTimeout(nextSong,100);
-
-}
-
-}
-
-}
-
-
-/* =========================================================
-PLAY / PAUSE
-========================================================= */
-
-function togglePlay(){
-
-if(!player)return;
-
-try{
-
-if(playing){
-
-player.pauseVideo();
-
-}
-
-else{
-
-const currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-if(
-sortedPlaylistItems.length>0 &&
-sortingReady &&
-!currentId
-){
-
-player.loadVideoById(
-sortedPlaylistItems[currentSortedIndex]
-);
-
-}
-
-else{
-
-player.playVideo();
-
-}
-
-}
-
-}catch(e){}
-
-}
-
-
-/* =========================================================
-VIDEO POPUP
-========================================================= */
-
-function toggleVideoPopup(){
-
-const popup=document.getElementById("videoPopup");
-const overlay=document.getElementById("videoOverlay");
-const videoPlaylist=document.getElementById("videoPlaylist");
-const iconSvg=document.getElementById("videoToggleIcon");
-
-const opening=!popup.classList.contains("active");
-
-if(opening){
-
-popup.classList.add("active");
-overlay.classList.add("active");
-videoPlaylist.classList.add("active");
-
-document.body.classList.add("popup-active");
-
-iconSvg.innerHTML=
-'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
-if(sortingReady && sortedPlaylistData.length>0){
-
-renderVideoPlaylist();
-
-}else{
-
-loadPlaylistItems();
-
-}
-
-requestAnimationFrame(()=>{
-requestAnimationFrame(()=>{
-adjustVideoPlaylistHeight();
-});
-});
-
-setTimeout(adjustVideoPlaylistHeight,100);
-setTimeout(adjustVideoPlaylistHeight,300);
-
-}
-
-else{
-
-popup.classList.remove("active");
-overlay.classList.remove("active");
-videoPlaylist.classList.remove("active");
-
-document.body.classList.remove("popup-active");
-
-iconSvg.innerHTML=
-'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
-
-}
-
-}
-
-
-/* =========================================================
-VIDEO PLAYLIST HEIGHT
-========================================================= */
-
-function adjustVideoPlaylistHeight(){
-
-const popup=document.getElementById("videoPopup");
-const playlist=document.getElementById("videoPlaylist");
-const playerCard=document.getElementById("playerCard");
-const videoSection=document.getElementById("videoSection");
-
-if(!popup || !playlist || !playerCard)return;
-
-if(!popup.classList.contains("active"))return;
-
-if(window.innerWidth>=769){
-
-if(!videoSection)return;
-
-const sectionRect=videoSection.getBoundingClientRect();
-const popupRect=popup.getBoundingClientRect();
-
-const available=
-sectionRect.bottom-
-popupRect.bottom-
-10;
-
-const safeHeight=Math.max(100,available);
-
-playlist.style.height=safeHeight+"px";
-playlist.style.maxHeight=safeHeight+"px";
-
-return;
-
-}
-
-const popupRect=popup.getBoundingClientRect();
-const playerRect=playerCard.getBoundingClientRect();
-
-const top=popupRect.bottom+1;
-const bottom=playerRect.top-20;
-
-let available=bottom-top;
-
-if(available>70){
-
-let safeHeight=Math.min(
-available,
-playerRect.top-top-2
-);
-
-safeHeight=Math.max(70,safeHeight);
-
-playlist.style.height=safeHeight+"px";
-playlist.style.maxHeight=safeHeight+"px";
-
-}else{
-
-playlist.style.height="70px";
-playlist.style.maxHeight="70px";
-
-}
-
-}
-
-
-/* =========================================================
-RESIZE
-========================================================= */
-
-window.addEventListener("resize",()=>{
-
-setTimeout(adjustVideoPlaylistHeight,50);
-setTimeout(adjustVideoPlaylistHeight,150);
-
-});
-
-
-/* =========================================================
-VOLUME
-========================================================= */
-
-function resetVolTimer(){
-
-if(volTimer){
-clearTimeout(volTimer);
-}
-
-volTimer=setTimeout(()=>{
-
-document
-.getElementById("volWrapper")
-.classList.remove("active");
-
-},3000);
-
-}
-
-function toggleVolume(){
-
-const wrapper=document.getElementById("volWrapper");
-
-if(wrapper.classList.contains("active")){
-
-wrapper.classList.remove("active");
-
-if(volTimer){
-clearTimeout(volTimer);
-}
-
-}else{
-
-wrapper.classList.add("active");
-
-resetVolTimer();
-
-}
-
-}
-
-function changeVolume(val){
-
-if(
-player &&
-typeof player.setVolume==="function"
-){
-
-player.setVolume(val);
-
-}
-
-resetVolTimer();
-
-}
-
-
-/* =========================================================
-NEXT SONG
-========================================================= */
-
-function nextSong(){
-
-if(
-!player ||
-sortedPlaylistItems.length===0
-)
-return;
-
-let currentId="";
-
-try{
-
-currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-}catch(e){}
-
-if(currentId){
-
-const found=
-sortedPlaylistItems.indexOf(currentId);
-
-if(found!==-1){
-currentSortedIndex=found;
-}
-
-}
-
-const nextIndex=
-(currentSortedIndex+1)%
-sortedPlaylistItems.length;
-
-currentSortedIndex=nextIndex;
-
-playSpecificTrack(nextIndex);
-
-}
-
-
-/* =========================================================
-PREVIOUS SONG
-========================================================= */
-
-function previousSong(){
-
-if(
-!player ||
-sortedPlaylistItems.length===0
-)
-return;
-
-let currentId="";
-
-try{
-
-currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-}catch(e){}
-
-if(currentId){
-
-const found=
-sortedPlaylistItems.indexOf(currentId);
-
-if(found!==-1){
-currentSortedIndex=found;
-}
-
-}
-
-const previousIndex=
-(currentSortedIndex-1+
-sortedPlaylistItems.length)%
-sortedPlaylistItems.length;
-
-currentSortedIndex=previousIndex;
-
-playSpecificTrack(previousIndex);
-
-}
-
-
-/* =========================================================
-FORCE UPDATE UI
-========================================================= */
-
-function forceUpdateUI(index){
-
-if(!sortedPlaylistData[index])return;
-
-const data=sortedPlaylistData[index];
-
-document.getElementById("cover").src=
-`https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
-
-document.getElementById("title").textContent=
-data.title || "YouTube Music";
-
-document.getElementById("artist").textContent=
-data.artist || "YouTube Music";
-
-currentSortedIndex=index;
-
-highlightActiveTrack();
-highlightVideoActiveTrack();
-
-}
-
-
-/* =========================================================
-SWIPE
-========================================================= */
-
-const playerCard=
-document.getElementById("playerCard");
-
-const seekElement=
-document.getElementById("seek");
-
-playerCard.addEventListener("pointerdown",e=>{
-
-if(
-e.target.closest(".controls") ||
-e.target.closest(".btn") ||
-e.target.closest(".play")
-){
-
-swipeActive=false;
-return;
-
-}
-
-swipeStartX=e.clientX;
-swipeStartY=e.clientY;
-
-swipeFromSeek=
-!!e.target.closest("#seek");
-
-swipeActive=true;
-
-});
-
-playerCard.addEventListener("pointerup",e=>{
-
-if(!swipeActive)return;
-
-const endX=e.clientX;
-const endY=e.clientY;
-
-const dx=endX-swipeStartX;
-const dy=endY-swipeStartY;
-
-if(swipeFromSeek){
-
-swipeActive=false;
-return;
-
-}
-
-if(Math.abs(dx)<50){
-
-swipeActive=false;
-return;
-
-}
-
-if(Math.abs(dy)>Math.abs(dx)){
-
-swipeActive=false;
-return;
-
-}
-
-if(dx<-50){
-
-nextSong();
-
-}else if(dx>50){
-
-previousSong();
-
-}
-
-swipeActive=false;
-
-});
-
-playerCard.addEventListener("pointercancel",()=>{
-
-swipeActive=false;
-
-});
-
-
-/* =========================================================
-SEEK
-========================================================= */
-
-function getSeekPosition(clientX,el){
-
-const rect=el.getBoundingClientRect();
-
-if(!rect.width)return 0;
-
-return Math.max(
-0,
-Math.min(
-1,
-(clientX-rect.left)/rect.width
-)
-);
-
-}
-
-function updateSeekVisual(pos){
-
-document.getElementById("fill").style.width=
-(pos*100)+"%";
-
-if(
-player &&
-typeof player.getDuration==="function"
-){
-
-const duration=player.getDuration();
-
-if(duration){
-
-document.getElementById("current").textContent=
-format(pos*duration);
-
-document.getElementById("duration").textContent=
-format(duration);
-
-}
-
-}
-
-}
-
-seekElement.addEventListener("pointerdown",e=>{
-
-e.preventDefault();
-e.stopPropagation();
-
-isDragging=true;
-
-try{
-
-seekElement.setPointerCapture(e.pointerId);
-
-}catch(err){}
-
-updateSeekVisual(
-getSeekPosition(e.clientX,seekElement)
-);
-
-},{passive:false});
-
-
-seekElement.addEventListener("pointermove",e=>{
-
-if(!isDragging)return;
-
-e.preventDefault();
-e.stopPropagation();
-
-updateSeekVisual(
-getSeekPosition(e.clientX,seekElement)
-);
-
-},{passive:false});
-
-
-seekElement.addEventListener("pointerup",e=>{
-
-if(!isDragging)return;
-
-e.preventDefault();
-e.stopPropagation();
-
-const pos=
-getSeekPosition(e.clientX,seekElement);
-
-updateSeekVisual(pos);
-
-if(
-player &&
-typeof player.getDuration==="function"
-){
-
-const duration=player.getDuration();
-
-if(duration){
-
-player.seekTo(
-pos*duration,
-true
-);
-
-}
-
-}
-
-isDragging=false;
-
-try{
-
-seekElement.releasePointerCapture(e.pointerId);
-
-}catch(err){}
-
-},{passive:false});
-
-
-/* =========================================================
-PROGRESS
-========================================================= */
-
-function updateProgress(){
-
-if(isDragging)return;
-
-if(
-!player ||
-typeof player.getCurrentTime!=="function"
-)
-return;
-
-try{
-
-const current=player.getCurrentTime();
-const duration=player.getDuration();
-
-if(!duration)return;
-
-const pos=Math.max(
-0,
-Math.min(
-1,
-current/duration
-)
-);
-
-document.getElementById("fill").style.width=
-(pos*100)+"%";
-
-document.getElementById("current").textContent=
-format(current);
-
-document.getElementById("duration").textContent=
-format(duration);
-
-}catch(e){}
-
-}
-
-
-/* =========================================================
-FORMAT
-========================================================= */
-
-function format(s){
-
-if(!s || isNaN(s)){
-return "0:00";
-}
-
-s=Math.floor(s);
-
-return Math.floor(s/60)+":"+
-String(s%60).padStart(2,"0");
-
-}
-
-
-/* =========================================================
-LOAD PLAYLIST
-========================================================= */
-
-function loadPlaylistItems(){
-
-if(
-!player ||
-typeof player.getPlaylist!=="function"
-)
-return;
-
-const ids=player.getPlaylist();
-
-if(!ids || ids.length===0){
-
-setTimeout(loadPlaylistItems,600);
-
-return;
-
-}
-
-playlistItems=ids;
-
-sortedPlaylistItems=[];
-sortedPlaylistData=[];
-
-sortingReady=false;
-
-
-/*
-  YouTube Data API v3 দিয়ে playlist-এর title/artist
-  আনা হচ্ছে।
-*/
-const requests=playlistItems.map((id,index)=>{
-
-return fetch(
-`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(id)}&key=${encodeURIComponent(YOUTUBE_API_KEY)}`
-)
-
-.then(r=>r.json())
-
-.then(data=>{
-
-const item=
-data &&
-data.items &&
-data.items[0];
-
-if(item && item.snippet){
-
-return{
-
-id:id,
-
-title:
-item.snippet.title ||
-`Track #${index+1}`,
-
-artist:
-item.snippet.channelTitle ||
-"YouTube Music",
-
-originalIndex:index
-
-};
-
-}
-
-return{
-
-id:id,
-title:`Track #${index+1}`,
-artist:"YouTube Music",
-originalIndex:index
-
-};
-
-})
-
-.catch(()=>{
-
-return{
-
-id:id,
-title:`Track #${index+1}`,
-artist:"YouTube Music",
-originalIndex:index
-
-};
-
-});
-
-});
-
-
-Promise.all(requests)
-.then(results=>{
-
-results.sort((a,b)=>{
-
-return a.title.localeCompare(
-b.title,
-undefined,
-{
-numeric:true,
-sensitivity:"base"
-}
-);
-
-});
-
-sortedPlaylistData=results;
-
-sortedPlaylistItems=
-results.map(item=>item.id);
-
-sortingReady=true;
-
-let currentId="";
-
-try{
-
-currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-}catch(e){}
-
-if(currentId){
-
-const currentIndex=
-sortedPlaylistItems.indexOf(currentId);
-
-if(currentIndex!==-1){
-
-currentSortedIndex=currentIndex;
-
-}
-
-}
-
-renderSortedPlaylists();
-
-highlightActiveTrack();
-highlightVideoActiveTrack();
-
-updateInfo();
-
-});
-
-}
 
 
 /* =========================================================
@@ -4190,21 +3306,31 @@ MAIN PLAYLIST
 function renderMainPlaylist(){
 
 const list=
-document.getElementById("songList");
+document.getElementById(
+"songList"
+);
 
 list.innerHTML="";
 
-sortedPlaylistData.forEach((data,index)=>{
+sortedPlaylistData.forEach(
+(data,index)=>{
 
-const item=document.createElement("div");
+const item=
+document.createElement(
+"div"
+);
 
-item.className="song-item";
+item.className=
+"song-item";
 
-item.id=`track-${index}`;
+item.id=
+`track-${index}`;
 
 item.onclick=()=>{
 
-playSpecificTrack(index);
+playSpecificTrack(
+index
+);
 
 };
 
@@ -4243,7 +3369,9 @@ VIDEO PLAYLIST
 function renderVideoPlaylist(){
 
 const list=
-document.getElementById("videoSongList");
+document.getElementById(
+"videoSongList"
+);
 
 if(
 !sortedPlaylistData ||
@@ -4269,24 +3397,36 @@ return;
 
 list.innerHTML="";
 
-sortedPlaylistData.forEach((data,index)=>{
+sortedPlaylistData.forEach(
+(data,index)=>{
 
-const item=document.createElement("div");
+const item=
+document.createElement(
+"div"
+);
 
-item.className="video-song-item";
+item.className=
+"video-song-item";
 
-item.id=`video-track-${index}`;
+item.id=
+`video-track-${index}`;
 
-item.addEventListener("click",function(e){
+item.addEventListener(
+"click",
+function(e){
 
 e.preventDefault();
 e.stopPropagation();
 
-playSpecificTrack(index);
+playSpecificTrack(
+index
+);
 
-},{
+},
+{
 passive:false
-});
+}
+);
 
 item.innerHTML=`
 
@@ -4316,7 +3456,10 @@ list.appendChild(item);
 
 highlightVideoActiveTrack();
 
-setTimeout(adjustVideoPlaylistHeight,20);
+setTimeout(
+adjustVideoPlaylistHeight,
+20
+);
 
 }
 
@@ -4327,9 +3470,13 @@ ESCAPE HTML
 
 function escapeHtml(text){
 
-if(!text)return "";
+if(!text)
+return "";
 
-const div=document.createElement("div");
+const div=
+document.createElement(
+"div"
+);
 
 div.textContent=text;
 
@@ -4350,7 +3497,8 @@ if(
 )
 return;
 
-const data=sortedPlaylistData[index];
+const data=
+sortedPlaylistData[index];
 
 const id=data.id;
 
@@ -4364,7 +3512,8 @@ try{
 
 player.loadVideoById(id);
 
-}catch(e){
+}
+catch(e){
 
 changingTrack=false;
 
@@ -4372,36 +3521,66 @@ return;
 
 }
 
-setTimeout(()=>{
+setTimeout(
+()=>{
 
 changingTrack=false;
 
-},700);
+},
+700
+);
 
 const drawer=
-document.getElementById("drawer");
+document.getElementById(
+"drawer"
+);
 
 const drawerOverlay=
-document.getElementById("overlay");
+document.getElementById(
+"overlay"
+);
 
-drawer.classList.remove("open");
-drawerOverlay.classList.remove("active");
+drawer.classList.remove(
+"open"
+);
+
+drawerOverlay.classList.remove(
+"active"
+);
 
 const popup=
-document.getElementById("videoPopup");
+document.getElementById(
+"videoPopup"
+);
 
-if(popup.classList.contains("active")){
+if(
+popup.classList.contains(
+"active"
+)
+){
 
 document
-.getElementById("videoPlaylist")
-.classList.add("active");
+.getElementById(
+"videoPlaylist"
+)
+.classList.add(
+"active"
+);
 
-setTimeout(adjustVideoPlaylistHeight,50);
-setTimeout(adjustVideoPlaylistHeight,150);
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
+);
 
 }
 
 highlightActiveTrack();
+
 highlightVideoActiveTrack();
 
 }
@@ -4427,11 +3606,15 @@ currentId=
 player.getVideoData() &&
 player.getVideoData().video_id;
 
-}catch(e){}
+}
+catch(e){}
 
 document
-.querySelectorAll(".song-item")
-.forEach((item,index)=>{
+.querySelectorAll(
+".song-item"
+)
+.forEach(
+(item,index)=>{
 
 item.classList.toggle(
 "active",
@@ -4463,11 +3646,15 @@ currentId=
 player.getVideoData() &&
 player.getVideoData().video_id;
 
-}catch(e){}
+}
+catch(e){}
 
 document
-.querySelectorAll(".video-song-item")
-.forEach((item,index)=>{
+.querySelectorAll(
+".video-song-item"
+)
+.forEach(
+(item,index)=>{
 
 item.classList.toggle(
 "active",
@@ -4487,33 +3674,47 @@ function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData!=="function"
+typeof player.getVideoData!==
+"function"
 )
 return;
 
 try{
 
-const d=player.getVideoData();
+const d=
+player.getVideoData();
 
-if(!d || !d.video_id)return;
+if(
+!d ||
+!d.video_id
+)
+return;
 
-document.getElementById("cover").src=
+document.getElementById(
+"cover"
+).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 if(d.title){
 
-document.getElementById("title").textContent=d.title;
+document.getElementById(
+"title"
+).textContent=d.title;
 
 }
 
 if(d.author){
 
-document.getElementById("artist").textContent=d.author;
+document.getElementById(
+"artist"
+).textContent=d.author;
 
 }
 
 const sortedIndex=
-sortedPlaylistItems.indexOf(d.video_id);
+sortedPlaylistItems.indexOf(
+d.video_id
+);
 
 if(sortedIndex!==-1){
 
@@ -4524,7 +3725,8 @@ currentSortedIndex=sortedIndex;
 highlightActiveTrack();
 highlightVideoActiveTrack();
 
-}catch(e){}
+}
+catch(e){}
 
 }
 
@@ -4536,11 +3738,15 @@ DRAWER
 function toggleDrawer(){
 
 const popup=
-document.getElementById("videoPopup");
+document.getElementById(
+"videoPopup"
+);
 
 if(
 popup &&
-popup.classList.contains("active")
+popup.classList.contains(
+"active"
+)
 ){
 
 return;
@@ -4548,19 +3754,34 @@ return;
 }
 
 const drawer=
-document.getElementById("drawer");
+document.getElementById(
+"drawer"
+);
 
 const overlay=
-document.getElementById("overlay");
+document.getElementById(
+"overlay"
+);
 
 const opening=
-!drawer.classList.contains("open");
+!drawer.classList.contains(
+"open"
+);
 
-drawer.classList.toggle("open",opening);
+drawer.classList.toggle(
+"open",
+opening
+);
 
-overlay.classList.toggle("active",opening);
+overlay.classList.toggle(
+"active",
+opening
+);
 
-if(opening && !sortingReady){
+if(
+opening &&
+!sortingReady
+){
 
 loadPlaylistItems();
 
