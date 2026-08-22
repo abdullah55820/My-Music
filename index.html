@@ -41,7 +41,7 @@ BACKGROUND
 
 .bg{
 position:fixed;
-inset:0;
+inset:-20px;
 
 background-image:url("background.jpg");
 background-position:center center;
@@ -59,7 +59,7 @@ backface-visibility:hidden;
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.2);
+background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
@@ -208,26 +208,25 @@ pointer-events:none!important;
 }
 
 /* =========================================================
-VIDEO SECTION (UNIFIED FOR ALL SCREENS TO MATCH TV)
+VIDEO SECTION
 ========================================================= */
 
 .video-section{
 position:fixed;
-display:none;
-top: 36.5%;
-left: 50%;
-transform: translate(-50%, -50%);
-width: 62vw;
-max-width: 580px;
-z-index: 1700;
-pointer-events: none;
-flex-direction: column;
-align-items: stretch;
-}
 
-body.popup-active .video-section{
+top:6%;
+left:50%;
+
+transform:translateX(-50%);
+
+width:min(420px,94%);
+
+z-index:1700;
+
 display:flex;
-opacity:1;
+flex-direction:column;
+align-items:center;
+
 pointer-events:none;
 }
 
@@ -237,19 +236,31 @@ VIDEO POPUP
 
 .video-popup{
 position:relative;
+
 width:100%;
 aspect-ratio:16 / 9;
 height:auto;
+
 background:#000;
-border-radius:3px;
+
+border-radius:18px;
+
 overflow:hidden;
+
 z-index:1701;
-border:none;
-box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+
+border:1px solid rgba(255,255,255,.25);
+
+box-shadow:
+0 25px 50px rgba(0,0,0,.7);
+
 opacity:0;
 visibility:hidden;
+
 pointer-events:none;
+
 transform:scale(.92);
+
 transition:
 opacity .3s ease,
 transform .3s cubic-bezier(.2,.8,.2,1),
@@ -259,7 +270,9 @@ visibility .3s ease;
 .video-popup.active{
 opacity:1;
 visibility:visible;
+
 pointer-events:auto;
+
 transform:scale(1);
 }
 
@@ -303,16 +316,16 @@ VIDEO PLAYLIST
 .video-playlist{
 width:100%;
 
-margin-top:6px;
+margin-top:1px;
 
-max-height: 160px;
-min-height: 60px;
+max-height:calc(100dvh - 410px);
+min-height:80px;
 
-padding:6px;
+padding:7px;
 
-border-radius:10px;
+border-radius:15px;
 
-background:rgba(20,20,20,.75);
+background:rgba(20,20,20,.52);
 
 border:1px solid rgba(255,255,255,.18);
 
@@ -358,16 +371,16 @@ VIDEO PLAYLIST TITLE
 ========================================================= */
 
 .video-playlist-title{
-font-size:9.5px;
+font-size:10px;
 font-weight:700;
 
 color:rgba(255,255,255,.9);
 
-padding:3px 6px 5px;
+padding:4px 7px 6px;
 
 border-bottom:1px solid rgba(255,255,255,.13);
 
-margin-bottom:4px;
+margin-bottom:5px;
 
 flex-shrink:0;
 
@@ -381,7 +394,7 @@ VIDEO SONG LIST
 .video-song-list{
 width:100%;
 
-height:calc(100% - 22px);
+height:calc(100% - 27px);
 
 overflow-y:auto;
 overflow-x:hidden;
@@ -389,7 +402,7 @@ overflow-x:hidden;
 display:flex;
 flex-direction:column;
 
-gap:4px;
+gap:5px;
 
 touch-action:pan-y;
 
@@ -425,14 +438,14 @@ VIDEO SONG ITEM
 .video-song-item{
 display:flex;
 align-items:center;
-gap:8px;
+gap:9px;
 
 width:100%;
-min-height:45px;
+min-height:54px;
 
-padding:5px 6px;
+padding:7px 8px;
 
-border-radius:8px;
+border-radius:10px;
 
 background:rgba(255,255,255,.07);
 border:1px solid rgba(255,255,255,.08);
@@ -467,10 +480,10 @@ border-color:rgba(255,255,255,.30);
 }
 
 .video-song-item img{
-width:35px;
-height:35px;
+width:44px;
+height:44px;
 
-border-radius:6px;
+border-radius:8px;
 
 object-fit:cover;
 
@@ -488,7 +501,7 @@ pointer-events:none;
 }
 
 .video-song-title{
-font-size:10.5px;
+font-size:11.5px;
 font-weight:700;
 
 color:#fff;
@@ -499,7 +512,7 @@ text-overflow:ellipsis;
 }
 
 .video-song-artist{
-font-size:9px;
+font-size:9.5px;
 
 color:rgba(255,255,255,.55);
 
@@ -507,7 +520,7 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-margin-top:1px;
+margin-top:2px;
 }
 
 /* =========================================================
@@ -527,7 +540,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 16px 25px;
+padding:0 16px 65px;
 
 pointer-events:auto;
 }
@@ -539,15 +552,15 @@ MUSIC PLAYER
 .player{
 width:min(440px,94%);
 
-height:100px;
+height:120px;
 
-padding:10px 16px;
+padding:14px 18px;
 
 border:1px solid rgba(255,255,255,.18);
 
-border-radius:50px;
+border-radius:60px;
 
-background:rgba(20,20,20,.55);
+background:rgba(20,20,20,.35);
 
 backdrop-filter:blur(20px);
 -webkit-backdrop-filter:blur(20px);
@@ -580,8 +593,8 @@ COVER
 .cover-wrapper{
 position:relative;
 
-width:70px;
-height:70px;
+width:84px;
+height:84px;
 
 flex-shrink:0;
 
@@ -618,8 +631,8 @@ content:"";
 
 position:absolute;
 
-width:14px;
-height:14px;
+width:16px;
+height:16px;
 
 background:rgba(20,20,20,.85);
 
@@ -665,7 +678,7 @@ justify-content:center;
 }
 
 .title{
-font-size:14px;
+font-size:16px;
 
 font-weight:700;
 
@@ -679,7 +692,7 @@ letter-spacing:.2px;
 }
 
 .artist{
-font-size:11px;
+font-size:12px;
 
 color:rgba(255,255,255,.65);
 
@@ -688,7 +701,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
-margin-bottom:6px;
+margin-bottom:8px;
 }
 
 /* =========================================================
@@ -699,7 +712,7 @@ SEEK
 position:relative;
 
 width:100%;
-height:4px;
+height:5px;
 
 border-radius:10px;
 
@@ -707,7 +720,7 @@ background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
-margin-bottom:4px;
+margin-bottom:6px;
 
 touch-action:none;
 
@@ -748,7 +761,7 @@ z-index:2;
 }
 
 .time-display{
-font-size:10px;
+font-size:11px;
 
 color:rgba(255,255,255,.65);
 
@@ -774,8 +787,8 @@ z-index:1610;
 }
 
 .btn{
-width:26px;
-height:26px;
+width:28px;
+height:28px;
 
 border:0;
 
@@ -802,8 +815,8 @@ z-index:1611;
 }
 
 .btn svg{
-width:18px;
-height:18px;
+width:20px;
+height:20px;
 
 fill:#fff;
 }
@@ -846,7 +859,7 @@ opacity .2s ease;
 }
 
 .vol-slider-wrapper.active{
-width:50px;
+width:55px;
 
 opacity:1;
 
@@ -857,7 +870,7 @@ margin-left:2px;
 -webkit-appearance:none;
 appearance:none;
 
-width:50px;
+width:55px;
 height:3.5px;
 
 background:rgba(255,255,255,.3);
@@ -898,8 +911,8 @@ PLAY
 ========================================================= */
 
 .play{
-width:38px;
-height:38px;
+width:44px;
+height:44px;
 
 border-radius:50%;
 
@@ -931,8 +944,8 @@ z-index:1611;
 }
 
 .play svg{
-width:18px;
-height:18px;
+width:20px;
+height:20px;
 
 fill:#000;
 
@@ -948,24 +961,456 @@ margin-left:0;
 transform:scale(.90);
 }
 
-
 /* =========================================================
-RESPONSIVE ADJUSTMENTS FOR TV SCREEN PLACEMENT
+DESKTOP
 ========================================================= */
 
 @media(min-width:769px){
-.video-section{
-top: 38.2%;
-width: 32.5vw;
-}
+
+/* ---------------------------------------------------------
+DESKTOP NORMAL / VIDEO OFF
+--------------------------------------------------------- */
+
+.app{
+height:100dvh;
+width:100%;
+
+display:flex;
+
+align-items:flex-end;
+justify-content:center;
+
+padding:0 40px 65px;
 }
 
-@media(max-width:768px){
-.video-section{
-top: 31.5%;
-width: 82vw;
-max-width: 420px;
+.player{
+width:min(560px,70vw);
+
+height:120px;
+
+margin:0;
+
+transform:none;
+transform-origin:left bottom;
 }
+
+.video-section{
+display:none;
+
+position:fixed;
+
+/* মনিটরের পজিশন অনুযায়ী এখানে সেট করা হয়েছে */
+top: 41%;
+left: 50%;
+transform: translate(-50%, -50%);
+
+width: 38.5%;
+
+height: auto;
+
+z-index:1700;
+
+pointer-events:none;
+}
+
+.top-widgets{
+display:flex;
+
+top:14px;
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+
+/* ---------------------------------------------------------
+DESKTOP VIDEO ON
+--------------------------------------------------------- */
+
+body.popup-active .app{
+
+display:flex;
+
+align-items:flex-end;
+justify-content:flex-start;
+
+padding:0 40px 65px;
+}
+
+body.popup-active .player{
+
+width:min(760px,52vw);
+
+margin:0;
+
+transform:translateX(-5px) scale(.92);
+
+transform-origin:left bottom;
+
+z-index:1601;
+}
+
+body.popup-active .video-section{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:stretch;
+
+position:fixed;
+
+/* মনিটরের স্ক্রিনের ভেতরে ভিডিও বসানোর পজিশন */
+top: 41%;
+left: 31%;
+transform: none;
+
+width: 38.5%;
+
+opacity:1;
+
+pointer-events:none;
+
+z-index:1700;
+}
+
+body.popup-active .video-popup{
+
+position:relative;
+
+width:100%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+flex-shrink:0;
+
+margin:0;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+transform:scale(1);
+
+border-radius: 4px; /* মনিটরের স্ক্রিনের সাথে মিলিয়ে রাউন্ড কর্নার কমানো হলো */
+border: none;
+box-shadow: none;
+
+z-index:1701;
+}
+
+body.popup-active .video-playlist{
+
+width:100%;
+
+flex:1;
+
+min-height:100px;
+
+height:auto;
+
+max-height:none;
+
+margin-top:10px;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+position:relative;
+
+z-index:1705;
+
+overflow:hidden;
+}
+
+body.popup-active .video-song-list{
+
+height:calc(100% - 27px);
+
+overflow-y:auto;
+
+overflow-x:hidden;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
+}
+
+body.popup-active .top-widgets{
+
+display:flex;
+
+top:14px;
+
+left:calc(
+35px + min(349.6px, 23.92vw)
+);
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
+body.popup-active .controls{
+z-index:1610;
+}
+
+body.popup-active .video-song-item{
+cursor:pointer;
+pointer-events:auto;
+}
+
+
+/* ---------------------------------------------------------
+DESKTOP SMALL HEIGHT
+--------------------------------------------------------- */
+
+@media(max-height:800px){
+
+body.popup-active .video-section{
+
+top:3vh;
+
+height:94dvh;
+}
+
+body.popup-active .video-popup{
+
+border-radius:4px;
+}
+
+body.popup-active .video-playlist{
+
+margin-top:7px;
+}
+
+}
+
+}
+
+
+/* =========================================================
+MOBILE
+========================================================= */
+
+@media(max-width:480px){
+
+.app{
+padding-bottom:60px;
+}
+
+.player{
+height:116px;
+
+padding:12px 14px;
+
+border-radius:58px;
+
+gap:10px;
+}
+
+.cover-wrapper{
+width:78px;
+height:78px;
+}
+
+.title{
+font-size:15px;
+}
+
+.artist{
+font-size:11px;
+}
+
+.play{
+width:42px;
+height:42px;
+}
+
+.top-widgets{
+top:10px;
+}
+
+.bd-time{
+font-size:10px;
+padding:4px 9px;
+}
+
+.playlist-toggle-btn{
+font-size:10px;
+padding:4px 9px;
+}
+
+.playlist-drawer{
+width:180px;
+}
+
+.video-section{
+top:6%;
+left:50%;
+
+right:auto;
+
+transform:translateX(-50%);
+
+width:94%;
+
+opacity:1;
+}
+
+body.popup-active .video-section{
+transform:translateX(-50%);
+}
+
+.video-popup{
+width:100%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+border-radius:16px;
+}
+
+.video-playlist{
+margin-top:1px;
+
+max-height:calc(100dvh - 350px);
+
+min-height:80px;
+
+padding:7px;
+
+border-radius:14px;
+}
+
+.video-song-list{
+height:calc(100% - 27px);
+
+pointer-events:auto;
+
+touch-action:pan-y;
+
+overflow-y:auto;
+
+-webkit-overflow-scrolling:touch;
+}
+
+.video-song-item{
+min-height:52px;
+
+padding:6px 7px;
+
+gap:8px;
+
+pointer-events:auto;
+
+touch-action:manipulation;
+}
+
+.video-song-item img{
+width:42px;
+height:42px;
+}
+
+.video-song-title{
+font-size:11px;
+}
+
+.video-song-artist{
+font-size:9px;
+}
+
+}
+
+
+/* =========================================================
+SMALL HEIGHT
+========================================================= */
+
+@media(max-height:700px){
+
+.video-section{
+top:3%;
+}
+
+.video-popup{
+aspect-ratio:16 / 9;
+height:auto;
+}
+
+.video-playlist{
+max-height:calc(100dvh - 300px);
+
+min-height:70px;
+
+margin-top:1px;
+}
+
+.video-song-item{
+min-height:48px;
+}
+
+.video-song-item img{
+width:40px;
+height:40px;
+}
+
+}
+
+
+/* =========================================================
+VERY SMALL WIDTH
+========================================================= */
+
+@media(max-width:360px){
+
+.video-section{
+width:96%;
+}
+
+.video-playlist{
+margin-top:1px;
+
+padding:6px;
+
+max-height:calc(100dvh - 300px);
+}
+
+.video-song-item{
+min-height:48px;
+
+padding:5px 6px;
+
+gap:7px;
+}
+
+.video-song-item img{
+width:39px;
+height:39px;
+}
+
+.video-song-title{
+font-size:10px;
+}
+
+.video-song-artist{
+font-size:8.5px;
+}
+
 }
 
 
@@ -975,54 +1420,87 @@ DRAWER
 
 .drawer-overlay{
 position:fixed;
+
 inset:0;
+
 z-index:9999;
+
 background:transparent!important;
+
 backdrop-filter:none!important;
 -webkit-backdrop-filter:none!important;
+
 pointer-events:none;
+
 display:none;
 }
 
 .drawer-overlay.active{
 display:block;
+
 pointer-events:auto;
 }
 
 .playlist-drawer{
 position:fixed;
+
 top:0;
+
 right:-100%;
+
 width:180px;
+
 height:100dvh;
-background:rgba(20,20,20,.65)!important;
+
+background:rgba(20,20,20,.45)!important;
+
 backdrop-filter:blur(30px) saturate(150%)!important;
 -webkit-backdrop-filter:blur(30px) saturate(150%)!important;
+
 border-left:1px solid rgba(255,255,255,.18)!important;
+
 z-index:10000;
-transition:right .35s cubic-bezier(.2,.8,.2,1);
+
+transition:
+right .35s cubic-bezier(.2,.8,.2,1);
+
 display:flex;
+
 flex-direction:column;
+
 padding:12px 6px;
-box-shadow:-15px 0 40px rgba(0,0,0,.5)!important;
+
+box-shadow:
+-15px 0 40px rgba(0,0,0,.5)!important;
+
 visibility:hidden;
+
 pointer-events:none;
 }
 
 .playlist-drawer.open{
 right:0;
+
 visibility:visible;
+
 pointer-events:auto;
 }
 
 .drawer-header{
 display:flex;
+
 align-items:center;
+
 justify-content:space-between;
+
 padding:6px 8px;
+
 border-bottom:1px solid rgba(255,255,255,.15);
+
 margin-bottom:8px;
+
 background:rgba(255,255,255,.1);
+
 border-radius:8px;
 }
 
@@ -1034,23 +1512,37 @@ color:#fff;
 
 .close-btn{
 background:transparent;
+
 border:0;
+
 color:rgba(255,255,255,.9);
+
 font-size:16px;
+
 cursor:pointer;
+
 padding:0 2px;
+
 line-height:1;
+
 touch-action:manipulation;
 }
 
 .song-list{
 flex:1;
+
 overflow-y:auto;
+
 display:flex;
+
 flex-direction:column;
+
 gap:4px;
+
 padding-right:2px;
+
 touch-action:pan-y;
+
 -webkit-overflow-scrolling:touch;
 }
 
@@ -1060,19 +1552,29 @@ width:2px;
 
 .song-list::-webkit-scrollbar-thumb{
 background:rgba(255,255,255,.3);
+
 border-radius:3px;
 }
 
 .song-item{
 display:flex;
+
 align-items:center;
+
 gap:6px;
+
 padding:4px 5px;
+
 border-radius:7px;
+
 background:rgba(255,255,255,.08);
+
 border:1px solid rgba(255,255,255,.1);
+
 cursor:pointer;
+
 touch-action:manipulation;
+
 -webkit-tap-highlight-color:transparent;
 }
 
@@ -1083,42 +1585,63 @@ transform:scale(.96);
 .song-item:hover,
 .song-item.active{
 background:rgba(255,255,255,.22);
+
 border-color:rgba(255,255,255,.35);
 }
 
 .song-item img{
 width:26px;
 height:26px;
+
 border-radius:5px;
+
 object-fit:cover;
+
 flex-shrink:0;
-box-shadow:0 2px 5px rgba(0,0,0,.3);
+
+box-shadow:
+0 2px 5px rgba(0,0,0,.3);
+
 pointer-events:none;
 }
 
 .song-item-info{
 flex:1;
+
 min-width:0;
+
 pointer-events:none;
 }
 
 .song-item-title{
 font-size:9.5px;
+
 font-weight:700;
+
 color:#fff;
+
 white-space:nowrap;
+
 overflow:hidden;
+
 text-overflow:ellipsis;
+
 letter-spacing:.2px;
 }
 
 .song-item-artist{
 font-size:8px;
+
 font-weight:400;
+
 color:rgba(255,255,255,.55);
+
 white-space:nowrap;
+
 overflow:hidden;
+
 text-overflow:ellipsis;
+
 margin-top:.5px;
 }
 
@@ -1767,6 +2290,26 @@ loadPlaylistItems();
 
 }
 
+requestAnimationFrame(()=>{
+
+requestAnimationFrame(()=>{
+
+adjustVideoPlaylistHeight();
+
+});
+
+});
+
+setTimeout(
+adjustVideoPlaylistHeight,
+100
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+300
+);
+
 }
 
 else{
@@ -1793,6 +2336,184 @@ iconSvg.innerHTML=
 }
 
 }
+
+
+/* =========================================================
+VIDEO PLAYLIST HEIGHT
+========================================================= */
+
+function adjustVideoPlaylistHeight(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const playlist=
+document.getElementById(
+"videoPlaylist"
+);
+
+const playerCard=
+document.getElementById(
+"playerCard"
+);
+
+const videoSection=
+document.getElementById(
+"videoSection"
+);
+
+if(
+!popup ||
+!playlist ||
+!playerCard
+)
+return;
+
+if(
+!popup.classList.contains("active")
+)
+return;
+
+
+/* =========================================================
+DESKTOP
+========================================================= */
+
+if(window.innerWidth>=769){
+
+if(!videoSection)
+return;
+
+const sectionRect=
+videoSection.getBoundingClientRect();
+
+const popupRect=
+popup.getBoundingClientRect();
+
+const available=
+sectionRect.bottom -
+popupRect.bottom -
+10;
+
+const safeHeight=
+Math.max(
+100,
+available
+);
+
+playlist.style.height=
+safeHeight+"px";
+
+playlist.style.maxHeight=
+safeHeight+"px";
+
+return;
+
+}
+
+
+/* =========================================================
+MOBILE / SMALL SCREEN
+========================================================= */
+
+const popupRect=
+popup.getBoundingClientRect();
+
+const playerRect=
+playerCard.getBoundingClientRect();
+
+const top=
+popupRect.bottom+1;
+
+const bottom=
+playerRect.top-20;
+
+let available=
+bottom-top;
+
+if(available>70){
+
+let safeHeight=
+Math.min(
+available,
+playerRect.top-top-2
+);
+
+safeHeight=
+Math.max(
+70,
+safeHeight
+);
+
+playlist.style.height=
+safeHeight+"px";
+
+playlist.style.maxHeight=
+safeHeight+"px";
+
+}
+
+else{
+
+playlist.style.height="70px";
+playlist.style.maxHeight="70px";
+
+}
+
+requestAnimationFrame(()=>{
+
+const finalRect=
+playlist.getBoundingClientRect();
+
+const finalPlayerRect=
+playerCard.getBoundingClientRect();
+
+if(
+finalRect.bottom >
+finalPlayerRect.top
+){
+
+const correctedHeight=
+Math.max(
+70,
+finalPlayerRect.top-top-2
+);
+
+playlist.style.height=
+correctedHeight+"px";
+
+playlist.style.maxHeight=
+correctedHeight+"px";
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+RESIZE
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
+);
+
+}
+);
 
 
 /* =========================================================
@@ -2715,6 +3436,11 @@ list.appendChild(item);
 
 highlightVideoActiveTrack();
 
+setTimeout(
+adjustVideoPlaylistHeight,
+20
+);
+
 }
 
 
@@ -2776,7 +3502,7 @@ return;
 }
 
 setTimeout(
-()=>{
+p=>{
 
 changingTrack=false;
 
@@ -2819,6 +3545,16 @@ document
 )
 .classList.add(
 "active"
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
 );
 
 }
@@ -3032,6 +3768,16 @@ loadPlaylistItems();
 }
 
 }
+
+
+/* =========================================================
+INITIAL
+========================================================= */
+
+setTimeout(
+adjustVideoPlaylistHeight,
+600
+);
 
 </script>
 
