@@ -197,7 +197,7 @@ display:none;
 }
 
 /* =========================================================
-DESKTOP SPECTRUM VISUALIZER (NEW CLEAN WHITE GLOW)
+MODERN DESKTOP SPECTRUM VISUALIZER (UPDATED)
 ========================================================= */
 
 .spectrum-wrap{
@@ -211,35 +211,33 @@ z-index:1500;
 display:flex;
 align-items:flex-end;
 justify-content:center;
-gap:5px;
+gap:4px;
 pointer-events:none;
-opacity:.95;
+padding:0 10px;
 }
 
 .spectrum-bar{
-width:3px;
-height:4px;
-border-radius:2px;
-background:rgba(255,255,255,0.85);
-box-shadow: 0 0 10px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.3);
+width:5px;
+height:6px;
+border-radius:10px 10px 4px 4px;
+background:linear-gradient(to top, rgba(255,59,48,0.3), #ff3b30, #ff9500, #34c759, #00c7be, #007aff);
+box-shadow:0 0 12px rgba(0,199,190,0.3);
 transform-origin:bottom;
-transition: height .08s ease, opacity .15s ease;
+transition:height 0.05s ease-out, opacity 0.15s ease;
+will-change: height;
 }
 
 .spectrum-wrap:not(.playing) .spectrum-bar{
-height:4px!important;
-opacity:.2;
+height:6px!important;
+opacity:0.25;
 box-shadow: none;
 }
 
 /* Only desktop */
-
 @media(max-width:768px){
-
 .spectrum-wrap{
 display:none!important;
 }
-
 }
 
 /* =========================================================
@@ -1200,7 +1198,7 @@ width:min(760px,52vw);
 margin:0;
 
 transform:
-translateX(-50px)
+translateX(-5px)
 scale(.92);
 
 transform-origin:left bottom;
@@ -1320,16 +1318,12 @@ z-index:2500;
 }
 
 /* =========================================================
-DESKTOP VIDEO ON - SPECTRUM
+DESKTOP VIDEO ON - SPECTRUM (UPDATED)
 ========================================================= */
 
 body.popup-active .spectrum-wrap{
-
-left:calc(
-35px + min(349.6px,23.92vw)
-);
-
-width:min(580px,38vw);
+left:calc(35px + min(349.6px, 23.92vw));
+width:min(560px, 38vw);
 }
 
 body.popup-active .playlist-toggle-btn{
@@ -1836,7 +1830,6 @@ white-space:nowrap;
 overflow:hidden;
 
 text-overflow:ellipsis;
-
 letter-spacing:.2px;
 }
 
@@ -2248,7 +2241,7 @@ updateBDTime,
 
 
 /* =========================================================
-DESKTOP SPECTRUM
+DESKTOP SPECTRUM (ENHANCED VISUALIZER)
 ========================================================= */
 
 function buildSpectrum(){
@@ -2263,16 +2256,16 @@ return;
 
 spectrum.innerHTML="";
 
-let count=60;
+let count=64;
 
 if(window.innerWidth>=1600){
-count=80;
+count=84;
 }
 else if(window.innerWidth>=1200){
-count=70;
+count=72;
 }
 else if(window.innerWidth>=900){
-count=55;
+count=58;
 }
 
 for(let i=0;i<count;i++){
@@ -2301,36 +2294,107 @@ null;
 
 
 function animateSpectrum(){
-if(!playing || window.innerWidth < 769){
-const spectrum = document.getElementById("spectrum");
+
+if(
+!playing ||
+window.innerWidth<769
+){
+
+const spectrum=
+document.getElementById(
+"spectrum"
+);
+
 if(spectrum){
-spectrum.classList.remove("playing");
+
+spectrum.classList.remove(
+"playing"
+);
+
 }
+
 return;
+
 }
 
-const spectrum = document.getElementById("spectrum");
-if(!spectrum) return;
+const spectrum=
+document.getElementById(
+"spectrum"
+);
 
-spectrum.classList.add("playing");
-const bars = spectrum.querySelectorAll(".spectrum-bar");
-const now = Date.now();
-const center = (bars.length - 1) / 2;
+if(!spectrum)
+return;
 
-bars.forEach((bar, index)=>{
-const distance = Math.abs(index - center) / center;
-const wave = (Math.sin(now / 100 + index * 0.45) + 1) / 2;
-const wave2 = (Math.cos(now / 180 - index * 0.3) + 1) / 2;
-const random = Math.random() * 0.4;
+spectrum.classList.add(
+"playing"
+);
 
-let height = 10 + (1 - distance) * 60 + wave * 32 + wave2 * 22 + random * 25;
-height = Math.min(85, height);
+const bars=
+spectrum.querySelectorAll(
+".spectrum-bar"
+);
 
-bar.style.height = height + "px";
-bar.style.opacity = String(0.4 + (1 - distance) * 0.6);
+const now=
+Date.now();
+
+const center=
+(bars.length-1)/2;
+
+bars.forEach(
+(bar,index)=>{
+
+const distance=
+Math.abs(index-center)/
+center;
+
+const wave=
+(
+Math.sin(
+now/90+
+index*.45
+)+1
+)/2;
+
+const wave2=
+(
+Math.cos(
+now/150+
+index*.35
+)+1
+)/2;
+
+const random=
+Math.random()*.4;
+
+let height=
+10+
+(1-distance)*60+
+wave*35+
+wave2*25+
+random*18;
+
+height=
+Math.min(
+88,
+height
+);
+
+bar.style.height=
+height+"px";
+
+bar.style.opacity=
+String(
+.4+
+(1-distance)*.6
+);
+
 });
 
-spectrumAnimation = requestAnimationFrame(animateSpectrum);
+spectrumAnimation=
+requestAnimationFrame(
+animateSpectrum
+);
+
 }
 
 
@@ -2383,9 +2447,9 @@ spectrum.querySelectorAll(
 bars.forEach(
 bar=>{
 
-bar.style.height="4px";
+bar.style.height="6px";
 
-bar.style.opacity=".2";
+bar.style.opacity=".25";
 
 });
 
@@ -3890,6 +3954,8 @@ ACTIVE VIDEO TRACK
 
 function highlightVideoActiveTrack(){
 
+id="test";
+
 if(
 !player ||
 sortedPlaylistItems.length===0
@@ -3976,7 +4042,7 @@ d.video_id
 
 if(sortedIndex!==-1){
 
-currentSortedIndex=sortedIndex;
+currentScoreIndex=sortedIndex;
 
 }
 
@@ -4018,6 +4084,7 @@ document.getElementById(
 );
 
 const overlay=
+visualOverlay=
 document.getElementById(
 "overlay"
 );
