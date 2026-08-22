@@ -540,7 +540,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 16px 20px; /* নিচের স্পেস কমিয়ে কন্ট্রোলার আরও নিচে নামানো হলো */
+padding:0 16px 20px;
 
 pointer-events:auto;
 }
@@ -552,7 +552,7 @@ MUSIC PLAYER
 .player{
 width:min(440px,94%);
 
-height:110px; /* উচ্চতা একটু কমানো হলো */
+height:110px;
 
 padding:12px 18px;
 
@@ -962,15 +962,15 @@ transform:scale(.90);
 }
 
 /* =========================================================
-3D COVERFLOW SECTION (DESKTOP & SWIPE CARDS)
+3D COVERFLOW SECTION (DESKTOP & SWIPE CARDS - MORE COMPACT)
 ========================================================= */
 .coverflow-wrapper{
     position: absolute;
-    top: 48%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100vw;
-    height: 52vh; /* উচ্চতা কমানো হলো যাতে উপরের টাইম ও নিচের প্লেয়ারে টাচ না লাগে */
+    height: 48vh; 
     display: none; 
     justify-content: center;
     align-items: center;
@@ -990,19 +990,20 @@ body.desktop-coverflow .coverflow-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
+    pointer-events: auto;
 }
 
 .song-card {
     position: absolute;
-    width: 210px;  /* কার্ডের সাইজ ছোট করা হয়েছে */
-    height: 300px; 
+    width: 150px;  /* কার্ড আরও ছোট করা হলো */
+    height: 220px; 
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 10px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
     cursor: pointer;
     text-align: center;
@@ -1014,19 +1015,19 @@ body.desktop-coverflow .coverflow-wrapper {
 
 .song-card img {
     width: 100%;
-    height: 190px; /* কার্ডের ইমেজ ছোট করা হলো */
+    height: 130px; /* কার্ডের ইমেজ ছোট করা হলো */
     object-fit: cover;
-    border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     pointer-events: none;
 }
 
 .song-card .card-info {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .song-card .card-title {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -1035,9 +1036,9 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card .card-artist {
-    font-size: 11px;
+    font-size: 9px;
     color: rgba(255, 255, 255, 0.65);
-    margin-top: 3px;
+    margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1052,28 +1053,28 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card.prev-1 {
-    transform: translateX(-160px) scale(0.85) rotateY(20deg);
+    transform: translateX(-110px) scale(0.82) rotateY(20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.prev-2 {
-    transform: translateX(-300px) scale(0.7) rotateY(30deg);
+    transform: translateX(-200px) scale(0.68) rotateY(30deg);
     z-index: 6;
     opacity: 0.3;
     pointer-events: auto;
 }
 
 .song-card.next-1 {
-    transform: translateX(160px) scale(0.85) rotateY(-20deg);
+    transform: translateX(110px) scale(0.82) rotateY(-20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.next-2 {
-    transform: translateX(300px) scale(0.7) rotateY(-30deg);
+    transform: translateX(200px) scale(0.68) rotateY(-30deg);
     z-index: 6;
     opacity: 0.3;
     pointer-events: auto;
@@ -2977,7 +2978,7 @@ swipeActive=false;
 
 
 /* =========================================================
-COVERFLOW SWIPE (LEFT / RIGHT) SUPPORT
+COVERFLOW SWIPE & TOUCH SUPPORT (FIXED)
 ========================================================= */
 let coverflowSwipeStartX = 0;
 let coverflowSwipeStartY = 0;
@@ -2997,11 +2998,24 @@ coverflowWrapperEl.addEventListener("pointerup", e => {
     const dx = e.clientX - coverflowSwipeStartX;
     const dy = e.clientY - coverflowSwipeStartY;
 
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+    // যদি খুব কম নড়ে তবে ক্লিক হিসেবে গণ্য হবে
+    if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
+        const clickedCard = e.target.closest(".song-card");
+        if (clickedCard) {
+            // কার্ডের ডেটা ইনডেক্স বের করে গান প্লে করা
+            const cards = Array.from(coverflowWrapperEl.querySelectorAll(".song-card"));
+            const clickedIndex = cards.indexOf(clickedCard);
+            if (clickedIndex !== -1) {
+                // একটিচুয়াল সোনা ইনডেক্স ম্যাপিং হিসাব করা
+                let targetIndex = (currentSortedIndex + (clickedIndex - Math.floor(cards.length / 2)) + sortedPlaylistData.length) % sortedPlaylistData.length;
+                // সরাসরি কার্ডে ক্লিক করলে একটিভ কার্ডে গেলে প্লে হবে অথবা যে কার্ডে ক্লিক করবে সেটি প্লে হবে
+            }
+        }
+    } else if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
         if (dx < 0) {
-            nextSong(); // ডান থেকে বামে টানলে পরবর্তী গান
+            nextSong(); // বাম দিকে টানলে পরবর্তী গান
         } else {
-            previousSong(); // বাম থেকে ডানে টানলে আগের গান
+            previousSong(); // ডান দিকে টানলে আগের গান
         }
     }
     coverflowSwipeActive = false;
@@ -3610,7 +3624,7 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-3D COVERFLOW RENDER (ALL SONGS INCLUDED)
+3D COVERFLOW RENDER (COMPACT CARDS & INTERACTIVE)
 ========================================================= */
 
 function renderCoverflow(){
@@ -3649,7 +3663,9 @@ function renderCoverflow(){
             </div>
         `;
 
-        card.addEventListener("click", () => {
+        // কার্ডে সরাসরি টাচ বা ক্লিক করলে গান প্লে হবে
+        card.addEventListener("pointerdown", (e) => {
+            e.stopPropagation();
             playSpecificTrack(index);
         });
 
@@ -3955,6 +3971,7 @@ document.getElementById(
 );
 
 const overlay=
+destination=
 document.getElementById(
 "overlay"
 );
@@ -3969,7 +3986,7 @@ drawer.classList.toggle(
 opening
 );
 
-overlay.classList.toggle(
+document.getElementById("overlay").classList.toggle(
 "active",
 opening
 );
