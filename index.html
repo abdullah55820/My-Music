@@ -59,7 +59,7 @@ backface-visibility:hidden;
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.0);
+background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
@@ -962,6 +962,124 @@ transform:scale(.90);
 }
 
 /* =========================================================
+3D COVERFLOW SECTION (DESKTOP & VIDEO OFF)
+========================================================= */
+.coverflow-wrapper{
+    position: absolute;
+    top: 15vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 900px;
+    height: 380px;
+    display: none; /* ডিফল্ট হাইড থাকবে */
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    z-index: 1500;
+}
+
+/* যখন ভিডিও পপআপ বন্ধ থাকবে এবং স্ক্রিন ডেস্কটপ হবে তখন এটি দেখাবে */
+body.desktop-coverflow .coverflow-wrapper {
+    display: flex;
+}
+
+.coverflow-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.song-card {
+    position: absolute;
+    width: 230px;
+    height: 310px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    transition: all 0.5s cubic-bezier(0.1, 0.9, 0.2, 1);
+    cursor: pointer;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.song-card img {
+    width: 100%;
+    height: 195px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.song-card .card-info {
+    margin-top: 12px;
+}
+
+.song-card .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+.song-card .card-artist {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* কভারফ্লো পজিশনিং স্টাইল */
+.song-card.active {
+    transform: translateX(0) scale(1.1) translateZ(0);
+    z-index: 10;
+    opacity: 1;
+    pointer-events: auto;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.song-card.prev-1 {
+    transform: translateX(-170px) scale(0.9) rotateY(18deg);
+    z-index: 8;
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+.song-card.prev-2 {
+    transform: translateX(-310px) scale(0.75) rotateY(28deg);
+    z-index: 6;
+    opacity: 0.35;
+    pointer-events: auto;
+}
+
+.song-card.next-1 {
+    transform: translateX(170px) scale(0.9) rotateY(-18deg);
+    z-index: 8;
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+.song-card.next-2 {
+    transform: translateX(310px) scale(0.75) rotateY(-28deg);
+    z-index: 6;
+    opacity: 0.35;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
 DESKTOP
 ========================================================= */
 
@@ -1041,11 +1159,6 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
-
-/*
-   পুরো controller এখন আগের থেকে একটু ডানে।
-   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
-*/
 
 width:min(760px,52vw);
 
@@ -1158,13 +1271,6 @@ display:flex;
 
 top:14px;
 
-/*
-   BD time controller-এর visual center-এর
-   ঠিক ওপর থাকবে।
-   Controller = 760px পর্যন্ত, scale = .92,
-   তাই center হিসাব করে position করা হয়েছে।
-*/
-
 left:calc(
 35px + min(349.6px, 23.92vw)
 );
@@ -1177,12 +1283,6 @@ z-index:2500;
 body.popup-active .playlist-toggle-btn{
 display:none;
 }
-
-/*
-   কোনো transform নেই।
-   তাই controller-এর ভিতরের item
-   আলাদা করে বামে/ডানে যাবে না।
-*/
 
 body.popup-active .controls{
 z-index:1610;
@@ -1774,6 +1874,16 @@ Loading...
 
 
 <!-- =========================================================
+3D COVERFLOW CONTAINER (DESKTOP)
+========================================================= -->
+<div class="coverflow-wrapper" id="coverflowWrapper">
+    <div class="coverflow-container" id="coverflowContainer">
+        <!-- জাভাস্ক্রিপ্ট দিয়ে কার্ডগুলো ডাইনামিক রেন্ডার হবে -->
+    </div>
+</div>
+
+
+<!-- =========================================================
 DRAWER
 ========================================================= -->
 
@@ -2103,6 +2213,9 @@ updateProgress,
 250
 );
 
+// ইনিশিয়াল ডেস্কটপ কভারফ্লো চেক
+updateDesktopCoverflowState();
+
 }
 
 
@@ -2123,6 +2236,7 @@ document.getElementById("play-icon");
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
+renderCoverflow(); // স্টেট চেঞ্জ হলে কভারফ্লো আপডেট হবে
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -2244,8 +2358,21 @@ catch(e){}
 
 
 /* =========================================================
-VIDEO POPUP
+VIDEO POPUP & DESKTOP COVERFLOW TOGGLE LOGIC
 ========================================================= */
+
+function updateDesktopCoverflowState() {
+    const popup = document.getElementById("videoPopup");
+    const isPopupActive = popup.classList.contains("active");
+    
+    // যদি উইন্ডো ডেস্কটপ سਾਈজ হয় (>=769px) এবং ভিডিও পপআপ একটিভ না থাকে
+    if (window.innerWidth >= 769 && !isPopupActive) {
+        document.body.classList.add("desktop-coverflow");
+        renderCoverflow();
+    } else {
+        document.body.classList.remove("desktop-coverflow");
+    }
+}
 
 function toggleVideoPopup(){
 
@@ -2354,6 +2481,9 @@ iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
+
+// পপআপ টগল করার সাথে সাথে ডেস্কটপ কভারফ্লো স্টেট আপডেট করা
+updateDesktopCoverflowState();
 
 }
 
@@ -2531,6 +2661,8 @@ setTimeout(
 adjustVideoPlaylistHeight,
 150
 );
+
+updateDesktopCoverflowState();
 
 }
 );
@@ -2761,6 +2893,7 @@ currentSortedIndex=index;
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
+renderCoverflow();
 
 }
 
@@ -3275,6 +3408,7 @@ currentIndex;
 }
 
 renderSortedPlaylists();
+renderCoverflow();
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
@@ -3288,13 +3422,14 @@ updateInfo();
 
 
 /* =========================================================
-RENDER PLAYLISTS
+RENDER PLAYLISTS & COVERFLOW
 ========================================================= */
 
 function renderSortedPlaylists(){
 
 renderMainPlaylist();
 renderVideoPlaylist();
+renderCoverflow();
 
 }
 
@@ -3465,6 +3600,57 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
+3D COVERFLOW RENDER
+========================================================= */
+
+function renderCoverflow(){
+    const container = document.getElementById("coverflowContainer");
+    if(!container || sortedPlaylistData.length === 0) return;
+
+    container.innerHTML = "";
+
+    sortedPlaylistData.forEach((song, index) => {
+        const card = document.createElement("div");
+        card.className = "song-card";
+
+        let diff = index - currentSortedIndex;
+        const total = sortedPlaylistData.length;
+
+        // সার্কুলার পজিশন ক্যালকুলেশন
+        if (diff > total / 2) diff -= total;
+        if (diff < -total / 2) diff += total;
+
+        if (diff === 0) {
+            card.classList.add("active");
+        } else if (diff === 1) {
+            card.classList.add("next-1");
+        } else if (diff === 2) {
+            card.classList.add("next-2");
+        } else if (diff === -1) {
+            card.classList.add("prev-1");
+        } else if (diff === -2) {
+            card.classList.add("prev-2");
+        }
+
+        card.innerHTML = `
+            <img src="https://i.ytimg.com/vi/${song.id}/hqdefault.jpg" alt="${escapeHtml(song.title)}" draggable="false">
+            <div class="card-info">
+                <div class="card-title">${escapeHtml(song.title)}</div>
+                <div class="card-artist">${escapeHtml(song.artist)}</div>
+            </div>
+        `;
+
+        // কার্ডে ক্লিক করলে গান প্লে হবে
+        card.addEventListener("click", () => {
+            playSpecificTrack(index);
+        });
+
+        container.appendChild(card);
+    });
+}
+
+
+/* =========================================================
 ESCAPE HTML
 ========================================================= */
 
@@ -3582,6 +3768,7 @@ adjustVideoPlaylistHeight,
 highlightActiveTrack();
 
 highlightVideoActiveTrack();
+renderCoverflow();
 
 }
 
@@ -3724,6 +3911,7 @@ currentSortedIndex=sortedIndex;
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
+renderCoverflow();
 
 }
 catch(e){}
