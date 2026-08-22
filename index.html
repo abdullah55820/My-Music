@@ -540,7 +540,7 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 16px 65px;
+padding:0 16px 20px; /* নিচের স্পেস কমিয়ে কন্ট্রোলার আরও নিচে নামানো হলো */
 
 pointer-events:auto;
 }
@@ -552,9 +552,9 @@ MUSIC PLAYER
 .player{
 width:min(440px,94%);
 
-height:120px;
+height:110px; /* উচ্চতা একটু কমানো হলো */
 
-padding:14px 18px;
+padding:12px 18px;
 
 border:1px solid rgba(255,255,255,.18);
 
@@ -593,8 +593,8 @@ COVER
 .cover-wrapper{
 position:relative;
 
-width:84px;
-height:84px;
+width:76px;
+height:76px;
 
 flex-shrink:0;
 
@@ -631,8 +631,8 @@ content:"";
 
 position:absolute;
 
-width:16px;
-height:16px;
+width:14px;
+height:14px;
 
 background:rgba(20,20,20,.85);
 
@@ -678,7 +678,7 @@ justify-content:center;
 }
 
 .title{
-font-size:16px;
+font-size:15px;
 
 font-weight:700;
 
@@ -692,7 +692,7 @@ letter-spacing:.2px;
 }
 
 .artist{
-font-size:12px;
+font-size:11px;
 
 color:rgba(255,255,255,.65);
 
@@ -701,7 +701,7 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:2px;
-margin-bottom:8px;
+margin-bottom:6px;
 }
 
 /* =========================================================
@@ -712,7 +712,7 @@ SEEK
 position:relative;
 
 width:100%;
-height:5px;
+height:4px;
 
 border-radius:10px;
 
@@ -720,7 +720,7 @@ background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
-margin-bottom:6px;
+margin-bottom:4px;
 
 touch-action:none;
 
@@ -761,7 +761,7 @@ z-index:2;
 }
 
 .time-display{
-font-size:11px;
+font-size:10.5px;
 
 color:rgba(255,255,255,.65);
 
@@ -787,8 +787,8 @@ z-index:1610;
 }
 
 .btn{
-width:28px;
-height:28px;
+width:26px;
+height:26px;
 
 border:0;
 
@@ -815,8 +815,8 @@ z-index:1611;
 }
 
 .btn svg{
-width:20px;
-height:20px;
+width:18px;
+height:18px;
 
 fill:#fff;
 }
@@ -911,8 +911,8 @@ PLAY
 ========================================================= */
 
 .play{
-width:44px;
-height:44px;
+width:40px;
+height:40px;
 
 border-radius:50%;
 
@@ -944,8 +944,8 @@ z-index:1611;
 }
 
 .play svg{
-width:20px;
-height:20px;
+width:18px;
+height:18px;
 
 fill:#000;
 
@@ -962,20 +962,21 @@ transform:scale(.90);
 }
 
 /* =========================================================
-3D COVERFLOW SECTION (DESKTOP & VIDEO OFF)
+3D COVERFLOW SECTION (DESKTOP & SWIPE CARDS)
 ========================================================= */
 .coverflow-wrapper{
     position: absolute;
-    top: 50%;
+    top: 48%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100vw;
-    height: 65vh;
+    height: 52vh; /* উচ্চতা কমানো হলো যাতে উপরের টাইম ও নিচের প্লেয়ারে টাচ না লাগে */
     display: none; 
     justify-content: center;
     align-items: center;
     perspective: 1200px;
     z-index: 1500;
+    touch-action: pan-y;
 }
 
 body.desktop-coverflow .coverflow-wrapper {
@@ -993,36 +994,39 @@ body.desktop-coverflow .coverflow-wrapper {
 
 .song-card {
     position: absolute;
-    width: 280px;
-    height: 380px;
+    width: 210px;  /* কার্ডের সাইজ ছোট করা হয়েছে */
+    height: 300px; 
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 24px;
-    padding: 14px;
+    border-radius: 20px;
+    padding: 10px;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
-    transition: all 0.5s cubic-bezier(0.1, 0.9, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
     cursor: pointer;
     text-align: center;
     opacity: 0;
     pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .song-card img {
     width: 100%;
-    height: 250px;
+    height: 190px; /* কার্ডের ইমেজ ছোট করা হলো */
     object-fit: cover;
-    border-radius: 16px;
+    border-radius: 14px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    pointer-events: none;
 }
 
 .song-card .card-info {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .song-card .card-title {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -1031,9 +1035,9 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card .card-artist {
-    font-size: 12px;
+    font-size: 11px;
     color: rgba(255, 255, 255, 0.65);
-    margin-top: 4px;
+    margin-top: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1048,28 +1052,28 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card.prev-1 {
-    transform: translateX(-220px) scale(0.85) rotateY(20deg);
+    transform: translateX(-160px) scale(0.85) rotateY(20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.prev-2 {
-    transform: translateX(-400px) scale(0.7) rotateY(30deg);
+    transform: translateX(-300px) scale(0.7) rotateY(30deg);
     z-index: 6;
     opacity: 0.3;
     pointer-events: auto;
 }
 
 .song-card.next-1 {
-    transform: translateX(220px) scale(0.85) rotateY(-20deg);
+    transform: translateX(160px) scale(0.85) rotateY(-20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.next-2 {
-    transform: translateX(400px) scale(0.7) rotateY(-30deg);
+    transform: translateX(300px) scale(0.7) rotateY(-30deg);
     z-index: 6;
     opacity: 0.3;
     pointer-events: auto;
@@ -1091,13 +1095,13 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 40px 65px;
+padding:0 40px 20px;
 }
 
 .player{
-width:min(560px,70vw);
+width:min(540px,70vw);
 
-height:120px;
+height:115px;
 
 margin:0;
 
@@ -1143,7 +1147,7 @@ display:flex;
 align-items:flex-end;
 justify-content:flex-start;
 
-padding:0 40px 65px;
+padding:0 40px 20px;
 }
 
 body.popup-active .player{
@@ -1312,35 +1316,35 @@ MOBILE
 @media(max-width:480px){
 
 .app{
-padding-bottom:60px;
+padding-bottom:15px;
 }
 
 .player{
-height:116px;
+height:108px;
 
-padding:12px 14px;
+padding:10px 14px;
 
-border-radius:58px;
+border-radius:54px;
 
 gap:10px;
 }
 
 .cover-wrapper{
-width:78px;
-height:78px;
+width:72px;
+height:72px;
 }
 
 .title{
-font-size:15px;
+font-size:14px;
 }
 
 .artist{
-font-size:11px;
+font-size:10.5px;
 }
 
 .play{
-width:42px;
-height:42px;
+width:38px;
+height:38px;
 }
 
 .top-widgets{
@@ -1857,11 +1861,11 @@ Loading...
 
 
 <!-- =========================================================
-3D COVERFLOW CONTAINER (DESKTOP)
+3D COVERFLOW CONTAINER (DESKTOP & SWIPE CARDS)
 ========================================================= -->
 <div class="coverflow-wrapper" id="coverflowWrapper">
     <div class="coverflow-container" id="coverflowContainer">
-        <!-- জাভাস্ক্রিপ্ট দিয়ে কার্ডগুলো ডাইনামিক রেন্ডার হবে -->
+        <!-- জাভাস্ক্রিপ্ট দিয়ে সব গানের কার্ড ডাইনামিক রেন্ডার হবে -->
     </div>
 </div>
 
@@ -2973,6 +2977,42 @@ swipeActive=false;
 
 
 /* =========================================================
+COVERFLOW SWIPE (LEFT / RIGHT) SUPPORT
+========================================================= */
+let coverflowSwipeStartX = 0;
+let coverflowSwipeStartY = 0;
+let coverflowSwipeActive = false;
+
+const coverflowWrapperEl = document.getElementById("coverflowWrapper");
+
+coverflowWrapperEl.addEventListener("pointerdown", e => {
+    coverflowSwipeStartX = e.clientX;
+    coverflowSwipeStartY = e.clientY;
+    coverflowSwipeActive = true;
+});
+
+coverflowWrapperEl.addEventListener("pointerup", e => {
+    if (!coverflowSwipeActive) return;
+
+    const dx = e.clientX - coverflowSwipeStartX;
+    const dy = e.clientY - coverflowSwipeStartY;
+
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) {
+            nextSong(); // ডান থেকে বামে টানলে পরবর্তী গান
+        } else {
+            previousSong(); // বাম থেকে ডানে টানলে আগের গান
+        }
+    }
+    coverflowSwipeActive = false;
+});
+
+coverflowWrapperEl.addEventListener("pointercancel", () => {
+    coverflowSwipeActive = false;
+});
+
+
+/* =========================================================
 SEEK
 ========================================================= */
 
@@ -3570,7 +3610,7 @@ adjustVideoPlaylistHeight,
 
 
 /* =========================================================
-3D COVERFLOW RENDER
+3D COVERFLOW RENDER (ALL SONGS INCLUDED)
 ========================================================= */
 
 function renderCoverflow(){
