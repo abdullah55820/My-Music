@@ -966,20 +966,18 @@ transform:scale(.90);
 ========================================================= */
 .coverflow-wrapper{
     position: absolute;
-    top: 15vh;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 900px;
-    height: 380px;
-    display: none; /* ডিফল্ট হাইড থাকবে */
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 65vh;
+    display: none; 
     justify-content: center;
     align-items: center;
-    perspective: 1000px;
+    perspective: 1200px;
     z-index: 1500;
 }
 
-/* যখন ভিডিও পপআপ বন্ধ থাকবে এবং স্ক্রিন ডেস্কটপ হবে তখন এটি দেখাবে */
 body.desktop-coverflow .coverflow-wrapper {
     display: flex;
 }
@@ -995,15 +993,15 @@ body.desktop-coverflow .coverflow-wrapper {
 
 .song-card {
     position: absolute;
-    width: 230px;
-    height: 310px;
+    width: 280px;
+    height: 380px;
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 24px;
+    padding: 14px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
     transition: all 0.5s cubic-bezier(0.1, 0.9, 0.2, 1);
     cursor: pointer;
     text-align: center;
@@ -1013,18 +1011,18 @@ body.desktop-coverflow .coverflow-wrapper {
 
 .song-card img {
     width: 100%;
-    height: 195px;
+    height: 250px;
     object-fit: cover;
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
 .song-card .card-info {
-    margin-top: 12px;
+    margin-top: 15px;
 }
 
 .song-card .card-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -1033,17 +1031,16 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card .card-artist {
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.65);
-    margin-top: 3px;
+    margin-top: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* কভারফ্লো পজিশনিং স্টাইল */
 .song-card.active {
-    transform: translateX(0) scale(1.1) translateZ(0);
+    transform: translateX(0) scale(1.05) translateZ(0);
     z-index: 10;
     opacity: 1;
     pointer-events: auto;
@@ -1051,30 +1048,30 @@ body.desktop-coverflow .coverflow-wrapper {
 }
 
 .song-card.prev-1 {
-    transform: translateX(-170px) scale(0.9) rotateY(18deg);
+    transform: translateX(-220px) scale(0.85) rotateY(20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.prev-2 {
-    transform: translateX(-310px) scale(0.75) rotateY(28deg);
+    transform: translateX(-400px) scale(0.7) rotateY(30deg);
     z-index: 6;
-    opacity: 0.35;
+    opacity: 0.3;
     pointer-events: auto;
 }
 
 .song-card.next-1 {
-    transform: translateX(170px) scale(0.9) rotateY(-18deg);
+    transform: translateX(220px) scale(0.85) rotateY(-20deg);
     z-index: 8;
     opacity: 0.7;
     pointer-events: auto;
 }
 
 .song-card.next-2 {
-    transform: translateX(310px) scale(0.75) rotateY(-28deg);
+    transform: translateX(400px) scale(0.7) rotateY(-30deg);
     z-index: 6;
-    opacity: 0.35;
+    opacity: 0.3;
     pointer-events: auto;
 }
 
@@ -1084,10 +1081,6 @@ DESKTOP
 ========================================================= */
 
 @media(min-width:769px){
-
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
 
 .app{
 height:100dvh;
@@ -1142,11 +1135,6 @@ transform:translateX(-50%);
 
 z-index:2500;
 }
-
-
-/* ---------------------------------------------------------
-DESKTOP VIDEO ON
---------------------------------------------------------- */
 
 body.popup-active .app{
 
@@ -1292,11 +1280,6 @@ body.popup-active .video-song-item{
 cursor:pointer;
 pointer-events:auto;
 }
-
-
-/* ---------------------------------------------------------
-DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
 
 @media(max-height:800px){
 
@@ -2213,7 +2196,6 @@ updateProgress,
 250
 );
 
-// ইনিশিয়াল ডেস্কটপ কভারফ্লো চেক
 updateDesktopCoverflowState();
 
 }
@@ -2236,7 +2218,7 @@ document.getElementById("play-icon");
 
 highlightActiveTrack();
 highlightVideoActiveTrack();
-renderCoverflow(); // স্টেট চেঞ্জ হলে কভারফ্লো আপডেট হবে
+renderCoverflow();
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -2365,7 +2347,6 @@ function updateDesktopCoverflowState() {
     const popup = document.getElementById("videoPopup");
     const isPopupActive = popup.classList.contains("active");
     
-    // যদি উইন্ডো ডেস্কটপ سਾਈজ হয় (>=769px) এবং ভিডিও পপআপ একটিভ না থাকে
     if (window.innerWidth >= 769 && !isPopupActive) {
         document.body.classList.add("desktop-coverflow");
         renderCoverflow();
@@ -2482,7 +2463,6 @@ iconSvg.innerHTML=
 
 }
 
-// পপআপ টগল করার সাথে সাথে ডেস্কটপ কভারফ্লো স্টেট আপডেট করা
 updateDesktopCoverflowState();
 
 }
@@ -2526,11 +2506,6 @@ if(
 )
 return;
 
-
-/* =========================================================
-DESKTOP
-========================================================= */
-
 if(window.innerWidth>=769){
 
 if(!videoSection)
@@ -2562,11 +2537,6 @@ safeHeight+"px";
 return;
 
 }
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
 
 const popupRect=
 popup.getBoundingClientRect();
@@ -3616,7 +3586,6 @@ function renderCoverflow(){
         let diff = index - currentSortedIndex;
         const total = sortedPlaylistData.length;
 
-        // সার্কুলার পজিশন ক্যালকুলেশন
         if (diff > total / 2) diff -= total;
         if (diff < -total / 2) diff += total;
 
@@ -3640,7 +3609,6 @@ function renderCoverflow(){
             </div>
         `;
 
-        // কার্ডে ক্লিক করলে গান প্লে হবে
         card.addEventListener("click", () => {
             playSpecificTrack(index);
         });
