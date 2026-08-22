@@ -208,25 +208,26 @@ pointer-events:none!important;
 }
 
 /* =========================================================
-VIDEO SECTION
+VIDEO SECTION (UNIFIED FOR ALL SCREENS TO MATCH TV)
 ========================================================= */
 
 .video-section{
 position:fixed;
+display:none;
+top: 36.5%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 62vw;
+max-width: 580px;
+z-index: 1700;
+pointer-events: none;
+flex-direction: column;
+align-items: stretch;
+}
 
-top:6%;
-left:50%;
-
-transform:translateX(-50%);
-
-width:min(420px,94%);
-
-z-index:1700;
-
+body.popup-active .video-section{
 display:flex;
-flex-direction:column;
-align-items:center;
-
+opacity:1;
 pointer-events:none;
 }
 
@@ -236,30 +237,19 @@ VIDEO POPUP
 
 .video-popup{
 position:relative;
-
 width:100%;
 aspect-ratio:16 / 9;
 height:auto;
-
 background:#000;
-
-border-radius:4px;
-
+border-radius:3px;
 overflow:hidden;
-
 z-index:1701;
-
 border:none;
-
-box-shadow:none;
-
+box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 opacity:0;
 visibility:hidden;
-
 pointer-events:none;
-
 transform:scale(.92);
-
 transition:
 opacity .3s ease,
 transform .3s cubic-bezier(.2,.8,.2,1),
@@ -269,9 +259,7 @@ visibility .3s ease;
 .video-popup.active{
 opacity:1;
 visibility:visible;
-
 pointer-events:auto;
-
 transform:scale(1);
 }
 
@@ -317,14 +305,14 @@ width:100%;
 
 margin-top:6px;
 
-max-height:calc(100dvh - 410px);
-min-height:80px;
+max-height: 160px;
+min-height: 60px;
 
-padding:7px;
+padding:6px;
 
-border-radius:12px;
+border-radius:10px;
 
-background:rgba(20,20,20,.65);
+background:rgba(20,20,20,.75);
 
 border:1px solid rgba(255,255,255,.18);
 
@@ -370,16 +358,16 @@ VIDEO PLAYLIST TITLE
 ========================================================= */
 
 .video-playlist-title{
-font-size:10px;
+font-size:9.5px;
 font-weight:700;
 
 color:rgba(255,255,255,.9);
 
-padding:4px 7px 6px;
+padding:3px 6px 5px;
 
 border-bottom:1px solid rgba(255,255,255,.13);
 
-margin-bottom:5px;
+margin-bottom:4px;
 
 flex-shrink:0;
 
@@ -393,7 +381,7 @@ VIDEO SONG LIST
 .video-song-list{
 width:100%;
 
-height:calc(100% - 27px);
+height:calc(100% - 22px);
 
 overflow-y:auto;
 overflow-x:hidden;
@@ -401,7 +389,7 @@ overflow-x:hidden;
 display:flex;
 flex-direction:column;
 
-gap:5px;
+gap:4px;
 
 touch-action:pan-y;
 
@@ -437,14 +425,14 @@ VIDEO SONG ITEM
 .video-song-item{
 display:flex;
 align-items:center;
-gap:9px;
+gap:8px;
 
 width:100%;
-min-height:54px;
+min-height:45px;
 
-padding:7px 8px;
+padding:5px 6px;
 
-border-radius:10px;
+border-radius:8px;
 
 background:rgba(255,255,255,.07);
 border:1px solid rgba(255,255,255,.08);
@@ -479,10 +467,10 @@ border-color:rgba(255,255,255,.30);
 }
 
 .video-song-item img{
-width:44px;
-height:44px;
+width:35px;
+height:35px;
 
-border-radius:8px;
+border-radius:6px;
 
 object-fit:cover;
 
@@ -500,7 +488,7 @@ pointer-events:none;
 }
 
 .video-song-title{
-font-size:11.5px;
+font-size:10.5px;
 font-weight:700;
 
 color:#fff;
@@ -511,7 +499,7 @@ text-overflow:ellipsis;
 }
 
 .video-song-artist{
-font-size:9.5px;
+font-size:9px;
 
 color:rgba(255,255,255,.55);
 
@@ -519,7 +507,7 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-margin-top:2px;
+margin-top:1px;
 }
 
 /* =========================================================
@@ -962,172 +950,22 @@ transform:scale(.90);
 
 
 /* =========================================================
-DESKTOP (EXACT FIT TO TV SCREEN IN BACKGROUND)
+RESPONSIVE ADJUSTMENTS FOR TV SCREEN PLACEMENT
 ========================================================= */
 
 @media(min-width:769px){
-
-.app{
-height:100dvh;
-width:100%;
-display:flex;
-align-items:flex-end;
-justify-content:center;
-padding:0 20px 20px;
-}
-
-.player{
-width:min(480px, 90vw);
-height:100px;
-margin:0;
-transform:none;
-}
-
-/* এই পজিশনটি ব্যাকগ্রাউন্ড ছবির ঠিক ঐ কালো টিভি স্ক্রিনের মাপ ও জায়গায় সেট করা হয়েছে */
 .video-section{
-display:none;
-position:fixed;
 top: 38.2%;
-left: 50.1%;
-transform: translate(-50%, -50%);
 width: 32.5vw;
-max-width: 580px;
-z-index: 1700;
-pointer-events: none;
+}
 }
 
-body.popup-active .video-section{
-display:flex;
-flex-direction:column;
-align-items:stretch;
-opacity:1;
-pointer-events:none;
-}
-
-body.popup-active .video-popup{
-position:relative;
-width:100%;
-aspect-ratio: 16 / 9;
-height:auto;
-flex-shrink:0;
-margin:0;
-opacity:1;
-visibility:visible;
-pointer-events:auto;
-transform:scale(1);
-border-radius:4px;
-z-index:1701;
-box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-}
-
-/* ভিডিও অন হলে নিচের প্লেলিস্টটি স্ক্রিনের নিচে ছোট করে দেখাবে */
-body.popup-active .video-playlist{
-width:100%;
-max-height: 180px;
-min-height: 70px;
-margin-top: 8px;
-opacity:1;
-visibility:visible;
-pointer-events:auto;
-position:relative;
-z-index:1705;
-overflow:hidden;
-}
-
-body.popup-active .video-song-list{
-height:calc(100% - 27px);
-overflow-y:auto;
-overflow-x:hidden;
-}
-
-.top-widgets{
-display:flex;
-top:14px;
-left:50%;
-transform:translateX(-50%);
-z-index:2500;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:none;
-}
-
-}
-
-
-/* =========================================================
-MOBILE
-========================================================= */
-
-@media(max-width:480px){
-
-.app{
-padding-bottom:25px;
-}
-
-.player{
-height:100px;
-padding:10px 14px;
-border-radius:50px;
-gap:10px;
-}
-
-.cover-wrapper{
-width:65px;
-height:65px;
-}
-
-.title{
-font-size:13px;
-}
-
-.artist{
-font-size:10px;
-}
-
-.play{
-width:36px;
-height:36px;
-}
-
-.top-widgets{
-top:10px;
-}
-
-.bd-time,
-.playlist-toggle-btn{
-font-size:10px;
-padding:4px 9px;
-}
-
+@media(max-width:768px){
 .video-section{
-top:6%;
-left:50%;
-right:auto;
-transform:translateX(-50%);
-width:94%;
-opacity:1;
+top: 31.5%;
+width: 82vw;
+max-width: 420px;
 }
-
-body.popup-active .video-section{
-transform:translateX(-50%);
-}
-
-.video-popup{
-width:100%;
-aspect-ratio:16 / 9;
-height:auto;
-border-radius:6px;
-}
-
-.video-playlist{
-margin-top:1px;
-max-height:calc(100dvh - 350px);
-min-height:80px;
-padding:7px;
-border-radius:12px;
-}
-
 }
 
 
@@ -1929,26 +1767,6 @@ loadPlaylistItems();
 
 }
 
-requestAnimationFrame(()=>{
-
-requestAnimationFrame(()=>{
-
-adjustVideoPlaylistHeight();
-
-});
-
-});
-
-setTimeout(
-adjustVideoPlaylistHeight,
-100
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-300
-);
-
 }
 
 else{
@@ -1975,158 +1793,6 @@ iconSvg.innerHTML=
 }
 
 }
-
-
-/* =========================================================
-VIDEO PLAYLIST HEIGHT
-========================================================= */
-
-function adjustVideoPlaylistHeight(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const playlist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const playerCard=
-document.getElementById(
-"playerCard"
-);
-
-const videoSection=
-document.getElementById(
-"videoSection"
-);
-
-if(
-!popup ||
-!playlist ||
-!playerCard
-)
-return;
-
-if(
-!popup.classList.contains("active")
-)
-return;
-
-
-/* =========================================================
-DESKTOP
-========================================================= */
-
-if(window.innerWidth>=769){
-
-return;
-
-}
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
-
-const popupRect=
-popup.getBoundingClientRect();
-
-const playerRect=
-playerCard.getBoundingClientRect();
-
-const top=
-popupRect.bottom+1;
-
-const bottom=
-playerRect.top-20;
-
-let available=
-bottom-top;
-
-if(available>70){
-
-let safeHeight=
-Math.min(
-available,
-playerRect.top-top-2
-);
-
-safeHeight=
-Math.max(
-70,
-safeHeight
-);
-
-playlist.style.height=
-safeHeight+"px";
-
-playlist.style.maxHeight=
-safeHeight+"px";
-
-}
-
-else{
-
-playlist.style.height="70px";
-playlist.style.maxHeight="70px";
-
-}
-
-requestAnimationFrame(()=>{
-
-const finalRect=
-playlist.getBoundingClientRect();
-
-const finalPlayerRect=
-playerCard.getBoundingClientRect();
-
-if(
-finalRect.bottom >
-finalPlayerRect.top
-){
-
-const correctedHeight=
-Math.max(
-70,
-finalPlayerRect.top-top-2
-);
-
-playlist.style.height=
-correctedHeight+"px";
-
-playlist.style.maxHeight=
-correctedHeight+"px";
-
-}
-
-});
-
-}
-
-
-/* =========================================================
-RESIZE
-========================================================= */
-
-window.addEventListener(
-"resize",
-()=>{
-
-setTimeout(
-adjustVideoPlaylistHeight,
-50
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-150
-);
-
-}
-);
 
 
 /* =========================================================
@@ -3049,11 +2715,6 @@ list.appendChild(item);
 
 highlightVideoActiveTrack();
 
-setTimeout(
-adjustVideoPlaylistHeight,
-20
-);
-
 }
 
 
@@ -3371,16 +3032,6 @@ loadPlaylistItems();
 }
 
 }
-
-
-/* =========================================================
-INITIAL
-========================================================= */
-
-setTimeout(
-adjustVideoPlaylistHeight,
-600
-);
 
 </script>
 
