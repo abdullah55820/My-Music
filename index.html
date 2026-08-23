@@ -63,12 +63,6 @@ background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
-body.popup-active .bg{
-filter:blur(20px);
--webkit-filter:blur(20px);
-transform:scale(1.1);
-}
-
 /* =========================================================
 TOP WIDGETS
 ========================================================= */
@@ -181,347 +175,20 @@ height:14px;
 fill:#fff;
 }
 
-body.popup-active .playlist-toggle-btn{
-display:none;
-}
-
 /* =========================================================
-VIDEO OVERLAY
+HIDDEN YOUTUBE PLAYER CONTAINER
 ========================================================= */
 
-.video-overlay{
+.hidden-yt-container{
 position:fixed;
-inset:0;
-
-z-index:1499;
-
-display:none;
-
-background:transparent;
-
-pointer-events:none!important;
-}
-
-.video-overlay.active{
-display:block;
-pointer-events:none!important;
-}
-
-/* =========================================================
-VIDEO SECTION
-========================================================= */
-
-.video-section{
-position:fixed;
-
-top:6%;
-left:50%;
-
-transform:translateX(-50%);
-
-width:min(420px,94%);
-
-z-index:1700;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-
-pointer-events:none;
-}
-
-/* =========================================================
-VIDEO POPUP
-========================================================= */
-
-.video-popup{
-position:relative;
-
-width:100%;
-aspect-ratio:16 / 9;
-height:auto;
-
-background:#000;
-
-border-radius:18px;
-
-overflow:hidden;
-
-z-index:1701;
-
-border:1px solid rgba(255,255,255,.25);
-
-box-shadow:
-0 25px 50px rgba(0,0,0,.7);
-
+width:1px;
+height:1px;
 opacity:0;
-visibility:hidden;
-
 pointer-events:none;
-
-transform:scale(.92);
-
-transition:
-opacity .3s ease,
-transform .3s cubic-bezier(.2,.8,.2,1),
-visibility .3s ease;
-}
-
-.video-popup.active{
-opacity:1;
-visibility:visible;
-
-pointer-events:auto;
-
-transform:scale(1);
-}
-
-/* =========================================================
-YOUTUBE IFRAME
-========================================================= */
-
-#yt{
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-border:0;
-display:block;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-
-z-index:1702;
-}
-
-#yt iframe{
-width:100%!important;
-height:100%!important;
-
-border:0;
-
-pointer-events:auto!important;
-
-touch-action:auto!important;
-}
-
-/* =========================================================
-VIDEO PLAYLIST
-========================================================= */
-
-.video-playlist{
-width:100%;
-
-margin-top:1px;
-
-max-height:calc(100dvh - 410px);
-min-height:80px;
-
-padding:7px;
-
-border-radius:15px;
-
-background:rgba(20,20,20,.52);
-
-border:1px solid rgba(255,255,255,.18);
-
-backdrop-filter:blur(25px) saturate(150%);
--webkit-backdrop-filter:blur(25px) saturate(150%);
-
-box-shadow:
-0 15px 40px rgba(0,0,0,.55);
-
-opacity:0;
-visibility:hidden;
-
-pointer-events:none;
-
-position:relative;
-
-z-index:1705;
-
-touch-action:pan-y;
-
--webkit-overflow-scrolling:touch;
-
-overscroll-behavior:contain;
-
 overflow:hidden;
-
-flex-shrink:0;
+z-index:-999;
 }
 
-.video-playlist.active{
-opacity:1;
-visibility:visible;
-
-pointer-events:auto;
-
-touch-action:pan-y;
-
-z-index:1705;
-}
-
-/* =========================================================
-VIDEO PLAYLIST TITLE
-========================================================= */
-
-.video-playlist-title{
-font-size:10px;
-font-weight:700;
-
-color:rgba(255,255,255,.9);
-
-padding:4px 7px 6px;
-
-border-bottom:1px solid rgba(255,255,255,.13);
-
-margin-bottom:5px;
-
-flex-shrink:0;
-
-pointer-events:none;
-}
-
-/* =========================================================
-VIDEO SONG LIST
-========================================================= */
-
-.video-song-list{
-width:100%;
-
-height:calc(100% - 27px);
-
-overflow-y:auto;
-overflow-x:hidden;
-
-display:flex;
-flex-direction:column;
-
-gap:5px;
-
-touch-action:pan-y;
-
--webkit-overflow-scrolling:touch;
-
-overscroll-behavior:contain;
-
-scrollbar-width:thin;
-
-pointer-events:auto;
-
-position:relative;
-
-z-index:1706;
-
--webkit-user-select:none;
-user-select:none;
-}
-
-.video-song-list::-webkit-scrollbar{
-width:3px;
-}
-
-.video-song-list::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,.35);
-border-radius:5px;
-}
-
-/* =========================================================
-VIDEO SONG ITEM
-========================================================= */
-
-.video-song-item{
-display:flex;
-align-items:center;
-gap:9px;
-
-width:100%;
-min-height:54px;
-
-padding:7px 8px;
-
-border-radius:10px;
-
-background:rgba(255,255,255,.07);
-border:1px solid rgba(255,255,255,.08);
-
-cursor:pointer;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-
-transition:
-background .2s ease,
-transform .15s ease,
-border-color .2s ease;
-
-flex-shrink:0;
-
-pointer-events:auto;
-
-position:relative;
-z-index:1707;
-}
-
-.video-song-item:active{
-transform:scale(.98);
-background:rgba(255,255,255,.18);
-}
-
-.video-song-item.active{
-background:rgba(255,255,255,.20);
-border-color:rgba(255,255,255,.30);
-}
-
-.video-song-item img{
-width:44px;
-height:44px;
-
-border-radius:8px;
-
-object-fit:cover;
-
-flex-shrink:0;
-
-pointer-events:none;
-
--webkit-user-drag:none;
-}
-
-.video-song-info{
-flex:1;
-min-width:0;
-pointer-events:none;
-}
-
-.video-song-title{
-font-size:11.5px;
-font-weight:700;
-
-color:#fff;
-
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.video-song-artist{
-font-size:9.5px;
-
-color:rgba(255,255,255,.55);
-
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-
-margin-top:2px;
-}
 
 /* =========================================================
 APP
@@ -967,10 +634,6 @@ DESKTOP
 
 @media(min-width:769px){
 
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
-
 .app{
 height:100dvh;
 width:100%;
@@ -991,27 +654,6 @@ height:120px;
 margin:0;
 
 transform:none;
-transform-origin:left bottom;
-}
-
-.video-section{
-display:none;
-
-position:fixed;
-
-top:4vh;
-right:4vw;
-left:auto;
-
-transform:none;
-
-width:min(620px,42vw);
-
-height:92dvh;
-
-z-index:1700;
-
-pointer-events:none;
 }
 
 .top-widgets{
@@ -1023,200 +665,6 @@ left:50%;
 transform:translateX(-50%);
 
 z-index:2500;
-}
-
-
-/* ---------------------------------------------------------
-DESKTOP VIDEO ON
---------------------------------------------------------- */
-
-body.popup-active .app{
-
-display:flex;
-
-align-items:flex-end;
-justify-content:flex-start;
-
-padding:0 40px 65px;
-}
-
-body.popup-active .player{
-
-/*
-   পুরো controller এখন আগের থেকে একটু ডানে।
-   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
-*/
-
-width:min(760px,52vw);
-
-margin:0;
-
-transform:translateX(-5px) scale(.92);
-
-transform-origin:left bottom;
-
-z-index:1601;
-}
-
-body.popup-active .video-section{
-
-display:flex;
-
-flex-direction:column;
-
-align-items:stretch;
-
-position:fixed;
-
-top:4vh;
-right:4vw;
-left:auto;
-
-transform:none;
-
-width:min(620px,42vw);
-
-height:92dvh;
-
-opacity:1;
-
-pointer-events:none;
-
-z-index:1700;
-}
-
-body.popup-active .video-popup{
-
-position:relative;
-
-width:100%;
-
-aspect-ratio:16 / 9;
-
-height:auto;
-
-flex-shrink:0;
-
-margin:0;
-
-opacity:1;
-
-visibility:visible;
-
-pointer-events:auto;
-
-transform:scale(1);
-
-border-radius:18px;
-
-z-index:1701;
-}
-
-body.popup-active .video-playlist{
-
-width:100%;
-
-flex:1;
-
-min-height:100px;
-
-height:auto;
-
-max-height:none;
-
-margin-top:10px;
-
-opacity:1;
-
-visibility:visible;
-
-pointer-events:auto;
-
-position:relative;
-
-z-index:1705;
-
-overflow:hidden;
-}
-
-body.popup-active .video-song-list{
-
-height:calc(100% - 27px);
-
-overflow-y:auto;
-
-overflow-x:hidden;
-
-touch-action:pan-y;
-
--webkit-overflow-scrolling:touch;
-}
-
-body.popup-active .top-widgets{
-
-display:flex;
-
-top:14px;
-
-/*
-   BD time controller-এর visual center-এর
-   ঠিক ওপর থাকবে।
-   Controller = 760px পর্যন্ত, scale = .92,
-   তাই center হিসাব করে position করা হয়েছে।
-*/
-
-left:calc(
-35px + min(349.6px, 23.92vw)
-);
-
-transform:translateX(-50%);
-
-z-index:2500;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:none;
-}
-
-/*
-   কোনো transform নেই।
-   তাই controller-এর ভিতরের item
-   আলাদা করে বামে/ডানে যাবে না।
-*/
-
-body.popup-active .controls{
-z-index:1610;
-}
-
-body.popup-active .video-song-item{
-cursor:pointer;
-pointer-events:auto;
-}
-
-
-/* ---------------------------------------------------------
-DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
-
-@media(max-height:800px){
-
-body.popup-active .video-section{
-
-top:3vh;
-
-height:94dvh;
-}
-
-body.popup-active .video-popup{
-
-border-radius:15px;
-}
-
-body.popup-active .video-playlist{
-
-margin-top:7px;
-}
-
 }
 
 }
@@ -1272,163 +720,6 @@ padding:4px 9px;
 .playlist-toggle-btn{
 font-size:10px;
 padding:4px 9px;
-}
-
-.playlist-drawer{
-width:180px;
-}
-
-.video-section{
-top:6%;
-left:50%;
-
-right:auto;
-
-transform:translateX(-50%);
-
-width:94%;
-
-opacity:1;
-}
-
-body.popup-active .video-section{
-transform:translateX(-50%);
-}
-
-.video-popup{
-width:100%;
-
-aspect-ratio:16 / 9;
-
-height:auto;
-
-border-radius:16px;
-}
-
-.video-playlist{
-margin-top:1px;
-
-max-height:calc(100dvh - 350px);
-
-min-height:80px;
-
-padding:7px;
-
-border-radius:14px;
-}
-
-.video-song-list{
-height:calc(100% - 27px);
-
-pointer-events:auto;
-
-touch-action:pan-y;
-
-overflow-y:auto;
-
--webkit-overflow-scrolling:touch;
-}
-
-.video-song-item{
-min-height:52px;
-
-padding:6px 7px;
-
-gap:8px;
-
-pointer-events:auto;
-
-touch-action:manipulation;
-}
-
-.video-song-item img{
-width:42px;
-height:42px;
-}
-
-.video-song-title{
-font-size:11px;
-}
-
-.video-song-artist{
-font-size:9px;
-}
-
-}
-
-
-/* =========================================================
-SMALL HEIGHT
-========================================================= */
-
-@media(max-height:700px){
-
-.video-section{
-top:3%;
-}
-
-.video-popup{
-aspect-ratio:16 / 9;
-height:auto;
-}
-
-.video-playlist{
-max-height:calc(100dvh - 300px);
-
-min-height:70px;
-
-margin-top:1px;
-}
-
-.video-song-item{
-min-height:48px;
-}
-
-.video-song-item img{
-width:40px;
-height:40px;
-}
-
-}
-
-
-/* =========================================================
-VERY SMALL WIDTH
-========================================================= */
-
-@media(max-width:360px){
-
-.video-section{
-width:96%;
-}
-
-.video-playlist{
-margin-top:1px;
-
-padding:6px;
-
-max-height:calc(100dvh - 300px);
-}
-
-.video-song-item{
-min-height:48px;
-
-padding:5px 6px;
-
-gap:7px;
-}
-
-.video-song-item img{
-width:39px;
-height:39px;
-}
-
-.video-song-title{
-font-size:10px;
-}
-
-.video-song-artist{
-font-size:8.5px;
 }
 
 }
@@ -1711,65 +1002,11 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 
 <!-- =========================================================
-VIDEO OVERLAY
+HIDDEN YOUTUBE PLAYER
 ========================================================= -->
 
-<div
-id="videoOverlay"
-class="video-overlay">
-</div>
-
-
-<!-- =========================================================
-VIDEO SECTION
-========================================================= -->
-
-<div
-class="video-section"
-id="videoSection"
->
-
-<div
-id="videoPopup"
-class="video-popup"
->
-
+<div class="hidden-yt-container">
 <div id="yt"></div>
-
-</div>
-
-
-<!-- VIDEO PLAYLIST -->
-
-<div
-id="videoPlaylist"
-class="video-playlist"
->
-
-<div class="video-playlist-title">
-Playlist Songs
-</div>
-
-<div
-class="video-song-list"
-id="videoSongList"
->
-
-<div style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:9px;
-padding:10px;
-">
-
-Loading...
-
-</div>
-
-</div>
-
-</div>
-
 </div>
 
 
@@ -1892,27 +1129,6 @@ id="fill">
 </div>
 
 <div class="controls">
-
-<button
-class="btn"
-id="videoToggleBtn"
-onclick="toggleVideoPopup()"
-title="Toggle Video Popup"
->
-
-<svg
-id="videoToggleIcon"
-viewBox="0 0 24 24"
->
-
-<path d="
-M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z
-"/>
-
-</svg>
-
-</button>
-
 
 <button
 class="play"
@@ -2058,11 +1274,11 @@ playerVars:{
 
 autoplay:0,
 
-controls:1,
+controls:0,
 
-disablekb:0,
+disablekb:1,
 
-fs:1,
+fs:0,
 
 modestbranding:1,
 
@@ -2122,7 +1338,6 @@ const playIcon=
 document.getElementById("play-icon");
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -2241,299 +1456,6 @@ player.playVideo();
 catch(e){}
 
 }
-
-
-/* =========================================================
-VIDEO POPUP
-========================================================= */
-
-function toggleVideoPopup(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const overlay=
-document.getElementById(
-"videoOverlay"
-);
-
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const iconSvg=
-document.getElementById(
-"videoToggleIcon"
-);
-
-const opening=
-!popup.classList.contains(
-"active"
-);
-
-if(opening){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
-
-videoPlaylist.classList.add(
-"active"
-);
-
-document.body.classList.add(
-"popup-active"
-);
-
-iconSvg.innerHTML=
-'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
-if(
-sortingReady &&
-sortedPlaylistData.length>0
-){
-
-renderVideoPlaylist();
-
-}
-
-else{
-
-loadPlaylistItems();
-
-}
-
-requestAnimationFrame(()=>{
-
-requestAnimationFrame(()=>{
-
-adjustVideoPlaylistHeight();
-
-});
-
-});
-
-setTimeout(
-adjustVideoPlaylistHeight,
-100
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-300
-);
-
-}
-
-else{
-
-popup.classList.remove(
-"active"
-);
-
-overlay.classList.remove(
-"active"
-);
-
-videoPlaylist.classList.remove(
-"active"
-);
-
-document.body.classList.remove(
-"popup-active"
-);
-
-iconSvg.innerHTML=
-'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
-
-}
-
-}
-
-
-/* =========================================================
-VIDEO PLAYLIST HEIGHT
-========================================================= */
-
-function adjustVideoPlaylistHeight(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const playlist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const playerCard=
-document.getElementById(
-"playerCard"
-);
-
-const videoSection=
-document.getElementById(
-"videoSection"
-);
-
-if(
-!popup ||
-!playlist ||
-!playerCard
-)
-return;
-
-if(
-!popup.classList.contains("active")
-)
-return;
-
-
-/* =========================================================
-DESKTOP
-========================================================= */
-
-if(window.innerWidth>=769){
-
-if(!videoSection)
-return;
-
-const sectionRect=
-videoSection.getBoundingClientRect();
-
-const popupRect=
-popup.getBoundingClientRect();
-
-const available=
-sectionRect.bottom -
-popupRect.bottom -
-10;
-
-const safeHeight=
-Math.max(
-100,
-available
-);
-
-playlist.style.height=
-safeHeight+"px";
-
-playlist.style.maxHeight=
-safeHeight+"px";
-
-return;
-
-}
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
-
-const popupRect=
-popup.getBoundingClientRect();
-
-const playerRect=
-playerCard.getBoundingClientRect();
-
-const top=
-popupRect.bottom+1;
-
-const bottom=
-playerRect.top-20;
-
-let available=
-bottom-top;
-
-if(available>70){
-
-let safeHeight=
-Math.min(
-available,
-playerRect.top-top-2
-);
-
-safeHeight=
-Math.max(
-70,
-safeHeight
-);
-
-playlist.style.height=
-safeHeight+"px";
-
-playlist.style.maxHeight=
-safeHeight+"px";
-
-}
-
-else{
-
-playlist.style.height="70px";
-playlist.style.maxHeight="70px";
-
-}
-
-requestAnimationFrame(()=>{
-
-const finalRect=
-playlist.getBoundingClientRect();
-
-const finalPlayerRect=
-playerCard.getBoundingClientRect();
-
-if(
-finalRect.bottom >
-finalPlayerRect.top
-){
-
-const correctedHeight=
-Math.max(
-70,
-finalPlayerRect.top-top-2
-);
-
-playlist.style.height=
-correctedHeight+"px";
-
-playlist.style.maxHeight=
-correctedHeight+"px";
-
-}
-
-});
-
-}
-
-
-/* =========================================================
-RESIZE
-========================================================= */
-
-window.addEventListener(
-"resize",
-()=>{
-
-setTimeout(
-adjustVideoPlaylistHeight,
-50
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-150
-);
-
-}
-);
 
 
 /* =========================================================
@@ -2760,7 +1682,6 @@ data.artist || "YouTube Music";
 currentSortedIndex=index;
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 }
 
@@ -3274,27 +2195,14 @@ currentIndex;
 
 }
 
-renderSortedPlaylists();
+renderMainPlaylist();
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 updateInfo();
 
 }
 );
-
-}
-
-
-/* =========================================================
-RENDER PLAYLISTS
-========================================================= */
-
-function renderSortedPlaylists(){
-
-renderMainPlaylist();
-renderVideoPlaylist();
 
 }
 
@@ -3358,108 +2266,6 @@ ${escapeHtml(data.artist)}
 list.appendChild(item);
 
 });
-
-}
-
-
-/* =========================================================
-VIDEO PLAYLIST
-========================================================= */
-
-function renderVideoPlaylist(){
-
-const list=
-document.getElementById(
-"videoSongList"
-);
-
-if(
-!sortedPlaylistData ||
-sortedPlaylistData.length===0
-){
-
-list.innerHTML=`
-
-<div style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:9px;
-padding:10px;
-">
-Loading...
-</div>
-
-`;
-
-return;
-
-}
-
-list.innerHTML="";
-
-sortedPlaylistData.forEach(
-(data,index)=>{
-
-const item=
-document.createElement(
-"div"
-);
-
-item.className=
-"video-song-item";
-
-item.id=
-`video-track-${index}`;
-
-item.addEventListener(
-"click",
-function(e){
-
-e.preventDefault();
-e.stopPropagation();
-
-playSpecificTrack(
-index
-);
-
-},
-{
-passive:false
-}
-);
-
-item.innerHTML=`
-
-<img
-src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
-alt="thumb"
-draggable="false"
->
-
-<div class="video-song-info">
-
-<div class="video-song-title">
-${escapeHtml(data.title)}
-</div>
-
-<div class="video-song-artist">
-${escapeHtml(data.artist)}
-</div>
-
-</div>
-
-`;
-
-list.appendChild(item);
-
-});
-
-highlightVideoActiveTrack();
-
-setTimeout(
-adjustVideoPlaylistHeight,
-20
-);
 
 }
 
@@ -3548,40 +2354,7 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup.classList.contains(
-"active"
-)
-){
-
-document
-.getElementById(
-"videoPlaylist"
-)
-.classList.add(
-"active"
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-50
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-150
-);
-
-}
-
 highlightActiveTrack();
-
-highlightVideoActiveTrack();
 
 }
 
@@ -3612,46 +2385,6 @@ catch(e){}
 document
 .querySelectorAll(
 ".song-item"
-)
-.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-sortedPlaylistItems[index]===currentId
-);
-
-});
-
-}
-
-
-/* =========================================================
-ACTIVE VIDEO TRACK
-========================================================= */
-
-function highlightVideoActiveTrack(){
-
-if(
-!player ||
-sortedPlaylistItems.length===0
-)
-return;
-
-let currentId="";
-
-try{
-
-currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-}
-catch(e){}
-
-document
-.querySelectorAll(
-".video-song-item"
 )
 .forEach(
 (item,index)=>{
@@ -3723,7 +2456,6 @@ currentSortedIndex=sortedIndex;
 }
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 }
 catch(e){}
@@ -3736,22 +2468,6 @@ DRAWER
 ========================================================= */
 
 function toggleDrawer(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup &&
-popup.classList.contains(
-"active"
-)
-){
-
-return;
-
-}
 
 const drawer=
 document.getElementById(
@@ -3788,16 +2504,6 @@ loadPlaylistItems();
 }
 
 }
-
-
-/* =========================================================
-INITIAL
-========================================================= */
-
-setTimeout(
-adjustVideoPlaylistHeight,
-600
-);
 
 </script>
 
