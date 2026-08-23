@@ -175,7 +175,24 @@ border:none;
 box-shadow:none;
 }
 
-/* ================= COVER WRAPPER (ONLY BORDER, NO BG & NO SHADOW) ================= */
+/* ================= TOP CARD (COVER / VIDEO) ================= */
+
+.cover-card{
+width:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+
+background:transparent; /* পেছনের ব্যাকগ্রাউন্ড রিমুভ করা হয়েছে */
+border:none;
+border-radius:30px;
+padding:18px;
+
+backdrop-filter:none;
+-webkit-backdrop-filter:none;
+
+box-shadow:none; /* পেছনের শ্যাডো রিমুভ করা হয়েছে */
+}
 
 .cover-wrapper{
 width:min(260px,65vw);
@@ -193,9 +210,12 @@ justify-content:center;
 border-radius:50%;
 overflow:hidden;
 
-background:transparent; /* ব্যাকগ্রাউন্ড সম্পূর্ণ সড়ানো হলো */
-border:2px solid rgba(255,255,255,0.75); /* শুধু বর্ডার রাখা হলো */
-box-shadow:none; /* বক্স শ্যাডো সড়ানো হলো */
+background:rgba(215,222,226,.8);
+border:1px solid rgba(255,255,255,.8);
+
+box-shadow:
+10px 10px 20px rgba(80,90,95,.2),
+-10px -10px 20px rgba(255,255,255,.78);
 
 transition:
 width .35s ease,
@@ -239,8 +259,9 @@ height:auto;
 aspect-ratio:16/9;
 border-radius:18px;
 background:#000;
-border:2px solid rgba(255,255,255,0.75);
-box-shadow:none;
+box-shadow:
+8px 8px 16px rgba(80,90,95,.2),
+-8px -8px 16px rgba(255,255,255,.78);
 }
 
 .cover-wrapper.video-active .cover{
@@ -600,6 +621,10 @@ padding:10px 10px;
 width:96vw;
 gap:10px;
 }
+.cover-card{
+padding:14px;
+border-radius:26px;
+}
 .controls-card{
 padding:14px 12px 16px;
 border-radius:26px;
@@ -628,11 +653,13 @@ border-radius:26px;
 <div class="app">
 <section class="player" id="playerCard">
 
-<!-- COVER / VIDEO -->
+<!-- TOP CARD: COVER / VIDEO -->
+<div class="cover-card">
 <div class="cover-wrapper" id="coverWrapper">
 <img id="cover" class="cover" src="logo.png" alt="Album art">
 <div id="videoPopup">
 <div id="yt"></div>
+</div>
 </div>
 </div>
 
