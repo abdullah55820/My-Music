@@ -164,7 +164,7 @@ pointer-events:auto;
 overflow-y:auto;
 }
 
-/* ================= TOP CARD (COVER / VIDEO) ================= */
+/* ================= TOP CARD ================= */
 
 .cover-card{
 width:min(380px,94vw);
@@ -213,7 +213,7 @@ overflow:hidden;
 
 background:rgba(215,222,226,.9);
 
-border:1px solid rgba(255,255,255,.95);
+border:2px solid rgba(255,255,255,.95);
 
 box-shadow:
 8px 8px 18px rgba(145,155,160,.55),
@@ -228,12 +228,14 @@ transition:all .35s ease;
 width:150%;
 height:150%;
 
+flex-shrink:0;
+
 border-radius:50%;
 
 object-fit:cover;
 object-position:center;
 
-background:#222;
+background:transparent;
 
 animation:spin 8s linear infinite;
 animation-play-state:paused;
@@ -251,7 +253,7 @@ from{transform:rotate(0)}
 to{transform:rotate(360deg)}
 }
 
-/* ================= BOTTOM CARD (CONTROLS & INFO) ================= */
+/* ================= BOTTOM CARD ================= */
 
 .player{
 width:min(380px,94vw);
@@ -422,8 +424,6 @@ touch-action:manipulation;
 -webkit-tap-highlight-color:transparent;
 }
 
-/* পাশের বাটন */
-
 .btn{
 width:60px;
 height:60px;
@@ -442,8 +442,6 @@ width:22px;
 height:22px;
 fill:#68151d;
 }
-
-/* মাঝের প্লে/পজ */
 
 .play{
 width:80px;
@@ -660,6 +658,7 @@ margin-top:2px;
 
 <!-- TOP -->
 <div class="top-widgets">
+
 <div class="bd-time">
 <span>BD</span>
 <span class="live-dot"></span>
@@ -667,85 +666,132 @@ margin-top:2px;
 </div>
 
 <button class="playlist-toggle-btn" onclick="toggleDrawer()">
+
 <svg viewBox="0 0 24 24">
 <path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
 </svg>
+
 <span>Playlist</span>
+
 </button>
+
 </div>
 
 <!-- DRAWER -->
-<div class="drawer-overlay" id="overlay" onclick="toggleDrawer()"></div>
+
+<div
+class="drawer-overlay"
+id="overlay"
+onclick="toggleDrawer()">
+</div>
 
 <div class="playlist-drawer" id="drawer">
 
 <div class="drawer-header">
-<div class="drawer-title">Playlist Songs</div>
 
-<button class="close-btn" onclick="toggleDrawer()">
-&times;
-</button>
+<div class="drawer-title">
+Playlist Songs
 </div>
 
-<div class="song-list" id="songList">
+<button
+class="close-btn"
+onclick="toggleDrawer()">
+&times;
+</button>
+
+</div>
+
+<div
+class="song-list"
+id="songList">
+
 <div style="text-align:center;color:#777;font-size:10px;margin-top:15px;">
 Loading...
 </div>
+
 </div>
 
 </div>
 
 <!-- APP -->
+
 <div class="app">
 
-<!-- TOP CARD: COVER / VIDEO -->
+<!-- TOP CARD -->
+
 <section class="cover-card">
 
-<div class="cover-wrapper" id="coverWrapper">
+<div
+class="cover-wrapper"
+id="coverWrapper">
 
-<img id="cover"
+<img
+id="cover"
 class="cover"
 src="logo.png"
 alt="Album art">
 
 <div id="videoPopup">
+
 <div id="yt"></div>
+
 </div>
 
 </div>
 
 </section>
 
-<!-- BOTTOM CARD: CONTROLS & INFO -->
-<section class="player" id="playerCard">
+<!-- BOTTOM CARD -->
+
+<section
+class="player"
+id="playerCard">
 
 <div class="middle">
 
-<div id="current" class="time-display">
+<div
+id="current"
+class="time-display">
 0:00 / 0:00
 </div>
 
-<div id="title" class="title">
+<div
+id="title"
+class="title">
 My Playlist
 </div>
 
-<div id="artist" class="artist">
+<div
+id="artist"
+class="artist">
 YouTube Music
 </div>
 
-<div class="seek" id="seek">
-<div class="fill" id="fill"></div>
+<div
+class="seek"
+id="seek">
+
+<div
+class="fill"
+id="fill">
+</div>
+
 </div>
 
 <div class="current-duration-hidden">
-<span id="duration">0:00</span>
+
+<span id="duration">
+0:00
+</span>
+
 </div>
 
 </div>
 
 <div class="controls">
 
-<button class="btn"
+<button
+class="btn"
 onclick="previousSong()"
 title="Previous">
 
@@ -755,17 +801,23 @@ title="Previous">
 
 </button>
 
-<button class="play"
+<button
+class="play"
 id="play"
 onclick="togglePlay()">
 
-<svg id="play-icon" viewBox="0 0 24 24">
+<svg
+id="play-icon"
+viewBox="0 0 24 24">
+
 <path d="M8 5v14l11-7z"/>
+
 </svg>
 
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="nextSong()"
 title="Next">
 
@@ -775,13 +827,18 @@ title="Next">
 
 </button>
 
-<button class="btn"
+<button
+class="btn"
 id="videoToggleBtn"
 onclick="toggleVideoPopup()"
 title="Video">
 
-<svg id="videoToggleIcon" viewBox="0 0 24 24">
+<svg
+id="videoToggleIcon"
+viewBox="0 0 24 24">
+
 <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+
 </svg>
 
 </button>
@@ -808,6 +865,7 @@ let sortingReady=false;
 let isDragging=false;
 let changingTrack=false;
 
+
 /* BD TIME */
 
 function updateBDTime(){
@@ -821,7 +879,8 @@ hour12:true
 };
 
 document.getElementById("bdTimeVal").textContent=
-new Intl.DateTimeFormat("en-US",options).format(new Date());
+new Intl.DateTimeFormat("en-US",options)
+.format(new Date());
 
 }
 
@@ -870,11 +929,18 @@ setInterval(updateProgress,250);
 }
 
 
+/* STATE */
+
 function state(e){
 
-const cover=document.getElementById("cover");
-const playBtn=document.getElementById("play");
-const playIcon=document.getElementById("play-icon");
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
 
 highlightActiveTrack();
 
@@ -948,9 +1014,11 @@ const currentId=
 player.getVideoData() &&
 player.getVideoData().video_id;
 
-if(sortedPlaylistItems.length &&
+if(
+sortedPlaylistItems.length &&
 sortingReady &&
-!currentId){
+!currentId
+){
 
 player.loadVideoById(
 sortedPlaylistItems[currentSortedIndex]
@@ -1074,7 +1142,8 @@ function forceUpdateUI(index){
 
 if(!sortedPlaylistData[index])return;
 
-const data=sortedPlaylistData[index];
+const data=
+sortedPlaylistData[index];
 
 document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
@@ -1096,13 +1165,17 @@ highlightActiveTrack();
 
 function getSeekPosition(clientX,el){
 
-const rect=el.getBoundingClientRect();
+const rect=
+el.getBoundingClientRect();
 
 if(!rect.width)return 0;
 
 return Math.max(
 0,
-Math.min(1,(clientX-rect.left)/rect.width)
+Math.min(
+1,
+(clientX-rect.left)/rect.width
+)
 );
 
 }
@@ -1112,7 +1185,9 @@ const seekElement=
 document.getElementById("seek");
 
 
-seekElement.addEventListener("pointerdown",e=>{
+seekElement.addEventListener(
+"pointerdown",
+e=>{
 
 e.preventDefault();
 e.stopPropagation();
@@ -1120,17 +1195,28 @@ e.stopPropagation();
 isDragging=true;
 
 try{
-seekElement.setPointerCapture(e.pointerId);
+
+seekElement.setPointerCapture(
+e.pointerId
+);
+
 }catch(err){}
 
 updateSeekVisual(
-getSeekPosition(e.clientX,seekElement)
+getSeekPosition(
+e.clientX,
+seekElement
+)
 );
 
-},{passive:false});
+},
+{passive:false}
+);
 
 
-seekElement.addEventListener("pointermove",e=>{
+seekElement.addEventListener(
+"pointermove",
+e=>{
 
 if(!isDragging)return;
 
@@ -1138,13 +1224,20 @@ e.preventDefault();
 e.stopPropagation();
 
 updateSeekVisual(
-getSeekPosition(e.clientX,seekElement)
+getSeekPosition(
+e.clientX,
+seekElement
+)
 );
 
-},{passive:false});
+},
+{passive:false}
+);
 
 
-seekElement.addEventListener("pointerup",e=>{
+seekElement.addEventListener(
+"pointerup",
+e=>{
 
 if(!isDragging)return;
 
@@ -1152,13 +1245,17 @@ e.preventDefault();
 e.stopPropagation();
 
 const pos=
-getSeekPosition(e.clientX,seekElement);
+getSeekPosition(
+e.clientX,
+seekElement
+);
 
 updateSeekVisual(pos);
 
 if(player){
 
-const duration=player.getDuration();
+const duration=
+player.getDuration();
 
 if(duration){
 
@@ -1174,27 +1271,39 @@ true
 isDragging=false;
 
 try{
-seekElement.releasePointerCapture(e.pointerId);
+
+seekElement.releasePointerCapture(
+e.pointerId
+);
+
 }catch(err){}
 
-},{passive:false});
+},
+{passive:false}
+);
 
 
 function updateSeekVisual(pos){
 
-document.getElementById("fill").style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
 
 if(player){
 
-const duration=player.getDuration();
+const duration=
+player.getDuration();
 
 if(duration){
 
-document.getElementById("current").textContent=
-format(pos*duration)+" / "+format(duration);
+document.getElementById("current")
+.textContent=
+format(pos*duration)+
+" / "+
+format(duration);
 
-document.getElementById("duration").textContent=
+document.getElementById("duration")
+.textContent=
 format(duration);
 
 }
@@ -1210,24 +1319,35 @@ if(isDragging || !player)return;
 
 try{
 
-const current=player.getCurrentTime();
-const duration=player.getDuration();
+const current=
+player.getCurrentTime();
+
+const duration=
+player.getDuration();
 
 if(!duration)return;
 
 const pos=
 Math.max(
 0,
-Math.min(1,current/duration)
+Math.min(
+1,
+current/duration
+)
 );
 
-document.getElementById("fill").style.width=
+document.getElementById("fill")
+.style.width=
 (pos*100)+"%";
 
-document.getElementById("current").textContent=
-format(current)+" / "+format(duration);
+document.getElementById("current")
+.textContent=
+format(current)+
+" / "+
+format(duration);
 
-document.getElementById("duration").textContent=
+document.getElementById("duration")
+.textContent=
 format(duration);
 
 }catch(e){}
@@ -1252,15 +1372,20 @@ String(s%60).padStart(2,"0");
 
 function loadPlaylistItems(){
 
-if(!player ||
-typeof player.getPlaylist!=="function")
-return;
+if(
+!player ||
+typeof player.getPlaylist!=="function"
+)return;
 
-const ids=player.getPlaylist();
+const ids=
+player.getPlaylist();
 
 if(!ids || !ids.length){
 
-setTimeout(loadPlaylistItems,600);
+setTimeout(
+loadPlaylistItems,
+600
+);
 
 return;
 
@@ -1275,7 +1400,8 @@ sortingReady=false;
 
 Promise.all(
 
-ids.map((id,index)=>
+ids.map(
+(id,index)=>
 
 fetch(
 `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
@@ -1319,7 +1445,8 @@ originalIndex:index
 
 .then(results=>{
 
-results.sort((a,b)=>
+results.sort(
+(a,b)=>
 a.title.localeCompare(
 b.title,
 undefined,
@@ -1333,7 +1460,9 @@ sensitivity:"base"
 sortedPlaylistData=results;
 
 sortedPlaylistItems=
-results.map(x=>x.id);
+results.map(
+x=>x.id
+);
 
 sortingReady=true;
 
@@ -1342,7 +1471,9 @@ player.getVideoData() &&
 player.getVideoData().video_id;
 
 const idx=
-sortedPlaylistItems.indexOf(currentId);
+sortedPlaylistItems.indexOf(
+currentId
+);
 
 if(idx!==-1){
 
@@ -1370,14 +1501,16 @@ document.getElementById("songList");
 
 list.innerHTML="";
 
-sortedPlaylistData.forEach((data,index)=>{
+sortedPlaylistData.forEach(
+(data,index)=>{
 
 const item=
 document.createElement("div");
 
 item.className="song-item";
 
-item.id=`track-${index}`;
+item.id=
+`track-${index}`;
 
 item.onclick=
 ()=>playSpecificTrack(index);
@@ -1429,9 +1562,10 @@ return div.innerHTML;
 
 function playSpecificTrack(index){
 
-if(!player ||
-!sortedPlaylistData[index])
-return;
+if(
+!player ||
+!sortedPlaylistData[index]
+)return;
 
 currentSortedIndex=index;
 
@@ -1453,17 +1587,22 @@ return;
 
 }
 
-setTimeout(()=>{
+setTimeout(
+()=>{
 
 changingTrack=false;
 
-},1200);
+},
+1200
+);
 
 
-document.getElementById("drawer")
+document
+.getElementById("drawer")
 .classList.remove("open");
 
-document.getElementById("overlay")
+document
+.getElementById("overlay")
 .classList.remove("active");
 
 highlightActiveTrack();
@@ -1475,8 +1614,10 @@ highlightActiveTrack();
 
 function highlightActiveTrack(){
 
-if(!sortedPlaylistItems.length ||
-!player)return;
+if(
+!sortedPlaylistItems.length ||
+!player
+)return;
 
 let id="";
 
@@ -1491,7 +1632,8 @@ player.getVideoData().video_id;
 
 document
 .querySelectorAll(".song-item")
-.forEach((item,index)=>{
+.forEach(
+(item,index)=>{
 
 item.classList.toggle(
 "active",
@@ -1511,29 +1653,35 @@ if(!player)return;
 
 try{
 
-const d=player.getVideoData();
+const d=
+player.getVideoData();
 
-if(!d || !d.video_id)return;
+if(!d || !d.video_id)
+return;
 
 document.getElementById("cover").src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 if(d.title){
 
-document.getElementById("title").textContent=
+document.getElementById("title")
+.textContent=
 d.title;
 
 }
 
 if(d.author){
 
-document.getElementById("artist").textContent=
+document.getElementById("artist")
+.textContent=
 d.author;
 
 }
 
 const idx=
-sortedPlaylistItems.indexOf(d.video_id);
+sortedPlaylistItems.indexOf(
+d.video_id
+);
 
 if(idx!==-1){
 
@@ -1557,7 +1705,9 @@ document.getElementById("coverWrapper");
 
 if(
 coverWrapper &&
-coverWrapper.classList.contains("video-active")
+coverWrapper.classList.contains(
+"video-active"
+)
 )return;
 
 const drawer=
@@ -1579,7 +1729,10 @@ overlay.classList.toggle(
 opening
 );
 
-if(opening && !sortingReady){
+if(
+opening &&
+!sortingReady
+){
 
 loadPlaylistItems();
 
