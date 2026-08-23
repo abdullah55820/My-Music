@@ -66,8 +66,8 @@ flex-direction:row;
 align-items:center;
 justify-content:center;
 gap:14px;
-margin-top:12px;
-padding-top:8px;
+margin-top:10px;
+padding-top:4px;
 z-index:2500;
 pointer-events:auto;
 }
@@ -150,51 +150,58 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-padding:25px 16px 20px;
+padding:20px 16px 16px;
 
 pointer-events:auto;
 }
 
-/* ================= PLAYER ================= */
+/* ================= PLAYER CONTAINER ================= */
 
 .player{
 width:min(520px,94vw);
-
-min-height:720px;
-max-height:calc(100dvh - 40px);
-
-padding:22px 20px 18px;
+max-height:calc(100dvh - 30px);
 
 display:flex;
 flex-direction:column;
 align-items:center;
-justify-content:space-between;
+gap:16px;
 
 position:relative;
 overflow:hidden;
+}
+
+/* ================= TOP CARD (THUMBNAIL/VIDEO) ================= */
+
+.cover-card{
+width:100%;
+display:flex;
+align-items:center;
+justify-content:center;
 
 background:rgba(220,227,231,.62);
-
 border:1px solid rgba(255,255,255,.75);
-
-border-radius:34px;
+border-radius:30px;
+padding:22px 20px;
 
 backdrop-filter:blur(18px);
 -webkit-backdrop-filter:blur(18px);
 
 box-shadow:
-14px 14px 30px rgba(75,85,90,.22),
--14px -14px 30px rgba(255,255,255,.72);
+12px 12px 26px rgba(75,85,90,.18),
+-12px -12px 26px rgba(255,255,255,.72);
+
+position:relative;
+z-index:1605;
 }
 
 /* ================= COVER ================= */
 
 .cover-wrapper{
-width:min(340px,70vw);
-height:min(340px,70vw);
+width:min(240px,55vw);
+height:min(240px,55vw);
 
-max-width:340px;
-max-height:340px;
+max-width:240px;
+max-height:240px;
 
 flex-shrink:0;
 
@@ -210,8 +217,8 @@ background:rgba(215,222,226,.8);
 border:1px solid rgba(255,255,255,.8);
 
 box-shadow:
-13px 13px 25px rgba(80,90,95,.23),
--13px -13px 25px rgba(255,255,255,.78);
+10px 10px 20px rgba(80,90,95,.2),
+-10px -10px 20px rgba(255,255,255,.78);
 
 transition:
 width .35s ease,
@@ -249,14 +256,14 @@ to{transform:rotate(360deg)}
 /* ================= VIDEO INSIDE COVER ================= */
 
 .cover-wrapper.video-active{
-width:min(340px,70vw);
+width:100%;
 height:auto;
 aspect-ratio:16/9;
-border-radius:20px;
+border-radius:18px;
 background:#000;
 box-shadow:
-10px 10px 20px rgba(80,90,95,.23),
--10px -10px 20px rgba(255,255,255,.78);
+8px 8px 16px rgba(80,90,95,.2),
+-8px -8px 16px rgba(255,255,255,.78);
 }
 
 .cover-wrapper.video-active .cover{
@@ -295,7 +302,7 @@ display:block;
 pointer-events:auto!important;
 }
 
-/* ================= CONTROLS & INFO CARD (COMBINED) ================= */
+/* ================= CONTROLS & INFO CARD ================= */
 
 .controls-card{
 width:100%;
@@ -303,19 +310,18 @@ display:flex;
 flex-direction:column;
 align-items:center;
 
-background:rgba(255,255,255,.25);
-border:1px solid rgba(255,255,255,.45);
-border-radius:24px;
+background:rgba(220,227,231,.62);
+border:1px solid rgba(255,255,255,.75);
+border-radius:30px;
 
-padding:14px 14px 16px;
-margin-top:auto;
+padding:18px 18px 20px;
 
 position:relative;
 z-index:1610;
 
 box-shadow:
-8px 8px 20px rgba(75,85,90,.12),
--8px -8px 20px rgba(255,255,255,.5);
+12px 12px 26px rgba(75,85,90,.18),
+-12px -12px 26px rgba(255,255,255,.72);
 }
 
 /* ================= INFO ================= */
@@ -327,11 +333,11 @@ flex-direction:column;
 align-items:center;
 justify-content:center;
 min-width:0;
-margin-bottom:10px;
+margin-bottom:8px;
 }
 
 .time-display{
-font-size:16px;
+font-size:15px;
 font-weight:800;
 color:#7a1820;
 letter-spacing:.3px;
@@ -342,7 +348,7 @@ margin-bottom:4px;
 .title{
 width:100%;
 text-align:center;
-font-size:15px;
+font-size:14px;
 font-weight:700;
 white-space:nowrap;
 overflow:hidden;
@@ -367,7 +373,7 @@ margin-top:2px;
 .seek{
 width:92%;
 height:5px;
-margin-top:10px;
+margin-top:8px;
 margin-bottom:14px;
 border-radius:10px;
 background:rgba(90,100,105,.16);
@@ -411,7 +417,7 @@ width:100%;
 display:flex;
 align-items:center;
 justify-content:center;
-gap:24px;
+gap:20px;
 position:relative;
 z-index:1620;
 }
@@ -419,8 +425,8 @@ z-index:1620;
 .controls #videoToggleBtn{
 position:static;
 transform:none;
-width:46px;
-height:46px;
+width:44px;
+height:44px;
 z-index:1630;
 }
 
@@ -445,36 +451,36 @@ touch-action:manipulation;
 }
 
 .btn{
-width:48px;
-height:48px;
+width:46px;
+height:46px;
 border-radius:50%;
-background:rgba(220,227,231,.7);
+background:rgba(255,255,255,.65);
 color:#68151d;
 box-shadow:
-6px 6px 14px rgba(75,85,90,.18),
--6px -6px 14px rgba(255,255,255,.78);
+5px 5px 12px rgba(75,85,90,.15),
+-5px -5px 12px rgba(255,255,255,.8);
 }
 
 .btn svg{
-width:20px;
-height:20px;
+width:19px;
+height:19px;
 fill:#68151d;
 }
 
 .play{
-width:58px;
-height:58px;
+width:54px;
+height:54px;
 border-radius:50%;
-background:rgba(220,227,231,.78);
+background:rgba(255,255,255,.75);
 color:#68151d;
 box-shadow:
-8px 8px 18px rgba(75,85,90,.2),
--8px -8px 18px rgba(255,255,255,.8);
+6px 6px 15px rgba(75,85,90,.18),
+-6px -6px 15px rgba(255,255,255,.85);
 }
 
 .play svg{
-width:24px;
-height:24px;
+width:22px;
+height:22px;
 fill:#68151d;
 margin-left:2px;
 }
@@ -611,8 +617,7 @@ margin-top:2px;
 
 @media(min-width:769px){
 .player{
-min-height:760px;
-width:min(560px,62vw);
+width:min(540px,62vw);
 }
 }
 
@@ -620,72 +625,70 @@ width:min(560px,62vw);
 
 @media(max-width:600px){
 .app{
-padding:20px 10px 10px;
+padding:16px 10px 10px;
 }
 .player{
 width:96vw;
-min-height:0;
-height:calc(100dvh - 20px);
-max-height:none;
-padding:16px 12px 10px;
-border-radius:30px;
+gap:12px;
+}
+.cover-card{
+padding:18px 14px;
+border-radius:26px;
 }
 .cover-wrapper{
-width:min(66vw,260px);
-height:min(66vw,260px);
-max-width:260px;
-max-height:260px;
-}
-.cover-wrapper.video-active{
-width:min(66vw,260px);
+width:min(210px,52vw);
+height:min(210px,52vw);
+max-width:210px;
+max-height:210px;
 }
 .controls-card{
-padding:12px 10px 14px;
+padding:14px 12px 16px;
+border-radius:26px;
 }
 .time-display{
-font-size:15px;
+font-size:14px;
 }
 .title{
-font-size:14px;
+font-size:13px;
 }
 .artist{
 font-size:10px;
 }
 .seek{
 width:94%;
-margin-top:8px;
-margin-bottom:10px;
+margin-top:6px;
+margin-bottom:12px;
 }
 .controls{
 gap:16px;
 }
 .btn{
-width:44px;
-height:44px;
+width:42px;
+height:42px;
 }
 .btn svg{
-width:18px;
-height:18px;
+width:17px;
+height:17px;
 }
 .play{
-width:52px;
-height:52px;
+width:50px;
+height:50px;
 }
 .play svg{
-width:22px;
-height:22px;
+width:20px;
+height:20px;
 }
 .controls #videoToggleBtn{
-width:40px;
-height:40px;
+width:38px;
+height:38px;
 }
 .controls #videoToggleBtn svg{
-width:16px;
-height:16px;
+width:15px;
+height:15px;
 }
 .bottom-widgets{
-margin-top:8px;
-padding-top:4px;
+margin-top:6px;
+padding-top:2px;
 }
 }
 </style>
@@ -711,14 +714,17 @@ padding-top:4px;
 <div class="app">
 <section class="player" id="playerCard">
 
+<!-- TOP CARD (COVER / VIDEO) -->
+<div class="cover-card">
 <div class="cover-wrapper" id="coverWrapper">
 <img id="cover" class="cover" src="logo.png" alt="Album art">
 <div id="videoPopup">
 <div id="yt"></div>
 </div>
 </div>
+</div>
 
-<!-- CONTROLS & INFO CARD (COMBINED) -->
+<!-- CONTROLS & INFO CARD -->
 <div class="controls-card">
 <div class="middle">
 <div id="current" class="time-display">0:00 / 0:00</div>
