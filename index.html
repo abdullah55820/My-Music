@@ -1126,11 +1126,10 @@ const currentState = player.getPlayerState();
 if(currentState === YT.PlayerState.PLAYING){
 player.pauseVideo();
 } else {
-// যদি অলরেডি কোনো ভিডিও সিলেক্টেড না থাকে বা পজড থাকে
 let id = "";
 try {
 const data = player.getVideoData();
-if (data) id = data.video_id;
+if (data && data.video_id) id = data.video_id;
 } catch(err) {}
 
 if (!id) {
@@ -1139,12 +1138,16 @@ id = sortedPlaylistItems[currentSortedIndex];
 } else if (playlistItems.length) {
 id = playlistItems[0];
 }
+if (id) {
+playTrackNow(id);
+return;
+}
 }
 
-if (id && (!player.getVideoUrl() || currentState !== YT.PlayerState.PAUSED)) {
-playTrackNow(id);
-} else {
+if (currentState === YT.PlayerState.PAUSED) {
 player.playVideo();
+} else if (id) {
+playTrackNow(id);
 }
 }
 
@@ -1160,6 +1163,10 @@ function playTrackNow(id){
 if(!player || !id)return;
 
 changingTrack=true;
+
+// টাইম এবং ফিল ইনস্ট্যান্ট রিসেট করে দেওয়া
+document.getElementById("current").textContent = "0:00 / 0:00";
+document.getElementById("fill").style.width = "0%";
 
 try{
 
@@ -1254,6 +1261,10 @@ data.title || "YouTube Music";
 
 document.getElementById("artist").textContent=
 data.artist || "YouTube Music";
+
+// টাইম এবং ফিল রিসেট
+document.getElementById("current").textContent = "0:00 / 0:00";
+document.getElementById("fill").style.width = "0%";
 
 currentSortedIndex=index;
 
@@ -1805,7 +1816,7 @@ document.getElementById("coverWrapper");
 
 if(
 coverWrapper &&
-coverwrapper.classList.contains("video-active")
+coverWrapper.classList.contains("video-active")
 )
 return;
 
