@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -25,8 +26,6 @@ href="logo.png">
 
 <style>
 
-/* ================= GLOBAL ================= */
-
 *{
 box-sizing:border-box;
 }
@@ -41,6 +40,7 @@ height:100%;
 overflow:hidden;
 
 background:#cfd7dc;
+
 color:#111;
 
 font-family:
@@ -72,7 +72,9 @@ inset:-20px;
 background-image:url("background.jpg");
 
 background-position:center;
+
 background-size:cover;
+
 background-repeat:no-repeat;
 
 z-index:0;
@@ -80,6 +82,7 @@ z-index:0;
 pointer-events:none;
 
 -webkit-backface-visibility:hidden;
+
 backface-visibility:hidden;
 
 }
@@ -159,6 +162,7 @@ backdrop-filter:blur(16px);
 box-shadow:
 
 4px 4px 10px rgba(90,100,105,.18),
+
 -4px -4px 10px rgba(255,255,255,.65);
 
 }
@@ -306,6 +310,7 @@ backdrop-filter:blur(18px);
 box-shadow:
 
 10px 10px 22px rgba(75,85,90,.22),
+
 -10px -10px 22px rgba(255,255,255,.75);
 
 }
@@ -342,8 +347,11 @@ border:1px solid rgba(255,255,255,.95);
 box-shadow:
 
 8px 8px 18px rgba(145,155,160,.55),
+
 -8px -8px 18px rgba(255,255,255,.9),
+
 inset 2px 2px 5px rgba(255,255,255,.65),
+
 inset -2px -2px 5px rgba(160,170,175,.25);
 
 transition:all .35s ease;
@@ -388,7 +396,7 @@ animation-play-state:running;
 @keyframes spin{
 
 from{
-transform:rotate(0);
+transform:rotate(0deg);
 }
 
 to{
@@ -433,6 +441,7 @@ backdrop-filter:blur(18px);
 box-shadow:
 
 10px 10px 22px rgba(75,85,90,.22),
+
 -10px -10px 22px rgba(255,255,255,.75);
 
 }
@@ -546,8 +555,11 @@ content:"";
 position:absolute;
 
 top:-10px;
+
 bottom:-10px;
+
 left:-10px;
+
 right:-10px;
 
 z-index:1;
@@ -559,6 +571,7 @@ z-index:1;
 position:absolute;
 
 left:0;
+
 top:0;
 
 height:100%;
@@ -671,6 +684,7 @@ color:#68151d;
 box-shadow:
 
 5px 5px 12px rgba(75,85,90,.22),
+
 -5px -5px 12px rgba(255,255,255,.78);
 
 }
@@ -700,6 +714,7 @@ color:#68151d;
 box-shadow:
 
 7px 7px 15px rgba(75,85,90,.24),
+
 -7px -7px 15px rgba(255,255,255,.8);
 
 }
@@ -957,6 +972,8 @@ flex-direction:column;
 
 gap:6px;
 
+-webkit-overflow-scrolling:touch;
+
 }
 
 .song-item{
@@ -978,6 +995,8 @@ border:1px solid rgba(255,255,255,.55);
 cursor:pointer;
 
 touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
 
 }
 
@@ -1040,6 +1059,7 @@ margin-top:2px;
 }
 
 </style>
+
 </head>
 
 
@@ -1100,13 +1120,11 @@ id="overlay">
 class="playlist-drawer"
 id="drawer">
 
-
 <div class="drawer-header">
 
 <div class="drawer-title">
 Playlist Songs
 </div>
-
 
 <button
 class="close-btn"
@@ -1148,11 +1166,9 @@ Loading...
 
 <section class="cover-card">
 
-
 <div
 class="cover-wrapper"
 id="coverWrapper">
-
 
 <img
 id="cover"
@@ -1166,7 +1182,6 @@ alt="Album art">
 <div id="yt"></div>
 
 </div>
-
 
 </div>
 
@@ -1227,7 +1242,6 @@ id="fill">
 </span>
 
 </div>
-
 
 </div>
 
@@ -1323,7 +1337,7 @@ l4 4v-11l-4 4z
 <script>
 
 /* =========================================================
-   SETTINGS
+   CONFIG
 ========================================================= */
 
 const PLAYLIST_ID = "PLbvY05KVYwoo";
@@ -1336,8 +1350,6 @@ const PLAYLIST_ID = "PLbvY05KVYwoo";
 let player = null;
 
 let playerReady = false;
-
-let playing = false;
 
 let playlistItems = [];
 
@@ -1353,10 +1365,6 @@ let isDragging = false;
 
 let changingTrack = false;
 
-let trackRequestId = 0;
-
-let progressTimer = null;
-
 
 /* =========================================================
    ELEMENTS
@@ -1371,29 +1379,32 @@ document.getElementById("play");
 const playIcon =
 document.getElementById("play-icon");
 
-const seekElement =
-document.getElementById("seek");
-
-const fill =
-document.getElementById("fill");
-
-const currentTimeElement =
-document.getElementById("current");
-
-const durationElement =
-document.getElementById("duration");
-
 const titleElement =
 document.getElementById("title");
 
 const artistElement =
 document.getElementById("artist");
 
+const currentElement =
+document.getElementById("current");
+
+const durationElement =
+document.getElementById("duration");
+
+const seekElement =
+document.getElementById("seek");
+
+const fillElement =
+document.getElementById("fill");
+
 const drawer =
 document.getElementById("drawer");
 
 const overlay =
 document.getElementById("overlay");
+
+const coverWrapper =
+document.getElementById("coverWrapper");
 
 const playlistButton =
 document.getElementById("playlistButton");
@@ -1410,8 +1421,8 @@ document.getElementById("nextBtn");
 const videoButton =
 document.getElementById("videoToggleBtn");
 
-const coverWrapper =
-document.getElementById("coverWrapper");
+const videoIcon =
+document.getElementById("videoToggleIcon");
 
 
 /* =========================================================
@@ -1434,7 +1445,9 @@ hour12:true
 
 };
 
-document.getElementById("bdTimeVal").textContent =
+document.getElementById(
+"bdTimeVal"
+).textContent =
 
 new Intl.DateTimeFormat(
 "en-US",
@@ -1445,11 +1458,14 @@ options
 
 updateBDTime();
 
-setInterval(updateBDTime,1000);
+setInterval(
+updateBDTime,
+1000
+);
 
 
 /* =========================================================
-   YOUTUBE API READY
+   YOUTUBE READY
 ========================================================= */
 
 function onYouTubeIframeAPIReady(){
@@ -1459,6 +1475,7 @@ player = new YT.Player(
 {
 
 width:"100%",
+
 height:"100%",
 
 playerVars:{
@@ -1508,15 +1525,10 @@ playerReady = true;
 
 loadPlaylistItems();
 
-if(!progressTimer){
-
-progressTimer =
 setInterval(
 updateProgress,
 200
 );
-
-}
 
 }
 
@@ -1530,23 +1542,25 @@ function onPlayerStateChange(event){
 if(!player) return;
 
 
-/* PLAYING */
+/* ================= PLAYING ================= */
 
 if(
 event.data ===
 YT.PlayerState.PLAYING
 ){
 
-playing = true;
-
 changingTrack = false;
 
-playButton.classList.add("playing");
+playButton.classList.add(
+"playing"
+);
 
 playIcon.innerHTML =
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add("spinning");
+cover.classList.add(
+"spinning"
+);
 
 updateInfo();
 
@@ -1557,80 +1571,78 @@ return;
 }
 
 
-/* PAUSED */
+/* ================= PAUSED ================= */
 
 if(
 event.data ===
 YT.PlayerState.PAUSED
 ){
 
-playing = false;
-
 changingTrack = false;
 
-playButton.classList.remove("playing");
+playButton.classList.remove(
+"playing"
+);
 
 playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
 
 return;
 
 }
 
 
-/* ENDED */
+/* ================= BUFFERING ================= */
+
+if(
+event.data ===
+YT.PlayerState.BUFFERING
+){
+
+return;
+
+}
+
+
+/* ================= ENDED ================= */
 
 if(
 event.data ===
 YT.PlayerState.ENDED
 ){
 
-playing = false;
+changingTrack = false;
 
-playButton.classList.remove("playing");
+playButton.classList.remove(
+"playing"
+);
 
 playIcon.innerHTML =
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
 
 
-if(!changingTrack){
+/*
+Auto next.
+কারণ আগের গান ইতিমধ্যে user initiated
+playback session-এর মধ্যে চলছে।
+*/
 
 setTimeout(
 function(){
 
-nextSong(true);
+nextSong();
 
 },
 50
 );
-
-}
-
-return;
-
-}
-
-
-/* CUED */
-
-if(
-event.data ===
-YT.PlayerState.CUED
-){
-
-if(changingTrack){
-
-try{
-
-player.playVideo();
-
-}catch(err){}
-
-}
 
 }
 
@@ -1659,7 +1671,7 @@ const state =
 player.getPlayerState();
 
 
-/* PLAYING */
+/* ================= PLAYING ================= */
 
 if(
 state ===
@@ -1673,7 +1685,7 @@ return;
 }
 
 
-/* PAUSED */
+/* ================= PAUSED ================= */
 
 if(
 state ===
@@ -1687,7 +1699,7 @@ return;
 }
 
 
-/* BUFFERING */
+/* ================= BUFFERING ================= */
 
 if(
 state ===
@@ -1699,7 +1711,7 @@ return;
 }
 
 
-/* No active track */
+/* ================= FIRST PLAY ================= */
 
 let id = "";
 
@@ -1730,7 +1742,9 @@ sortedPlaylistItems[
 currentSortedIndex
 ];
 
-}else if(
+}
+
+else if(
 playlistItems.length
 ){
 
@@ -1751,7 +1765,7 @@ playTrackNow(id);
 }catch(err){
 
 console.log(
-"Play error:",
+"togglePlay:",
 err
 );
 
@@ -1777,10 +1791,6 @@ return;
 }
 
 
-const request =
-++trackRequestId;
-
-
 changingTrack = true;
 
 
@@ -1798,11 +1808,16 @@ forceUpdateUI(index);
 }
 
 
-try{
-
 /*
-   loadVideoById directly starts playback.
+IMPORTANT:
+
+একই function call-এর মধ্যে
+loadVideoById + playVideo।
+
+কোনো 250ms / 500ms delay নেই।
 */
+
+try{
 
 player.loadVideoById({
 
@@ -1813,88 +1828,16 @@ startSeconds:0
 });
 
 
-/*
-   iPhone/mobile fallback.
-*/
-
-setTimeout(
-function(){
-
-if(
-request !== trackRequestId
-){
-
-return;
-
-}
-
-
-try{
-
-const state =
-player.getPlayerState();
-
-
-if(
-state ===
-YT.PlayerState.CUED ||
-state ===
-YT.PlayerState.UNSTARTED
-){
-
 player.playVideo();
-
-}
-
-}catch(err){}
-
-},
-180
-);
-
-
-/*
-   Second fallback for mobile.
-*/
-
-setTimeout(
-function(){
-
-if(
-request !== trackRequestId
-){
-
-return;
-
-}
-
-
-try{
-
-if(
-player.getPlayerState() !==
-YT.PlayerState.PLAYING
-){
-
-player.playVideo();
-
-}
-
-}catch(err){}
-
-},
-500
-);
-
 
 }catch(err){
 
-changingTrack = false;
-
 console.log(
-"Track load error:",
+"playTrackNow:",
 err
 );
+
+changingTrack = false;
 
 }
 
@@ -1905,7 +1848,7 @@ err
    NEXT
 ========================================================= */
 
-function nextSong(auto=false){
+function nextSong(){
 
 if(
 !player ||
@@ -2025,15 +1968,6 @@ highlightActiveTrack();
 
 function toggleVideoPopup(){
 
-if(!coverWrapper) return;
-
-
-const icon =
-document.getElementById(
-"videoToggleIcon"
-);
-
-
 const opening =
 !coverWrapper.classList.contains(
 "video-active"
@@ -2050,7 +1984,7 @@ document.body.classList.add(
 "popup-active"
 );
 
-icon.innerHTML =
+videoIcon.innerHTML =
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 }else{
@@ -2063,7 +1997,7 @@ document.body.classList.remove(
 "popup-active"
 );
 
-icon.innerHTML =
+videoIcon.innerHTML =
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 
 }
@@ -2072,7 +2006,7 @@ icon.innerHTML =
 
 
 /* =========================================================
-   SEEK POSITION
+   SEEK
 ========================================================= */
 
 function getSeekPosition(
@@ -2103,17 +2037,11 @@ rect.width
 }
 
 
-/* =========================================================
-   SEEK POINTER DOWN
-========================================================= */
-
 seekElement.addEventListener(
 "pointerdown",
 function(event){
 
 event.preventDefault();
-
-event.stopPropagation();
 
 isDragging = true;
 
@@ -2139,10 +2067,6 @@ seekElement
 );
 
 
-/* =========================================================
-   SEEK POINTER MOVE
-========================================================= */
-
 seekElement.addEventListener(
 "pointermove",
 function(event){
@@ -2155,8 +2079,6 @@ return;
 
 
 event.preventDefault();
-
-event.stopPropagation();
 
 
 updateSeekVisual(
@@ -2171,10 +2093,6 @@ seekElement
 );
 
 
-/* =========================================================
-   SEEK POINTER UP
-========================================================= */
-
 seekElement.addEventListener(
 "pointerup",
 function(event){
@@ -2187,8 +2105,6 @@ return;
 
 
 event.preventDefault();
-
-event.stopPropagation();
 
 
 const position =
@@ -2241,7 +2157,7 @@ event.pointerId
 
 function updateSeekVisual(position){
 
-fill.style.width =
+fillElement.style.width =
 (position * 100) + "%";
 
 
@@ -2256,7 +2172,7 @@ player.getDuration();
 
 if(duration){
 
-currentTimeElement.textContent =
+currentElement.textContent =
 format(position * duration)
 +
 " / "
@@ -2295,7 +2211,6 @@ try{
 const current =
 player.getCurrentTime();
 
-
 const duration =
 player.getDuration();
 
@@ -2320,11 +2235,11 @@ current / duration
 );
 
 
-fill.style.width =
+fillElement.style.width =
 (position * 100) + "%";
 
 
-currentTimeElement.textContent =
+currentElement.textContent =
 format(current)
 +
 " / "
@@ -2341,7 +2256,7 @@ format(duration);
 
 
 /* =========================================================
-   FORMAT TIME
+   FORMAT
 ========================================================= */
 
 function format(seconds){
@@ -2361,16 +2276,24 @@ Math.floor(seconds);
 
 
 return (
-Math.floor(seconds / 60)
+
+Math.floor(
+seconds / 60
+)
+
 +
+
 ":"
+
 +
+
 String(
 seconds % 60
 ).padStart(
 2,
 "0"
 )
+
 );
 
 }
@@ -2430,13 +2353,6 @@ return;
 
 playlistItems =
 ids.slice();
-
-
-sortedPlaylistItems = [];
-
-sortedPlaylistData = [];
-
-sortingReady = false;
 
 
 Promise.all(
@@ -2512,6 +2428,10 @@ originalIndex:index
 .then(
 function(results){
 
+/*
+Alphabetical sorting.
+*/
+
 results.sort(
 function(a,b){
 
@@ -2553,7 +2473,6 @@ try{
 const data =
 player.getVideoData();
 
-
 if(data){
 
 currentId =
@@ -2582,7 +2501,7 @@ currentSortedIndex = 0;
 }
 
 
-renderSortedPlaylists();
+renderPlaylist();
 
 highlightActiveTrack();
 
@@ -2598,7 +2517,7 @@ updateInfo();
    RENDER PLAYLIST
 ========================================================= */
 
-function renderSortedPlaylists(){
+function renderPlaylist(){
 
 const list =
 document.getElementById(
@@ -2623,17 +2542,7 @@ item.className =
 
 
 item.id =
-`track-${index}`;
-
-
-item.addEventListener(
-"click",
-function(){
-
-playSpecificTrack(index);
-
-}
-);
+"track-" + index;
 
 
 item.innerHTML = `
@@ -2657,6 +2566,27 @@ ${escapeHtml(data.artist)}
 `;
 
 
+/*
+Important:
+pointerdown/touchstart এ play না করে
+click ব্যবহার করা হচ্ছে যাতে iOS touch
+properly user action হিসেবে নেয়।
+*/
+
+item.addEventListener(
+"click",
+function(event){
+
+event.preventDefault();
+
+event.stopPropagation();
+
+playSpecificTrack(index);
+
+}
+);
+
+
 list.appendChild(item);
 
 }
@@ -2666,7 +2596,7 @@ list.appendChild(item);
 
 
 /* =========================================================
-   ESCAPE HTML
+   ESCAPE
 ========================================================= */
 
 function escapeHtml(text){
@@ -2694,7 +2624,7 @@ return div.innerHTML;
 
 
 /* =========================================================
-   SPECIFIC SONG
+   PLAY SPECIFIC
 ========================================================= */
 
 function playSpecificTrack(index){
@@ -2721,8 +2651,18 @@ index;
 forceUpdateUI(index);
 
 
+/*
+Play BEFORE closing drawer.
+এতে click-এর user interaction chain
+আগে নষ্ট হয় না।
+*/
+
 playTrackNow(id);
 
+
+/*
+তারপর drawer close।
+*/
 
 closePlaylist();
 
@@ -2730,7 +2670,7 @@ closePlaylist();
 
 
 /* =========================================================
-   HIGHLIGHT ACTIVE
+   ACTIVE TRACK
 ========================================================= */
 
 function highlightActiveTrack(){
@@ -2782,7 +2722,7 @@ currentId
 
 
 /* =========================================================
-   UPDATE SONG INFO
+   UPDATE INFO
 ========================================================= */
 
 function updateInfo(){
@@ -2852,10 +2792,15 @@ highlightActiveTrack();
 
 
 /* =========================================================
-   OPEN PLAYLIST
+   DRAWER OPEN
 ========================================================= */
 
 function openPlaylist(){
+
+/*
+FIXED:
+coverWrapper, not coverwrapper
+*/
 
 if(
 coverWrapper &&
@@ -2888,7 +2833,7 @@ loadPlaylistItems();
 
 
 /* =========================================================
-   CLOSE PLAYLIST
+   DRAWER CLOSE
 ========================================================= */
 
 function closePlaylist(){
@@ -2905,7 +2850,7 @@ overlay.classList.remove(
 
 
 /* =========================================================
-   TOGGLE PLAYLIST
+   DRAWER TOGGLE
 ========================================================= */
 
 function toggleDrawer(){
@@ -2969,20 +2914,6 @@ closePlaylist();
 );
 
 
-previousButton.addEventListener(
-"click",
-function(event){
-
-event.preventDefault();
-
-event.stopPropagation();
-
-previousSong();
-
-}
-);
-
-
 playButton.addEventListener(
 "click",
 function(event){
@@ -2992,6 +2923,20 @@ event.preventDefault();
 event.stopPropagation();
 
 togglePlay();
+
+}
+);
+
+
+previousButton.addEventListener(
+"click",
+function(event){
+
+event.preventDefault();
+
+event.stopPropagation();
+
+previousSong();
 
 }
 );
@@ -3026,59 +2971,25 @@ toggleVideoPopup();
 
 
 /* =========================================================
-   SWIPE DRAWER CLOSE
+   ESC KEY
 ========================================================= */
 
-let drawerStartX = 0;
-
-drawer.addEventListener(
-"touchstart",
+document.addEventListener(
+"keydown",
 function(event){
 
-if(!event.touches.length){
-
-return;
-
-}
-
-drawerStartX =
-event.touches[0].clientX;
-
-},
-{passive:true}
-);
-
-
-drawer.addEventListener(
-"touchend",
-function(event){
-
-if(!event.changedTouches.length){
-
-return;
-
-}
-
-
-const endX =
-event.changedTouches[0].clientX;
-
-
-const difference =
-endX - drawerStartX;
-
-
-if(difference > 70){
+if(
+event.key === "Escape"
+){
 
 closePlaylist();
 
 }
 
-},
-{passive:true}
-);
+});
 
 </script>
 
 </body>
+
 </html>
