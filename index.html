@@ -492,27 +492,44 @@ display:none;
 
 /* ================= VIDEO INSIDE COVER ================= */
 
-.video-overlay{
+#videoPopup{
 display:none;
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+background:#111;
+overflow:hidden;
+border-radius:inherit;
+z-index:9;
 }
 
-.video-section{
-display:none;
+#yt{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+border:0;
+display:block;
+z-index:10;
+}
+
+#yt iframe{
+width:100%!important;
+height:100%!important;
+border:0;
+display:block;
+pointer-events:auto!important;
+background:transparent;
 }
 
 .cover-wrapper.video-active{
 width:min(92vw,390px);
-
 height:auto;
-
 aspect-ratio:16/9;
-
 border-radius:28px;
-
 overflow:hidden;
-
-background:#000;
-
+background:#111;
 box-shadow:
 14px 14px 30px rgba(75,85,90,.25),
 -14px -14px 30px rgba(255,255,255,.72);
@@ -524,203 +541,105 @@ display:none;
 
 .cover-wrapper.video-active #videoPopup{
 display:block;
-
-width:100%;
-height:100%;
-
 opacity:1;
 visibility:visible;
-
 pointer-events:auto;
-}
-
-#videoPopup{
-display:none;
-
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-background:#000;
-
-overflow:hidden;
-
-border-radius:inherit;
-
-z-index:9;
-}
-
-#yt{
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-border:0;
-
-display:block;
-
-z-index:10;
-}
-
-#yt iframe{
-width:100%!important;
-height:100%!important;
-
-border:0;
-
-display:block;
-
-pointer-events:auto!important;
 }
 
 /* ================= DRAWER ================= */
 
 .drawer-overlay{
 position:fixed;
-
 inset:0;
-
 z-index:9999;
-
 background:transparent;
-
 pointer-events:none;
-
 display:none;
 }
 
 .drawer-overlay.active{
 display:block;
-
 pointer-events:auto;
 }
 
 .playlist-drawer{
 position:fixed;
-
 top:0;
-
 right:-100%;
-
 width:260px;
-
 height:100dvh;
-
 background:rgba(220,227,231,.88);
-
 backdrop-filter:blur(30px);
 -webkit-backdrop-filter:blur(30px);
-
 border-left:1px solid rgba(255,255,255,.7);
-
 z-index:10000;
-
-transition:
-right .35s cubic-bezier(.2,.8,.2,1);
-
+transition:right .35s cubic-bezier(.2,.8,.2,1);
 display:flex;
 flex-direction:column;
-
 padding:14px 9px;
-
-box-shadow:
--15px 0 40px rgba(0,0,0,.22);
-
+box-shadow:-15px 0 40px rgba(0,0,0,.22);
 visibility:hidden;
-
 pointer-events:none;
 }
 
 .playlist-drawer.open{
 right:0;
-
 visibility:visible;
-
 pointer-events:auto;
 }
 
 .drawer-header{
 display:flex;
-
 align-items:center;
 justify-content:space-between;
-
 padding:8px;
-
 border-bottom:1px solid rgba(80,90,95,.15);
-
 margin-bottom:8px;
 }
 
 .drawer-title{
 font-size:13px;
 font-weight:800;
-
 color:#111;
 }
 
 .close-btn{
 background:transparent;
-
 border:0;
-
 color:#68151d;
-
 font-size:20px;
-
 cursor:pointer;
-
 padding:0 3px;
 }
 
 .song-list{
 flex:1;
-
 overflow-y:auto;
-
 display:flex;
-
 flex-direction:column;
-
 gap:6px;
 }
 
 .song-item{
 display:flex;
-
 align-items:center;
-
 gap:8px;
-
 padding:7px;
-
 border-radius:11px;
-
 background:rgba(255,255,255,.38);
-
 border:1px solid rgba(255,255,255,.55);
-
 cursor:pointer;
 }
 
 .song-item.active{
 background:rgba(255,255,255,.72);
-
 border-color:rgba(120,24,33,.25);
 }
 
 .song-item img{
 width:38px;
 height:38px;
-
 border-radius:7px;
-
 object-fit:cover;
 }
 
@@ -732,7 +651,6 @@ min-width:0;
 .song-item-title{
 font-size:10px;
 font-weight:800;
-
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -740,234 +658,175 @@ text-overflow:ellipsis;
 
 .song-item-artist{
 font-size:8px;
-
 color:#747a7d;
-
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
-
 margin-top:2px;
 }
 
 /* ================= DESKTOP ================= */
 
 @media(min-width:769px){
-
 .player{
 min-height:760px;
-
 width:min(560px,62vw);
-
 padding-top:42px;
 }
-
 .cover-wrapper{
 width:410px;
 height:410px;
 }
-
 .title{
 font-size:21px;
 }
-
 .artist{
 font-size:13px;
 }
-
 }
 
 /* ================= MOBILE ================= */
 
 @media(max-width:600px){
-
 .app{
 padding:24px 10px 12px;
 }
-
 .player{
 width:96vw;
-
 min-height:0;
-
 height:calc(100dvh - 30px);
-
 max-height:none;
-
 padding:30px 14px 12px;
-
 border-radius:30px;
 }
-
 .cover-wrapper{
 width:min(82vw,350px);
-
 height:min(82vw,350px);
-
 max-width:350px;
 max-height:350px;
 }
-
 .cover-wrapper.video-active{
 width:min(92vw,350px);
-
 height:auto;
-
 aspect-ratio:16/9;
 }
-
 .middle{
 margin-top:12px;
 }
-
 .time-display{
 font-size:21px;
-
 margin-bottom:4px;
 }
-
 .title{
 font-size:17px;
 }
-
 .artist{
 font-size:12px;
 }
-
 .seek{
 width:90%;
-
 margin-top:14px;
 }
-
 .controls{
 gap:18px;
-
 margin-top:19px;
 }
-
 .controls #videoToggleBtn{
 right:2px;
-
 width:50px;
 height:50px;
 }
-
 .controls #videoToggleBtn svg{
 width:22px;
 height:22px;
 }
-
 .btn{
 width:64px;
 height:64px;
 }
-
 .btn svg{
 width:27px;
 height:27px;
 }
-
 .play{
 width:100px;
 height:100px;
 }
-
 .play svg{
 width:40px;
 height:40px;
 }
-
 }
 
 /* ================= SMALL MOBILE ================= */
 
 @media(max-width:390px){
-
 .player{
 padding-left:10px;
 padding-right:10px;
 }
-
 .cover-wrapper{
 width:min(78vw,310px);
 height:min(78vw,310px);
 }
-
 .title{
 font-size:16px;
 }
-
 .artist{
 font-size:11px;
 }
-
 .controls{
 gap:13px;
 }
-
 .controls #videoToggleBtn{
 right:0;
-
 width:46px;
 height:46px;
 }
-
 .controls #videoToggleBtn svg{
 width:20px;
 height:20px;
 }
-
 .btn{
 width:58px;
 height:58px;
 }
-
 .btn svg{
 width:25px;
 height:25px;
 }
-
 .play{
 width:92px;
 height:92px;
 }
-
 .play svg{
 width:37px;
 height:37px;
 }
-
 }
 
 /* ================= VERY SMALL ================= */
 
 @media(max-width:340px){
-
 .controls{
 gap:9px;
 }
-
 .controls #videoToggleBtn{
 width:42px;
 height:42px;
 }
-
 .controls #videoToggleBtn svg{
 width:18px;
 height:18px;
 }
-
 .btn{
 width:54px;
 height:54px;
 }
-
 .play{
 width:84px;
 height:84px;
 }
-
 }
 </style>
 </head>
@@ -989,11 +848,6 @@ height:84px;
 </button>
 </div>
 
-<!-- VIDEO -->
-<div id="videoPopup">
-<div id="yt"></div>
-</div>
-
 <!-- DRAWER -->
 <div class="drawer-overlay" id="overlay" onclick="toggleDrawer()"></div>
 <div class="playlist-drawer" id="drawer">
@@ -1012,6 +866,10 @@ height:84px;
 
 <div class="cover-wrapper" id="coverWrapper">
 <img id="cover" class="cover" src="logo.png" alt="Album art">
+<!-- VIDEO CONTAINER -->
+<div id="videoPopup">
+<div id="yt"></div>
+</div>
 </div>
 
 <div class="middle">
@@ -1074,7 +932,20 @@ function onYouTubeIframeAPIReady(){
 player=new YT.Player("yt",{
 width:"100%",
 height:"100%",
-playerVars:{autoplay:0,controls:1,disablekb:0,fs:1,modestbranding:1,playsinline:1,rel:0,iv_load_policy:3,listType:"playlist",list:PLAYLIST_ID},
+playerVars:{
+autoplay:0,
+controls:1,
+disablekb:0,
+fs:1,
+modestbranding:1,
+playsinline:1,
+rel:0,
+iv_load_policy:3,
+listType:"playlist",
+list:PLAYLIST_ID,
+enablejsapi:1,
+origin:window.location.origin
+},
 events:{onReady:ready,onStateChange:state}
 });
 }
