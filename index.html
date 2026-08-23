@@ -43,7 +43,7 @@ BACKGROUND
 position:fixed;
 inset:-20px;
 
-background-image:url("background.GIF");
+background-image:url("background.jpg");
 background-position:center center;
 background-size:cover;
 background-repeat:no-repeat;
@@ -63,6 +63,11 @@ background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
+body.popup-active .bg{
+filter:blur(20px);
+-webkit-filter:blur(20px);
+transform:scale(1.1);
+}
 
 /* =========================================================
 TOP WIDGETS
@@ -304,7 +309,40 @@ pointer-events:auto!important;
 touch-action:auto!important;
 }
 
+/* =========================================================
+VIDEO PLAYLIST
+========================================================= */
 
+/*
+   VIDEO POPUP-ER NICHE PLAYLIST
+   পুরোপুরি HIDDEN
+*/
+
+.video-playlist{
+display:none!important;
+}
+
+/* =========================================================
+VIDEO SONG LIST
+========================================================= */
+
+.video-song-list{
+width:100%;
+height:100%;
+
+overflow-y:auto;
+overflow-x:hidden;
+
+display:none!important;
+}
+
+/* =========================================================
+VIDEO SONG ITEM
+========================================================= */
+
+.video-song-item{
+display:none!important;
+}
 
 /* =========================================================
 APP
@@ -750,10 +788,6 @@ DESKTOP
 
 @media(min-width:769px){
 
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
-
 .app{
 height:100dvh;
 width:100%;
@@ -790,7 +824,7 @@ transform:none;
 
 width:min(620px,42vw);
 
-height:92dvh;
+height:auto;
 
 z-index:1700;
 
@@ -808,10 +842,9 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
-
-/* ---------------------------------------------------------
+/* =========================================================
 DESKTOP VIDEO ON
---------------------------------------------------------- */
+========================================================= */
 
 body.popup-active .app{
 
@@ -824,11 +857,6 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
-
-/*
-   পুরো controller এখন আগের থেকে একটু ডানে।
-   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
-*/
 
 width:min(760px,52vw);
 
@@ -859,7 +887,7 @@ transform:none;
 
 width:min(620px,42vw);
 
-height:92dvh;
+height:auto;
 
 opacity:1;
 
@@ -895,44 +923,20 @@ border-radius:18px;
 z-index:1701;
 }
 
+/*
+   VIDEO PLAYLIST HIDDEN
+*/
+
 body.popup-active .video-playlist{
-
-width:100%;
-
-flex:1;
-
-min-height:100px;
-
-height:auto;
-
-max-height:none;
-
-margin-top:10px;
-
-opacity:1;
-
-visibility:visible;
-
-pointer-events:auto;
-
-position:relative;
-
-z-index:1705;
-
-overflow:hidden;
+display:none!important;
 }
 
 body.popup-active .video-song-list{
+display:none!important;
+}
 
-height:calc(100% - 27px);
-
-overflow-y:auto;
-
-overflow-x:hidden;
-
-touch-action:pan-y;
-
--webkit-overflow-scrolling:touch;
+body.popup-active .video-song-item{
+display:none!important;
 }
 
 body.popup-active .top-widgets{
@@ -940,13 +944,6 @@ body.popup-active .top-widgets{
 display:flex;
 
 top:14px;
-
-/*
-   BD time controller-এর visual center-এর
-   ঠিক ওপর থাকবে।
-   Controller = 760px পর্যন্ত, scale = .92,
-   তাই center হিসাব করে position করা হয়েছে।
-*/
 
 left:calc(
 35px + min(349.6px, 23.92vw)
@@ -961,49 +958,11 @@ body.popup-active .playlist-toggle-btn{
 display:none;
 }
 
-/*
-   কোনো transform নেই।
-   তাই controller-এর ভিতরের item
-   আলাদা করে বামে/ডানে যাবে না।
-*/
-
 body.popup-active .controls{
 z-index:1610;
 }
 
-body.popup-active .video-song-item{
-cursor:pointer;
-pointer-events:auto;
 }
-
-
-/* ---------------------------------------------------------
-DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
-
-@media(max-height:800px){
-
-body.popup-active .video-section{
-
-top:3vh;
-
-height:94dvh;
-}
-
-body.popup-active .video-popup{
-
-border-radius:15px;
-}
-
-body.popup-active .video-playlist{
-
-margin-top:7px;
-}
-
-}
-
-}
-
 
 /* =========================================================
 MOBILE
@@ -1088,6 +1047,23 @@ height:auto;
 border-radius:16px;
 }
 
+/*
+   MOBILE VIDEO PLAYLIST HIDDEN
+*/
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
+}
+
+.video-song-item{
+display:none!important;
+}
+
+}
 
 /* =========================================================
 SMALL HEIGHT
@@ -1105,24 +1081,10 @@ height:auto;
 }
 
 .video-playlist{
-max-height:calc(100dvh - 300px);
-
-min-height:70px;
-
-margin-top:1px;
-}
-
-.video-song-item{
-min-height:48px;
-}
-
-.video-song-item img{
-width:40px;
-height:40px;
+display:none!important;
 }
 
 }
-
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1135,36 +1097,14 @@ width:96%;
 }
 
 .video-playlist{
-margin-top:1px;
-
-padding:6px;
-
-max-height:calc(100dvh - 300px);
+display:none!important;
 }
 
-.video-song-item{
-min-height:48px;
-
-padding:5px 6px;
-
-gap:7px;
-}
-
-.video-song-item img{
-width:39px;
-height:39px;
-}
-
-.video-song-title{
-font-size:10px;
-}
-
-.video-song-artist{
-font-size:8.5px;
+.video-song-list{
+display:none!important;
 }
 
 }
-
 
 /* =========================================================
 DRAWER
@@ -1404,9 +1344,7 @@ margin-top:.5px;
 
 <div class="bg"></div>
 
-<!-- =========================================================
-TOP WIDGETS
-========================================================= -->
+<!-- TOP WIDGETS -->
 
 <div class="top-widgets">
 
@@ -1442,9 +1380,7 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 </div>
 
 
-<!-- =========================================================
-VIDEO OVERLAY
-========================================================= -->
+<!-- VIDEO OVERLAY -->
 
 <div
 id="videoOverlay"
@@ -1452,9 +1388,7 @@ class="video-overlay">
 </div>
 
 
-<!-- =========================================================
-VIDEO SECTION
-========================================================= -->
+<!-- VIDEO SECTION -->
 
 <div
 class="video-section"
@@ -1470,8 +1404,10 @@ class="video-popup"
 
 </div>
 
-
-<!-- VIDEO PLAYLIST -->
+<!--
+VIDEO PLAYLIST HTML রাখা হয়েছে,
+কিন্তু CSS দিয়ে পুরোপুরি hidden.
+-->
 
 <div
 id="videoPlaylist"
@@ -1487,13 +1423,6 @@ class="video-song-list"
 id="videoSongList"
 >
 
-<div style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:9px;
-padding:10px;
-">
-
 Loading...
 
 </div>
@@ -1502,12 +1431,8 @@ Loading...
 
 </div>
 
-</div>
 
-
-<!-- =========================================================
-DRAWER
-========================================================= -->
+<!-- DRAWER -->
 
 <div
 class="drawer-overlay"
@@ -1557,9 +1482,7 @@ Loading...
 </div>
 
 
-<!-- =========================================================
-MAIN APP
-========================================================= -->
+<!-- MAIN APP -->
 
 <div class="app">
 
@@ -1854,7 +1777,6 @@ const playIcon=
 document.getElementById("play-icon");
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 if(
 e.data===YT.PlayerState.PLAYING
@@ -1991,11 +1913,6 @@ document.getElementById(
 "videoOverlay"
 );
 
-const videoPlaylist=
-document.getElementById(
-"videoPlaylist"
-);
-
 const iconSvg=
 document.getElementById(
 "videoToggleIcon"
@@ -2016,51 +1933,12 @@ overlay.classList.add(
 "active"
 );
 
-videoPlaylist.classList.add(
-"active"
-);
-
 document.body.classList.add(
 "popup-active"
 );
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
-
-if(
-sortingReady &&
-sortedPlaylistData.length>0
-){
-
-renderVideoPlaylist();
-
-}
-
-else{
-
-loadPlaylistItems();
-
-}
-
-requestAnimationFrame(()=>{
-
-requestAnimationFrame(()=>{
-
-adjustVideoPlaylistHeight();
-
-});
-
-});
-
-setTimeout(
-adjustVideoPlaylistHeight,
-100
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-300
-);
 
 }
 
@@ -2071,10 +1949,6 @@ popup.classList.remove(
 );
 
 overlay.classList.remove(
-"active"
-);
-
-videoPlaylist.classList.remove(
 "active"
 );
 
@@ -2091,180 +1965,12 @@ iconSvg.innerHTML=
 
 
 /* =========================================================
-VIDEO PLAYLIST HEIGHT
-========================================================= */
-
-function adjustVideoPlaylistHeight(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const playlist=
-document.getElementById(
-"videoPlaylist"
-);
-
-const playerCard=
-document.getElementById(
-"playerCard"
-);
-
-const videoSection=
-document.getElementById(
-"videoSection"
-);
-
-if(
-!popup ||
-!playlist ||
-!playerCard
-)
-return;
-
-if(
-!popup.classList.contains("active")
-)
-return;
-
-
-/* =========================================================
-DESKTOP
-========================================================= */
-
-if(window.innerWidth>=769){
-
-if(!videoSection)
-return;
-
-const sectionRect=
-videoSection.getBoundingClientRect();
-
-const popupRect=
-popup.getBoundingClientRect();
-
-const available=
-sectionRect.bottom -
-popupRect.bottom -
-10;
-
-const safeHeight=
-Math.max(
-100,
-available
-);
-
-playlist.style.height=
-safeHeight+"px";
-
-playlist.style.maxHeight=
-safeHeight+"px";
-
-return;
-
-}
-
-
-/* =========================================================
-MOBILE / SMALL SCREEN
-========================================================= */
-
-const popupRect=
-popup.getBoundingClientRect();
-
-const playerRect=
-playerCard.getBoundingClientRect();
-
-const top=
-popupRect.bottom+1;
-
-const bottom=
-playerRect.top-20;
-
-let available=
-bottom-top;
-
-if(available>70){
-
-let safeHeight=
-Math.min(
-available,
-playerRect.top-top-2
-);
-
-safeHeight=
-Math.max(
-70,
-safeHeight
-);
-
-playlist.style.height=
-safeHeight+"px";
-
-playlist.style.maxHeight=
-safeHeight+"px";
-
-}
-
-else{
-
-playlist.style.height="70px";
-playlist.style.maxHeight="70px";
-
-}
-
-requestAnimationFrame(()=>{
-
-const finalRect=
-playlist.getBoundingClientRect();
-
-const finalPlayerRect=
-playerCard.getBoundingClientRect();
-
-if(
-finalRect.bottom >
-finalPlayerRect.top
-){
-
-const correctedHeight=
-Math.max(
-70,
-finalPlayerRect.top-top-2
-);
-
-playlist.style.height=
-correctedHeight+"px";
-
-playlist.style.maxHeight=
-correctedHeight+"px";
-
-}
-
-});
-
-}
-
-
-/* =========================================================
 RESIZE
 ========================================================= */
 
 window.addEventListener(
 "resize",
-()=>{
-
-setTimeout(
-adjustVideoPlaylistHeight,
-50
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-150
-);
-
-}
+()=>{}
 );
 
 
@@ -2492,7 +2198,6 @@ data.artist || "YouTube Music";
 currentSortedIndex=index;
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 }
 
@@ -3009,7 +2714,6 @@ currentIndex;
 renderSortedPlaylists();
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 updateInfo();
 
@@ -3026,7 +2730,6 @@ RENDER PLAYLISTS
 function renderSortedPlaylists(){
 
 renderMainPlaylist();
-renderVideoPlaylist();
 
 }
 
@@ -3090,108 +2793,6 @@ ${escapeHtml(data.artist)}
 list.appendChild(item);
 
 });
-
-}
-
-
-/* =========================================================
-VIDEO PLAYLIST
-========================================================= */
-
-function renderVideoPlaylist(){
-
-const list=
-document.getElementById(
-"videoSongList"
-);
-
-if(
-!sortedPlaylistData ||
-sortedPlaylistData.length===0
-){
-
-list.innerHTML=`
-
-<div style="
-text-align:center;
-color:rgba(255,255,255,.7);
-font-size:9px;
-padding:10px;
-">
-Loading...
-</div>
-
-`;
-
-return;
-
-}
-
-list.innerHTML="";
-
-sortedPlaylistData.forEach(
-(data,index)=>{
-
-const item=
-document.createElement(
-"div"
-);
-
-item.className=
-"video-song-item";
-
-item.id=
-`video-track-${index}`;
-
-item.addEventListener(
-"click",
-function(e){
-
-e.preventDefault();
-e.stopPropagation();
-
-playSpecificTrack(
-index
-);
-
-},
-{
-passive:false
-}
-);
-
-item.innerHTML=`
-
-<img
-src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
-alt="thumb"
-draggable="false"
->
-
-<div class="video-song-info">
-
-<div class="video-song-title">
-${escapeHtml(data.title)}
-</div>
-
-<div class="video-song-artist">
-${escapeHtml(data.artist)}
-</div>
-
-</div>
-
-`;
-
-list.appendChild(item);
-
-});
-
-highlightVideoActiveTrack();
-
-setTimeout(
-adjustVideoPlaylistHeight,
-20
-);
 
 }
 
@@ -3280,40 +2881,7 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup.classList.contains(
-"active"
-)
-){
-
-document
-.getElementById(
-"videoPlaylist"
-)
-.classList.add(
-"active"
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-50
-);
-
-setTimeout(
-adjustVideoPlaylistHeight,
-150
-);
-
-}
-
 highlightActiveTrack();
-
-highlightVideoActiveTrack();
 
 }
 
@@ -3344,46 +2912,6 @@ catch(e){}
 document
 .querySelectorAll(
 ".song-item"
-)
-.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-sortedPlaylistItems[index]===currentId
-);
-
-});
-
-}
-
-
-/* =========================================================
-ACTIVE VIDEO TRACK
-========================================================= */
-
-function highlightVideoActiveTrack(){
-
-if(
-!player ||
-sortedPlaylistItems.length===0
-)
-return;
-
-let currentId="";
-
-try{
-
-currentId=
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-}
-catch(e){}
-
-document
-.querySelectorAll(
-".video-song-item"
 )
 .forEach(
 (item,index)=>{
@@ -3455,7 +2983,6 @@ currentSortedIndex=sortedIndex;
 }
 
 highlightActiveTrack();
-highlightVideoActiveTrack();
 
 }
 catch(e){}
@@ -3525,11 +3052,6 @@ loadPlaylistItems();
 /* =========================================================
 INITIAL
 ========================================================= */
-
-setTimeout(
-adjustVideoPlaylistHeight,
-600
-);
 
 </script>
 
