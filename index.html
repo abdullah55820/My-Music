@@ -8,6 +8,7 @@
 
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preload" as="image" href="background.jpg">
 
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
@@ -35,27 +36,23 @@ overflow-x:hidden!important;
 }
 
 /* =========================================================
-BACKGROUND VIDEO
+BACKGROUND
 ========================================================= */
 
 .bg{
 position:fixed;
-inset:0;
-width:100%;
-height:100%;
+inset:-20px;
+
+background-image:url("background.jpg");
+background-position:center center;
+background-size:cover;
+background-repeat:no-repeat;
+
 z-index:0;
 pointer-events:none;
-overflow:hidden;
-}
 
-.bg video{
-width:100%;
-height:100%;
-object-fit:cover;
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%, -50%);
+-webkit-backface-visibility:hidden;
+backface-visibility:hidden;
 }
 
 .bg::after{
@@ -64,14 +61,12 @@ position:absolute;
 inset:0;
 background:rgba(0,0,0,.35);
 pointer-events:none;
-z-index:1;
 }
 
 body.popup-active .bg{
 filter:blur(20px);
 -webkit-filter:blur(20px);
 transform:scale(1.1);
-transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 /* =========================================================
@@ -186,6 +181,10 @@ height:14px;
 fill:#fff;
 }
 
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
 /* =========================================================
 VIDEO OVERLAY
 ========================================================= */
@@ -228,7 +227,7 @@ display:flex;
 flex-direction:column;
 align-items:center;
 
-pointer-events:auto;
+pointer-events:none;
 }
 
 /* =========================================================
@@ -255,68 +254,26 @@ border:1px solid rgba(255,255,255,.25);
 box-shadow:
 0 25px 50px rgba(0,0,0,.7);
 
+opacity:0;
+visibility:hidden;
+
+pointer-events:none;
+
+transform:scale(.92);
+
+transition:
+opacity .3s ease,
+transform .3s cubic-bezier(.2,.8,.2,1),
+visibility .3s ease;
+}
+
+.video-popup.active{
 opacity:1;
 visibility:visible;
 
 pointer-events:auto;
 
 transform:scale(1);
-}
-
-/* =========================================================
-VIDEO PLACEHOLDER (ALWAYS VISIBLE WHEN NO VIDEO PLAYING)
-========================================================= */
-
-.video-placeholder{
-position:absolute;
-inset:0;
-background:radial-gradient(circle at center, rgba(30,30,30,0.95) 0%, rgba(5,5,5,1) 100%);
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:12px;
-z-index:1703;
-transition: opacity 0.3s ease;
-pointer-events:none;
-}
-
-.video-placeholder.hidden{
-opacity:0;
-pointer-events:none;
-}
-
-.visualizer-bars{
-display:flex;
-align-items:flex-end;
-gap:4px;
-height:30px;
-}
-
-.visualizer-bars span{
-width:4px;
-background:#fff;
-border-radius:2px;
-animation: bounceWave 1.2s infinite ease-in-out;
-}
-
-.visualizer-bars span:nth-child(1){ animation-delay: 0.1s; height: 15px; }
-.visualizer-bars span:nth-child(2){ animation-delay: 0.3s; height: 28px; }
-.visualizer-bars span:nth-child(3){ animation-delay: 0.2s; height: 20px; }
-.visualizer-bars span:nth-child(4){ animation-delay: 0.4s; height: 32px; }
-.visualizer-bars span:nth-child(5){ animation-delay: 0.15s; height: 18px; }
-
-@keyframes bounceWave{
-0%, 100%{ transform: scaleY(0.4); opacity: 0.5; }
-50%{ transform: scaleY(1); opacity: 1; }
-}
-
-.placeholder-text{
-font-size:12px;
-font-weight:600;
-color:rgba(255,255,255,0.6);
-letter-spacing:1px;
-text-transform:uppercase;
 }
 
 /* =========================================================
@@ -396,8 +353,6 @@ overscroll-behavior:contain;
 overflow:hidden;
 
 flex-shrink:0;
-
-transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .video-playlist.active{
@@ -1012,6 +967,10 @@ DESKTOP
 
 @media(min-width:769px){
 
+/* ---------------------------------------------------------
+DESKTOP NORMAL / VIDEO OFF
+--------------------------------------------------------- */
+
 .app{
 height:100dvh;
 width:100%;
@@ -1036,7 +995,7 @@ transform-origin:left bottom;
 }
 
 .video-section{
-display:flex;
+display:none;
 
 position:fixed;
 
@@ -1052,7 +1011,7 @@ height:92dvh;
 
 z-index:1700;
 
-pointer-events:auto;
+pointer-events:none;
 }
 
 .top-widgets{
@@ -1066,6 +1025,11 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
+
+/* ---------------------------------------------------------
+DESKTOP VIDEO ON
+--------------------------------------------------------- */
+
 body.popup-active .app{
 
 display:flex;
@@ -1077,6 +1041,11 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
+
+/*
+   পুরো controller এখন আগের থেকে একটু ডানে।
+   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
+*/
 
 width:min(760px,52vw);
 
@@ -1111,7 +1080,7 @@ height:92dvh;
 
 opacity:1;
 
-pointer-events:auto;
+pointer-events:none;
 
 z-index:1700;
 }
@@ -1189,6 +1158,13 @@ display:flex;
 
 top:14px;
 
+/*
+   BD time controller-এর visual center-এর
+   ঠিক ওপর থাকবে।
+   Controller = 760px পর্যন্ত, scale = .92,
+   তাই center হিসাব করে position করা হয়েছে।
+*/
+
 left:calc(
 35px + min(349.6px, 23.92vw)
 );
@@ -1198,6 +1174,16 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
+/*
+   কোনো transform নেই।
+   তাই controller-এর ভিতরের item
+   আলাদা করে বামে/ডানে যাবে না।
+*/
+
 body.popup-active .controls{
 z-index:1610;
 }
@@ -1206,6 +1192,11 @@ body.popup-active .video-song-item{
 cursor:pointer;
 pointer-events:auto;
 }
+
+
+/* ---------------------------------------------------------
+DESKTOP SMALL HEIGHT
+--------------------------------------------------------- */
 
 @media(max-height:800px){
 
@@ -1229,6 +1220,7 @@ margin-top:7px;
 }
 
 }
+
 
 /* =========================================================
 MOBILE
@@ -1299,6 +1291,10 @@ width:94%;
 opacity:1;
 }
 
+body.popup-active .video-section{
+transform:translateX(-50%);
+}
+
 .video-popup{
 width:100%;
 
@@ -1360,6 +1356,7 @@ font-size:9px;
 
 }
 
+
 /* =========================================================
 SMALL HEIGHT
 ========================================================= */
@@ -1393,6 +1390,7 @@ height:40px;
 }
 
 }
+
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1434,6 +1432,7 @@ font-size:8.5px;
 }
 
 }
+
 
 /* =========================================================
 DRAWER
@@ -1671,14 +1670,7 @@ margin-top:.5px;
 
 <body>
 
-<!-- =========================================================
-BACKGROUND VIDEO
-========================================================= -->
-<div class="bg">
-  <video autoplay muted loop playsinline>
-    <source src="bg-video.mp4" type="video/mp4">
-  </video>
-</div>
+<div class="bg"></div>
 
 <!-- =========================================================
 TOP WIDGETS
@@ -1741,18 +1733,6 @@ id="videoSection"
 id="videoPopup"
 class="video-popup"
 >
-
-<!-- ANIMATED PLACEHOLDER FOR EMPTY SCREEN -->
-<div class="video-placeholder" id="videoPlaceholder">
-  <div class="visualizer-bars">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <div class="placeholder-text">YOUTUBE MUSIC</div>
-</div>
 
 <div id="yt"></div>
 
@@ -2141,9 +2121,6 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
-const placeholder=
-document.getElementById("videoPlaceholder");
-
 highlightActiveTrack();
 highlightVideoActiveTrack();
 
@@ -2152,10 +2129,6 @@ e.data===YT.PlayerState.PLAYING
 ){
 
 playing=true;
-
-if(placeholder){
-placeholder.classList.add("hidden");
-}
 
 playBtn.classList.add(
 "playing"
@@ -2208,12 +2181,6 @@ cover.classList.remove(
 "spinning"
 );
 
-if(!placeholderFinishedVideo()){
-if(placeholder){
-placeholder.classList.remove("hidden");
-}
-}
-
 if(!changingTrack){
 
 setTimeout(
@@ -2227,10 +2194,6 @@ nextSong,
 
 }
 
-function placeholderFinishedVideo(){
-return false;
-}
-
 
 /* =========================================================
 PLAY / PAUSE
@@ -2239,9 +2202,6 @@ PLAY / PAUSE
 function togglePlay(){
 
 if(!player)return;
-
-const placeholder=
-document.getElementById("videoPlaceholder");
 
 try{
 
@@ -2252,10 +2212,6 @@ player.pauseVideo();
 }
 
 else{
-
-if(placeholder){
-placeholder.classList.add("hidden");
-}
 
 const currentId=
 player.getVideoData() &&
@@ -2288,10 +2244,20 @@ catch(e){}
 
 
 /* =========================================================
-VIDEO POPUP (TOGGLE PLAYLIST ON/OFF)
+VIDEO POPUP
 ========================================================= */
 
 function toggleVideoPopup(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const overlay=
+document.getElementById(
+"videoOverlay"
+);
 
 const videoPlaylist=
 document.getElementById(
@@ -2304,11 +2270,19 @@ document.getElementById(
 );
 
 const opening=
-!videoPlaylist.classList.contains(
+!popup.classList.contains(
 "active"
 );
 
 if(opening){
+
+popup.classList.add(
+"active"
+);
+
+overlay.classList.add(
+"active"
+);
 
 videoPlaylist.classList.add(
 "active"
@@ -2360,6 +2334,14 @@ adjustVideoPlaylistHeight,
 
 else{
 
+popup.classList.remove(
+"active"
+);
+
+overlay.classList.remove(
+"active"
+);
+
 videoPlaylist.classList.remove(
 "active"
 );
@@ -2410,7 +2392,7 @@ if(
 return;
 
 if(
-!playlist.classList.contains("active")
+!popup.classList.contains("active")
 )
 return;
 
@@ -3526,13 +3508,6 @@ forceUpdateUI(index);
 
 changingTrack=true;
 
-const placeholder=
-document.getElementById("videoPlaceholder");
-
-if(placeholder){
-placeholder.classList.add("hidden");
-}
-
 try{
 
 player.loadVideoById(id);
@@ -3573,16 +3548,24 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-const videoPlaylist=
+const popup=
 document.getElementById(
-"videoPlaylist"
+"videoPopup"
 );
 
 if(
-videoPlaylist.classList.contains(
+popup.classList.contains(
 "active"
 )
 ){
+
+document
+.getElementById(
+"videoPlaylist"
+)
+.classList.add(
+"active"
+);
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -3754,14 +3737,14 @@ DRAWER
 
 function toggleDrawer(){
 
-const videoPlaylist=
+const popup=
 document.getElementById(
-"videoPlaylist"
+"videoPopup"
 );
 
 if(
-videoPlaylist &&
-videoPlaylist.classList.contains(
+popup &&
+popup.classList.contains(
 "active"
 )
 ){
@@ -3812,7 +3795,7 @@ INITIAL
 ========================================================= */
 
 setTimeout(
-adjustVideoPlaylistHeaderHeight = adjustVideoPlaylistHeight,
+adjustVideoPlaylistHeight,
 600
 );
 
