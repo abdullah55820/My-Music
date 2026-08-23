@@ -8,7 +8,6 @@
 
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
-<link rel="preload" as="image" href="background.jpg">
 
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
@@ -36,23 +35,27 @@ overflow-x:hidden!important;
 }
 
 /* =========================================================
-BACKGROUND
+BACKGROUND VIDEO
 ========================================================= */
 
 .bg{
 position:fixed;
-inset:-20px;
-
-background-image:url("background.jpg");
-background-position:center center;
-background-size:cover;
-background-repeat:no-repeat;
-
+inset:0;
+width:100%;
+height:100%;
 z-index:0;
 pointer-events:none;
+overflow:hidden;
+}
 
--webkit-backface-visibility:hidden;
-backface-visibility:hidden;
+.bg video{
+width:100%;
+height:100%;
+object-fit:cover;
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
 }
 
 .bg::after{
@@ -61,12 +64,14 @@ position:absolute;
 inset:0;
 background:rgba(0,0,0,.35);
 pointer-events:none;
+z-index:1;
 }
 
 body.popup-active .bg{
 filter:blur(20px);
 -webkit-filter:blur(20px);
 transform:scale(1.1);
+transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 /* =========================================================
@@ -274,6 +279,61 @@ visibility:visible;
 pointer-events:auto;
 
 transform:scale(1);
+}
+
+/* =========================================================
+VIDEO PLACEHOLDER (AMAZING ANIMATED SCREEN)
+========================================================= */
+
+.video-placeholder{
+position:absolute;
+inset:0;
+background:radial-gradient(circle at center, rgba(30,30,30,0.95) 0%, rgba(5,5,5,1) 100%);
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:12px;
+z-index:1703;
+transition: opacity 0.3s ease;
+}
+
+.video-popup.active .video-placeholder{
+opacity:0;
+pointer-events:none;
+}
+
+.visualizer-bars{
+display:flex;
+align-items:flex-end;
+gap:4px;
+height:30px;
+}
+
+.visualizer-bars span{
+width:4px;
+background:#fff;
+border-radius:2px;
+animation: bounceWave 1.2s infinite ease-in-out;
+}
+
+.visualizer-bars span:nth-child(1){ animation-delay: 0.1s; height: 15px; }
+.visualizer-bars span:nth-child(2){ animation-delay: 0.3s; height: 28px; }
+.visualizer-bars span:nth-child(3){ animation-delay: 0.2s; height: 20px; }
+.visualizer-bars span:nth-child(4){ animation-delay: 0.4s; height: 32px; }
+.visualizer-bars span:nth-child(5){ animation-delay: 0.15s; height: 18px; }
+
+@keyframes bounceWave{
+0%, 100%{ transform: scaleY(0.4); opacity: 0.5; }
+50%{ transform: scaleY(1); opacity: 1; }
+}
+
+.placeholder-text{
+font-size:12px;
+font-weight:600;
+color:rgba(255,255,255,0.6);
+letter-spacing:1px;
+text-transform:uppercase;
 }
 
 /* =========================================================
@@ -967,10 +1027,6 @@ DESKTOP
 
 @media(min-width:769px){
 
-/* ---------------------------------------------------------
-DESKTOP NORMAL / VIDEO OFF
---------------------------------------------------------- */
-
 .app{
 height:100dvh;
 width:100%;
@@ -1025,11 +1081,6 @@ transform:translateX(-50%);
 z-index:2500;
 }
 
-
-/* ---------------------------------------------------------
-DESKTOP VIDEO ON
---------------------------------------------------------- */
-
 body.popup-active .app{
 
 display:flex;
@@ -1041,11 +1092,6 @@ padding:0 40px 65px;
 }
 
 body.popup-active .player{
-
-/*
-   পুরো controller এখন আগের থেকে একটু ডানে।
-   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
-*/
 
 width:min(760px,52vw);
 
@@ -1158,13 +1204,6 @@ display:flex;
 
 top:14px;
 
-/*
-   BD time controller-এর visual center-এর
-   ঠিক ওপর থাকবে।
-   Controller = 760px পর্যন্ত, scale = .92,
-   তাই center হিসাব করে position করা হয়েছে।
-*/
-
 left:calc(
 35px + min(349.6px, 23.92vw)
 );
@@ -1178,12 +1217,6 @@ body.popup-active .playlist-toggle-btn{
 display:none;
 }
 
-/*
-   কোনো transform নেই।
-   তাই controller-এর ভিতরের item
-   আলাদা করে বামে/ডানে যাবে না।
-*/
-
 body.popup-active .controls{
 z-index:1610;
 }
@@ -1192,11 +1225,6 @@ body.popup-active .video-song-item{
 cursor:pointer;
 pointer-events:auto;
 }
-
-
-/* ---------------------------------------------------------
-DESKTOP SMALL HEIGHT
---------------------------------------------------------- */
 
 @media(max-height:800px){
 
@@ -1220,7 +1248,6 @@ margin-top:7px;
 }
 
 }
-
 
 /* =========================================================
 MOBILE
@@ -1356,7 +1383,6 @@ font-size:9px;
 
 }
 
-
 /* =========================================================
 SMALL HEIGHT
 ========================================================= */
@@ -1390,7 +1416,6 @@ height:40px;
 }
 
 }
-
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1432,7 +1457,6 @@ font-size:8.5px;
 }
 
 }
-
 
 /* =========================================================
 DRAWER
@@ -1670,7 +1694,14 @@ margin-top:.5px;
 
 <body>
 
-<div class="bg"></div>
+<!-- =========================================================
+BACKGROUND VIDEO
+========================================================= -->
+<div class="bg">
+  <video autoplay muted loop playsinline>
+    <source src="bg-video.mp4" type="video/mp4">
+  </video>
+</div>
 
 <!-- =========================================================
 TOP WIDGETS
@@ -1733,6 +1764,18 @@ id="videoSection"
 id="videoPopup"
 class="video-popup"
 >
+
+<!-- ANIMATED PLACEHOLDER FOR EMPTY SCREEN -->
+<div class="video-placeholder">
+  <div class="visualizer-bars">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div class="placeholder-text">YOUTUBE MUSIC</div>
+</div>
 
 <div id="yt"></div>
 
@@ -3795,7 +3838,7 @@ INITIAL
 ========================================================= */
 
 setTimeout(
-adjustVideoPlaylistHeight,
+adjustVideoPlaylistHeaderHeight = adjustVideoPlaylistHeight,
 600
 );
 
