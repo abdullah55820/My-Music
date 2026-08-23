@@ -251,6 +251,55 @@ from{transform:rotate(0)}
 to{transform:rotate(360deg)}
 }
 
+/* ================= VIDEO INSIDE COVER ================= */
+
+.cover-wrapper.video-active{
+width:min(390px,78vw);
+height:auto;
+aspect-ratio:16/9;
+border-radius:20px;
+background:#000;
+box-shadow:
+10px 10px 20px rgba(80,90,95,.23),
+-10px -10px 20px rgba(255,255,255,.78);
+}
+
+.cover-wrapper.video-active .cover{
+display:none;
+}
+
+.cover-wrapper.video-active #videoPopup{
+display:block;
+}
+
+#videoPopup{
+display:none;
+position:relative;
+width:100%;
+height:100%;
+min-height:100%;
+background:#000;
+overflow:hidden;
+border-radius:inherit;
+}
+
+#yt{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+border:0;
+display:block;
+}
+
+#yt iframe{
+width:100%!important;
+height:100%!important;
+border:0;
+display:block;
+pointer-events:auto!important;
+}
+
 /* ================= INFO ================= */
 
 .middle{
@@ -486,66 +535,6 @@ margin-left:0;
 transform:scale(.93);
 }
 
-.vol-container{
-display:none;
-}
-
-/* ================= VIDEO INSIDE COVER ================= */
-
-#videoPopup{
-display:none;
-position:absolute;
-inset:0;
-width:100%;
-height:100%;
-background:#111;
-overflow:hidden;
-border-radius:inherit;
-z-index:9;
-}
-
-#yt{
-position:absolute;
-inset:0;
-width:100%;
-height:100%;
-border:0;
-display:block;
-z-index:10;
-}
-
-#yt iframe{
-width:100%!important;
-height:100%!important;
-border:0;
-display:block;
-pointer-events:auto!important;
-background:transparent;
-}
-
-.cover-wrapper.video-active{
-width:min(92vw,390px);
-height:auto;
-aspect-ratio:16/9;
-border-radius:28px;
-overflow:hidden;
-background:#111;
-box-shadow:
-14px 14px 30px rgba(75,85,90,.25),
--14px -14px 30px rgba(255,255,255,.72);
-}
-
-.cover-wrapper.video-active .cover{
-display:none;
-}
-
-.cover-wrapper.video-active #videoPopup{
-display:block;
-opacity:1;
-visibility:visible;
-pointer-events:auto;
-}
-
 /* ================= DRAWER ================= */
 
 .drawer-overlay{
@@ -677,6 +666,9 @@ padding-top:42px;
 width:410px;
 height:410px;
 }
+.cover-wrapper.video-active{
+width:410px;
+}
 .title{
 font-size:21px;
 }
@@ -706,9 +698,7 @@ max-width:350px;
 max-height:350px;
 }
 .cover-wrapper.video-active{
-width:min(92vw,350px);
-height:auto;
-aspect-ratio:16/9;
+width:min(82vw,350px);
 }
 .middle{
 margin-top:12px;
@@ -769,6 +759,9 @@ padding-right:10px;
 width:min(78vw,310px);
 height:min(78vw,310px);
 }
+.cover-wrapper.video-active{
+width:min(78vw,310px);
+}
 .title{
 font-size:16px;
 }
@@ -802,30 +795,6 @@ height:92px;
 .play svg{
 width:37px;
 height:37px;
-}
-}
-
-/* ================= VERY SMALL ================= */
-
-@media(max-width:340px){
-.controls{
-gap:9px;
-}
-.controls #videoToggleBtn{
-width:42px;
-height:42px;
-}
-.controls #videoToggleBtn svg{
-width:18px;
-height:18px;
-}
-.btn{
-width:54px;
-height:54px;
-}
-.play{
-width:84px;
-height:84px;
 }
 }
 </style>
@@ -866,7 +835,6 @@ height:84px;
 
 <div class="cover-wrapper" id="coverWrapper">
 <img id="cover" class="cover" src="logo.png" alt="Album art">
-<!-- VIDEO CONTAINER -->
 <div id="videoPopup">
 <div id="yt"></div>
 </div>
@@ -1011,11 +979,9 @@ const opening=!coverWrapper.classList.contains("video-active");
 
 if(opening){
 coverWrapper.classList.add("video-active");
-document.body.classList.add("popup-active");
 icon.innerHTML='<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 }else{
 coverWrapper.classList.remove("video-active");
-document.body.classList.remove("popup-active");
 icon.innerHTML='<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
 }
 }
