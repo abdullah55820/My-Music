@@ -64,7 +64,7 @@ pointer-events:none;
 }
 
 /* =========================================================
-TOP WIDGETS
+TOP WIDGETS (ALWAYS FIXED & VISIBLE)
 ========================================================= */
 
 .top-widgets{
@@ -173,10 +173,6 @@ transform:scale(.95);
 width:14px;
 height:14px;
 fill:#fff;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:none;
 }
 
 /* =========================================================
@@ -307,32 +303,13 @@ touch-action:auto!important;
 VIDEO PLAYLIST
 ========================================================= */
 
-/*
-   VIDEO POPUP-ER NICHE PLAYLIST
-   পুরোপুরি HIDDEN
-*/
-
 .video-playlist{
 display:none!important;
 }
 
-/* =========================================================
-VIDEO SONG LIST
-========================================================= */
-
 .video-song-list{
-width:100%;
-height:100%;
-
-overflow-y:auto;
-overflow-x:hidden;
-
 display:none!important;
 }
-
-/* =========================================================
-VIDEO SONG ITEM
-========================================================= */
 
 .video-song-item{
 display:none!important;
@@ -825,17 +802,6 @@ z-index:1700;
 pointer-events:none;
 }
 
-.top-widgets{
-display:flex;
-
-top:14px;
-left:50%;
-
-transform:translateX(-50%);
-
-z-index:2500;
-}
-
 /* =========================================================
 DESKTOP VIDEO ON
 ========================================================= */
@@ -915,41 +881,6 @@ transform:scale(1);
 border-radius:0px;
 
 z-index:1701;
-}
-
-/*
-   VIDEO PLAYLIST HIDDEN
-*/
-
-body.popup-active .video-playlist{
-display:none!important;
-}
-
-body.popup-active .video-song-list{
-display:none!important;
-}
-
-body.popup-active .video-song-item{
-display:none!important;
-}
-
-body.popup-active .top-widgets{
-
-display:flex;
-
-top:14px;
-
-left:calc(
-35px + min(349.6px, 23.92vw)
-);
-
-transform:translateX(-50%);
-
-z-index:2500;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:none;
 }
 
 body.popup-active .controls{
@@ -1041,22 +972,6 @@ height:auto;
 border-radius:0px;
 }
 
-/*
-   MOBILE VIDEO PLAYLIST HIDDEN
-*/
-
-.video-playlist{
-display:none!important;
-}
-
-.video-song-list{
-display:none!important;
-}
-
-.video-song-item{
-display:none!important;
-}
-
 }
 
 /* =========================================================
@@ -1074,10 +989,6 @@ aspect-ratio:16 / 9;
 height:auto;
 }
 
-.video-playlist{
-display:none!important;
-}
-
 }
 
 /* =========================================================
@@ -1088,14 +999,6 @@ VERY SMALL WIDTH
 
 .video-section{
 width:96%;
-}
-
-.video-playlist{
-display:none!important;
-}
-
-.video-song-list{
-display:none!important;
 }
 
 }
@@ -1397,11 +1300,6 @@ class="video-popup"
 <div id="yt"></div>
 
 </div>
-
-<!--
-VIDEO PLAYLIST HTML রাখা হয়েছে,
-কিন্তু CSS দিয়ে পুরোপুরি hidden.
--->
 
 <div
 id="videoPlaylist"
@@ -2995,17 +2893,6 @@ document.getElementById(
 "videoPopup"
 );
 
-if(
-popup &&
-popup.classList.contains(
-"active"
-)
-){
-
-return;
-
-}
-
 const drawer=
 document.getElementById(
 "drawer"
@@ -3041,11 +2928,6 @@ loadPlaylistItems();
 }
 
 }
-
-
-/* =========================================================
-INITIAL
-========================================================= */
 
 </script>
 
