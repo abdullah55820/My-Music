@@ -186,10 +186,6 @@ height:14px;
 fill:#fff;
 }
 
-body.popup-active .playlist-toggle-btn{
-display:none;
-}
-
 /* =========================================================
 VIDEO OVERLAY
 ========================================================= */
@@ -232,7 +228,7 @@ display:flex;
 flex-direction:column;
 align-items:center;
 
-pointer-events:none;
+pointer-events:auto;
 }
 
 /* =========================================================
@@ -259,20 +255,6 @@ border:1px solid rgba(255,255,255,.25);
 box-shadow:
 0 25px 50px rgba(0,0,0,.7);
 
-opacity:0;
-visibility:hidden;
-
-pointer-events:none;
-
-transform:scale(.92);
-
-transition:
-opacity .3s ease,
-transform .3s cubic-bezier(.2,.8,.2,1),
-visibility .3s ease;
-}
-
-.video-popup.active{
 opacity:1;
 visibility:visible;
 
@@ -282,7 +264,7 @@ transform:scale(1);
 }
 
 /* =========================================================
-VIDEO PLACEHOLDER (AMAZING ANIMATED SCREEN)
+VIDEO PLACEHOLDER (ALWAYS VISIBLE WHEN NO VIDEO PLAYING)
 ========================================================= */
 
 .video-placeholder{
@@ -296,9 +278,10 @@ justify-content:center;
 gap:12px;
 z-index:1703;
 transition: opacity 0.3s ease;
+pointer-events:none;
 }
 
-.video-popup.active .video-placeholder{
+.video-placeholder.hidden{
 opacity:0;
 pointer-events:none;
 }
@@ -413,6 +396,8 @@ overscroll-behavior:contain;
 overflow:hidden;
 
 flex-shrink:0;
+
+transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .video-playlist.active{
@@ -1051,7 +1036,7 @@ transform-origin:left bottom;
 }
 
 .video-section{
-display:none;
+display:flex;
 
 position:fixed;
 
@@ -1067,7 +1052,7 @@ height:92dvh;
 
 z-index:1700;
 
-pointer-events:none;
+pointer-events:auto;
 }
 
 .top-widgets{
@@ -1126,7 +1111,7 @@ height:92dvh;
 
 opacity:1;
 
-pointer-events:none;
+pointer-events:auto;
 
 z-index:1700;
 }
@@ -1211,10 +1196,6 @@ left:calc(
 transform:translateX(-50%);
 
 z-index:2500;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:none;
 }
 
 body.popup-active .controls{
@@ -1316,10 +1297,6 @@ transform:translateX(-50%);
 width:94%;
 
 opacity:1;
-}
-
-body.popup-active .video-section{
-transform:translateX(-50%);
 }
 
 .video-popup{
@@ -1766,7 +1743,7 @@ class="video-popup"
 >
 
 <!-- ANIMATED PLACEHOLDER FOR EMPTY SCREEN -->
-<div class="video-placeholder">
+<div class="video-placeholder" id="videoPlaceholder">
   <div class="visualizer-bars">
     <span></span>
     <span></span>
@@ -2164,6 +2141,9 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
+const placeholder=
+document.getElementById("videoPlaceholder");
+
 highlightActiveTrack();
 highlightVideoActiveTrack();
 
@@ -2172,6 +2152,10 @@ e.data===YT.PlayerState.PLAYING
 ){
 
 playing=true;
+
+if(placeholder){
+placeholder.classList.add("hidden");
+}
 
 playBtn.classList.add(
 "playing"
@@ -2224,6 +2208,12 @@ cover.classList.remove(
 "spinning"
 );
 
+if(!placeholderFinishedVideo()){
+if(placeholder){
+placeholder.classList.remove("hidden");
+}
+}
+
 if(!changingTrack){
 
 setTimeout(
@@ -2237,6 +2227,10 @@ nextSong,
 
 }
 
+function placeholderFinishedVideo(){
+return false;
+}
+
 
 /* =========================================================
 PLAY / PAUSE
@@ -2245,6 +2239,9 @@ PLAY / PAUSE
 function togglePlay(){
 
 if(!player)return;
+
+const placeholder=
+document.getElementById("videoPlaceholder");
 
 try{
 
@@ -2255,6 +2252,10 @@ player.pauseVideo();
 }
 
 else{
+
+if(placeholder){
+placeholder.classList.add("hidden");
+}
 
 const currentId=
 player.getVideoData() &&
@@ -2287,20 +2288,10 @@ catch(e){}
 
 
 /* =========================================================
-VIDEO POPUP
+VIDEO POPUP (TOGGLE PLAYLIST ON/OFF)
 ========================================================= */
 
 function toggleVideoPopup(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-const overlay=
-document.getElementById(
-"videoOverlay"
-);
 
 const videoPlaylist=
 document.getElementById(
@@ -2313,19 +2304,11 @@ document.getElementById(
 );
 
 const opening=
-!popup.classList.contains(
+!videoPlaylist.classList.contains(
 "active"
 );
 
 if(opening){
-
-popup.classList.add(
-"active"
-);
-
-overlay.classList.add(
-"active"
-);
 
 videoPlaylist.classList.add(
 "active"
@@ -2377,14 +2360,6 @@ adjustVideoPlaylistHeight,
 
 else{
 
-popup.classList.remove(
-"active"
-);
-
-overlay.classList.remove(
-"active"
-);
-
 videoPlaylist.classList.remove(
 "active"
 );
@@ -2435,7 +2410,7 @@ if(
 return;
 
 if(
-!popup.classList.contains("active")
+!playlist.classList.contains("active")
 )
 return;
 
@@ -3551,6 +3526,13 @@ forceUpdateUI(index);
 
 changingTrack=true;
 
+const placeholder=
+document.getElementById("videoPlaceholder");
+
+if(placeholder){
+placeholder.classList.add("hidden");
+}
+
 try{
 
 player.loadVideoById(id);
@@ -3591,24 +3573,16 @@ drawerOverlay.classList.remove(
 "active"
 );
 
-const popup=
+const videoPlaylist=
 document.getElementById(
-"videoPopup"
+"videoPlaylist"
 );
 
 if(
-popup.classList.contains(
+videoPlaylist.classList.contains(
 "active"
 )
 ){
-
-document
-.getElementById(
-"videoPlaylist"
-)
-.classList.add(
-"active"
-);
 
 setTimeout(
 adjustVideoPlaylistHeight,
@@ -3780,14 +3754,14 @@ DRAWER
 
 function toggleDrawer(){
 
-const popup=
+const videoPlaylist=
 document.getElementById(
-"videoPopup"
+"videoPlaylist"
 );
 
 if(
-popup &&
-popup.classList.contains(
+videoPlaylist &&
+videoPlaylist.classList.contains(
 "active"
 )
 ){
