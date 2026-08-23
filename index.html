@@ -1349,53 +1349,80 @@ nextSong,
 
 
 /* ================= PLAY / PAUSE ================= */
-
 function togglePlay(){
 
 if(!player)return;
 
+try{
+
+const currentId =
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+
+/* প্রথম click-এই প্রথম গান চালু */
+
+if(!currentId){
+
+if(
+sortedPlaylistItems.length &&
+sortingReady
+){
+
+changingTrack=true;
+
+player.loadVideoById(
+sortedPlaylistItems[currentSortedIndex]
+);
+
+setTimeout(()=>{
+changingTrack=false;
+},1200);
+
+}else{
+
+/* Playlist data এখনো ready না হলে
+   YouTube playlist থেকে current video load করবে */
+
+player.loadPlaylist({
+list:PLAYLIST_ID,
+listType:"playlist",
+index:0
+});
+
+setTimeout(()=>{
 
 try{
+
+player.playVideo();
+
+}catch(e){}
+
+},500);
+
+}
+
+return;
+
+}
+
+
+/* Normal Play / Pause */
 
 if(playing){
 
 player.pauseVideo();
 
-}
-
-else{
-
-const currentId=
-
-player.getVideoData() &&
-player.getVideoData().video_id;
-
-
-if(
-sortedPlaylistItems.length &&
-sortingReady &&
-!currentId
-){
-
-player.loadVideoById(
-sortedPlaylistItems[
-currentSortedIndex
-]
-);
-
-}
-
-else{
+}else{
 
 player.playVideo();
-
-}
 
 }
 
 }catch(e){}
 
 }
+
 
 
 /* ================= VIDEO POPUP ================= */
