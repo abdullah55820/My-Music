@@ -74,9 +74,13 @@ background-image:url("background.jpg");
 
 }
 
-/* DESKTOP BACKGROUND */
+/* REAL DESKTOP BACKGROUND
+   IMPORTANT:
+   hover + pointer makes this apply to real mouse/trackpad desktops,
+   not iPhone "Request Desktop Website".
+*/
 
-@media(min-width:769px){
+@media(min-width:769px) and (hover:hover) and (pointer:fine){
 
 .bg{
 background-image:url("desktop.jpg");
@@ -196,9 +200,10 @@ height:14px;
 fill:#fff;
 }
 
-body.popup-active .playlist-toggle-btn{
-display:none;
-}
+/*
+   IMPORTANT:
+   Playlist button is NOT hidden when video opens.
+*/
 
 /* =========================================================
 VIDEO OVERLAY
@@ -793,10 +798,10 @@ transform:scale(.90);
 }
 
 /* =========================================================
-DESKTOP
+REAL DESKTOP ONLY
 ========================================================= */
 
-@media(min-width:769px){
+@media(min-width:769px) and (hover:hover) and (pointer:fine){
 
 .app{
 height:100dvh;
@@ -818,6 +823,7 @@ height:120px;
 margin:0;
 
 transform:scale(.85) translateY(25px);
+
 transform-origin:center bottom;
 }
 
@@ -853,7 +859,7 @@ z-index:2500;
 }
 
 /* =========================================================
-DESKTOP VIDEO ON
+REAL DESKTOP VIDEO ON
 ========================================================= */
 
 body.popup-active .app{
@@ -872,14 +878,14 @@ width:min(760px,52vw);
 
 margin:0;
 
-
-
-transform-origin:left bottom;
-transform:scale(.82);
 position:relative;
+
 top:38px;
+
+transform:scale(.82);
+
 transform-origin:center bottom;
-  
+
 z-index:1601;
 }
 
@@ -894,6 +900,7 @@ align-items:stretch;
 position:fixed;
 
 top:15.75vh;
+
 right:27vw;
 left:auto;
 
@@ -949,6 +956,8 @@ body.popup-active .video-song-item{
 display:none!important;
 }
 
+/* PLAYLIST ALWAYS SHOW */
+
 body.popup-active .top-widgets{
 
 display:flex;
@@ -956,7 +965,7 @@ display:flex;
 top:14px;
 
 left:calc(
-35px + min(349.6px, 23.92vw)
+35px + min(349.6px,23.92vw)
 );
 
 transform:translateX(-50%);
@@ -965,7 +974,7 @@ z-index:2500;
 }
 
 body.popup-active .playlist-toggle-btn{
-display:none;
+display:flex!important;
 }
 
 body.popup-active .controls{
