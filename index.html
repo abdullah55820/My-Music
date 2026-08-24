@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
 <link rel="preload" as="image" href="background.jpg">
+<link rel="preload" as="image" href="desktop.jpg">
 
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
@@ -59,12 +60,32 @@ backface-visibility:hidden;
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.0);
+background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
+/* MOBILE BACKGROUND */
+
+@media(max-width:768px){
+
+.bg{
+background-image:url("background.jpg");
+}
+
+}
+
+/* DESKTOP BACKGROUND */
+
+@media(min-width:769px){
+
+.bg{
+background-image:url("desktop.jpg");
+}
+
+}
+
 /* =========================================================
-TOP WIDGETS (ALWAYS FIXED & VISIBLE)
+TOP WIDGETS
 ========================================================= */
 
 .top-widgets{
@@ -173,6 +194,10 @@ transform:scale(.95);
 width:14px;
 height:14px;
 fill:#fff;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
 }
 
 /* =========================================================
@@ -307,9 +332,23 @@ VIDEO PLAYLIST
 display:none!important;
 }
 
+/* =========================================================
+VIDEO SONG LIST
+========================================================= */
+
 .video-song-list{
+width:100%;
+height:100%;
+
+overflow-y:auto;
+overflow-x:hidden;
+
 display:none!important;
 }
+
+/* =========================================================
+VIDEO SONG ITEM
+========================================================= */
 
 .video-song-item{
 display:none!important;
@@ -802,6 +841,17 @@ z-index:1700;
 pointer-events:none;
 }
 
+.top-widgets{
+display:flex;
+
+top:14px;
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
 /* =========================================================
 DESKTOP VIDEO ON
 ========================================================= */
@@ -883,6 +933,37 @@ border-radius:0px;
 z-index:1701;
 }
 
+body.popup-active .video-playlist{
+display:none!important;
+}
+
+body.popup-active .video-song-list{
+display:none!important;
+}
+
+body.popup-active .video-song-item{
+display:none!important;
+}
+
+body.popup-active .top-widgets{
+
+display:flex;
+
+top:14px;
+
+left:calc(
+35px + min(349.6px, 23.92vw)
+);
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
 body.popup-active .controls{
 z-index:1610;
 }
@@ -946,14 +1027,14 @@ width:180px;
 }
 
 .video-section{
-top:18.2%;
-left:49.65%;
+top:6%;
+left:50%;
 
 right:auto;
 
 transform:translateX(-50%);
 
-width:84.50%;
+width:94%;
 
 opacity:1;
 }
@@ -970,6 +1051,18 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:0px;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
+}
+
+.video-song-item{
+display:none!important;
 }
 
 }
@@ -989,6 +1082,10 @@ aspect-ratio:16 / 9;
 height:auto;
 }
 
+.video-playlist{
+display:none!important;
+}
+
 }
 
 /* =========================================================
@@ -999,6 +1096,14 @@ VERY SMALL WIDTH
 
 .video-section{
 width:96%;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
 }
 
 }
@@ -1276,14 +1381,12 @@ M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
 
 </div>
 
-
 <!-- VIDEO OVERLAY -->
 
 <div
 id="videoOverlay"
 class="video-overlay">
 </div>
-
 
 <!-- VIDEO SECTION -->
 
@@ -1322,7 +1425,6 @@ Loading...
 </div>
 
 </div>
-
 
 <!-- DRAWER -->
 
@@ -1372,7 +1474,6 @@ Loading...
 </div>
 
 </div>
-
 
 <!-- MAIN APP -->
 
@@ -1460,7 +1561,6 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
-
 <button
 class="play"
 id="play"
@@ -1479,7 +1579,6 @@ M8 5v14l11-7z
 </svg>
 
 </button>
-
 
 <div class="vol-container">
 
@@ -1523,7 +1622,6 @@ oninput="changeVolume(this.value)"
 
 </div>
 
-
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -1549,7 +1647,6 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
-
 
 /* =========================================================
 BD TIME
@@ -1586,7 +1683,6 @@ setInterval(
 updateBDTime,
 1000
 );
-
 
 /* =========================================================
 YOUTUBE API
@@ -1636,7 +1732,6 @@ onStateChange:state
 
 }
 
-
 /* =========================================================
 READY
 ========================================================= */
@@ -1651,7 +1746,6 @@ updateProgress,
 );
 
 }
-
 
 /* =========================================================
 PLAYER STATE
@@ -1740,7 +1834,6 @@ nextSong,
 
 }
 
-
 /* =========================================================
 PLAY / PAUSE
 ========================================================= */
@@ -1787,7 +1880,6 @@ player.playVideo();
 catch(e){}
 
 }
-
 
 /* =========================================================
 VIDEO POPUP
@@ -1855,7 +1947,6 @@ iconSvg.innerHTML=
 
 }
 
-
 /* =========================================================
 RESIZE
 ========================================================= */
@@ -1864,7 +1955,6 @@ window.addEventListener(
 "resize",
 ()=>{}
 );
-
 
 /* =========================================================
 VOLUME
@@ -1952,7 +2042,6 @@ resetVolTimer();
 
 }
 
-
 /* =========================================================
 NEXT SONG
 ========================================================= */
@@ -2003,7 +2092,6 @@ nextIndex
 );
 
 }
-
 
 /* =========================================================
 PREVIOUS SONG
@@ -2057,7 +2145,6 @@ previousIndex
 
 }
 
-
 /* =========================================================
 FORCE UPDATE UI
 ========================================================= */
@@ -2092,7 +2179,6 @@ currentSortedIndex=index;
 highlightActiveTrack();
 
 }
-
 
 /* =========================================================
 SWIPE
@@ -2196,7 +2282,6 @@ swipeActive=false;
 
 }
 );
-
 
 /* =========================================================
 SEEK
@@ -2367,7 +2452,6 @@ passive:false
 }
 );
 
-
 /* =========================================================
 PROGRESS
 ========================================================= */
@@ -2424,7 +2508,6 @@ catch(e){}
 
 }
 
-
 /* =========================================================
 FORMAT
 ========================================================= */
@@ -2450,7 +2533,6 @@ s%60
 );
 
 }
-
 
 /* =========================================================
 LOAD PLAYLIST
@@ -2614,7 +2696,6 @@ updateInfo();
 
 }
 
-
 /* =========================================================
 RENDER PLAYLISTS
 ========================================================= */
@@ -2624,7 +2705,6 @@ function renderSortedPlaylists(){
 renderMainPlaylist();
 
 }
-
 
 /* =========================================================
 MAIN PLAYLIST
@@ -2688,7 +2768,6 @@ list.appendChild(item);
 
 }
 
-
 /* =========================================================
 ESCAPE HTML
 ========================================================= */
@@ -2708,7 +2787,6 @@ div.textContent=text;
 return div.innerHTML;
 
 }
-
 
 /* =========================================================
 PLAY SPECIFIC TRACK
@@ -2777,7 +2855,6 @@ highlightActiveTrack();
 
 }
 
-
 /* =========================================================
 ACTIVE MAIN TRACK
 ========================================================= */
@@ -2816,7 +2893,6 @@ sortedPlaylistItems[index]===currentId
 });
 
 }
-
 
 /* =========================================================
 UPDATE INFO
@@ -2881,7 +2957,6 @@ catch(e){}
 
 }
 
-
 /* =========================================================
 DRAWER
 ========================================================= */
@@ -2892,6 +2967,17 @@ const popup=
 document.getElementById(
 "videoPopup"
 );
+
+if(
+popup &&
+popup.classList.contains(
+"active"
+)
+){
+
+return;
+
+}
 
 const drawer=
 document.getElementById(
@@ -2928,6 +3014,10 @@ loadPlaylistItems();
 }
 
 }
+
+/* =========================================================
+INITIAL
+========================================================= */
 
 </script>
 
