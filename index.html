@@ -74,13 +74,9 @@ background-image:url("background.jpg");
 
 }
 
-/* REAL DESKTOP BACKGROUND
-   IMPORTANT:
-   hover + pointer makes this apply to real mouse/trackpad desktops,
-   not iPhone "Request Desktop Website".
-*/
+/* DESKTOP BACKGROUND */
 
-@media(min-width:769px) and (hover:hover) and (pointer:fine){
+@media(min-width:769px){
 
 .bg{
 background-image:url("desktop.jpg");
@@ -188,6 +184,10 @@ touch-action:manipulation;
 transition:
 transform .2s,
 background .2s;
+
+position:relative;
+z-index:100000;
+pointer-events:auto;
 }
 
 .playlist-toggle-btn:active{
@@ -199,11 +199,6 @@ width:14px;
 height:14px;
 fill:#fff;
 }
-
-/*
-   IMPORTANT:
-   Playlist button is NOT hidden when video opens.
-*/
 
 /* =========================================================
 VIDEO OVERLAY
@@ -798,10 +793,10 @@ transform:scale(.90);
 }
 
 /* =========================================================
-REAL DESKTOP ONLY
+DESKTOP
 ========================================================= */
 
-@media(min-width:769px) and (hover:hover) and (pointer:fine){
+@media(min-width:769px){
 
 .app{
 height:100dvh;
@@ -823,7 +818,6 @@ height:120px;
 margin:0;
 
 transform:scale(.85) translateY(25px);
-
 transform-origin:center bottom;
 }
 
@@ -855,11 +849,13 @@ left:50%;
 
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:99999;
+
+pointer-events:auto;
 }
 
 /* =========================================================
-REAL DESKTOP VIDEO ON
+DESKTOP VIDEO ON
 ========================================================= */
 
 body.popup-active .app{
@@ -878,14 +874,14 @@ width:min(760px,52vw);
 
 margin:0;
 
-position:relative;
-
-top:38px;
-
+transform-origin:left bottom;
 transform:scale(.82);
 
-transform-origin:center bottom;
+position:relative;
+top:38px;
 
+transform-origin:center bottom;
+  
 z-index:1601;
 }
 
@@ -900,7 +896,6 @@ align-items:stretch;
 position:fixed;
 
 top:15.75vh;
-
 right:27vw;
 left:auto;
 
@@ -956,8 +951,6 @@ body.popup-active .video-song-item{
 display:none!important;
 }
 
-/* PLAYLIST ALWAYS SHOW */
-
 body.popup-active .top-widgets{
 
 display:flex;
@@ -965,16 +958,20 @@ display:flex;
 top:14px;
 
 left:calc(
-35px + min(349.6px,23.92vw)
+35px + min(349.6px, 23.92vw)
 );
 
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:99999;
+
+pointer-events:auto;
 }
 
 body.popup-active .playlist-toggle-btn{
-display:flex!important;
+display:flex !important;
+pointer-events:auto !important;
+z-index:100000 !important;
 }
 
 body.popup-active .controls{
@@ -1023,6 +1020,8 @@ height:42px;
 
 .top-widgets{
 top:10px;
+z-index:99999;
+pointer-events:auto;
 }
 
 .bd-time{
@@ -1033,6 +1032,12 @@ padding:4px 9px;
 .playlist-toggle-btn{
 font-size:10px;
 padding:4px 9px;
+
+display:flex !important;
+
+pointer-events:auto !important;
+
+z-index:100000 !important;
 }
 
 .playlist-drawer{
@@ -1350,6 +1355,35 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:.5px;
+}
+
+/* =========================================================
+FINAL PLAYLIST BUTTON FIX
+========================================================= */
+
+.top-widgets{
+z-index:99999 !important;
+pointer-events:auto !important;
+}
+
+.playlist-toggle-btn{
+display:flex !important;
+
+position:relative !important;
+
+z-index:100000 !important;
+
+pointer-events:auto !important;
+
+touch-action:manipulation !important;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:flex !important;
+
+pointer-events:auto !important;
+
+z-index:100000 !important;
 }
 
 </style>
@@ -2975,22 +3009,6 @@ DRAWER
 ========================================================= */
 
 function toggleDrawer(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup &&
-popup.classList.contains(
-"active"
-)
-){
-
-return;
-
-}
 
 const drawer=
 document.getElementById(
