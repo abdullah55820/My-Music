@@ -184,10 +184,6 @@ touch-action:manipulation;
 transition:
 transform .2s,
 background .2s;
-
-position:relative;
-z-index:100000;
-pointer-events:auto;
 }
 
 .playlist-toggle-btn:active{
@@ -198,6 +194,10 @@ transform:scale(.95);
 width:14px;
 height:14px;
 fill:#fff;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
 }
 
 /* =========================================================
@@ -849,9 +849,7 @@ left:50%;
 
 transform:translateX(-50%);
 
-z-index:99999;
-
-pointer-events:auto;
+z-index:2500;
 }
 
 /* =========================================================
@@ -874,12 +872,12 @@ width:min(760px,52vw);
 
 margin:0;
 
+
+
 transform-origin:left bottom;
 transform:scale(.82);
-
 position:relative;
 top:38px;
-
 transform-origin:center bottom;
   
 z-index:1601;
@@ -963,15 +961,11 @@ left:calc(
 
 transform:translateX(-50%);
 
-z-index:99999;
-
-pointer-events:auto;
+z-index:2500;
 }
 
 body.popup-active .playlist-toggle-btn{
-display:flex !important;
-pointer-events:auto !important;
-z-index:100000 !important;
+display:none;
 }
 
 body.popup-active .controls{
@@ -1020,8 +1014,6 @@ height:42px;
 
 .top-widgets{
 top:10px;
-z-index:99999;
-pointer-events:auto;
 }
 
 .bd-time{
@@ -1032,18 +1024,10 @@ padding:4px 9px;
 .playlist-toggle-btn{
 font-size:10px;
 padding:4px 9px;
-
-display:flex !important;
-
-pointer-events:auto !important;
-
-z-index:100000 !important;
 }
 
 .playlist-drawer{
 width:180px;
-z-index:30000;
-}
 }
 
 .video-section{
@@ -1357,35 +1341,6 @@ overflow:hidden;
 text-overflow:ellipsis;
 
 margin-top:.5px;
-}
-
-/* =========================================================
-FINAL PLAYLIST BUTTON FIX
-========================================================= */
-
-.top-widgets{
-z-index:99999 !important;
-pointer-events:auto !important;
-}
-
-.playlist-toggle-btn{
-display:flex !important;
-
-position:relative !important;
-
-z-index:100000 !important;
-
-pointer-events:auto !important;
-
-touch-action:manipulation !important;
-}
-
-body.popup-active .playlist-toggle-btn{
-display:flex !important;
-
-pointer-events:auto !important;
-
-z-index:100000 !important;
 }
 
 </style>
@@ -3011,6 +2966,22 @@ DRAWER
 ========================================================= */
 
 function toggleDrawer(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+if(
+popup &&
+popup.classList.contains(
+"active"
+)
+){
+
+return;
+
+}
 
 const drawer=
 document.getElementById(
