@@ -184,6 +184,10 @@ touch-action:manipulation;
 transition:
 transform .2s,
 background .2s;
+
+position:relative;
+z-index:100000;
+pointer-events:auto;
 }
 
 .playlist-toggle-btn:active{
@@ -845,7 +849,9 @@ left:50%;
 
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:99999;
+
+pointer-events:auto;
 }
 
 /* =========================================================
@@ -872,11 +878,10 @@ transform-origin:left bottom;
 transform:scale(.82);
 
 position:relative;
-
 top:38px;
 
 transform-origin:center bottom;
-
+  
 z-index:1601;
 }
 
@@ -958,13 +963,15 @@ left:calc(
 
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:99999;
+
+pointer-events:auto;
 }
 
-/* Playlist intentionally NOT hidden */
-
 body.popup-active .playlist-toggle-btn{
-display:flex!important;
+display:flex !important;
+pointer-events:auto !important;
+z-index:100000 !important;
 }
 
 body.popup-active .controls{
@@ -1013,6 +1020,8 @@ height:42px;
 
 .top-widgets{
 top:10px;
+z-index:99999;
+pointer-events:auto;
 }
 
 .bd-time{
@@ -1023,6 +1032,12 @@ padding:4px 9px;
 .playlist-toggle-btn{
 font-size:10px;
 padding:4px 9px;
+
+display:flex !important;
+
+pointer-events:auto !important;
+
+z-index:100000 !important;
 }
 
 .playlist-drawer{
@@ -1106,10 +1121,6 @@ display:none!important;
 }
 
 .video-song-list{
-display:none!important;
-}
-
-.video-song-item{
 display:none!important;
 }
 
@@ -1347,31 +1358,32 @@ margin-top:.5px;
 }
 
 /* =========================================================
-REAL DESKTOP ONLY
-1200px+ = ACTUAL PC/LAPTOP
-769px–1199px REMAINS UNCHANGED
+FINAL PLAYLIST BUTTON FIX
 ========================================================= */
 
-@media(min-width:1200px){
+.top-widgets{
+z-index:99999 !important;
+pointer-events:auto !important;
+}
 
-/* Playlist ALWAYS visible */
+.playlist-toggle-btn{
+display:flex !important;
+
+position:relative !important;
+
+z-index:100000 !important;
+
+pointer-events:auto !important;
+
+touch-action:manipulation !important;
+}
+
 body.popup-active .playlist-toggle-btn{
-display:flex!important;
-}
+display:flex !important;
 
-/* Real desktop video position */
-body.popup-active .video-section{
-top:15.75vh;
-right:27vw;
-left:auto;
-}
+pointer-events:auto !important;
 
-/* Real desktop player position */
-body.popup-active .player{
-position:relative;
-top:38px;
-}
-
+z-index:100000 !important;
 }
 
 </style>
@@ -1399,7 +1411,7 @@ top:38px;
 
 <button
 class="playlist-toggle-btn"
-onclick="toggleDrawer"
+onclick="toggleDrawer()"
 >
 
 <svg viewBox="0 0 24 24">
@@ -2997,22 +3009,6 @@ DRAWER
 ========================================================= */
 
 function toggleDrawer(){
-
-const popup=
-document.getElementById(
-"videoPopup"
-);
-
-if(
-popup &&
-popup.classList.contains(
-"active"
-)
-){
-
-return;
-
-}
 
 const drawer=
 document.getElementById(
