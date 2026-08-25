@@ -201,6 +201,103 @@ display:none;
 }
 
 /* =========================================================
+BIG DIGITAL CLOCK
+========================================================= */
+
+.big-clock{
+position:fixed;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+z-index:1500;
+
+text-align:center;
+
+color:#fff;
+
+font-family:
+"SF Pro Display",
+"Segoe UI",
+Arial,
+sans-serif;
+
+pointer-events:none;
+
+text-shadow:
+0 0 10px rgba(255,255,255,.6),
+0 0 25px rgba(255,255,255,.25),
+0 5px 20px rgba(0,0,0,.8);
+
+transition:
+opacity .3s ease,
+transform .3s ease,
+visibility .3s ease;
+}
+
+#bigClockTime{
+font-size:72px;
+
+font-weight:900;
+
+letter-spacing:5px;
+
+line-height:1;
+
+white-space:nowrap;
+}
+
+#bigClockDate{
+margin-top:14px;
+
+font-size:22px;
+
+font-weight:800;
+
+letter-spacing:4px;
+
+text-transform:uppercase;
+
+white-space:nowrap;
+}
+
+/* VIDEO ON → CLOCK HIDE */
+
+body.popup-active .big-clock{
+opacity:0;
+
+visibility:hidden;
+
+transform:
+translate(-50%,-50%)
+scale(.9);
+}
+
+/* MOBILE CLOCK */
+
+@media(max-width:480px){
+
+.big-clock{
+top:50%;
+left:50%;
+}
+
+#bigClockTime{
+font-size:48px;
+letter-spacing:3px;
+}
+
+#bigClockDate{
+font-size:14px;
+letter-spacing:2px;
+margin-top:10px;
+}
+
+}
+
+/* =========================================================
 VIDEO OVERLAY
 ========================================================= */
 
@@ -841,17 +938,6 @@ z-index:1700;
 pointer-events:none;
 }
 
-.top-widgets{
-display:flex;
-
-top:14px;
-left:50%;
-
-transform:translateX(-50%);
-
-z-index:2500;
-}
-
 /* =========================================================
 DESKTOP VIDEO ON
 ========================================================= */
@@ -1351,6 +1437,25 @@ margin-top:.5px;
 
 <div class="bg"></div>
 
+<!-- =========================================================
+BIG DIGITAL CLOCK
+========================================================= -->
+
+<div
+class="big-clock"
+id="bigClock"
+>
+
+<div id="bigClockTime">
+00:00:00
+</div>
+
+<div id="bigClockDate">
+25 AUGUST 2026
+</div>
+
+</div>
+
 <!-- TOP WIDGETS -->
 
 <div class="top-widgets">
@@ -1630,6 +1735,56 @@ oninput="changeVolume(this.value)"
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
+
+/* =========================================================
+BIG DIGITAL CLOCK
+========================================================= */
+
+function updateBigClock(){
+
+const now=new Date();
+
+const time=
+new Intl.DateTimeFormat(
+"en-US",
+{
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit",
+hour12:false
+}
+).format(now);
+
+const date=
+new Intl.DateTimeFormat(
+"en-US",
+{
+day:"2-digit",
+month:"long",
+year:"numeric"
+}
+).format(now);
+
+document.getElementById(
+"bigClockTime"
+).textContent=time;
+
+document.getElementById(
+"bigClockDate"
+).textContent=date.toUpperCase();
+
+}
+
+updateBigClock();
+
+setInterval(
+updateBigClock,
+1000
+);
+
+/* =========================================================
+PLAYER VARIABLES
+========================================================= */
 
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
