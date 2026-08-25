@@ -217,29 +217,30 @@ display:none;
 }
 
 /* =========================================================
-PLAYLIST TOGGLE BUTTON (INSIDE CONTROLLER)
+PLAYLIST TOGGLE BUTTON (UNDER SEEK BAR / INSIDE MIDDLE INFO)
 ========================================================= */
 
 .playlist-toggle-btn{
 background:rgba(0,0,0,.25);
-border:1px solid rgba(255,255,255,.18);
+border:1px solid rgba(255,255,255,.15);
 color:rgba(255,255,255,.9);
-font-size:11px;
+font-size:10px;
 font-weight:600;
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
-display:flex;
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+display:inline-flex;
 align-items:center;
 gap:5px;
 cursor:pointer;
 touch-action:manipulation;
 -webkit-tap-highlight-color:transparent;
-padding:6px 10px;
-border-radius:20px;
+padding:3px 8px;
+border-radius:15px;
 transition: transform .2s, background .2s;
 position:relative;
 z-index:1611;
-flex-shrink:0;
+margin-top:5px;
+width:max-content;
 }
 
 .playlist-toggle-btn:active{
@@ -247,8 +248,8 @@ transform:scale(.92);
 }
 
 .playlist-toggle-btn svg{
-width:15px;
-height:15px;
+width:13px;
+height:13px;
 fill:#fff;
 }
 
@@ -435,7 +436,7 @@ MUSIC PLAYER
 .player{
 width:min(460px,96%);
 
-height:120px;
+height:124px;
 
 padding:14px 16px;
 
@@ -561,7 +562,7 @@ justify-content:center;
 }
 
 .title{
-font-size:16px;
+font-size:15px;
 
 font-weight:700;
 
@@ -575,7 +576,7 @@ letter-spacing:.2px;
 }
 
 .artist{
-font-size:12px;
+font-size:11.5px;
 
 color:rgba(255,255,255,.65);
 
@@ -583,8 +584,8 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-margin-top:2px;
-margin-bottom:8px;
+margin-top:1px;
+margin-bottom:5px;
 }
 
 /* =========================================================
@@ -595,7 +596,7 @@ SEEK
 position:relative;
 
 width:100%;
-height:5px;
+height:4.5px;
 
 border-radius:10px;
 
@@ -603,7 +604,7 @@ background:rgba(255,255,255,.2);
 
 cursor:pointer;
 
-margin-bottom:6px;
+margin-bottom:4px;
 
 touch-action:none;
 
@@ -644,10 +645,26 @@ z-index:2;
 }
 
 .time-display{
-font-size:11px;
+font-size:10px;
 
+color:rgba(255,255,255,.6);
+
+font-variant-numeric:tabular-nums;
+
+display:none; /* Hidden to save space since playlist button is here */
+}
+
+.info-bottom-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+width:100%;
+margin-top:2px;
+}
+
+.time-info{
+font-size:10px;
 color:rgba(255,255,255,.65);
-
 font-variant-numeric:tabular-nums;
 }
 
@@ -742,7 +759,7 @@ opacity .2s ease;
 }
 
 .vol-slider-wrapper.active{
-width:50px;
+width:48px;
 
 opacity:1;
 
@@ -753,7 +770,7 @@ margin-left:2px;
 -webkit-appearance:none;
 appearance:none;
 
-width:50px;
+width:48px;
 height:3.5px;
 
 background:rgba(255,255,255,.3);
@@ -865,7 +882,7 @@ padding:0 40px 40px;
 .player{
 width:min(600px,75vw);
 
-height:120px;
+height:124px;
 
 margin:0;
 
@@ -1020,7 +1037,7 @@ padding-bottom:60px;
 }
 
 .player{
-height:116px;
+height:120px;
 
 padding:12px 12px;
 
@@ -1049,7 +1066,7 @@ height:38px;
 
 .playlist-toggle-btn{
 font-size:9.5px;
-padding:5px 8px;
+padding:3px 7px;
 }
 
 .playlist-drawer{
@@ -1547,44 +1564,27 @@ id="fill">
 
 </div>
 
-<div class="time-display">
+<div class="info-bottom-row">
 
-<span id="current">
-0:00
-</span>
+<div class="time-info">
+<span id="current">0:00</span> / <span id="duration">0:00</span>
+</div>
 
-/
-
-<span id="duration">
-0:00
-</span>
+<button
+class="playlist-toggle-btn"
+onclick="toggleDrawer()"
+>
+<svg viewBox="0 0 24 24">
+<path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
+</svg>
+<span>Playlist</span>
+</button>
 
 </div>
 
 </div>
 
 <div class="controls">
-
-<!-- =========================================================
-PLAYLIST TOGGLE BUTTON (MOVED INSIDE CONTROLS)
-========================================================= -->
-
-<button
-class="playlist-toggle-btn"
-onclick="toggleDrawer()"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
-"/>
-
-</svg>
-
-<span>Playlist</span>
-
-</button>
 
 <button
 class="btn"
