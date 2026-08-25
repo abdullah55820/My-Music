@@ -222,21 +222,33 @@ TOP WIDGETS
 
 .top-widgets{
 position:fixed;
+
 top:14px;
 left:50%;
+
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:10001;
 
 display:flex;
 flex-direction:column;
 align-items:center;
 gap:8px;
 
-pointer-events:auto;
+pointer-events:auto!important;
+touch-action:manipulation;
+-webkit-tap-highlight-color:transparent;
 }
 
+/* =========================================================
+PLAYLIST BUTTON
+========================================================= */
+
 .playlist-toggle-btn{
+position:relative;
+
+z-index:10002;
+
 padding:5px 12px;
 
 border-radius:20px;
@@ -257,7 +269,9 @@ align-items:center;
 gap:6px;
 
 cursor:pointer;
+
 touch-action:manipulation;
+pointer-events:auto!important;
 
 -webkit-tap-highlight-color:transparent;
 
@@ -273,7 +287,10 @@ transform:scale(.95);
 .playlist-toggle-btn svg{
 width:14px;
 height:14px;
+
 fill:#fff;
+
+pointer-events:none;
 }
 
 /* =========================================================
@@ -728,6 +745,11 @@ height:20px;
 fill:#fff;
 }
 
+.btn:active,
+.play:active{
+transform:scale(.90);
+}
+
 /* =========================================================
 VOLUME
 ========================================================= */
@@ -863,11 +885,6 @@ margin-left:2px;
 margin-left:0;
 }
 
-.btn:active,
-.play:active{
-transform:scale(.90);
-}
-
 /* =========================================================
 DESKTOP
 ========================================================= */
@@ -925,7 +942,10 @@ left:50%;
 
 transform:translateX(-50%);
 
-z-index:2500;
+z-index:10001;
+
+pointer-events:auto!important;
+touch-action:manipulation;
 }
 
 /* =========================================================
@@ -1006,28 +1026,37 @@ pointer-events:auto;
 
 transform:scale(1);
 
-transition: transform .5s cubic-bezier(.2,.8,.2,1);
+transition:transform .5s cubic-bezier(.2,.8,.2,1);
 
 border-radius:0px;
 
 z-index:1701;
+
 box-shadow:none!important;
 }
+
+/* =========================================================
+DESKTOP TV OPEN ANIMATION
+========================================================= */
+
 @keyframes tvOpen{
-    from{
-        transform:scale(.75);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
+
+from{
+transform:scale(.75);
+opacity:0;
+}
+
+to{
+transform:scale(1);
+opacity:1;
+}
+
 }
 
 body.popup-active .video-popup{
-    animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
+animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
 }
-    
+
 body.popup-active .video-playlist{
 display:none!important;
 box-shadow:none!important;
@@ -1048,11 +1077,14 @@ display:flex;
 top:14px;
 
 left:50%;
+
 transform:translateX(-50%);
 
-z-index:2500;
-}
+z-index:10001;
 
+pointer-events:auto!important;
+touch-action:manipulation;
+}
 
 body.popup-active .controls{
 z-index:1610;
@@ -1100,11 +1132,21 @@ height:42px;
 
 .top-widgets{
 top:10px;
+
+z-index:10001;
+
+pointer-events:auto!important;
+touch-action:manipulation;
 }
 
 .playlist-toggle-btn{
 font-size:10px;
 padding:4px 9px;
+
+z-index:10002;
+
+pointer-events:auto!important;
+touch-action:manipulation;
 }
 
 .playlist-drawer{
@@ -1136,6 +1178,7 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:0px;
+
 box-shadow:none!important;
 }
 
@@ -1427,6 +1470,7 @@ margin-top:.5px;
 
 </style>
 </head>
+
 <body>
 
 <div class="bg"></div>
@@ -1437,19 +1481,19 @@ DIGITAL CLOCK
 
 <div class="digital-clock">
 
-    <div
-        class="clock-time"
-        id="clockTime"
-    >
-        12:00:00 PM
-    </div>
+<div
+class="clock-time"
+id="clockTime"
+>
+12:00:00 PM
+</div>
 
-    <div
-        class="clock-date"
-        id="clockDate"
-    >
-        25 AUGUST 2026
-    </div>
+<div
+class="clock-date"
+id="clockDate"
+>
+25 AUGUST 2026
+</div>
 
 </div>
 
@@ -1459,10 +1503,10 @@ TOP WIDGETS
 
 <div class="top-widgets">
 
-
 <button
 class="playlist-toggle-btn"
 onclick="toggleDrawer()"
+type="button"
 >
 
 <svg viewBox="0 0 24 24">
@@ -1519,9 +1563,7 @@ Playlist Songs
 class="video-song-list"
 id="videoSongList"
 >
-
 Loading...
-
 </div>
 
 </div>
@@ -1553,6 +1595,7 @@ Playlist Songs
 <button
 class="close-btn"
 onclick="toggleDrawer()"
+type="button"
 >
 &times;
 </button>
@@ -1652,6 +1695,7 @@ class="btn"
 id="videoToggleBtn"
 onclick="toggleVideoPopup()"
 title="Toggle Video Popup"
+type="button"
 >
 
 <svg
@@ -1671,6 +1715,7 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 class="play"
 id="play"
 onclick="togglePlay()"
+type="button"
 >
 
 <svg
@@ -1691,6 +1736,7 @@ M8 5v14l11-7z
 <button
 class="btn"
 onclick="toggleVolume()"
+type="button"
 >
 
 <svg viewBox="0 0 24 24">
@@ -1738,46 +1784,46 @@ DIGITAL CLOCK
 
 function updateDigitalClock(){
 
-    const now = new Date();
+const now=new Date();
 
-    const time =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-    timeZone:"Asia/Dhaka",
-                hour:"2-digit",
-                minute:"2-digit",
-                second:"2-digit",
-                hour12:true
-            }
-        ).format(now);
+const time=
+new Intl.DateTimeFormat(
+"en-US",
+{
+timeZone:"Asia/Dhaka",
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit",
+hour12:true
+}
+).format(now);
 
-    const date =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone:"Asia/Dhaka",
-                day:"2-digit",
-                month:"long",
-                year:"numeric"
-            }
-        ).format(now);
+const date=
+new Intl.DateTimeFormat(
+"en-US",
+{
+timeZone:"Asia/Dhaka",
+day:"2-digit",
+month:"long",
+year:"numeric"
+}
+).format(now);
 
-    document.getElementById(
-        "clockTime"
-    ).textContent = time;
+document.getElementById(
+"clockTime"
+).textContent=time;
 
-    document.getElementById(
-        "clockDate"
-    ).textContent = date.toUpperCase();
+document.getElementById(
+"clockDate"
+).textContent=date.toUpperCase();
 
 }
 
 updateDigitalClock();
 
 setInterval(
-    updateDigitalClock,
-    1000
+updateDigitalClock,
+1000
 );
 
 
@@ -1806,7 +1852,6 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
-
 
 
 /* =========================================================
@@ -2137,9 +2182,7 @@ wrapper.classList.remove(
 
 if(volTimer){
 
-clearTimeout(
-volTimer
-);
+clearTimeout(volTimer);
 
 }
 
