@@ -217,67 +217,38 @@ display:none;
 }
 
 /* =========================================================
-TOP WIDGETS
+PLAYLIST TOGGLE BUTTON (INSIDE CONTROLLER)
 ========================================================= */
 
-.top-widgets{
-position:fixed;
-top:14px;
-left:50%;
-transform:translateX(-50%);
-
-z-index:2500;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:8px;
-
-pointer-events:auto;
-}
-
 .playlist-toggle-btn{
-padding:5px 12px;
-
-border-radius:20px;
-
 background:rgba(0,0,0,.25);
 border:1px solid rgba(255,255,255,.18);
-
 color:rgba(255,255,255,.9);
-
 font-size:11px;
 font-weight:600;
-
 backdrop-filter:blur(12px);
 -webkit-backdrop-filter:blur(12px);
-
 display:flex;
 align-items:center;
-gap:6px;
-
+gap:5px;
 cursor:pointer;
 touch-action:manipulation;
-
 -webkit-tap-highlight-color:transparent;
-
-transition:
-transform .2s,
-background .2s;
-
-/* PLAYLIST ALWAYS CLICKABLE */
+padding:6px 10px;
+border-radius:20px;
+transition: transform .2s, background .2s;
 position:relative;
-z-index:30000;
-pointer-events:auto;
+z-index:1611;
+flex-shrink:0;
 }
 
 .playlist-toggle-btn:active{
-transform:scale(.95);
+transform:scale(.92);
 }
 
 .playlist-toggle-btn svg{
-width:14px;
-height:14px;
+width:15px;
+height:15px;
 fill:#fff;
 }
 
@@ -462,11 +433,11 @@ MUSIC PLAYER
 ========================================================= */
 
 .player{
-width:min(440px,94%);
+width:min(460px,96%);
 
 height:120px;
 
-padding:14px 18px;
+padding:14px 16px;
 
 border:1px solid rgba(255,255,255,.18);
 
@@ -483,7 +454,7 @@ box-shadow:
 display:flex;
 align-items:center;
 
-gap:12px;
+gap:10px;
 
 position:relative;
 
@@ -689,7 +660,7 @@ display:flex;
 
 align-items:center;
 
-gap:8px;
+gap:6px;
 
 flex-shrink:0;
 
@@ -771,7 +742,7 @@ opacity .2s ease;
 }
 
 .vol-slider-wrapper.active{
-width:55px;
+width:50px;
 
 opacity:1;
 
@@ -782,7 +753,7 @@ margin-left:2px;
 -webkit-appearance:none;
 appearance:none;
 
-width:55px;
+width:50px;
 height:3.5px;
 
 background:rgba(255,255,255,.3);
@@ -823,8 +794,8 @@ PLAY
 ========================================================= */
 
 .play{
-width:44px;
-height:44px;
+width:40px;
+height:40px;
 
 border-radius:50%;
 
@@ -856,8 +827,8 @@ z-index:1611;
 }
 
 .play svg{
-width:20px;
-height:20px;
+width:18px;
+height:18px;
 
 fill:#000;
 
@@ -892,7 +863,7 @@ padding:0 40px 40px;
 }
 
 .player{
-width:min(560px,70vw);
+width:min(600px,75vw);
 
 height:120px;
 
@@ -922,20 +893,6 @@ z-index:1700;
 pointer-events:none;
 }
 
-.top-widgets{
-display:flex;
-
-top:14px;
-left:50%;
-
-transform:translateX(-50%);
-
-z-index:2500;
-
-/* keep playlist clickable above everything */
-pointer-events:auto;
-}
-
 body.popup-active .app{
 
 display:flex;
@@ -948,7 +905,7 @@ padding:0 40px 65px;
 
 body.popup-active .player{
 
-width:min(760px,52vw);
+width:min(780px,55vw);
 
 margin:0;
 
@@ -1046,24 +1003,6 @@ body.popup-active .video-song-item{
 display:none!important;
 }
 
-body.popup-active .top-widgets{
-
-display:flex;
-
-top:14px;
-
-left:50%;
-transform:translateX(-50%);
-
-z-index:30000;
-pointer-events:auto;
-}
-
-body.popup-active .playlist-toggle-btn{
-z-index:30001;
-pointer-events:auto;
-}
-
 body.popup-active .controls{
 z-index:1610;
 }
@@ -1083,20 +1022,20 @@ padding-bottom:60px;
 .player{
 height:116px;
 
-padding:12px 14px;
+padding:12px 12px;
 
 border-radius:58px;
 
-gap:10px;
+gap:8px;
 }
 
 .cover-wrapper{
-width:78px;
-height:78px;
+width:76px;
+height:76px;
 }
 
 .title{
-font-size:15px;
+font-size:14px;
 }
 
 .artist{
@@ -1104,21 +1043,13 @@ font-size:11px;
 }
 
 .play{
-width:42px;
-height:42px;
-}
-
-.top-widgets{
-top:10px;
-z-index:30000;
-pointer-events:auto;
+width:38px;
+height:38px;
 }
 
 .playlist-toggle-btn{
-font-size:10px;
-padding:4px 9px;
-z-index:30001;
-pointer-events:auto;
+font-size:9.5px;
+padding:5px 8px;
 }
 
 .playlist-drawer{
@@ -1469,31 +1400,6 @@ id="clockDate"
 </div>
 
 <!-- =========================================================
-TOP WIDGETS
-========================================================= -->
-
-<div class="top-widgets">
-
-<button
-class="playlist-toggle-btn"
-onclick="toggleDrawer()"
->
-
-<svg viewBox="0 0 24 24">
-
-<path d="
-M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
-"/>
-
-</svg>
-
-<span>Playlist</span>
-
-</button>
-
-</div>
-
-<!-- =========================================================
 VIDEO OVERLAY
 ========================================================= -->
 
@@ -1658,6 +1564,27 @@ id="fill">
 </div>
 
 <div class="controls">
+
+<!-- =========================================================
+PLAYLIST TOGGLE BUTTON (MOVED INSIDE CONTROLS)
+========================================================= -->
+
+<button
+class="playlist-toggle-btn"
+onclick="toggleDrawer()"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
+"/>
+
+</svg>
+
+<span>Playlist</span>
+
+</button>
 
 <button
 class="btn"
@@ -2347,7 +2274,8 @@ e=>{
 if(
 e.target.closest(".controls") ||
 e.target.closest(".btn") ||
-e.target.closest(".play")
+e.target.closest(".play") ||
+e.target.closest(".playlist-toggle-btn")
 ){
 
 swipeActive=false;
