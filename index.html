@@ -1236,7 +1236,7 @@ display:flex;
 
 align-items:center;
 
-justify-content:space-between;
+gap:5px;
 
 padding:6px 8px;
 
@@ -1250,8 +1250,53 @@ border-radius:8px;
 }
 
 .drawer-title{
-font-size:11px;
+font-size:10px;
 font-weight:700;
+color:#fff;
+white-space:nowrap;
+}
+
+/* =========================================================
+DRAWER SEARCH BOX & CLEAR BUTTON STYLING
+========================================================= */
+
+.drawer-search-container{
+position:relative;
+flex:1;
+min-width:0;
+display:flex;
+align-items:center;
+}
+
+.drawer-search-box{
+width:100%;
+padding:4px 18px 4px 6px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.15);
+border-radius:6px;
+color:#fff;
+font-size:9.5px;
+outline:none;
+}
+
+.drawer-search-box::placeholder{
+color:rgba(255,255,255,.5);
+}
+
+.search-clear-btn{
+position:absolute;
+right:4px;
+background:transparent;
+border:0;
+color:rgba(255,255,255,0.7);
+font-size:12px;
+cursor:pointer;
+padding:0 2px;
+line-height:1;
+display:none;
+}
+
+.search-clear-btn:hover{
 color:#fff;
 }
 
@@ -1271,26 +1316,7 @@ padding:0 2px;
 line-height:1;
 
 touch-action:manipulation;
-}
-
-/* =========================================================
-DRAWER SEARCH BOX STYLING
-========================================================= */
-
-.drawer-search-box{
-width:100%;
-padding:6px 8px;
-margin-bottom:8px;
-background:rgba(255,255,255,.08);
-border:1px solid rgba(255,255,255,.15);
-border-radius:7px;
-color:#fff;
-font-size:10px;
-outline:none;
-}
-
-.drawer-search-box::placeholder{
-color:rgba(255,255,255,.5);
+flex-shrink:0;
 }
 
 .song-list{
@@ -1505,7 +1531,19 @@ id="drawer"
 <div class="drawer-header">
 
 <div class="drawer-title">
-Playlist Songs
+Playlist
+</div>
+
+<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
+<div class="drawer-search-container">
+<input 
+type="text" 
+class="drawer-search-box" 
+id="drawerSearch" 
+placeholder="Search..." 
+oninput="filterPlaylist(this.value)"
+>
+<button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">&times;</button>
 </div>
 
 <button
@@ -1516,15 +1554,6 @@ onclick="toggleDrawer()"
 </button>
 
 </div>
-
-<!-- ড্রয়ার সার্চ বক্স -->
-<input 
-type="text" 
-class="drawer-search-box" 
-id="drawerSearch" 
-placeholder="Search songs..." 
-oninput="filterPlaylist(this.value)"
->
 
 <div
 class="song-list"
@@ -2882,12 +2911,19 @@ list.appendChild(item);
 
 
 /* =========================================================
-PLAYLIST SEARCH FILTER FUNCTION
+PLAYLIST SEARCH FILTER & CLEAR FUNCTIONS
 ========================================================= */
 
 function filterPlaylist(query){
 const filter = query.toLowerCase();
 const items = document.querySelectorAll(".song-item");
+const clearBtn = document.getElementById("searchClearBtn");
+
+if(query.length > 0){
+clearBtn.style.display = "block";
+} else {
+clearBtn.style.display = "none";
+}
 
 items.forEach(item => {
 const title = item.querySelector(".song-item-title").textContent.toLowerCase();
@@ -2899,6 +2935,12 @@ item.style.display = "flex";
 item.style.display = "none";
 }
 });
+}
+
+function clearSearch(){
+const searchInput = document.getElementById("drawerSearch");
+searchInput.value = "";
+filterPlaylist("");
 }
 
 
