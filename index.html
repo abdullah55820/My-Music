@@ -1273,6 +1273,26 @@ line-height:1;
 touch-action:manipulation;
 }
 
+/* =========================================================
+DRAWER SEARCH BOX STYLING
+========================================================= */
+
+.drawer-search-box{
+width:100%;
+padding:6px 8px;
+margin-bottom:8px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.15);
+border-radius:7px;
+color:#fff;
+font-size:10px;
+outline:none;
+}
+
+.drawer-search-box::placeholder{
+color:rgba(255,255,255,.5);
+}
+
 .song-list{
 flex:1;
 
@@ -1496,6 +1516,15 @@ onclick="toggleDrawer()"
 </button>
 
 </div>
+
+<!-- ড্রয়ার সার্চ বক্স -->
+<input 
+type="text" 
+class="drawer-search-box" 
+id="drawerSearch" 
+placeholder="Search songs..." 
+oninput="filterPlaylist(this.value)"
+>
 
 <div
 class="song-list"
@@ -2849,6 +2878,27 @@ list.appendChild(item);
 
 });
 
+}
+
+
+/* =========================================================
+PLAYLIST SEARCH FILTER FUNCTION
+========================================================= */
+
+function filterPlaylist(query){
+const filter = query.toLowerCase();
+const items = document.querySelectorAll(".song-item");
+
+items.forEach(item => {
+const title = item.querySelector(".song-item-title").textContent.toLowerCase();
+const artist = item.querySelector(".song-item-artist").textContent.toLowerCase();
+
+if(title.includes(filter) || artist.includes(filter)){
+item.style.display = "flex";
+} else {
+item.style.display = "none";
+}
+});
 }
 
 
