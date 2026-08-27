@@ -86,9 +86,9 @@ DYNAMIC FLOATING MUSIC NOTES (SPEAKER EFFECT)
 
 .notes-container {
 position: fixed;
-/* ডানপাশের স্পিকারের পজিশন অনুযায়ী অ্যাডজাস্ট করার জায়গা */
+/* পজিশন আরও ডানে সরানো হয়েছে (right: 5%) */
 top: 50%;
-right: 8%;
+right: 5%;
 width: 60px;
 height: 60px;
 pointer-events: none;
@@ -99,15 +99,17 @@ z-index: 100;
 position: absolute;
 bottom: 0;
 left: 50%;
-font-size: 24px;
+font-size: 22px;
 font-weight: bold;
-color: #f472b6;
+/* কালার সম্পূর্ণ White এবং হোয়াইট-পার্পল গ্লো দেওয়া হয়েছে */
+color: #ffffff;
 text-shadow: 
-  0 0 10px #ec4899,
-  0 0 20px #a855f7,
-  0 0 30px #a855f7;
+  0 0 8px #ffffff,
+  0 0 16px rgba(255, 255, 255, 0.8),
+  0 0 24px rgba(216, 180, 254, 0.6);
 opacity: 0;
-animation: floatUp 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+/* গতি স্লো করার জন্য সময় বাড়িয়ে 4.5s করা হয়েছে */
+animation: floatUp 4.5s cubic-bezier(0.2, 0.5, 0.4, 0.95) forwards;
 user-select: none;
 pointer-events: none;
 }
@@ -115,14 +117,17 @@ pointer-events: none;
 @keyframes floatUp {
 0% {
   opacity: 0;
-  transform: translate(-50%, 0) scale(0.6) rotate(0deg);
+  transform: translate(-50%, 0) scale(0.5) rotate(0deg);
 }
-20% {
-  opacity: 0.9;
+15% {
+  opacity: 0.95;
+}
+80% {
+  opacity: 0.8;
 }
 100% {
   opacity: 0;
-  transform: translate(var(--x-end), -140px) scale(1.4) rotate(var(--rot-end));
+  transform: translate(var(--x-end), -170px) scale(1.3) rotate(var(--rot-end));
 }
 }
 
@@ -1086,24 +1091,25 @@ const note = document.createElement("div");
 note.className = "music-note";
 note.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
 
-// Random trajectory settings
-const xEnd = (Math.random() * 80 - 40) + "px"; // move left/right randomly
-const rotEnd = (Math.random() * 60 - 30) + "deg"; // random rotation
+// Trajectory and rotation settings
+const xEnd = (Math.random() * 90 - 45) + "px"; // wider spread
+const rotEnd = (Math.random() * 80 - 40) + "deg";
 
 note.style.setProperty('--x-end', xEnd);
 note.style.setProperty('--rot-end', rotEnd);
 
 container.appendChild(note);
 
-// Animation শেষ হওয়ার পর DOM পরিষ্কার করা
+// Clean up DOM after slow animation (4.5s)
 setTimeout(() => {
   note.remove();
-}, 2500);
+}, 4500);
 }
 
 function startMusicNotes() {
 if (noteInterval) return;
-noteInterval = setInterval(spawnMusicNote, 600); // 600ms পর পর একটি করে নোট বের হবে
+/* বের হওয়ার পরিমাণ বাড়াতে সময় কমিকু ৩৫০ms করা হয়েছে */
+noteInterval = setInterval(spawnMusicNote, 350); 
 }
 
 function stopMusicNotes() {
@@ -1174,7 +1180,7 @@ playBtn.classList.add("playing");
 playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 cover.classList.add("spinning");
 
-startMusicNotes(); // নোট বের হওয়া শুরু করবে
+startMusicNotes();
 updateInfo();
 }
 else if(e.data===YT.PlayerState.PAUSED){
@@ -1183,7 +1189,7 @@ playBtn.classList.remove("playing");
 playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
 cover.classList.remove("spinning");
 
-stopMusicNotes(); // নোট বন্ধ হবে
+stopMusicNotes();
 }
 else if(e.data===YT.PlayerState.ENDED){
 playing=false;
@@ -1191,7 +1197,7 @@ playBtn.classList.remove("playing");
 playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
 cover.classList.remove("spinning");
 
-stopMusicNotes(); // নোট বন্ধ হবে
+stopMusicNotes();
 
 if(!changingTrack){
 setTimeout(nextSong,100);
