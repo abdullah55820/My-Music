@@ -84,58 +84,54 @@ background-image:url("desktop.jpg");
 DYNAMIC FLOATING MUSIC NOTES (DESKTOP ONLY)
 ========================================================= */
 
-/* মোবাইলে নোট কন্টেইনার সম্পূর্ণ বন্ধ থাকবে */
 .notes-container {
-display: none;
+  display: none;
 }
 
-/* শুধুমাত্র ডেসটপে কাজ করবে */
-@media(min-width:769px){
-.notes-container {
-display: block;
-position: fixed;
-top: 50%;
-right: 5%;
-width: 60px;
-height: 60px;
-pointer-events: none;
-z-index: 100;
-}
+@media(min-width: 769px) {
+  .notes-container {
+    display: block;
+    position: fixed;
+    bottom: 50px;
+    right: 6%;
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 100;
+  }
 
-.music-note {
-position: absolute;
-bottom: 0;
-left: 50%;
-font-size: 14px; /* সাইজ আরও ছোট করা হয়েছে */
-font-weight: bold;
-color: #ffffff;
-text-shadow: 
-  0 0 6px #ffffff,
-  0 0 12px rgba(255, 255, 255, 0.8);
-opacity: 0;
-/* ১৪ সেকেন্ড সময় দিয়ে অত্যন্ত স্লো করা হয়েছে */
-animation: floatUpSuperSlow 14s cubic-bezier(0.1, 0.2, 0.3, 1) forwards;
-user-select: none;
-pointer-events: none;
-}
+  .music-note {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 
+      0 0 6px #ffffff,
+      0 0 12px rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    animation: floatUpSuperSlow 9s cubic-bezier(0.1, 0.2, 0.3, 1) forwards;
+    user-select: none;
+    pointer-events: none;
+  }
 }
 
 @keyframes floatUpSuperSlow {
-0% {
-  opacity: 0;
-  transform: translate(-50%, 0) scale(0.5) rotate(0deg);
-}
-15% {
-  opacity: 0.9;
-}
-70% {
-  opacity: 0.6;
-}
-100% {
-  opacity: 0;
-  /* বেশি উপরে উঠবে না, মাত্র -70px উপরে যাবে */
-  transform: translate(var(--x-end), -70px) scale(0.9) rotate(var(--rot-end));
-}
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.6) rotate(0deg);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x-end), -140px) scale(1) rotate(var(--rot-end));
+  }
 }
 
 /* =========================================================
@@ -1084,58 +1080,55 @@ updateDigitalClock();
 setInterval(updateDigitalClock,1000);
 
 /* =========================================================
-DYNAMIC MUSIC NOTES GENERATOR (SUPER SLOW & SHORT DISTANCE - DESKTOP ONLY)
+DYNAMIC MUSIC NOTES SCRIPT
 ========================================================= */
 
 const noteSymbols = ['♪', '♫', '♬', '♩'];
 let noteInterval = null;
 
 function spawnSingleNote() {
-const container = document.getElementById("notesContainer");
-if (!container || window.innerWidth <= 768) return;
+  const container = document.getElementById("notesContainer");
+  if (!container || window.innerWidth <= 768) return;
 
-const note = document.createElement("div");
-note.className = "music-note";
-note.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  const note = document.createElement("div");
+  note.className = "music-note";
+  note.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
 
-// খুব বেশি দূরে যাবে না, ডানে-বামে হালকা ছড়াবে
-const xEnd = (Math.random() * 40 - 20) + "px"; 
-const rotEnd = (Math.random() * 50 - 25) + "deg";
+  const xEnd = (Math.random() * 50 - 25) + "px"; 
+  const rotEnd = (Math.random() * 60 - 30) + "deg";
 
-note.style.setProperty('--x-end', xEnd);
-note.style.setProperty('--rot-end', rotEnd);
+  note.style.setProperty('--x-end', xEnd);
+  note.style.setProperty('--rot-end', rotEnd);
 
-container.appendChild(note);
+  container.appendChild(note);
 
-// ১৪ সেকেন্ড পর রিমুভ হবে
-setTimeout(() => {
-  note.remove();
-}, 14000);
+  setTimeout(() => {
+    note.remove();
+  }, 9000);
 }
 
 function spawnMusicNoteGroup() {
-if (window.innerWidth <= 768) return; 
+  if (window.innerWidth <= 768) return; 
 
-const count = Math.floor(Math.random() * 2) + 2; 
+  const count = 2; 
 
-for (let i = 0; i < count; i++) {
-  setTimeout(() => {
-    spawnSingleNote();
-  }, i * 400);
-}
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      spawnSingleNote();
+    }, i * 600);
+  }
 }
 
 function startMusicNotes() {
-if (noteInterval || window.innerWidth <= 768) return;
-// প্রতি ৩.৫ সেকেন্ড পর পর ২-৩টি নোট বের হবে
-noteInterval = setInterval(spawnMusicNoteGroup, 3500);
+  if (noteInterval || window.innerWidth <= 768) return;
+  noteInterval = setInterval(spawnMusicNoteGroup, 1800);
 }
 
 function stopMusicNotes() {
-if (noteInterval) {
-  clearInterval(noteInterval);
-  noteInterval = null;
-}
+  if (noteInterval) {
+    clearInterval(noteInterval);
+    noteInterval = null;
+  }
 }
 
 /* =========================================================
