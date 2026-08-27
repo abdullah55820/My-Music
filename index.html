@@ -29,7 +29,6 @@ overflow:hidden;
 background:#050505;
 color:#fff;
 font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
-position:fixed;
 }
 
 body{
@@ -83,6 +82,47 @@ background-image:url("background.jpg");
 background-image:url("desktop.jpg");
 }
 
+}
+
+/* =========================================================
+SPEAKER PULSE & GLOW EFFECT OVERLAY
+========================================================= */
+
+.speaker-effect {
+position:fixed;
+
+/* Position adjust korte ei top, right, width, height percent/pixel-e change korte parbi */
+top:48%;
+right:8%;
+width:110px;
+height:130px;
+
+border-radius:20px;
+pointer-events:none;
+z-index:10;
+opacity:0;
+
+transition:opacity .3s ease, transform .3s ease;
+}
+
+/* Playing state active animation */
+.speaker-effect.playing {
+opacity:1;
+animation:speakerPulse 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes speakerPulse {
+0% {
+transform:scale(1);
+box-shadow:0 0 10px rgba(168,85,247,.3),
+            inset 0 0 10px rgba(168,85,247,.2);
+}
+100% {
+transform:scale(1.05);
+box-shadow:0 0 35px rgba(168,85,247,.9),
+            0 0 60px rgba(236,72,153,.6),
+            inset 0 0 20px rgba(168,85,247,.5);
+}
 }
 
 /* =========================================================
@@ -218,7 +258,7 @@ display:none;
 }
 
 /* =========================================================
-PLAYLIST TOGGLE BUTTON
+PLAYLIST TOGGLE BUTTON (CENTERED)
 ========================================================= */
 
 .playlist-toggle-btn{
@@ -237,12 +277,13 @@ touch-action:manipulation;
 -webkit-tap-highlight-color:transparent;
 padding:3px 8px;
 border-radius:15px;
-transition:transform .2s,background .2s;
+transition: transform .2s, background .2s;
 position:relative;
 z-index:1611;
-margin-top:15px;
+margin-top: 15px;
+
 width:max-content;
-grid-column:2;
+grid-column: 2;
 }
 
 .playlist-toggle-btn:active{
@@ -387,6 +428,10 @@ VIDEO PLAYLIST
 display:none!important;
 }
 
+/* =========================================================
+VIDEO SONG LIST
+========================================================= */
+
 .video-song-list{
 width:100%;
 height:100%;
@@ -396,6 +441,10 @@ overflow-x:hidden;
 
 display:none!important;
 }
+
+/* =========================================================
+VIDEO SONG ITEM
+========================================================= */
 
 .video-song-item{
 display:none!important;
@@ -410,7 +459,7 @@ position:relative;
 
 z-index:1600;
 
-height:100%;
+height:100dvh;
 width:100%;
 
 display:flex;
@@ -649,18 +698,18 @@ display:none;
 }
 
 .info-bottom-row{
-display:grid;
-grid-template-columns:1fr auto 1fr;
-align-items:center;
-width:100%;
-margin-top:4px;
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+align-items: center;
+width: 100%;
+margin-top: 4px;
 }
 
 .time-info{
 font-size:10px;
 color:rgba(255,255,255,.65);
 font-variant-numeric:tabular-nums;
-grid-column:1;
+grid-column: 1;
 }
 
 /* =========================================================
@@ -863,7 +912,7 @@ DESKTOP
 @media(min-width:769px){
 
 .app{
-height:100%;
+height:100dvh;
 width:100%;
 
 display:flex;
@@ -979,31 +1028,27 @@ pointer-events:auto;
 
 transform:scale(1);
 
-transition:transform .5s cubic-bezier(.2,.8,.2,1);
+transition: transform .5s cubic-bezier(.2,.8,.2,1);
 
 border-radius:0px;
 
 z-index:1701;
-
 box-shadow:none!important;
 }
 
 @keyframes tvOpen{
-
-from{
-transform:scale(.75);
-opacity:0;
-}
-
-to{
-transform:scale(1);
-opacity:1;
-}
-
+    from{
+        transform:scale(.75);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
 }
 
 body.popup-active .video-popup{
-animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
+    animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
 }
 
 body.popup-active .video-playlist{
@@ -1072,15 +1117,8 @@ padding:3px 7px;
 width:180px;
 }
 
-/* =========================================================
-MOBILE VIDEO POPUP
-FIXED FOR SAFARI + HOME SCREEN
-========================================================= */
-
 .video-section{
-
-top:18.17lvh;
-
+top:18.17%;
 left:49.65%;
 
 right:auto;
@@ -1093,7 +1131,6 @@ opacity:1;
 }
 
 body.popup-active .video-section{
-top:18.17lvh;
 transform:translateX(-50%);
 }
 
@@ -1105,7 +1142,6 @@ aspect-ratio:16 / 9;
 height:auto;
 
 border-radius:0px;
-
 box-shadow:none!important;
 }
 
@@ -1127,17 +1163,11 @@ display:none!important;
 SMALL HEIGHT
 ========================================================= */
 
-/*
-IMPORTANT:
-Do NOT move the video popup to 3% on short Safari
-viewports. Safari's bottom browser bar reduces the
-visible viewport height and used to trigger this rule,
-which pushed the popup too high.
-
-The popup now stays controlled by 18.17lvh.
-*/
-
 @media(max-height:700px){
+
+.video-section{
+top:3%;
+}
 
 .video-popup{
 aspect-ratio:16 / 9;
@@ -1206,7 +1236,7 @@ right:-100%;
 
 width:180px;
 
-height:100%;
+height:100dvh;
 
 background:rgba(20,20,20,.45)!important;
 
@@ -1273,7 +1303,7 @@ opacity:0.8;
 }
 
 /* =========================================================
-DRAWER SEARCH
+DRAWER SEARCH BOX & CLEAR BUTTON STYLING
 ========================================================= */
 
 .drawer-search-container{
@@ -1442,6 +1472,9 @@ margin-top:.5px;
 
 <div class="bg"></div>
 
+<!-- SPEAKER PULSE & GLOW OVERLAY -->
+<div class="speaker-effect" id="speakerEffect"></div>
+
 <!-- =========================================================
 DIGITAL CLOCK
 ========================================================= -->
@@ -1529,32 +1562,21 @@ id="drawer"
 
 <div class="drawer-header">
 
-<div
-class="drawer-title"
-onclick="toggleDrawer()"
-title="Hide Playlist"
->
+<!-- প্লেলিস্ট টাইটেলে ক্লিক করলে ড্রয়ার হাইড হবে -->
+<div class="drawer-title" onclick="toggleDrawer()" title="Hide Playlist">
 Playlist
 </div>
 
+<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
 <div class="drawer-search-container">
-
-<input
-type="text"
-class="drawer-search-box"
-id="drawerSearch"
-placeholder="Search..."
+<input 
+type="text" 
+class="drawer-search-box" 
+id="drawerSearch" 
+placeholder="Search..." 
 oninput="filterPlaylist(this.value)"
 >
-
-<button
-class="search-clear-btn"
-id="searchClearBtn"
-onclick="clearSearch()"
->
-&times;
-</button>
-
+<button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">&times;</button>
 </div>
 
 </div>
@@ -1632,28 +1654,17 @@ id="fill">
 <div class="info-bottom-row">
 
 <div class="time-info">
-
-<span id="current">0:00</span>
-/
-<span id="duration">0:00</span>
-
+<span id="current">0:00</span> / <span id="duration">0:00</span>
 </div>
 
 <button
 class="playlist-toggle-btn"
 onclick="toggleDrawer()"
 >
-
 <svg viewBox="0 0 24 24">
-
-<path d="
-M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
-"/>
-
+<path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
 </svg>
-
 <span>Playlist</span>
-
 </button>
 
 </div>
@@ -1778,10 +1789,13 @@ year:"numeric"
 }
 ).format(now);
 
-document.getElementById("clockTime").textContent=time;
+document.getElementById(
+"clockTime"
+).textContent=time;
 
-document.getElementById("clockDate").textContent=
-date.toUpperCase();
+document.getElementById(
+"clockDate"
+).textContent=date.toUpperCase();
 
 }
 
@@ -1836,14 +1850,23 @@ height:"100%",
 playerVars:{
 
 autoplay:0,
+
 controls:1,
+
 disablekb:0,
+
 fs:1,
+
 modestbranding:1,
+
 playsinline:1,
+
 rel:0,
+
 iv_load_policy:3,
+
 listType:"playlist",
+
 list:PLAYLIST_ID
 
 },
@@ -1891,46 +1914,79 @@ document.getElementById("play");
 const playIcon=
 document.getElementById("play-icon");
 
+const speakerEffect=
+document.getElementById("speakerEffect");
+
 highlightActiveTrack();
 
-if(e.data===YT.PlayerState.PLAYING){
+if(
+e.data===YT.PlayerState.PLAYING
+){
 
 playing=true;
 
-playBtn.classList.add("playing");
+playBtn.classList.add(
+"playing"
+);
 
 playIcon.innerHTML=
 '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
-cover.classList.add("spinning");
+cover.classList.add(
+"spinning"
+);
+
+if(speakerEffect){
+  speakerEffect.classList.add("playing");
+}
 
 updateInfo();
 
 }
 
-else if(e.data===YT.PlayerState.PAUSED){
+else if(
+e.data===YT.PlayerState.PAUSED
+){
 
 playing=false;
 
-playBtn.classList.remove("playing");
+playBtn.classList.remove(
+"playing"
+);
 
 playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
+
+if(speakerEffect){
+  speakerEffect.classList.remove("playing");
+}
 
 }
 
-else if(e.data===YT.PlayerState.ENDED){
+else if(
+e.data===YT.PlayerState.ENDED
+){
 
 playing=false;
 
-playBtn.classList.remove("playing");
+playBtn.classList.remove(
+"playing"
+);
 
 playIcon.innerHTML=
 '<path d="M8 5v14l11-7z"/>';
 
-cover.classList.remove("spinning");
+cover.classList.remove(
+"spinning"
+);
+
+if(speakerEffect){
+  speakerEffect.classList.remove("playing");
+}
 
 if(!changingTrack){
 
@@ -2001,24 +2057,38 @@ VIDEO POPUP
 function toggleVideoPopup(){
 
 const popup=
-document.getElementById("videoPopup");
+document.getElementById(
+"videoPopup"
+);
 
 const overlay=
-document.getElementById("videoOverlay");
+document.getElementById(
+"videoOverlay"
+);
 
 const iconSvg=
-document.getElementById("videoToggleIcon");
+document.getElementById(
+"videoToggleIcon"
+);
 
 const opening=
-!popup.classList.contains("active");
+!popup.classList.contains(
+"active"
+);
 
 if(opening){
 
-popup.classList.add("active");
+popup.classList.add(
+"active"
+);
 
-overlay.classList.add("active");
+overlay.classList.add(
+"active"
+);
 
-document.body.classList.add("popup-active");
+document.body.classList.add(
+"popup-active"
+);
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
@@ -2027,11 +2097,17 @@ iconSvg.innerHTML=
 
 else{
 
-popup.classList.remove("active");
+popup.classList.remove(
+"active"
+);
 
-overlay.classList.remove("active");
+overlay.classList.remove(
+"active"
+);
 
-document.body.classList.remove("popup-active");
+document.body.classList.remove(
+"popup-active"
+);
 
 iconSvg.innerHTML=
 '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
@@ -2059,7 +2135,9 @@ function resetVolTimer(){
 
 if(volTimer){
 
-clearTimeout(volTimer);
+clearTimeout(
+volTimer
+);
 
 }
 
@@ -2067,8 +2145,12 @@ volTimer=setTimeout(
 ()=>{
 
 document
-.getElementById("volWrapper")
-.classList.remove("active");
+.getElementById(
+"volWrapper"
+)
+.classList.remove(
+"active"
+);
 
 },
 3000
@@ -2079,15 +2161,25 @@ document
 function toggleVolume(){
 
 const wrapper=
-document.getElementById("volWrapper");
+document.getElementById(
+"volWrapper"
+);
 
-if(wrapper.classList.contains("active")){
+if(
+wrapper.classList.contains(
+"active"
+)
+){
 
-wrapper.classList.remove("active");
+wrapper.classList.remove(
+"active"
+);
 
 if(volTimer){
 
-clearTimeout(volTimer);
+clearTimeout(
+volTimer
+);
 
 }
 
@@ -2095,7 +2187,9 @@ clearTimeout(volTimer);
 
 else{
 
-wrapper.classList.add("active");
+wrapper.classList.add(
+"active"
+);
 
 resetVolTimer();
 
@@ -2107,7 +2201,8 @@ function changeVolume(val){
 
 if(
 player &&
-typeof player.setVolume==="function"
+typeof player.setVolume===
+"function"
 ){
 
 player.setVolume(val);
@@ -2145,7 +2240,9 @@ catch(e){}
 if(currentId){
 
 const found=
-sortedPlaylistItems.indexOf(currentId);
+sortedPlaylistItems.indexOf(
+currentId
+);
 
 if(found!==-1){
 
@@ -2159,9 +2256,12 @@ const nextIndex=
 (currentSortedIndex+1)%
 sortedPlaylistItems.length;
 
-currentSortedIndex=nextIndex;
+currentSortedIndex=
+nextIndex;
 
-playSpecificTrack(nextIndex);
+playSpecificTrack(
+nextIndex
+);
 
 }
 
@@ -2192,7 +2292,9 @@ catch(e){}
 if(currentId){
 
 const found=
-sortedPlaylistItems.indexOf(currentId);
+sortedPlaylistItems.indexOf(
+currentId
+);
 
 if(found!==-1){
 
@@ -2207,9 +2309,12 @@ const previousIndex=
 sortedPlaylistItems.length)%
 sortedPlaylistItems.length;
 
-currentSortedIndex=previousIndex;
+currentSortedIndex=
+previousIndex;
 
-playSpecificTrack(previousIndex);
+playSpecificTrack(
+previousIndex
+);
 
 }
 
@@ -2220,19 +2325,27 @@ FORCE UPDATE UI
 
 function forceUpdateUI(index){
 
-if(!sortedPlaylistData[index])
+if(
+!sortedPlaylistData[index]
+)
 return;
 
 const data=
 sortedPlaylistData[index];
 
-document.getElementById("cover").src=
+document.getElementById(
+"cover"
+).src=
 `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
 
-document.getElementById("title").textContent=
+document.getElementById(
+"title"
+).textContent=
 data.title || "YouTube Music";
 
-document.getElementById("artist").textContent=
+document.getElementById(
+"artist"
+).textContent=
 data.artist || "YouTube Music";
 
 currentSortedIndex=index;
@@ -2247,10 +2360,14 @@ SWIPE
 ========================================================= */
 
 const playerCard=
-document.getElementById("playerCard");
+document.getElementById(
+"playerCard"
+);
 
 const seekElement=
-document.getElementById("seek");
+document.getElementById(
+"seek"
+);
 
 playerCard.addEventListener(
 "pointerdown",
@@ -2306,7 +2423,10 @@ return;
 
 }
 
-if(Math.abs(dy)>Math.abs(dx)){
+if(
+Math.abs(dy)>
+Math.abs(dx)
+){
 
 swipeActive=false;
 return;
@@ -2368,12 +2488,15 @@ rect.width
 
 function updateSeekVisual(pos){
 
-document.getElementById("fill").style.width=
+document.getElementById(
+"fill"
+).style.width=
 (pos*100)+"%";
 
 if(
 player &&
-typeof player.getDuration==="function"
+typeof player.getDuration===
+"function"
 ){
 
 const duration=
@@ -2381,10 +2504,14 @@ player.getDuration();
 
 if(duration){
 
-document.getElementById("current").textContent=
+document.getElementById(
+"current"
+).textContent=
 format(pos*duration);
 
-document.getElementById("duration").textContent=
+document.getElementById(
+"duration"
+).textContent=
 format(duration);
 
 }
@@ -2404,7 +2531,9 @@ isDragging=true;
 
 try{
 
-seekElement.setPointerCapture(e.pointerId);
+seekElement.setPointerCapture(
+e.pointerId
+);
 
 }
 catch(err){}
@@ -2465,7 +2594,8 @@ updateSeekVisual(pos);
 
 if(
 player &&
-typeof player.getDuration==="function"
+typeof player.getDuration===
+"function"
 ){
 
 const duration=
@@ -2511,7 +2641,8 @@ return;
 
 if(
 !player ||
-typeof player.getCurrentTime!=="function"
+typeof player.getCurrentTime!==
+"function"
 )
 return;
 
@@ -2535,13 +2666,19 @@ current/duration
 )
 );
 
-document.getElementById("fill").style.width=
+document.getElementById(
+"fill"
+).style.width=
 (pos*100)+"%";
 
-document.getElementById("current").textContent=
+document.getElementById(
+"current"
+).textContent=
 format(current);
 
-document.getElementById("duration").textContent=
+document.getElementById(
+"duration"
+).textContent=
 format(duration);
 
 }
@@ -2556,7 +2693,10 @@ FORMAT
 
 function format(s){
 
-if(!s || isNaN(s)){
+if(
+!s ||
+isNaN(s)
+){
 
 return "0:00";
 
@@ -2568,8 +2708,7 @@ return Math.floor(s/60)+":"+
 String(
 s%60
 ).padStart(
-2,
-"0"
+2,"0"
 );
 
 }
@@ -2583,7 +2722,8 @@ function loadPlaylistItems(){
 
 if(
 !player ||
-typeof player.getPlaylist!=="function"
+typeof player.getPlaylist!==
+"function"
 )
 return;
 
@@ -2712,11 +2852,14 @@ catch(e){}
 if(currentId){
 
 const currentIndex=
-sortedPlaylistItems.indexOf(currentId);
+sortedPlaylistItems.indexOf(
+currentId
+);
 
 if(currentIndex!==-1){
 
-currentSortedIndex=currentIndex;
+currentSortedIndex=
+currentIndex;
 
 }
 
@@ -2752,7 +2895,9 @@ MAIN PLAYLIST
 function renderMainPlaylist(){
 
 const list=
-document.getElementById("songList");
+document.getElementById(
+"songList"
+);
 
 list.innerHTML="";
 
@@ -2760,16 +2905,21 @@ sortedPlaylistData.forEach(
 (data,index)=>{
 
 const item=
-document.createElement("div");
+document.createElement(
+"div"
+);
 
-item.className="song-item";
+item.className=
+"song-item";
 
 item.id=
 `track-${index}`;
 
 item.onclick=()=>{
 
-playSpecificTrack(index);
+playSpecificTrack(
+index
+);
 
 };
 
@@ -2802,71 +2952,36 @@ list.appendChild(item);
 
 
 /* =========================================================
-PLAYLIST SEARCH FILTER
+PLAYLIST SEARCH FILTER & CLEAR FUNCTIONS
 ========================================================= */
 
 function filterPlaylist(query){
+const filter = query.toLowerCase();
+const items = document.querySelectorAll(".song-item");
+const clearBtn = document.getElementById("searchClearBtn");
 
-const filter=
-query.toLowerCase();
-
-const items=
-document.querySelectorAll(".song-item");
-
-const clearBtn=
-document.getElementById("searchClearBtn");
-
-if(query.length>0){
-
-clearBtn.style.display="block";
-
-}
-else{
-
-clearBtn.style.display="none";
-
+if(query.length > 0){
+clearBtn.style.display = "block";
+} else {
+clearBtn.style.display = "none";
 }
 
-items.forEach(
-item=>{
+items.forEach(item => {
+const title = item.querySelector(".song-item-title").textContent.toLowerCase();
+const artist = item.querySelector(".song-item-artist").textContent.toLowerCase();
 
-const title=
-item.querySelector(".song-item-title")
-.textContent
-.toLowerCase();
-
-const artist=
-item.querySelector(".song-item-artist")
-.textContent
-.toLowerCase();
-
-if(
-title.includes(filter) ||
-artist.includes(filter)
-){
-
-item.style.display="flex";
-
+if(title.includes(filter) || artist.includes(filter)){
+item.style.display = "flex";
+} else {
+item.style.display = "none";
 }
-else{
-
-item.style.display="none";
-
-}
-
 });
-
 }
 
 function clearSearch(){
-
-const searchInput=
-document.getElementById("drawerSearch");
-
-searchInput.value="";
-
+const searchInput = document.getElementById("drawerSearch");
+searchInput.value = "";
 filterPlaylist("");
-
 }
 
 
@@ -2880,7 +2995,9 @@ if(!text)
 return "";
 
 const div=
-document.createElement("div");
+document.createElement(
+"div"
+);
 
 div.textContent=text;
 
@@ -2935,14 +3052,22 @@ changingTrack=false;
 );
 
 const drawer=
-document.getElementById("drawer");
+document.getElementById(
+"drawer"
+);
 
 const drawerOverlay=
-document.getElementById("overlay");
+document.getElementById(
+"overlay"
+);
 
-drawer.classList.remove("open");
+drawer.classList.remove(
+"open"
+);
 
-drawerOverlay.classList.remove("active");
+drawerOverlay.classList.remove(
+"active"
+);
 
 highlightActiveTrack();
 
@@ -2973,7 +3098,9 @@ player.getVideoData().video_id;
 catch(e){}
 
 document
-.querySelectorAll(".song-item")
+.querySelectorAll(
+".song-item"
+)
 .forEach(
 (item,index)=>{
 
@@ -2995,7 +3122,8 @@ function updateInfo(){
 
 if(
 !player ||
-typeof player.getVideoData!=="function"
+typeof player.getVideoData!==
+"function"
 )
 return;
 
@@ -3010,25 +3138,31 @@ if(
 )
 return;
 
-document.getElementById("cover").src=
+document.getElementById(
+"cover"
+).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
 
 if(d.title){
 
-document.getElementById("title").textContent=
-d.title;
+document.getElementById(
+"title"
+).textContent=d.title;
 
 }
 
 if(d.author){
 
-document.getElementById("artist").textContent=
-d.author;
+document.getElementById(
+"artist"
+).textContent=d.author;
 
 }
 
 const sortedIndex=
-sortedPlaylistItems.indexOf(d.video_id);
+sortedPlaylistItems.indexOf(
+d.video_id
+);
 
 if(sortedIndex!==-1){
 
@@ -3051,13 +3185,19 @@ DRAWER
 function toggleDrawer(){
 
 const drawer=
-document.getElementById("drawer");
+document.getElementById(
+"drawer"
+);
 
 const overlay=
-document.getElementById("overlay");
+document.getElementById(
+"overlay"
+);
 
 const opening=
-!drawer.classList.contains("open");
+!drawer.classList.contains(
+"open"
+);
 
 drawer.classList.toggle(
 "open",
