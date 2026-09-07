@@ -37,7 +37,7 @@ overflow-x:hidden!important;
 }
 
 /* =========================================================
-BACKGROUND & AMBIENT RGB LIGHT
+BACKGROUND
 ========================================================= */
 
 .bg{
@@ -56,55 +56,12 @@ pointer-events:none;
 backface-visibility:hidden;
 }
 
-/* Natural Wall RGB Glow Overlay */
-.bg::before{
-content:"";
-position:absolute;
-inset:0;
-background: radial-gradient(
-  circle at 50% 35%, 
-  rgba(255, 0, 128, 0.45) 0%, 
-  rgba(120, 0, 255, 0.3) 35%, 
-  rgba(0, 212, 255, 0.2) 65%, 
-  transparent 80%
-);
-mix-blend-mode: color-dodge;
-filter: blur(40px);
-opacity: 0.8;
-pointer-events:none;
-animation: rgbWallBlink 8s ease-in-out infinite alternate;
-}
-
 .bg::after{
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.1);
+background:rgba(0,0,0,.0);
 pointer-events:none;
-}
-
-/* RGB Light Blink Animation */
-@keyframes rgbWallBlink {
-  0% {
-    opacity: 0.35;
-    filter: blur(40px) hue-rotate(0deg);
-  }
-  25% {
-    opacity: 0.85;
-    filter: blur(35px) hue-rotate(90deg);
-  }
-  50% {
-    opacity: 0.45;
-    filter: blur(45px) hue-rotate(180deg);
-  }
-  75% {
-    opacity: 0.9;
-    filter: blur(30px) hue-rotate(270deg);
-  }
-  100% {
-    opacity: 0.35;
-    filter: blur(40px) hue-rotate(360deg);
-  }
 }
 
 /* MOBILE BACKGROUND */
@@ -1467,6 +1424,98 @@ text-overflow:ellipsis;
 margin-top:.5px;
 }
 
+/* =========================================================
+LYRICS DRAWER (NEW STYLES)
+========================================================= */
+
+.lyrics-drawer{
+position:fixed;
+top:0;
+left:-100%;
+width:240px;
+height:100dvh;
+background:rgba(20,20,20,.55)!important;
+backdrop-filter:blur(30px) saturate(150%)!important;
+-webkit-backdrop-filter:blur(30px) saturate(150%)!important;
+border-right:1px solid rgba(255,255,255,.18)!important;
+z-index:10000;
+transition:left .35s cubic-bezier(.2,.8,.2,1);
+display:flex;
+flex-direction:column;
+padding:16px 12px;
+box-shadow:15px 0 40px rgba(0,0,0,.5)!important;
+visibility:hidden;
+pointer-events:none;
+}
+
+.lyrics-drawer.open{
+left:0;
+visibility:visible;
+pointer-events:auto;
+}
+
+.lyrics-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding-bottom:10px;
+border-bottom:1px solid rgba(255,255,255,.15);
+margin-bottom:12px;
+font-size:12px;
+font-weight:700;
+color:#fff;
+}
+
+.lyrics-content{
+flex:1;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:12px;
+padding-right:4px;
+text-align:center;
+scroll-behavior:smooth;
+}
+
+.lyrics-content::-webkit-scrollbar{
+width:2px;
+}
+
+.lyrics-content::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.3);
+border-radius:3px;
+}
+
+.lyric-line{
+font-size:12px;
+color:rgba(255,255,255,.4);
+transition:color .25s ease, transform .25s ease, font-size .25s ease;
+line-height:1.4;
+cursor:pointer;
+padding:2px 0;
+}
+
+.lyric-line.active{
+color:#fff;
+font-weight:700;
+font-size:13.5px;
+transform:scale(1.05);
+text-shadow:0 0 10px rgba(255,255,255,.5);
+}
+
+.lyrics-status{
+font-size:11px;
+color:rgba(255,255,255,.5);
+margin-top:20px;
+text-align:center;
+}
+
+@media(max-width:480px){
+.lyrics-drawer{
+width:200px;
+}
+}
+
 </style>
 </head>
 
@@ -1544,13 +1593,13 @@ Loading...
 </div>
 
 <!-- =========================================================
-DRAWER
+DRAWER (PLAYLIST)
 ========================================================= -->
 
 <div
 class="drawer-overlay"
 id="overlay"
-onclick="toggleDrawer()"
+onclick="closeAllDrawers()"
 >
 </div>
 
@@ -1561,10 +1610,12 @@ id="drawer"
 
 <div class="drawer-header">
 
+<!-- প্লেলিস্ট টাইটারে ক্লিক করলে ড্রয়ার হাইড হবে -->
 <div class="drawer-title" onclick="toggleDrawer()" title="Hide Playlist">
 Playlist
 </div>
 
+<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
 <div class="drawer-search-container">
 <input 
 type="text" 
@@ -1597,6 +1648,25 @@ Loading...
 </div>
 
 </div>
+
+<!-- =========================================================
+LYRICS DRAWER (NEW)
+========================================================= -->
+
+<div
+class="lyrics-drawer"
+id="lyricsDrawer"
+>
+<div class="lyrics-header">
+<span>Lyrics</span>
+<span style="cursor:pointer; opacity:0.7;" onclick="toggleLyricsDrawer()">&times;</span>
+</div>
+
+<div class="lyrics-content" id="lyricsContainer">
+<div class="lyrics-status">Select a song to load lyrics</div>
+</div>
+</div>
+
 
 <!-- =========================================================
 MAIN APP
@@ -1669,6 +1739,18 @@ onclick="toggleDrawer()"
 </div>
 
 <div class="controls">
+
+<!-- NEW LYRICS BUTTON -->
+<button
+class="btn"
+id="lyricsBtn"
+onclick="toggleLyricsDrawer()"
+title="Toggle Lyrics"
+>
+<svg viewBox="0 0 24 24">
+<path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+</svg>
+</button>
 
 <button
 class="btn"
@@ -1829,6 +1911,10 @@ let swipeActive=false;
 let swipeFromSeek=false;
 
 let changingTrack=false;
+
+/* LYRICS VARIABLES */
+let currentLyrics = [];
+let lastTrackTitle = "";
 
 
 /* =========================================================
@@ -2333,6 +2419,7 @@ data.artist || "YouTube Music";
 currentSortedIndex=index;
 
 highlightActiveTrack();
+fetchLyrics(data.title, data.artist);
 
 }
 
@@ -2662,6 +2749,9 @@ document.getElementById(
 "duration"
 ).textContent=
 format(duration);
+
+/* Sync Lyrics with Time */
+syncLyrics(current);
 
 }
 catch(e){}
@@ -3033,23 +3123,7 @@ changingTrack=false;
 700
 );
 
-const drawer=
-document.getElementById(
-"drawer"
-);
-
-const drawerOverlay=
-document.getElementById(
-"overlay"
-);
-
-drawer.classList.remove(
-"open"
-);
-
-drawerOverlay.classList.remove(
-"active"
-);
+closeAllDrawers();
 
 highlightActiveTrack();
 
@@ -3154,6 +3228,11 @@ currentSortedIndex=sortedIndex;
 
 highlightActiveTrack();
 
+if (d.title && d.title !== lastTrackTitle) {
+lastTrackTitle = d.title;
+fetchLyrics(d.title, d.author);
+}
+
 }
 catch(e){}
 
@@ -3161,7 +3240,7 @@ catch(e){}
 
 
 /* =========================================================
-DRAWER
+DRAWER & LYRICS TOGGLES
 ========================================================= */
 
 function toggleDrawer(){
@@ -3169,6 +3248,11 @@ function toggleDrawer(){
 const drawer=
 document.getElementById(
 "drawer"
+);
+
+const lyricsDrawer=
+document.getElementById(
+"lyricsDrawer"
 );
 
 const overlay=
@@ -3180,6 +3264,8 @@ const opening=
 !drawer.classList.contains(
 "open"
 );
+
+lyricsDrawer.classList.remove("open");
 
 drawer.classList.toggle(
 "open",
@@ -3202,10 +3288,175 @@ loadPlaylistItems();
 
 }
 
+function toggleLyricsDrawer(){
+const drawer=
+document.getElementById(
+"drawer"
+);
+
+const lyricsDrawer=
+document.getElementById(
+"lyricsDrawer"
+);
+
+const overlay=
+document.getElementById(
+"overlay"
+);
+
+const opening=
+!lyricsDrawer.classList.contains(
+"open"
+);
+
+drawer.classList.remove("open");
+
+lyricsDrawer.classList.toggle(
+"open",
+opening
+);
+
+overlay.classList.toggle(
+"active",
+opening
+);
+}
+
+function closeAllDrawers(){
+document.getElementById("drawer").classList.remove("open");
+document.getElementById("lyricsDrawer").classList.remove("open");
+document.getElementById("overlay").classList.remove("active");
+}
+
 
 /* =========================================================
-INITIAL
+LYRICS FETCH & SYNC LOGIC (Lrclib API)
 ========================================================= */
+
+function cleanTitle(title) {
+if(!title) return "";
+return title
+.replace(/\[.*?\]|\(.*?\)/g, "") // Remove brackets/parentheses
+.replace(/ft\..*|feat\..*/i, "")  // Remove ft/feat
+.replace(/official video|lyric video|audio|full song/gi, "")
+.trim();
+}
+
+function fetchLyrics(trackTitle, artistName) {
+const container = document.getElementById("lyricsContainer");
+container.innerHTML = '<div class="lyrics-status">Searching lyrics...</div>';
+currentLyrics = [];
+
+const cleanTrack = cleanTitle(trackTitle);
+const cleanArtist = cleanTitle(artistName);
+
+const url = `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTrack)}`;
+
+fetch(url)
+.then(res => res.json())
+.then(data => {
+if(data && data.length > 0) {
+// Try finding synced lyrics first
+let match = data.find(item => item.syncedLyrics);
+if(!match) match = data[0]; // fallback to first result
+
+if(match.syncedLyrics) {
+parseSyncedLyrics(match.syncedLyrics);
+renderLyrics();
+} else if(match.plainLyrics) {
+renderPlainLyrics(match.plainLyrics);
+} else {
+container.innerHTML = '<div class="lyrics-status">No lyrics found</div>';
+}
+} else {
+container.innerHTML = '<div class="lyrics-status">No lyrics found</div>';
+}
+})
+.catch(err => {
+container.innerHTML = '<div class="lyrics-status">Failed to load lyrics</div>';
+});
+}
+
+function parseSyncedLyrics(lrcText) {
+currentLyrics = [];
+const lines = lrcText.split("\n");
+const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
+
+lines.forEach(line => {
+const match = timeRegex.exec(line);
+if(match) {
+const minutes = parseInt(match[1]);
+const seconds = parseInt(match[2]);
+const milliseconds = parseInt(match[3]);
+const time = minutes * 60 + seconds + milliseconds / (match[3].length === 3 ? 1000 : 100);
+const text = line.replace(timeRegex, "").trim();
+
+if(text) {
+currentLyrics.push({ time, text });
+}
+}
+});
+}
+
+function renderLyrics() {
+const container = document.getElementById("lyricsContainer");
+container.innerHTML = "";
+
+currentLyrics.forEach((lyric, index) => {
+const el = document.createElement("div");
+el.className = "lyric-line";
+el.id = `lyric-${index}`;
+el.textContent = lyric.text;
+el.onclick = () => {
+if(player && typeof player.seekTo === "function") {
+player.seekTo(lyric.time, true);
+}
+};
+container.appendChild(el);
+});
+}
+
+function renderPlainLyrics(text) {
+const container = document.getElementById("lyricsContainer");
+container.innerHTML = "";
+const lines = text.split("\n");
+
+lines.forEach(line => {
+if(line.trim()){
+const el = document.createElement("div");
+el.className = "lyric-line active";
+el.style.opacity = "0.8";
+el.textContent = line;
+container.appendChild(el);
+}
+});
+}
+
+function syncLyrics(currentTime) {
+if(!currentLyrics.length) return;
+
+let activeIndex = -1;
+for(let i = 0; i < currentLyrics.length; i++) {
+if(currentTime >= currentLyrics[i].time) {
+activeIndex = i;
+} else {
+break;
+}
+}
+
+if(activeIndex !== -1) {
+document.querySelectorAll(".lyric-line").forEach((el, idx) => {
+if(idx === activeIndex) {
+if(!el.classList.contains("active")) {
+el.classList.add("active");
+el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+} else {
+el.classList.remove("active");
+}
+});
+}
+}
 
 </script>
 
