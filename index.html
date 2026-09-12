@@ -1,347 +1,3172 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Media Player with Synchronized Lyrics</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    body {
-      background: #0f0d13;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #fff;
-    }
+<title>My Music Player</title>
 
-    /* Player Container Frame */
-    .desktop-setup {
-      position: relative;
-      width: 420px;
-      background: #18151f;
-      border-radius: 28px;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 105, 180, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+<link rel="preconnect" href="https://www.youtube.com">
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preload" as="image" href="background.jpg">
+<link rel="preload" as="image" href="desktop.jpg">
 
-    /* Top Screen Area (Video / Room Aesthetics Background) */
-    .main-screen {
-      position: relative;
-      width: 100%;
-      height: 240px;
-      background: #000;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 
-    #video-wrapper {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
+<style>
 
-    #youtube-player {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+*{
+box-sizing:border-box;
+}
 
-    /* Lyrics Overlay (Hides video when toggled) */
-    .lyrics-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 13, 19, 0.95);
-      backdrop-filter: blur(8px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 40px 20px;
-      overflow-y: auto;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 10;
-    }
+html,
+body{
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#050505;
+color:#fff;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+}
 
-    .lyrics-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+body{
+position:relative;
+overflow-x:hidden!important;
+}
 
-    .lyrics-content {
-      text-align: center;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+/* =========================================================
+BACKGROUND
+========================================================= */
 
-    /* Individual Lyric Line Styling */
-    .lyric-line {
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.4);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      font-weight: 500;
-    }
+.bg{
+position:fixed;
+inset:-20px;
 
-    /* Active Lyric Line (Spotify Style) */
-    .lyric-line.active {
-      color: #1db954;
-      font-size: 18px;
-      font-weight: 700;
-      transform: scale(1.04);
-      text-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
-    }
+background-image:url("background.jpg");
+background-position:center center;
+background-size:cover;
+background-repeat:no-repeat;
 
-    /* Mini Bottom Control Bar */
-    .mini-player-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #231f2d;
-      padding: 12px 18px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+z-index:0;
+pointer-events:none;
 
-    .track-details {
-      display: flex;
-      flex-direction: column;
-      max-width: 170px;
-    }
+-webkit-backface-visibility:hidden;
+backface-visibility:hidden;
+}
 
-    .track-title {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #fff;
-    }
+.bg::after{
+content:"";
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.0);
+pointer-events:none;
+}
 
-    .track-subtitle {
-      font-size: 12px;
-      color: #8b8599;
-      margin-top: 2px;
-    }
+/* MOBILE BACKGROUND */
 
-    .control-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+@media(max-width:768px){
 
-    .icon-btn {
-      background: none;
-      border: none;
-      color: #8b8599;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+.bg{
+background-image:url("background.jpg");
+}
 
-    .icon-btn:hover {
-      color: #fff;
-    }
+}
 
-    .icon-btn.active {
-      color: #1db954;
-    }
+/* DESKTOP BACKGROUND */
 
-    .action-play-btn {
-      background: #fff;
-      color: #000;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      font-size: 14px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+@media(min-width:769px){
 
-    .action-play-btn:hover {
-      background: #e2e2e2;
-      transform: scale(1.05);
-    }
+.bg{
+background-image:url("desktop.jpg");
+}
 
-    /* Custom Scrollbar for Lyrics Overlay */
-    .lyrics-overlay::-webkit-scrollbar {
-      width: 4px;
+}
+
+/* =========================================================
+DIGITAL CLOCK - COMMON
+========================================================= */
+
+.digital-clock{
+position:fixed;
+
+left:50%;
+top:50%;
+
+transform:translate(-50%,-50%);
+
+z-index:1500;
+
+text-align:center;
+
+width:max-content;
+
+pointer-events:none;
+
+user-select:none;
+-webkit-user-select:none;
+}
+
+/* =========================================================
+DESKTOP DIGITAL CLOCK
+========================================================= */
+
+@media(min-width:769px){
+
+.digital-clock{
+top:38%;
+}
+
+.clock-time{
+
+font-size:30px;
+
+font-weight:900;
+
+letter-spacing:4px;
+
+line-height:1;
+
+color:#fff;
+
+white-space:nowrap;
+
+text-shadow:
+0 4px 20px rgba(0,0,0,.65);
+}
+
+.clock-date{
+
+margin-top:12px;
+
+font-size:10px;
+
+font-weight:700;
+
+letter-spacing:2px;
+
+line-height:1.2;
+
+color:rgba(255,255,255,.88);
+
+white-space:nowrap;
+
+text-shadow:
+0 3px 12px rgba(0,0,0,.6);
+}
+
+}
+
+/* =========================================================
+MOBILE DIGITAL CLOCK
+========================================================= */
+
+@media(max-width:768px){
+
+.digital-clock{
+top:30%;
+}
+
+.clock-time{
+
+font-size:clamp(38px,10vw,65px);
+
+font-weight:900;
+
+letter-spacing:2px;
+
+line-height:1;
+
+color:#fff;
+
+white-space:nowrap;
+
+text-shadow:
+0 4px 18px rgba(0,0,0,.65);
+}
+
+.clock-date{
+
+margin-top:9px;
+
+font-size:clamp(10px,2.9vw,15px);
+
+font-weight:700;
+
+letter-spacing:2px;
+
+line-height:1.2;
+
+color:rgba(255,255,255,.88);
+
+white-space:nowrap;
+
+text-shadow:
+0 3px 10px rgba(0,0,0,.6);
+}
+
+}
+
+/* =========================================================
+CLOCK HIDE WHEN VIDEO ON
+========================================================= */
+
+body.popup-active .digital-clock{
+display:none;
+}
+
+/* =========================================================
+PLAYLIST TOGGLE BUTTON (CENTERED)
+========================================================= */
+
+.playlist-toggle-btn{
+background:rgba(0,0,0,.25);
+border:1px solid rgba(255,255,255,.15);
+color:rgba(255,255,255,.9);
+font-size:10px;
+font-weight:600;
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+display:flex;
+align-items:center;
+gap:5px;
+cursor:pointer;
+touch-action:manipulation;
+-webkit-tap-highlight-color:transparent;
+padding:3px 8px;
+border-radius:15px;
+transition: transform .2s, background .2s;
+position:relative;
+z-index:1611;
+margin-top: 15px;
+
+width:max-content;
+grid-column: 2;
+}
+
+.playlist-toggle-btn:active{
+transform:scale(.92);
+}
+
+.playlist-toggle-btn svg{
+width:13px;
+height:13px;
+fill:#fff;
+}
+
+/* =========================================================
+VIDEO OVERLAY
+========================================================= */
+
+.video-overlay{
+position:fixed;
+inset:0;
+
+z-index:1499;
+
+display:none;
+
+background:transparent;
+
+pointer-events:none!important;
+}
+
+.video-overlay.active{
+display:block;
+pointer-events:none!important;
+}
+
+/* =========================================================
+VIDEO SECTION
+========================================================= */
+
+.video-section{
+position:fixed;
+
+top:6%;
+left:50%;
+
+transform:translateX(-50%);
+
+width:min(420px,94%);
+
+z-index:1700;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+pointer-events:none;
+}
+
+/* =========================================================
+VIDEO POPUP
+========================================================= */
+
+.video-popup{
+position:relative;
+
+width:100%;
+aspect-ratio:16 / 9;
+height:auto;
+
+background:#000;
+
+border-radius:0px;
+
+overflow:hidden;
+
+z-index:1701;
+
+border:0px solid rgba(255,255,255,.25);
+
+box-shadow:
+0 25px 50px rgba(0,0,0,.7);
+
+opacity:0;
+visibility:hidden;
+
+pointer-events:none;
+
+transform:scale(.75);
+
+transition:
+opacity .3s ease,
+transform .3s cubic-bezier(.2,.8,.2,1),
+visibility .3s ease;
+}
+
+.video-popup.active{
+opacity:1;
+visibility:visible;
+
+pointer-events:auto;
+
+transform:scale(1);
+}
+
+/* =========================================================
+YOUTUBE IFRAME
+========================================================= */
+
+#yt{
+position:absolute;
+
+inset:0;
+
+width:100%;
+height:100%;
+
+border:0;
+display:block;
+
+pointer-events:auto!important;
+
+touch-action:auto!important;
+
+z-index:1702;
+}
+
+#yt iframe{
+width:100%!important;
+height:100%!important;
+
+border:0;
+
+pointer-events:auto!important;
+
+touch-action:auto!important;
+}
+
+/* =========================================================
+VIDEO PLAYLIST
+========================================================= */
+
+.video-playlist{
+display:none!important;
+}
+
+/* =========================================================
+VIDEO SONG LIST
+========================================================= */
+
+.video-song-list{
+width:100%;
+height:100%;
+
+overflow-y:auto;
+overflow-x:hidden;
+
+display:none!important;
+}
+
+/* =========================================================
+VIDEO SONG ITEM
+========================================================= */
+
+.video-song-item{
+display:none!important;
+}
+
+/* =========================================================
+APP
+========================================================= */
+
+.app{
+position:relative;
+
+z-index:1600;
+
+height:100dvh;
+width:100%;
+
+display:flex;
+
+align-items:flex-end;
+justify-content:center;
+
+padding:0 16px 65px;
+
+pointer-events:auto;
+}
+
+/* =========================================================
+MUSIC PLAYER
+========================================================= */
+
+.player{
+width:min(460px,96%);
+
+height:124px;
+
+padding:14px 16px;
+
+border:1px solid rgba(255,255,255,.18);
+
+border-radius:60px;
+
+background:rgba(20,20,20,.35);
+
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
+
+box-shadow:
+0 20px 50px rgba(0,0,0,.45);
+
+display:flex;
+align-items:center;
+
+gap:10px;
+
+position:relative;
+
+overflow:hidden;
+
+touch-action:pan-y;
+
+z-index:1601;
+
+transition:
+transform .35s cubic-bezier(.2,.8,.2,1),
+width .35s ease;
+}
+
+/* =========================================================
+COVER
+========================================================= */
+
+.cover-wrapper{
+position:relative;
+
+width:84px;
+height:84px;
+
+flex-shrink:0;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+border-radius:50%;
+
+overflow:hidden;
+
+border:1px solid rgba(255,255,255,.3);
+}
+
+.cover{
+width:137%;
+height:137%;
+
+margin:-18.5%;
+
+border-radius:50%;
+
+object-fit:cover;
+object-position:center;
+
+background:#222;
+
+animation:spin 8s linear infinite;
+animation-play-state:paused;
+}
+
+.cover-wrapper::after{
+content:"";
+
+position:absolute;
+
+width:16px;
+height:16px;
+
+background:rgba(20,20,20,.85);
+
+border:2px solid rgba(255,255,255,.3);
+
+border-radius:50%;
+
+left:50%;
+top:50%;
+
+transform:translate(-50%,-50%);
+
+z-index:2;
+}
+
+.cover.spinning{
+animation-play-state:running;
+}
+
+@keyframes spin{
+
+from{
+transform:rotate(0deg);
+}
+
+to{
+transform:rotate(360deg);
+}
+
+}
+
+/* =========================================================
+SONG INFO
+========================================================= */
+
+.middle{
+flex:1;
+min-width:0;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+.title{
+font-size:15px;
+
+font-weight:700;
+
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+
+color:#fff;
+
+letter-spacing:.2px;
+}
+
+.artist{
+font-size:11.5px;
+
+color:rgba(255,255,255,.65);
+
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+
+margin-top:1px;
+margin-bottom:5px;
+}
+
+/* =========================================================
+SEEK
+========================================================= */
+
+.seek{
+position:relative;
+
+width:100%;
+height:4.5px;
+
+border-radius:10px;
+
+background:rgba(255,255,255,.2);
+
+cursor:pointer;
+
+margin-bottom:6px;
+
+touch-action:none;
+
+user-select:none;
+-webkit-user-select:none;
+}
+
+.seek::before{
+content:"";
+
+position:absolute;
+
+top:-12px;
+bottom:-12px;
+
+left:-10px;
+right:-10px;
+
+z-index:1;
+}
+
+.fill{
+position:absolute;
+
+left:0;
+top:0;
+
+height:100%;
+width:0;
+
+background:#fff;
+
+border-radius:10px;
+
+pointer-events:none;
+
+z-index:2;
+}
+
+.time-display{
+font-size:10px;
+
+color:rgba(255,255,255,.6);
+
+font-variant-numeric:tabular-nums;
+
+display:none;
+}
+
+.info-bottom-row{
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+align-items: center;
+width: 100%;
+margin-top: 4px;
+}
+
+.time-info{
+font-size:10px;
+color:rgba(255,255,255,.65);
+font-variant-numeric:tabular-nums;
+grid-column: 1;
+}
+
+/* =========================================================
+CONTROLS
+========================================================= */
+
+.controls{
+display:flex;
+
+align-items:center;
+
+gap:6px;
+
+flex-shrink:0;
+
+position:relative;
+
+z-index:1610;
+}
+
+.btn{
+width:28px;
+height:28px;
+
+border:0;
+
+background:transparent;
+
+color:rgba(255,255,255,.9);
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+cursor:pointer;
+
+padding:0;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+position:relative;
+
+z-index:1611;
+}
+
+.btn svg{
+width:20px;
+height:20px;
+
+fill:#fff;
+}
+
+/* =========================================================
+VOLUME
+========================================================= */
+
+.vol-container{
+display:flex;
+
+align-items:center;
+gap:4px;
+
+background:rgba(0,0,0,.25);
+
+border:1px solid rgba(255,255,255,.15);
+
+padding:4px 6px;
+
+border-radius:20px;
+
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+}
+
+.vol-slider-wrapper{
+width:0;
+
+overflow:hidden;
+
+opacity:0;
+
+display:flex;
+align-items:center;
+
+transition:
+width .28s cubic-bezier(.2,.8,.2,1),
+opacity .2s ease;
+}
+
+.vol-slider-wrapper.active{
+width:48px;
+
+opacity:1;
+
+margin-left:2px;
+}
+
+.vol-slider{
+-webkit-appearance:none;
+appearance:none;
+
+width:48px;
+height:3.5px;
+
+background:rgba(255,255,255,.3);
+
+border-radius:10px;
+
+outline:none;
+
+cursor:pointer;
+}
+
+.vol-slider::-webkit-slider-thumb{
+-webkit-appearance:none;
+appearance:none;
+
+width:10px;
+height:10px;
+
+border-radius:50%;
+
+background:#fff;
+
+cursor:pointer;
+
+box-shadow:0 0 5px rgba(0,0,0,.5);
+}
+
+@supports (-webkit-touch-callout:none){
+
+.vol-container{
+display:none!important;
+}
+
+}
+
+/* =========================================================
+PLAY
+========================================================= */
+
+.play{
+width:40px;
+height:40px;
+
+border-radius:50%;
+
+border:0;
+
+background:#fff;
+
+color:#000;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+box-shadow:
+0 4px 15px rgba(0,0,0,.3);
+
+cursor:pointer;
+
+flex-shrink:0;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+position:relative;
+
+z-index:1611;
+}
+
+.play svg{
+width:18px;
+height:18px;
+
+fill:#000;
+
+margin-left:2px;
+}
+
+.play.playing svg{
+margin-left:0;
+}
+
+.btn:active,
+.play:active{
+transform:scale(.90);
+}
+
+/* =========================================================
+DESKTOP
+========================================================= */
+
+@media(min-width:769px){
+
+.app{
+height:100dvh;
+width:100%;
+
+display:flex;
+
+align-items:flex-end;
+justify-content:center;
+
+padding:0 40px 40px;
+}
+
+.player{
+width:min(600px,75vw);
+
+height:124px;
+
+margin:0;
+
+transform:scale(.85) translateY(25px);
+transform-origin:center bottom;
+}
+
+.video-section{
+display:none;
+
+position:fixed;
+
+top:4vh;
+right:4vw;
+left:auto;
+
+transform:none;
+
+width:min(620px,42vw);
+
+height:auto;
+
+z-index:1700;
+
+pointer-events:none;
+}
+
+body.popup-active .app{
+
+display:flex;
+
+align-items:flex-end;
+justify-content:center;
+
+padding:0 40px 65px;
+}
+
+body.popup-active .player{
+
+width:min(780px,55vw);
+
+margin:0;
+
+transform:scale(.82);
+transform-origin:center bottom;
+
+position:relative;
+top:40px;
+
+z-index:1601;
+}
+
+body.popup-active .video-section{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:stretch;
+
+position:fixed;
+
+top:15.75vh;
+right:27vw;
+left:auto;
+
+transform:none;
+
+width:min(620px,42vw);
+
+height:auto;
+
+opacity:1;
+
+pointer-events:none;
+
+z-index:1700;
+}
+
+body.popup-active .video-popup{
+
+position:relative;
+
+width:90%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+flex-shrink:0;
+
+margin:0;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+transform:scale(1);
+
+transition: transform .5s cubic-bezier(.2,.8,.2,1);
+
+border-radius:0px;
+
+z-index:1701;
+box-shadow:none!important;
+}
+
+@keyframes tvOpen{
+    from{
+        transform:scale(.75);
+        opacity:0;
     }
-    .lyrics-overlay::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
+    to{
+        transform:scale(1);
+        opacity:1;
     }
-  </style>
+}
+
+body.popup-active .video-popup{
+    animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
+}
+
+body.popup-active .video-playlist{
+display:none!important;
+box-shadow:none!important;
+}
+
+body.popup-active .video-song-list{
+display:none!important;
+}
+
+body.popup-active .video-song-item{
+display:none!important;
+}
+
+body.popup-active .controls{
+z-index:1610;
+}
+
+}
+
+/* =========================================================
+MOBILE
+========================================================= */
+
+@media(max-width:480px){
+
+.app{
+padding-bottom:60px;
+}
+
+.player{
+height:120px;
+
+padding:12px 12px;
+
+border-radius:58px;
+
+gap:8px;
+}
+
+.cover-wrapper{
+width:76px;
+height:76px;
+}
+
+.title{
+font-size:14px;
+}
+
+.artist{
+font-size:11px;
+}
+
+.play{
+width:38px;
+height:38px;
+}
+
+.playlist-toggle-btn{
+font-size:9.5px;
+padding:3px 7px;
+}
+
+.playlist-drawer{
+width:180px;
+}
+
+.video-section{
+top:18.17%;
+left:49.65%;
+
+right:auto;
+
+transform:translateX(-50%);
+
+width:84.55%;
+
+opacity:1;
+}
+
+body.popup-active .video-section{
+transform:translateX(-50%);
+}
+
+.video-popup{
+width:100%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+border-radius:0px;
+box-shadow:none!important;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
+}
+
+.video-song-item{
+display:none!important;
+}
+
+}
+
+/* =========================================================
+SMALL HEIGHT
+========================================================= */
+
+@media(max-height:700px){
+
+.video-section{
+top:3%;
+}
+
+.video-popup{
+aspect-ratio:16 / 9;
+height:auto;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+}
+
+/* =========================================================
+VERY SMALL WIDTH
+========================================================= */
+
+@media(max-width:360px){
+
+.video-section{
+width:96%;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
+}
+
+}
+
+/* =========================================================
+DRAWER
+========================================================= */
+
+.drawer-overlay{
+position:fixed;
+
+inset:0;
+
+z-index:9999;
+
+background:transparent!important;
+
+backdrop-filter:none!important;
+-webkit-backdrop-filter:none!important;
+
+pointer-events:none;
+
+display:none;
+}
+
+.drawer-overlay.active{
+display:block;
+
+pointer-events:auto;
+}
+
+.playlist-drawer{
+position:fixed;
+
+top:0;
+
+right:-100%;
+
+width:180px;
+
+height:100dvh;
+
+background:rgba(20,20,20,.45)!important;
+
+backdrop-filter:blur(30px) saturate(150%)!important;
+-webkit-backdrop-filter:blur(30px) saturate(150%)!important;
+
+border-left:1px solid rgba(255,255,255,.18)!important;
+
+z-index:10000;
+
+transition:
+right .35s cubic-bezier(.2,.8,.2,1);
+
+display:flex;
+
+flex-direction:column;
+
+padding:12px 6px;
+
+box-shadow:
+-15px 0 40px rgba(0,0,0,.5)!important;
+
+visibility:hidden;
+
+pointer-events:none;
+}
+
+.playlist-drawer.open{
+right:0;
+
+visibility:visible;
+
+pointer-events:auto;
+}
+
+.drawer-header{
+display:flex;
+
+align-items:center;
+
+gap:5px;
+
+padding:6px 8px;
+
+border-bottom:1px solid rgba(255,255,255,.15);
+
+margin-bottom:8px;
+
+background:rgba(255,255,255,.1);
+
+border-radius:8px;
+}
+
+.drawer-title{
+font-size:10px;
+font-weight:700;
+color:#fff;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.drawer-title:hover{
+opacity:0.8;
+}
+
+/* =========================================================
+DRAWER SEARCH BOX & CLEAR BUTTON STYLING
+========================================================= */
+
+.drawer-search-container{
+position:relative;
+flex:1;
+min-width:0;
+display:flex;
+align-items:center;
+}
+
+.drawer-search-box{
+width:100%;
+padding:4px 22px 4px 6px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.15);
+border-radius:6px;
+color:#fff;
+font-size:9.5px;
+outline:none;
+}
+
+.drawer-search-box::placeholder{
+color:rgba(255,255,255,.5);
+}
+
+.search-clear-btn{
+position:absolute;
+right:5px;
+top:40%;
+transform:translateY(-50%);
+background:transparent;
+border:0;
+color:rgba(255,255,255,0.75);
+font-size:20px;
+cursor:pointer;
+padding:0 3px;
+line-height:1;
+display:none;
+}
+
+.search-clear-btn:hover{
+color:#fff;
+}
+
+.song-list{
+flex:1;
+
+overflow-y:auto;
+
+display:flex;
+
+flex-direction:column;
+
+gap:4px;
+
+padding-right:2px;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
+}
+
+.song-list::-webkit-scrollbar{
+width:2px;
+}
+
+.song-list::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.3);
+
+border-radius:3px;
+}
+
+.song-item{
+display:flex;
+
+align-items:center;
+
+gap:6px;
+
+padding:4px 5px;
+
+border-radius:7px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.1);
+
+cursor:pointer;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+}
+
+.song-item:active{
+transform:scale(.96);
+}
+
+.song-item:hover,
+.song-item.active{
+background:rgba(255,255,255,.22);
+
+border-color:rgba(255,255,255,.35);
+}
+
+.song-item img{
+width:26px;
+height:26px;
+
+border-radius:5px;
+
+object-fit:cover;
+
+flex-shrink:0;
+
+box-shadow:
+0 2px 5px rgba(0,0,0,.3);
+
+pointer-events:none;
+}
+
+.song-item-info{
+flex:1;
+
+min-width:0;
+
+pointer-events:none;
+}
+
+.song-item-title{
+font-size:9.5px;
+
+font-weight:700;
+
+color:#fff;
+
+white-space:nowrap;
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+letter-spacing:.2px;
+}
+
+.song-item-artist{
+font-size:8px;
+
+font-weight:400;
+
+color:rgba(255,255,255,.55);
+
+white-space:nowrap;
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+margin-top:.5px;
+}
+
+</style>
 </head>
+
 <body>
 
-  <div class="desktop-setup">
-    <!-- Screen View Area -->
-    <div class="main-screen">
-      <div id="video-wrapper">
-        <div id="youtube-player"></div>
-      </div>
-      
-      <!-- Lyrics Overlay Container -->
-      <div id="lyrics-overlay" class="lyrics-overlay">
-        <div id="lyrics-content" class="lyrics-content">
-          <p class="lyric-line" data-time="0">Chittiyaan Kalaiyaan Ve...</p>
-          <p class="lyric-line" data-time="8">Oh baby meri chittiyaan kalaiyaan ve</p>
-          <p class="lyric-line" data-time="15">Tere naal nachna main</p>
-          <p class="lyric-line" data-time="22">Tu leja mujhe shopping pe</p>
-          <p class="lyric-line" data-time="28">Dil ka ye shor sun le</p>
-        </div>
-      </div>
-    </div>
+<div class="bg"></div>
 
-    <!-- Mini Bottom Controller -->
-    <div class="mini-player-bar">
-      <div class="track-details">
-        <span class="track-title">'Chittiyaan Kalaiyaan...</span>
-        <span class="track-subtitle">T-Series</span>
-      </div>
+<!-- =========================================================
+DIGITAL CLOCK
+========================================================= -->
 
-      <div class="control-actions">
-        <!-- Mic Icon Button (Toggles Video/Lyrics) -->
-        <button id="mic-btn" class="icon-btn" onclick="toggleLyrics()" title="Toggle Lyrics Display">
-          🎤
-        </button>
-        <!-- Play/Pause Control -->
-        <button id="play-btn" class="icon-btn action-play-btn" onclick="togglePlay()">
-          ▶
-        </button>
-      </div>
-    </div>
-  </div>
+<div class="digital-clock">
 
-  <!-- YouTube IFrame API Script -->
-  <script src="https://www.youtube.com/iframe_api"></script>
+<div
+class="clock-time"
+id="clockTime"
+>
+12:00:00 PM
+</div>
 
-  <script>
-    let player;
-    let isLyricsVisible = false;
-    let syncInterval;
+<div
+class="clock-date"
+id="clockDate"
+>
+25 AUGUST 2026
+</div>
 
-    // Load YouTube iFrame Player
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('youtube-player', {
-        videoId: 'zPqy4k-4mms',
-        playerVars: {
-          'playsinline': 1,
-          'controls': 1,
-          'rel': 0,
-          'modestbranding': 1
-        },
-        events: {
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
+</div>
 
-    // Toggle Play / Pause Logic
-    function togglePlay() {
-      if (!player || typeof player.getPlayerState !== 'function') return;
-      const state = player.getPlayerState();
-      if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-      } else {
-        player.playVideo();
-      }
-    }
+<!-- =========================================================
+VIDEO OVERLAY
+========================================================= -->
 
-    // Listen to Player Events
-    function onPlayerStateChange(event) {
-      const playBtn = document.getElementById('play-btn');
-      if (event.data === YT.PlayerState.PLAYING) {
-        playBtn.innerText = '⏸';
-        startLyricsSync();
-      } else {
-        playBtn.innerText = '▶';
-        stopLyricsSync();
-      }
-    }
+<div
+id="videoOverlay"
+class="video-overlay">
+</div>
 
-    // Toggle Lyrics Screen Overlay on Mic Click
-    function toggleLyrics() {
-      isLyricsVisible = !isLyricsVisible;
-      const overlay = document.getElementById('lyrics-overlay');
-      const micBtn = document.getElementById('mic-btn');
+<!-- =========================================================
+VIDEO SECTION
+========================================================= -->
 
-      if (isLyricsVisible) {
-        overlay.classList.add('active');
-        micBtn.classList.add('active');
-      } else {
-        overlay.classList.remove('active');
-        micBtn.classList.remove('active');
-      }
-    }
+<div
+class="video-section"
+id="videoSection"
+>
 
-    // Track playback time and update highlighted lyric line
-    function startLyricsSync() {
-      stopLyricsSync();
-      syncInterval = setInterval(() => {
-        if (player && typeof player.getCurrentTime === 'function') {
-          const currentTime = player.getCurrentTime();
-          updateActiveLyric(currentTime);
-        }
-      }, 300);
-    }
+<div
+id="videoPopup"
+class="video-popup"
+>
 
-    function stopLyricsSync() {
-      clearInterval(syncInterval);
-    }
+<div id="yt"></div>
 
-    function updateActiveLyric(currentTime) {
-      const lines = document.querySelectorAll('.lyric-line');
-      let currentActiveIndex = -1;
+</div>
 
-      lines.forEach((line, index) => {
-        const lineTime = parseFloat(line.getAttribute('data-time'));
-        if (currentTime >= lineTime) {
-          currentActiveIndex = index;
-        }
-      });
+<div
+id="videoPlaylist"
+class="video-playlist"
+>
 
-      lines.forEach((line, index) => {
-        if (index === currentActiveIndex) {
-          if (!line.classList.contains('active')) {
-            line.classList.add('active');
-            line.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        } else {
-          line.classList.remove('active');
-        }
-      });
-    }
-  </script>
+<div class="video-playlist-title">
+Playlist Songs
+</div>
+
+<div
+class="video-song-list"
+id="videoSongList"
+>
+Loading...
+</div>
+
+</div>
+
+</div>
+
+<!-- =========================================================
+DRAWER
+========================================================= -->
+
+<div
+class="drawer-overlay"
+id="overlay"
+onclick="toggleDrawer()"
+>
+</div>
+
+<div
+class="playlist-drawer"
+id="drawer"
+>
+
+<div class="drawer-header">
+
+<!-- প্লেলিস্ট টাইটেলে ক্লিক করলে ড্রয়ার হাইড হবে -->
+<div class="drawer-title" onclick="toggleDrawer()" title="Hide Playlist">
+Playlist
+</div>
+
+<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
+<div class="drawer-search-container">
+<input 
+type="text" 
+class="drawer-search-box" 
+id="drawerSearch" 
+placeholder="Search..." 
+oninput="filterPlaylist(this.value)"
+>
+<button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">&times;</button>
+</div>
+
+</div>
+
+<div
+class="song-list"
+id="songList"
+>
+
+<div style="
+text-align:center;
+color:rgba(255,255,255,.7);
+font-size:10px;
+margin-top:15px;
+">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =========================================================
+MAIN APP
+========================================================= -->
+
+<div class="app">
+
+<section
+class="player"
+id="playerCard"
+>
+
+<div class="cover-wrapper">
+
+<img
+id="cover"
+class="cover"
+src="logo.png"
+alt="Album art"
+>
+
+</div>
+
+<div class="middle">
+
+<div
+id="title"
+class="title"
+>
+My Playlist
+</div>
+
+<div
+id="artist"
+class="artist"
+>
+YouTube Music
+</div>
+
+<div
+class="seek"
+id="seek"
+>
+
+<div
+class="fill"
+id="fill">
+</div>
+
+</div>
+
+<div class="info-bottom-row">
+
+<div class="time-info">
+<span id="current">0:00</span> / <span id="duration">0:00</span>
+</div>
+
+<button
+class="playlist-toggle-btn"
+onclick="toggleDrawer()"
+>
+<svg viewBox="0 0 24 24">
+<path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
+</svg>
+<span>Playlist</span>
+</button>
+
+</div>
+
+</div>
+
+<div class="controls">
+
+<button
+class="btn"
+id="videoToggleBtn"
+onclick="toggleVideoPopup()"
+title="Toggle Video Popup"
+>
+
+<svg
+id="videoToggleIcon"
+viewBox="0 0 24 24"
+>
+
+<path d="
+M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z
+"/>
+
+</svg>
+
+</button>
+
+<button
+class="play"
+id="play"
+onclick="togglePlay()"
+>
+
+<svg
+id="play-icon"
+viewBox="0 0 24 24"
+>
+
+<path d="
+M8 5v14l11-7z
+"/>
+
+</svg>
+
+</button>
+
+<div class="vol-container">
+
+<button
+class="btn"
+onclick="toggleVolume()"
+>
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z
+"/>
+
+</svg>
+
+</button>
+
+<div
+class="vol-slider-wrapper"
+id="volWrapper"
+>
+
+<input
+type="range"
+class="vol-slider"
+id="volSlider"
+min="0"
+max="100"
+value="100"
+oninput="changeVolume(this.value)"
+>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+
+/* =========================================================
+DIGITAL CLOCK
+========================================================= */
+
+function updateDigitalClock(){
+
+const now=new Date();
+
+const time=
+new Intl.DateTimeFormat(
+"en-US",
+{
+timeZone:"Asia/Dhaka",
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit",
+hour12:true
+}
+).format(now);
+
+const date=
+new Intl.DateTimeFormat(
+"en-US",
+{
+timeZone:"Asia/Dhaka",
+day:"2-digit",
+month:"long",
+year:"numeric"
+}
+).format(now);
+
+document.getElementById(
+"clockTime"
+).textContent=time;
+
+document.getElementById(
+"clockDate"
+).textContent=date.toUpperCase();
+
+}
+
+updateDigitalClock();
+
+setInterval(
+updateDigitalClock,
+1000
+);
+
+
+/* =========================================================
+YOUTUBE PLAYLIST
+========================================================= */
+
+const PLAYLIST_ID="PLbvY05KVYwoo";
+
+let player=null;
+let playing=false;
+
+let playlistItems=[];
+let sortedPlaylistItems=[];
+let sortedPlaylistData=[];
+
+let currentSortedIndex=0;
+let sortingReady=false;
+
+let volTimer=null;
+let isDragging=false;
+
+let swipeStartX=0;
+let swipeStartY=0;
+let swipeActive=false;
+let swipeFromSeek=false;
+
+let changingTrack=false;
+
+
+/* =========================================================
+YOUTUBE API
+========================================================= */
+
+function onYouTubeIframeAPIReady(){
+
+player=new YT.Player(
+"yt",
+{
+
+width:"100%",
+height:"100%",
+
+playerVars:{
+
+autoplay:0,
+
+controls:1,
+
+disablekb:0,
+
+fs:1,
+
+modestbranding:1,
+
+playsinline:1,
+
+rel:0,
+
+iv_load_policy:3,
+
+listType:"playlist",
+
+list:PLAYLIST_ID
+
+},
+
+events:{
+
+onReady:ready,
+onStateChange:state
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+READY
+========================================================= */
+
+function ready(){
+
+loadPlaylistItems();
+
+setInterval(
+updateProgress,
+250
+);
+
+}
+
+
+/* =========================================================
+PLAYER STATE
+========================================================= */
+
+function state(e){
+
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
+
+highlightActiveTrack();
+
+if(
+e.data===YT.PlayerState.PLAYING
+){
+
+playing=true;
+
+playBtn.classList.add(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+cover.classList.add(
+"spinning"
+);
+
+updateInfo();
+
+}
+
+else if(
+e.data===YT.PlayerState.PAUSED
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
+}
+
+else if(
+e.data===YT.PlayerState.ENDED
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
+if(!changingTrack){
+
+setTimeout(
+nextSong,
+100
+);
+
+}
+
+}
+
+}
+
+
+/* =========================================================
+PLAY / PAUSE
+========================================================= */
+
+function togglePlay(){
+
+if(!player)return;
+
+try{
+
+if(playing){
+
+player.pauseVideo();
+
+}
+
+else{
+
+const currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+if(
+sortedPlaylistItems.length>0 &&
+sortingReady &&
+!currentId
+){
+
+player.loadVideoById(
+sortedPlaylistItems[currentSortedIndex]
+);
+
+}
+
+else{
+
+player.playVideo();
+
+}
+
+}
+
+}
+catch(e){}
+
+}
+
+
+/* =========================================================
+VIDEO POPUP
+========================================================= */
+
+function toggleVideoPopup(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const overlay=
+document.getElementById(
+"videoOverlay"
+);
+
+const iconSvg=
+document.getElementById(
+"videoToggleIcon"
+);
+
+const opening=
+!popup.classList.contains(
+"active"
+);
+
+if(opening){
+
+popup.classList.add(
+"active"
+);
+
+overlay.classList.add(
+"active"
+);
+
+document.body.classList.add(
+"popup-active"
+);
+
+iconSvg.innerHTML=
+'<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
+
+}
+
+else{
+
+popup.classList.remove(
+"active"
+);
+
+overlay.classList.remove(
+"active"
+);
+
+document.body.classList.remove(
+"popup-active"
+);
+
+iconSvg.innerHTML=
+'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>';
+
+}
+
+}
+
+
+/* =========================================================
+RESIZE
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{}
+);
+
+
+/* =========================================================
+VOLUME
+========================================================= */
+
+function resetVolTimer(){
+
+if(volTimer){
+
+clearTimeout(
+volTimer
+);
+
+}
+
+volTimer=setTimeout(
+()=>{
+
+document
+.getElementById(
+"volWrapper"
+)
+.classList.remove(
+"active"
+);
+
+},
+3000
+);
+
+}
+
+function toggleVolume(){
+
+const wrapper=
+document.getElementById(
+"volWrapper"
+);
+
+if(
+wrapper.classList.contains(
+"active"
+)
+){
+
+wrapper.classList.remove(
+"active"
+);
+
+if(volTimer){
+
+clearTimeout(
+volTimer
+);
+
+}
+
+}
+
+else{
+
+wrapper.classList.add(
+"active"
+);
+
+resetVolTimer();
+
+}
+
+}
+
+function changeVolume(val){
+
+if(
+player &&
+typeof player.setVolume===
+"function"
+){
+
+player.setVolume(val);
+
+}
+
+resetVolTimer();
+
+}
+
+
+/* =========================================================
+NEXT SONG
+========================================================= */
+
+function nextSong(){
+
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+const nextIndex=
+(currentSortedIndex+1)%
+sortedPlaylistItems.length;
+
+currentSortedIndex=
+nextIndex;
+
+playSpecificTrack(
+nextIndex
+);
+
+}
+
+
+/* =========================================================
+PREVIOUS SONG
+========================================================= */
+
+function previousSong(){
+
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+const previousIndex=
+(currentSortedIndex-1+
+sortedPlaylistItems.length)%
+sortedPlaylistItems.length;
+
+currentSortedIndex=
+previousIndex;
+
+playSpecificTrack(
+previousIndex
+);
+
+}
+
+
+/* =========================================================
+FORCE UPDATE UI
+========================================================= */
+
+function forceUpdateUI(index){
+
+if(
+!sortedPlaylistData[index]
+)
+return;
+
+const data=
+sortedPlaylistData[index];
+
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
+
+document.getElementById(
+"title"
+).textContent=
+data.title || "YouTube Music";
+
+document.getElementById(
+"artist"
+).textContent=
+data.artist || "YouTube Music";
+
+currentSortedIndex=index;
+
+highlightActiveTrack();
+
+}
+
+
+/* =========================================================
+SWIPE
+========================================================= */
+
+const playerCard=
+document.getElementById(
+"playerCard"
+);
+
+const seekElement=
+document.getElementById(
+"seek"
+);
+
+playerCard.addEventListener(
+"pointerdown",
+e=>{
+
+if(
+e.target.closest(".controls") ||
+e.target.closest(".btn") ||
+e.target.closest(".play") ||
+e.target.closest(".playlist-toggle-btn")
+){
+
+swipeActive=false;
+return;
+
+}
+
+swipeStartX=e.clientX;
+swipeStartY=e.clientY;
+
+swipeFromSeek=
+!!e.target.closest("#seek");
+
+swipeActive=true;
+
+}
+);
+
+playerCard.addEventListener(
+"pointerup",
+e=>{
+
+if(!swipeActive)
+return;
+
+const endX=e.clientX;
+const endY=e.clientY;
+
+const dx=endX-swipeStartX;
+const dy=endY-swipeStartY;
+
+if(swipeFromSeek){
+
+swipeActive=false;
+return;
+
+}
+
+if(Math.abs(dx)<50){
+
+swipeActive=false;
+return;
+
+}
+
+if(
+Math.abs(dy)>
+Math.abs(dx)
+){
+
+swipeActive=false;
+return;
+
+}
+
+if(dx<-50){
+
+nextSong();
+
+}
+
+else if(dx>50){
+
+previousSong();
+
+}
+
+swipeActive=false;
+
+}
+);
+
+playerCard.addEventListener(
+"pointercancel",
+()=>{
+
+swipeActive=false;
+
+}
+);
+
+
+/* =========================================================
+SEEK
+========================================================= */
+
+function getSeekPosition(
+clientX,
+el
+){
+
+const rect=
+el.getBoundingClientRect();
+
+if(!rect.width)
+return 0;
+
+return Math.max(
+0,
+Math.min(
+1,
+(clientX-rect.left)/
+rect.width
+)
+);
+
+}
+
+function updateSeekVisual(pos){
+
+document.getElementById(
+"fill"
+).style.width=
+(pos*100)+"%";
+
+if(
+player &&
+typeof player.getDuration===
+"function"
+){
+
+const duration=
+player.getDuration();
+
+if(duration){
+
+document.getElementById(
+"current"
+).textContent=
+format(pos*duration);
+
+document.getElementById(
+"duration"
+).textContent=
+format(duration);
+
+}
+
+}
+
+}
+
+seekElement.addEventListener(
+"pointerdown",
+e=>{
+
+e.preventDefault();
+e.stopPropagation();
+
+isDragging=true;
+
+try{
+
+seekElement.setPointerCapture(
+e.pointerId
+);
+
+}
+catch(err){}
+
+updateSeekVisual(
+getSeekPosition(
+e.clientX,
+seekElement
+)
+);
+
+},
+{
+passive:false
+}
+);
+
+seekElement.addEventListener(
+"pointermove",
+e=>{
+
+if(!isDragging)
+return;
+
+e.preventDefault();
+e.stopPropagation();
+
+updateSeekVisual(
+getSeekPosition(
+e.clientX,
+seekElement
+)
+);
+
+},
+{
+passive:false
+}
+);
+
+seekElement.addEventListener(
+"pointerup",
+e=>{
+
+if(!isDragging)
+return;
+
+e.preventDefault();
+e.stopPropagation();
+
+const pos=
+getSeekPosition(
+e.clientX,
+seekElement
+);
+
+updateSeekVisual(pos);
+
+if(
+player &&
+typeof player.getDuration===
+"function"
+){
+
+const duration=
+player.getDuration();
+
+if(duration){
+
+player.seekTo(
+pos*duration,
+true
+);
+
+}
+
+}
+
+isDragging=false;
+
+try{
+
+seekElement.releasePointerCapture(
+e.pointerId
+);
+
+}
+catch(err){}
+
+},
+{
+passive:false
+}
+);
+
+
+/* =========================================================
+PROGRESS
+========================================================= */
+
+function updateProgress(){
+
+if(isDragging)
+return;
+
+if(
+!player ||
+typeof player.getCurrentTime!==
+"function"
+)
+return;
+
+try{
+
+const current=
+player.getCurrentTime();
+
+const duration=
+player.getDuration();
+
+if(!duration)
+return;
+
+const pos=
+Math.max(
+0,
+Math.min(
+1,
+current/duration
+)
+);
+
+document.getElementById(
+"fill"
+).style.width=
+(pos*100)+"%";
+
+document.getElementById(
+"current"
+).textContent=
+format(current);
+
+document.getElementById(
+"duration"
+).textContent=
+format(duration);
+
+}
+catch(e){}
+
+}
+
+
+/* =========================================================
+FORMAT
+========================================================= */
+
+function format(s){
+
+if(
+!s ||
+isNaN(s)
+){
+
+return "0:00";
+
+}
+
+s=Math.floor(s);
+
+return Math.floor(s/60)+":"+
+String(
+s%60
+).padStart(
+2,"0"
+);
+
+}
+
+
+/* =========================================================
+LOAD PLAYLIST
+========================================================= */
+
+function loadPlaylistItems(){
+
+if(
+!player ||
+typeof player.getPlaylist!==
+"function"
+)
+return;
+
+const ids=
+player.getPlaylist();
+
+if(
+!ids ||
+ids.length===0
+){
+
+setTimeout(
+loadPlaylistItems,
+600
+);
+
+return;
+
+}
+
+playlistItems=ids;
+
+sortedPlaylistItems=[];
+sortedPlaylistData=[];
+
+sortingReady=false;
+
+const requests=
+playlistItems.map(
+(id,index)=>{
+
+return fetch(
+`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
+)
+
+.then(
+r=>r.json()
+)
+
+.then(
+data=>{
+
+return{
+
+id:id,
+
+title:
+(data && data.title)
+?
+data.title
+:
+`Track #${index+1}`,
+
+artist:
+(data && data.author_name)
+?
+data.author_name
+:
+"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+)
+
+.catch(
+()=>{
+
+return{
+
+id:id,
+
+title:`Track #${index+1}`,
+
+artist:"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+);
+
+});
+
+Promise.all(requests)
+.then(
+results=>{
+
+results.sort(
+(a,b)=>{
+
+return a.title.localeCompare(
+b.title,
+undefined,
+{
+numeric:true,
+sensitivity:"base"
+}
+);
+
+});
+
+sortedPlaylistData=results;
+
+sortedPlaylistItems=
+results.map(
+item=>item.id
+);
+
+sortingReady=true;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const currentIndex=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(currentIndex!==-1){
+
+currentSortedIndex=
+currentIndex;
+
+}
+
+}
+
+renderSortedPlaylists();
+
+highlightActiveTrack();
+
+updateInfo();
+
+}
+);
+
+}
+
+
+/* =========================================================
+RENDER PLAYLISTS
+========================================================= */
+
+function renderSortedPlaylists(){
+
+renderMainPlaylist();
+
+}
+
+
+/* =========================================================
+MAIN PLAYLIST
+========================================================= */
+
+function renderMainPlaylist(){
+
+const list=
+document.getElementById(
+"songList"
+);
+
+list.innerHTML="";
+
+sortedPlaylistData.forEach(
+(data,index)=>{
+
+const item=
+document.createElement(
+"div"
+);
+
+item.className=
+"song-item";
+
+item.id=
+`track-${index}`;
+
+item.onclick=()=>{
+
+playSpecificTrack(
+index
+);
+
+};
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
+alt="thumb"
+>
+
+<div class="song-item-info">
+
+<div class="song-item-title">
+${escapeHtml(data.title)}
+</div>
+
+<div class="song-item-artist">
+${escapeHtml(data.artist)}
+</div>
+
+</div>
+
+`;
+
+list.appendChild(item);
+
+});
+
+}
+
+
+/* =========================================================
+PLAYLIST SEARCH FILTER & CLEAR FUNCTIONS
+========================================================= */
+
+function filterPlaylist(query){
+const filter = query.toLowerCase();
+const items = document.querySelectorAll(".song-item");
+const clearBtn = document.getElementById("searchClearBtn");
+
+if(query.length > 0){
+clearBtn.style.display = "block";
+} else {
+clearBtn.style.display = "none";
+}
+
+items.forEach(item => {
+const title = item.querySelector(".song-item-title").textContent.toLowerCase();
+const artist = item.querySelector(".song-item-artist").textContent.toLowerCase();
+
+if(title.includes(filter) || artist.includes(filter)){
+item.style.display = "flex";
+} else {
+item.style.display = "none";
+}
+});
+}
+
+function clearSearch(){
+const searchInput = document.getElementById("drawerSearch");
+searchInput.value = "";
+filterPlaylist("");
+}
+
+
+/* =========================================================
+ESCAPE HTML
+========================================================= */
+
+function escapeHtml(text){
+
+if(!text)
+return "";
+
+const div=
+document.createElement(
+"div"
+);
+
+div.textContent=text;
+
+return div.innerHTML;
+
+}
+
+
+/* =========================================================
+PLAY SPECIFIC TRACK
+========================================================= */
+
+function playSpecificTrack(index){
+
+if(
+!player ||
+!sortedPlaylistData[index]
+)
+return;
+
+const data=
+sortedPlaylistData[index];
+
+const id=data.id;
+
+currentSortedIndex=index;
+
+forceUpdateUI(index);
+
+changingTrack=true;
+
+try{
+
+player.loadVideoById(id);
+
+}
+catch(e){
+
+changingTrack=false;
+
+return;
+
+}
+
+setTimeout(
+()=>{
+
+changingTrack=false;
+
+},
+700
+);
+
+const drawer=
+document.getElementById(
+"drawer"
+);
+
+const drawerOverlay=
+document.getElementById(
+"overlay"
+);
+
+drawer.classList.remove(
+"open"
+);
+
+drawerOverlay.classList.remove(
+"active"
+);
+
+highlightActiveTrack();
+
+}
+
+
+/* =========================================================
+ACTIVE MAIN TRACK
+========================================================= */
+
+function highlightActiveTrack(){
+
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+document
+.querySelectorAll(
+".song-item"
+)
+.forEach(
+(item,index)=>{
+
+item.classList.toggle(
+"active",
+sortedPlaylistItems[index]===currentId
+);
+
+});
+
+}
+
+
+/* =========================================================
+UPDATE INFO
+========================================================= */
+
+function updateInfo(){
+
+if(
+!player ||
+typeof player.getVideoData!==
+"function"
+)
+return;
+
+try{
+
+const d=
+player.getVideoData();
+
+if(
+!d ||
+!d.video_id
+)
+return;
+
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+
+if(d.title){
+
+document.getElementById(
+"title"
+).textContent=d.title;
+
+}
+
+if(d.author){
+
+document.getElementById(
+"artist"
+).textContent=d.author;
+
+}
+
+const sortedIndex=
+sortedPlaylistItems.indexOf(
+d.video_id
+);
+
+if(sortedIndex!==-1){
+
+currentSortedIndex=sortedIndex;
+
+}
+
+highlightActiveTrack();
+
+}
+catch(e){}
+
+}
+
+
+/* =========================================================
+DRAWER
+========================================================= */
+
+function toggleDrawer(){
+
+const drawer=
+document.getElementById(
+"drawer"
+);
+
+const overlay=
+document.getElementById(
+"overlay"
+);
+
+const opening=
+!drawer.classList.contains(
+"open"
+);
+
+drawer.classList.toggle(
+"open",
+opening
+);
+
+overlay.classList.toggle(
+"active",
+opening
+);
+
+if(
+opening &&
+!sortingReady
+){
+
+loadPlaylistItems();
+
+}
+
+}
+
+
+/* =========================================================
+INITIAL
+========================================================= */
+
+</script>
+
 </body>
 </html>
