@@ -36,6 +36,7 @@ position:relative;
 overflow-x:hidden!important;
 }
 
+
 /* =========================================================
 BACKGROUND
 ========================================================= */
@@ -60,9 +61,10 @@ backface-visibility:hidden;
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.0);
+background:rgba(0,0,0,0);
 pointer-events:none;
 }
+
 
 /* MOBILE BACKGROUND */
 
@@ -74,6 +76,7 @@ background-image:url("background.jpg");
 
 }
 
+
 /* DESKTOP BACKGROUND */
 
 @media(min-width:769px){
@@ -84,8 +87,9 @@ background-image:url("desktop.jpg");
 
 }
 
+
 /* =========================================================
-DIGITAL CLOCK - COMMON
+DIGITAL CLOCK
 ========================================================= */
 
 .digital-clock{
@@ -108,9 +112,6 @@ user-select:none;
 -webkit-user-select:none;
 }
 
-/* =========================================================
-DESKTOP DIGITAL CLOCK
-========================================================= */
 
 @media(min-width:769px){
 
@@ -158,9 +159,6 @@ text-shadow:
 
 }
 
-/* =========================================================
-MOBILE DIGITAL CLOCK
-========================================================= */
 
 @media(max-width:768px){
 
@@ -208,52 +206,11 @@ text-shadow:
 
 }
 
-/* =========================================================
-CLOCK HIDE WHEN VIDEO ON
-========================================================= */
 
 body.popup-active .digital-clock{
 display:none;
 }
 
-/* =========================================================
-PLAYLIST TOGGLE BUTTON (CENTERED)
-========================================================= */
-
-.playlist-toggle-btn{
-background:rgba(0,0,0,.25);
-border:1px solid rgba(255,255,255,.15);
-color:rgba(255,255,255,.9);
-font-size:10px;
-font-weight:600;
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
-display:flex;
-align-items:center;
-gap:5px;
-cursor:pointer;
-touch-action:manipulation;
--webkit-tap-highlight-color:transparent;
-padding:3px 8px;
-border-radius:15px;
-transition: transform .2s, background .2s;
-position:relative;
-z-index:1611;
-margin-top: 15px;
-
-width:max-content;
-grid-column: 2;
-}
-
-.playlist-toggle-btn:active{
-transform:scale(.92);
-}
-
-.playlist-toggle-btn svg{
-width:13px;
-height:13px;
-fill:#fff;
-}
 
 /* =========================================================
 VIDEO OVERLAY
@@ -276,6 +233,7 @@ pointer-events:none!important;
 display:block;
 pointer-events:none!important;
 }
+
 
 /* =========================================================
 VIDEO SECTION
@@ -300,6 +258,7 @@ align-items:center;
 pointer-events:none;
 }
 
+
 /* =========================================================
 VIDEO POPUP
 ========================================================= */
@@ -313,13 +272,13 @@ height:auto;
 
 background:#000;
 
-border-radius:0px;
+border-radius:0;
 
 overflow:hidden;
 
 z-index:1701;
 
-border:0px solid rgba(255,255,255,.25);
+border:0;
 
 box-shadow:
 0 25px 50px rgba(0,0,0,.7);
@@ -346,8 +305,9 @@ pointer-events:auto;
 transform:scale(1);
 }
 
+
 /* =========================================================
-YOUTUBE IFRAME
+YOUTUBE
 ========================================================= */
 
 #yt{
@@ -379,6 +339,7 @@ pointer-events:auto!important;
 touch-action:auto!important;
 }
 
+
 /* =========================================================
 VIDEO PLAYLIST
 ========================================================= */
@@ -386,10 +347,6 @@ VIDEO PLAYLIST
 .video-playlist{
 display:none!important;
 }
-
-/* =========================================================
-VIDEO SONG LIST
-========================================================= */
 
 .video-song-list{
 width:100%;
@@ -401,13 +358,10 @@ overflow-x:hidden;
 display:none!important;
 }
 
-/* =========================================================
-VIDEO SONG ITEM
-========================================================= */
-
 .video-song-item{
 display:none!important;
 }
+
 
 /* =========================================================
 APP
@@ -431,28 +385,32 @@ padding:0 16px 65px;
 pointer-events:auto;
 }
 
+
 /* =========================================================
-MUSIC PLAYER
+IPOD CLASSIC PLAYER
 ========================================================= */
 
 .player{
-width:min(460px,96%);
+width:min(430px,94%);
+height:150px;
 
-height:124px;
+padding:10px;
 
-padding:14px 16px;
+background:
+linear-gradient(
+180deg,
+rgba(248,248,248,.98),
+rgba(205,205,205,.98)
+);
 
-border:1px solid rgba(255,255,255,.18);
+border:1px solid rgba(0,0,0,.5);
 
-border-radius:60px;
-
-background:rgba(20,20,20,.35);
-
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
+border-radius:18px;
 
 box-shadow:
-0 20px 50px rgba(0,0,0,.45);
+0 18px 40px rgba(0,0,0,.55),
+inset 0 1px 0 rgba(255,255,255,.95),
+inset 0 -1px 0 rgba(0,0,0,.18);
 
 display:flex;
 align-items:center;
@@ -472,6 +430,42 @@ transform .35s cubic-bezier(.2,.8,.2,1),
 width .35s ease;
 }
 
+
+/* =========================================================
+IPOD TOP GLOSS
+========================================================= */
+
+.player::before{
+content:"";
+
+position:absolute;
+
+left:0;
+right:0;
+top:0;
+
+height:45%;
+
+border-radius:18px 18px 0 0;
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.35),
+rgba(255,255,255,0)
+);
+
+pointer-events:none;
+
+z-index:0;
+}
+
+.player > *{
+position:relative;
+z-index:1;
+}
+
+
 /* =========================================================
 COVER
 ========================================================= */
@@ -479,8 +473,8 @@ COVER
 .cover-wrapper{
 position:relative;
 
-width:84px;
-height:84px;
+width:76px;
+height:76px;
 
 flex-shrink:0;
 
@@ -488,67 +482,46 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-border-radius:50%;
+border-radius:7px;
 
 overflow:hidden;
 
-border:1px solid rgba(255,255,255,.3);
+background:#111;
+
+border:1px solid rgba(0,0,0,.5);
+
+box-shadow:
+0 2px 6px rgba(0,0,0,.35);
 }
 
 .cover{
-width:137%;
-height:137%;
+width:100%;
+height:100%;
 
-margin:-18.5%;
+margin:0;
 
-border-radius:50%;
+border-radius:0;
 
 object-fit:cover;
 object-position:center;
 
 background:#222;
 
-animation:spin 8s linear infinite;
+animation:none;
 animation-play-state:paused;
 }
 
+
+/* Remove vinyl centre */
+
 .cover-wrapper::after{
-content:"";
-
-position:absolute;
-
-width:16px;
-height:16px;
-
-background:rgba(20,20,20,.85);
-
-border:2px solid rgba(255,255,255,.3);
-
-border-radius:50%;
-
-left:50%;
-top:50%;
-
-transform:translate(-50%,-50%);
-
-z-index:2;
+display:none;
 }
 
 .cover.spinning{
-animation-play-state:running;
+animation:none;
 }
 
-@keyframes spin{
-
-from{
-transform:rotate(0deg);
-}
-
-to{
-transform:rotate(360deg);
-}
-
-}
 
 /* =========================================================
 SONG INFO
@@ -558,13 +531,18 @@ SONG INFO
 flex:1;
 min-width:0;
 
+height:100%;
+
 display:flex;
 flex-direction:column;
+
 justify-content:center;
+
+padding:8px 2px;
 }
 
 .title{
-font-size:15px;
+font-size:13px;
 
 font-weight:700;
 
@@ -572,41 +550,50 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-color:#fff;
+color:#111;
 
-letter-spacing:.2px;
+letter-spacing:0;
+
+line-height:1.2;
+
+text-shadow:
+0 1px 0 rgba(255,255,255,.8);
 }
 
 .artist{
-font-size:11.5px;
+font-size:10px;
 
-color:rgba(255,255,255,.65);
+color:#555;
 
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-margin-top:1px;
-margin-bottom:5px;
+margin-top:2px;
+
+margin-bottom:8px;
 }
 
+
 /* =========================================================
-SEEK
+IPOD SEEK BAR
 ========================================================= */
 
 .seek{
 position:relative;
 
 width:100%;
-height:4.5px;
+height:5px;
 
-border-radius:10px;
+border-radius:2px;
 
-background:rgba(255,255,255,.2);
+background:#aaa;
+
+border:1px solid #888;
 
 cursor:pointer;
 
-margin-bottom:6px;
+margin-bottom:5px;
 
 touch-action:none;
 
@@ -622,8 +609,8 @@ position:absolute;
 top:-12px;
 bottom:-12px;
 
-left:-10px;
-right:-10px;
+left:-8px;
+right:-8px;
 
 z-index:1;
 }
@@ -637,19 +624,29 @@ top:0;
 height:100%;
 width:0;
 
-background:#fff;
+background:
+linear-gradient(
+180deg,
+#555,
+#111
+);
 
-border-radius:10px;
+border-radius:1px;
 
 pointer-events:none;
 
 z-index:2;
 }
 
-.time-display{
-font-size:10px;
 
-color:rgba(255,255,255,.6);
+/* =========================================================
+TIME
+========================================================= */
+
+.time-display{
+font-size:9px;
+
+color:#555;
 
 font-variant-numeric:tabular-nums;
 
@@ -657,19 +654,92 @@ display:none;
 }
 
 .info-bottom-row{
-display: grid;
-grid-template-columns: 1fr auto 1fr;
-align-items: center;
-width: 100%;
-margin-top: 4px;
+display:grid;
+
+grid-template-columns:1fr auto 1fr;
+
+align-items:center;
+
+width:100%;
+
+margin-top:2px;
 }
 
 .time-info{
-font-size:10px;
-color:rgba(255,255,255,.65);
+font-size:9px;
+
+color:#555;
+
 font-variant-numeric:tabular-nums;
-grid-column: 1;
+
+grid-column:1;
 }
+
+
+/* =========================================================
+PLAYLIST BUTTON
+========================================================= */
+
+.playlist-toggle-btn{
+background:
+linear-gradient(
+180deg,
+#fafafa,
+#d2d2d2
+);
+
+border:1px solid #999;
+
+color:#222;
+
+font-size:8px;
+
+font-weight:700;
+
+display:flex;
+
+align-items:center;
+
+gap:3px;
+
+cursor:pointer;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+padding:3px 7px;
+
+border-radius:4px;
+
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,.9),
+0 1px 2px rgba(0,0,0,.25);
+
+transition:transform .15s;
+
+position:relative;
+
+z-index:1611;
+
+margin-top:0;
+
+width:max-content;
+
+grid-column:2;
+}
+
+.playlist-toggle-btn:active{
+transform:scale(.92);
+}
+
+.playlist-toggle-btn svg{
+width:11px;
+height:11px;
+
+fill:#222;
+}
+
 
 /* =========================================================
 CONTROLS
@@ -680,7 +750,7 @@ display:flex;
 
 align-items:center;
 
-gap:6px;
+gap:4px;
 
 flex-shrink:0;
 
@@ -690,14 +760,21 @@ z-index:1610;
 }
 
 .btn{
-width:28px;
-height:28px;
+width:27px;
+height:27px;
 
-border:0;
+border:1px solid #999;
 
-background:transparent;
+border-radius:50%;
 
-color:rgba(255,255,255,.9);
+background:
+linear-gradient(
+180deg,
+#fff,
+#cfcfcf
+);
+
+color:#222;
 
 display:flex;
 
@@ -715,14 +792,84 @@ touch-action:manipulation;
 position:relative;
 
 z-index:1611;
+
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,.9),
+0 1px 2px rgba(0,0,0,.3);
 }
 
 .btn svg{
-width:20px;
-height:20px;
+width:15px;
+height:15px;
 
-fill:#fff;
+fill:#222;
 }
+
+.btn:active{
+transform:scale(.90);
+}
+
+
+/* =========================================================
+PLAY BUTTON
+========================================================= */
+
+.play{
+width:38px;
+height:38px;
+
+border-radius:50%;
+
+border:1px solid #888;
+
+background:
+linear-gradient(
+180deg,
+#ffffff,
+#c5c5c5
+);
+
+color:#111;
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,.95),
+0 2px 4px rgba(0,0,0,.35);
+
+cursor:pointer;
+
+flex-shrink:0;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+position:relative;
+
+z-index:1611;
+}
+
+.play svg{
+width:17px;
+height:17px;
+
+fill:#111;
+
+margin-left:2px;
+}
+
+.play.playing svg{
+margin-left:0;
+}
+
+.play:active{
+transform:scale(.90);
+}
+
 
 /* =========================================================
 VOLUME
@@ -732,18 +879,19 @@ VOLUME
 display:flex;
 
 align-items:center;
-gap:4px;
 
-background:rgba(0,0,0,.25);
+gap:3px;
 
-border:1px solid rgba(255,255,255,.15);
+background:transparent;
 
-padding:4px 6px;
+border:0;
 
-border-radius:20px;
+padding:0;
 
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
+border-radius:0;
+
+backdrop-filter:none;
+-webkit-backdrop-filter:none;
 }
 
 .vol-slider-wrapper{
@@ -762,7 +910,7 @@ opacity .2s ease;
 }
 
 .vol-slider-wrapper.active{
-width:48px;
+width:45px;
 
 opacity:1;
 
@@ -773,12 +921,12 @@ margin-left:2px;
 -webkit-appearance:none;
 appearance:none;
 
-width:48px;
-height:3.5px;
+width:45px;
+height:3px;
 
-background:rgba(255,255,255,.3);
+background:#999;
 
-border-radius:10px;
+border-radius:2px;
 
 outline:none;
 
@@ -789,16 +937,14 @@ cursor:pointer;
 -webkit-appearance:none;
 appearance:none;
 
-width:10px;
-height:10px;
+width:9px;
+height:9px;
 
 border-radius:50%;
 
-background:#fff;
+background:#222;
 
 cursor:pointer;
-
-box-shadow:0 0 5px rgba(0,0,0,.5);
 }
 
 @supports (-webkit-touch-callout:none){
@@ -809,60 +955,107 @@ display:none!important;
 
 }
 
+
 /* =========================================================
-PLAY
+MOBILE IPOD
 ========================================================= */
 
+@media(max-width:480px){
+
+.app{
+padding-bottom:60px;
+}
+
+.player{
+width:94%;
+
+height:142px;
+
+padding:9px;
+
+border-radius:16px;
+
+gap:8px;
+}
+
+.player::before{
+border-radius:16px 16px 0 0;
+}
+
+.cover-wrapper{
+width:72px;
+height:72px;
+}
+
+.title{
+font-size:12.5px;
+}
+
+.artist{
+font-size:9.5px;
+
+margin-bottom:7px;
+}
+
 .play{
-width:40px;
-height:40px;
-
-border-radius:50%;
-
-border:0;
-
-background:#fff;
-
-color:#000;
-
-display:flex;
-
-align-items:center;
-justify-content:center;
-
-box-shadow:
-0 4px 15px rgba(0,0,0,.3);
-
-cursor:pointer;
-
-flex-shrink:0;
-
-touch-action:manipulation;
-
--webkit-tap-highlight-color:transparent;
-
-position:relative;
-
-z-index:1611;
+width:36px;
+height:36px;
 }
 
-.play svg{
-width:18px;
-height:18px;
-
-fill:#000;
-
-margin-left:2px;
+.btn{
+width:25px;
+height:25px;
 }
 
-.play.playing svg{
-margin-left:0;
+.playlist-toggle-btn{
+font-size:8px;
+
+padding:3px 6px;
 }
 
-.btn:active,
-.play:active{
-transform:scale(.90);
+.video-section{
+top:18.17%;
+left:49.65%;
+
+right:auto;
+
+transform:translateX(-50%);
+
+width:84.55%;
+
+opacity:1;
 }
+
+body.popup-active .video-section{
+transform:translateX(-50%);
+}
+
+.video-popup{
+width:100%;
+
+aspect-ratio:16 / 9;
+
+height:auto;
+
+border-radius:0;
+
+box-shadow:none!important;
+}
+
+.video-playlist{
+display:none!important;
+}
+
+.video-song-list{
+display:none!important;
+}
+
+.video-song-item{
+display:none!important;
+}
+
+}
+
 
 /* =========================================================
 DESKTOP
@@ -890,6 +1083,7 @@ height:124px;
 margin:0;
 
 transform:scale(.85) translateY(25px);
+
 transform-origin:center bottom;
 }
 
@@ -899,7 +1093,9 @@ display:none;
 position:fixed;
 
 top:4vh;
+
 right:4vw;
+
 left:auto;
 
 transform:none;
@@ -918,6 +1114,7 @@ body.popup-active .app{
 display:flex;
 
 align-items:flex-end;
+
 justify-content:center;
 
 padding:0 40px 65px;
@@ -930,9 +1127,11 @@ width:min(780px,55vw);
 margin:0;
 
 transform:scale(.82);
+
 transform-origin:center bottom;
 
 position:relative;
+
 top:40px;
 
 z-index:1601;
@@ -949,7 +1148,9 @@ align-items:stretch;
 position:fixed;
 
 top:15.75vh;
+
 right:27vw;
+
 left:auto;
 
 transform:none;
@@ -987,31 +1188,38 @@ pointer-events:auto;
 
 transform:scale(1);
 
-transition: transform .5s cubic-bezier(.2,.8,.2,1);
+transition:
+transform .5s cubic-bezier(.2,.8,.2,1);
 
-border-radius:0px;
+border-radius:0;
 
 z-index:1701;
+
 box-shadow:none!important;
 }
 
 @keyframes tvOpen{
-    from{
-        transform:scale(.75);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
+
+from{
+transform:scale(.75);
+opacity:0;
+}
+
+to{
+transform:scale(1);
+opacity:1;
+}
+
 }
 
 body.popup-active .video-popup{
-    animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
+animation:
+tvOpen .5s cubic-bezier(.2,.8,.2,1);
 }
 
 body.popup-active .video-playlist{
 display:none!important;
+
 box-shadow:none!important;
 }
 
@@ -1029,94 +1237,6 @@ z-index:1610;
 
 }
 
-/* =========================================================
-MOBILE
-========================================================= */
-
-@media(max-width:480px){
-
-.app{
-padding-bottom:60px;
-}
-
-.player{
-height:120px;
-
-padding:12px 12px;
-
-border-radius:58px;
-
-gap:8px;
-}
-
-.cover-wrapper{
-width:76px;
-height:76px;
-}
-
-.title{
-font-size:14px;
-}
-
-.artist{
-font-size:11px;
-}
-
-.play{
-width:38px;
-height:38px;
-}
-
-.playlist-toggle-btn{
-font-size:9.5px;
-padding:3px 7px;
-}
-
-.playlist-drawer{
-width:180px;
-}
-
-.video-section{
-top:18.17%;
-left:49.65%;
-
-right:auto;
-
-transform:translateX(-50%);
-
-width:84.55%;
-
-opacity:1;
-}
-
-body.popup-active .video-section{
-transform:translateX(-50%);
-}
-
-.video-popup{
-width:100%;
-
-aspect-ratio:16 / 9;
-
-height:auto;
-
-border-radius:0px;
-box-shadow:none!important;
-}
-
-.video-playlist{
-display:none!important;
-}
-
-.video-song-list{
-display:none!important;
-}
-
-.video-song-item{
-display:none!important;
-}
-
-}
 
 /* =========================================================
 SMALL HEIGHT
@@ -1139,6 +1259,7 @@ display:none!important;
 
 }
 
+
 /* =========================================================
 VERY SMALL WIDTH
 ========================================================= */
@@ -1158,6 +1279,7 @@ display:none!important;
 }
 
 }
+
 
 /* =========================================================
 DRAWER
@@ -1251,36 +1373,52 @@ border-radius:8px;
 
 .drawer-title{
 font-size:10px;
+
 font-weight:700;
+
 color:#fff;
+
 white-space:nowrap;
+
 cursor:pointer;
 }
 
 .drawer-title:hover{
-opacity:0.8;
+opacity:.8;
 }
 
+
 /* =========================================================
-DRAWER SEARCH BOX & CLEAR BUTTON STYLING
+SEARCH
 ========================================================= */
 
 .drawer-search-container{
 position:relative;
+
 flex:1;
+
 min-width:0;
+
 display:flex;
+
 align-items:center;
 }
 
 .drawer-search-box{
 width:100%;
+
 padding:4px 22px 4px 6px;
+
 background:rgba(255,255,255,.08);
+
 border:1px solid rgba(255,255,255,.15);
+
 border-radius:6px;
+
 color:#fff;
+
 font-size:9.5px;
+
 outline:none;
 }
 
@@ -1290,22 +1428,38 @@ color:rgba(255,255,255,.5);
 
 .search-clear-btn{
 position:absolute;
+
 right:5px;
+
 top:40%;
+
 transform:translateY(-50%);
+
 background:transparent;
+
 border:0;
-color:rgba(255,255,255,0.75);
+
+color:rgba(255,255,255,.75);
+
 font-size:20px;
+
 cursor:pointer;
+
 padding:0 3px;
+
 line-height:1;
+
 display:none;
 }
 
 .search-clear-btn:hover{
 color:#fff;
 }
+
+
+/* =========================================================
+SONG LIST
+========================================================= */
 
 .song-list{
 flex:1;
@@ -1427,9 +1581,11 @@ margin-top:.5px;
 </style>
 </head>
 
+
 <body>
 
 <div class="bg"></div>
+
 
 <!-- =========================================================
 DIGITAL CLOCK
@@ -1453,6 +1609,7 @@ id="clockDate"
 
 </div>
 
+
 <!-- =========================================================
 VIDEO OVERLAY
 ========================================================= -->
@@ -1461,6 +1618,7 @@ VIDEO OVERLAY
 id="videoOverlay"
 class="video-overlay">
 </div>
+
 
 <!-- =========================================================
 VIDEO SECTION
@@ -1479,6 +1637,7 @@ class="video-popup"
 <div id="yt"></div>
 
 </div>
+
 
 <div
 id="videoPlaylist"
@@ -1500,6 +1659,7 @@ Loading...
 
 </div>
 
+
 <!-- =========================================================
 DRAWER
 ========================================================= -->
@@ -1511,6 +1671,7 @@ onclick="toggleDrawer()"
 >
 </div>
 
+
 <div
 class="playlist-drawer"
 id="drawer"
@@ -1518,24 +1679,37 @@ id="drawer"
 
 <div class="drawer-header">
 
-<!-- প্লেলিস্ট টাইটেলে ক্লিক করলে ড্রয়ার হাইড হবে -->
-<div class="drawer-title" onclick="toggleDrawer()" title="Hide Playlist">
+<div
+class="drawer-title"
+onclick="toggleDrawer()"
+title="Hide Playlist"
+>
 Playlist
 </div>
 
-<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
+
 <div class="drawer-search-container">
-<input 
-type="text" 
-class="drawer-search-box" 
-id="drawerSearch" 
-placeholder="Search..." 
+
+<input
+type="text"
+class="drawer-search-box"
+id="drawerSearch"
+placeholder="Search..."
 oninput="filterPlaylist(this.value)"
 >
-<button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">&times;</button>
+
+<button
+class="search-clear-btn"
+id="searchClearBtn"
+onclick="clearSearch()"
+>
+&times;
+</button>
+
 </div>
 
 </div>
+
 
 <div
 class="song-list"
@@ -1557,6 +1731,7 @@ Loading...
 
 </div>
 
+
 <!-- =========================================================
 MAIN APP
 ========================================================= -->
@@ -1568,6 +1743,9 @@ class="player"
 id="playerCard"
 >
 
+
+<!-- ALBUM ART -->
+
 <div class="cover-wrapper">
 
 <img
@@ -1578,6 +1756,9 @@ alt="Album art"
 >
 
 </div>
+
+
+<!-- SONG INFORMATION -->
 
 <div class="middle">
 
@@ -1595,6 +1776,9 @@ class="artist"
 YouTube Music
 </div>
 
+
+<!-- SEEK -->
+
 <div
 class="seek"
 id="seek"
@@ -1607,27 +1791,50 @@ id="fill">
 
 </div>
 
+
+<!-- BOTTOM -->
+
 <div class="info-bottom-row">
 
 <div class="time-info">
-<span id="current">0:00</span> / <span id="duration">0:00</span>
+
+<span id="current">0:00</span>
+/
+<span id="duration">0:00</span>
+
 </div>
+
 
 <button
 class="playlist-toggle-btn"
 onclick="toggleDrawer()"
 >
+
 <svg viewBox="0 0 24 24">
-<path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
+
+<path d="
+M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
+"/>
+
 </svg>
-<span>Playlist</span>
+
+<span>
+Playlist
+</span>
+
 </button>
 
 </div>
 
 </div>
 
+
+<!-- CONTROLS -->
+
 <div class="controls">
+
+
+<!-- VIDEO -->
 
 <button
 class="btn"
@@ -1649,6 +1856,9 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
+
+<!-- PLAY -->
+
 <button
 class="play"
 id="play"
@@ -1668,6 +1878,9 @@ M8 5v14l11-7z
 
 </button>
 
+
+<!-- VOLUME -->
+
 <div class="vol-container">
 
 <button
@@ -1684,6 +1897,7 @@ M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.
 </svg>
 
 </button>
+
 
 <div
 class="vol-slider-wrapper"
@@ -1710,9 +1924,11 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
+
 
 /* =========================================================
 DIGITAL CLOCK
@@ -1872,6 +2088,7 @@ document.getElementById("play-icon");
 
 highlightActiveTrack();
 
+
 if(
 e.data===YT.PlayerState.PLAYING
 ){
@@ -1893,6 +2110,7 @@ updateInfo();
 
 }
 
+
 else if(
 e.data===YT.PlayerState.PAUSED
 ){
@@ -1911,6 +2129,7 @@ cover.classList.remove(
 );
 
 }
+
 
 else if(
 e.data===YT.PlayerState.ENDED
@@ -2017,6 +2236,7 @@ const opening=
 "active"
 );
 
+
 if(opening){
 
 popup.classList.add(
@@ -2035,6 +2255,7 @@ iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
 
 }
+
 
 else{
 
@@ -2056,16 +2277,6 @@ iconSvg.innerHTML=
 }
 
 }
-
-
-/* =========================================================
-RESIZE
-========================================================= */
-
-window.addEventListener(
-"resize",
-()=>{}
-);
 
 
 /* =========================================================
@@ -2098,6 +2309,7 @@ document
 );
 
 }
+
 
 function toggleVolume(){
 
@@ -2137,6 +2349,7 @@ resetVolTimer();
 }
 
 }
+
 
 function changeVolume(val){
 
@@ -2310,6 +2523,7 @@ document.getElementById(
 "seek"
 );
 
+
 playerCard.addEventListener(
 "pointerdown",
 e=>{
@@ -2322,11 +2536,13 @@ e.target.closest(".playlist-toggle-btn")
 ){
 
 swipeActive=false;
+
 return;
 
 }
 
 swipeStartX=e.clientX;
+
 swipeStartY=e.clientY;
 
 swipeFromSeek=
@@ -2336,6 +2552,7 @@ swipeActive=true;
 
 }
 );
+
 
 playerCard.addEventListener(
 "pointerup",
@@ -2353,6 +2570,7 @@ const dy=endY-swipeStartY;
 if(swipeFromSeek){
 
 swipeActive=false;
+
 return;
 
 }
@@ -2360,6 +2578,7 @@ return;
 if(Math.abs(dx)<50){
 
 swipeActive=false;
+
 return;
 
 }
@@ -2370,6 +2589,7 @@ Math.abs(dx)
 ){
 
 swipeActive=false;
+
 return;
 
 }
@@ -2390,6 +2610,7 @@ swipeActive=false;
 
 }
 );
+
 
 playerCard.addEventListener(
 "pointercancel",
@@ -2427,6 +2648,7 @@ rect.width
 
 }
 
+
 function updateSeekVisual(pos){
 
 document.getElementById(
@@ -2461,6 +2683,7 @@ format(duration);
 
 }
 
+
 seekElement.addEventListener(
 "pointerdown",
 e=>{
@@ -2492,6 +2715,7 @@ passive:false
 }
 );
 
+
 seekElement.addEventListener(
 "pointermove",
 e=>{
@@ -2514,6 +2738,7 @@ seekElement
 passive:false
 }
 );
+
 
 seekElement.addEventListener(
 "pointerup",
@@ -2692,6 +2917,7 @@ sortedPlaylistData=[];
 
 sortingReady=false;
 
+
 const requests=
 playlistItems.map(
 (id,index)=>{
@@ -2752,6 +2978,7 @@ originalIndex:index
 
 });
 
+
 Promise.all(requests)
 .then(
 results=>{
@@ -2779,6 +3006,7 @@ item=>item.id
 
 sortingReady=true;
 
+
 let currentId="";
 
 try{
@@ -2789,6 +3017,7 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
+
 
 if(currentId){
 
@@ -2819,7 +3048,7 @@ updateInfo();
 
 
 /* =========================================================
-RENDER PLAYLISTS
+RENDER
 ========================================================= */
 
 function renderSortedPlaylists(){
@@ -2842,6 +3071,7 @@ document.getElementById(
 
 list.innerHTML="";
 
+
 sortedPlaylistData.forEach(
 (data,index)=>{
 
@@ -2863,6 +3093,7 @@ index
 );
 
 };
+
 
 item.innerHTML=`
 
@@ -2893,36 +3124,87 @@ list.appendChild(item);
 
 
 /* =========================================================
-PLAYLIST SEARCH FILTER & CLEAR FUNCTIONS
+SEARCH FILTER
 ========================================================= */
 
 function filterPlaylist(query){
-const filter = query.toLowerCase();
-const items = document.querySelectorAll(".song-item");
-const clearBtn = document.getElementById("searchClearBtn");
 
-if(query.length > 0){
-clearBtn.style.display = "block";
-} else {
-clearBtn.style.display = "none";
+const filter=
+query.toLowerCase();
+
+const items=
+document.querySelectorAll(
+".song-item"
+);
+
+const clearBtn=
+document.getElementById(
+"searchClearBtn"
+);
+
+
+if(query.length>0){
+
+clearBtn.style.display="block";
+
+}
+else{
+
+clearBtn.style.display="none";
+
 }
 
-items.forEach(item => {
-const title = item.querySelector(".song-item-title").textContent.toLowerCase();
-const artist = item.querySelector(".song-item-artist").textContent.toLowerCase();
 
-if(title.includes(filter) || artist.includes(filter)){
-item.style.display = "flex";
-} else {
-item.style.display = "none";
+items.forEach(
+item=>{
+
+const title=
+item
+.querySelector(".song-item-title")
+.textContent
+.toLowerCase();
+
+const artist=
+item
+.querySelector(".song-item-artist")
+.textContent
+.toLowerCase();
+
+
+if(
+title.includes(filter) ||
+artist.includes(filter)
+){
+
+item.style.display="flex";
+
 }
+else{
+
+item.style.display="none";
+
+}
+
 });
+
 }
+
+
+/* =========================================================
+CLEAR SEARCH
+========================================================= */
 
 function clearSearch(){
-const searchInput = document.getElementById("drawerSearch");
-searchInput.value = "";
+
+const searchInput=
+document.getElementById(
+"drawerSearch"
+);
+
+searchInput.value="";
+
 filterPlaylist("");
+
 }
 
 
@@ -2962,13 +3244,15 @@ return;
 const data=
 sortedPlaylistData[index];
 
-const id=data.id;
+const id=
+data.id;
 
 currentSortedIndex=index;
 
 forceUpdateUI(index);
 
 changingTrack=true;
+
 
 try{
 
@@ -2983,6 +3267,7 @@ return;
 
 }
 
+
 setTimeout(
 ()=>{
 
@@ -2991,6 +3276,7 @@ changingTrack=false;
 },
 700
 );
+
 
 const drawer=
 document.getElementById(
@@ -3016,7 +3302,7 @@ highlightActiveTrack();
 
 
 /* =========================================================
-ACTIVE MAIN TRACK
+ACTIVE TRACK
 ========================================================= */
 
 function highlightActiveTrack(){
@@ -3029,6 +3315,7 @@ return;
 
 let currentId="";
 
+
 try{
 
 currentId=
@@ -3037,6 +3324,7 @@ player.getVideoData().video_id;
 
 }
 catch(e){}
+
 
 document
 .querySelectorAll(
@@ -3068,10 +3356,12 @@ typeof player.getVideoData!==
 )
 return;
 
+
 try{
 
 const d=
 player.getVideoData();
+
 
 if(
 !d ||
@@ -3079,10 +3369,12 @@ if(
 )
 return;
 
+
 document.getElementById(
 "cover"
 ).src=
 `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+
 
 if(d.title){
 
@@ -3092,6 +3384,7 @@ document.getElementById(
 
 }
 
+
 if(d.author){
 
 document.getElementById(
@@ -3100,16 +3393,20 @@ document.getElementById(
 
 }
 
+
 const sortedIndex=
 sortedPlaylistItems.indexOf(
 d.video_id
 );
 
+
 if(sortedIndex!==-1){
 
-currentSortedIndex=sortedIndex;
+currentSortedIndex=
+sortedIndex;
 
 }
+
 
 highlightActiveTrack();
 
@@ -3140,6 +3437,7 @@ const opening=
 "open"
 );
 
+
 drawer.classList.toggle(
 "open",
 opening
@@ -3149,6 +3447,7 @@ overlay.classList.toggle(
 "active",
 opening
 );
+
 
 if(
 opening &&
