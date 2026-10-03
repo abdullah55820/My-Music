@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://www.youtube.com">
 <link rel="preconnect" href="https://i.ytimg.com">
 <link rel="preload" as="image" href="background.jpg">
-<link rel="preload" as="image" href="desktop.jpg">
 
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
@@ -60,199 +59,130 @@ backface-visibility:hidden;
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.0);
+background:rgba(0,0,0,.35);
 pointer-events:none;
 }
 
-/* MOBILE BACKGROUND */
-
-@media(max-width:768px){
-
-.bg{
-background-image:url("background.jpg");
-}
-
-}
-
-/* DESKTOP BACKGROUND */
-
-@media(min-width:769px){
-
-.bg{
-background-image:url("desktop.jpg");
-}
-
+body.popup-active .bg{
+filter:blur(20px);
+-webkit-filter:blur(20px);
+transform:scale(1.1);
 }
 
 /* =========================================================
-DIGITAL CLOCK - COMMON
+TOP WIDGETS
 ========================================================= */
 
-.digital-clock{
+.top-widgets{
 position:fixed;
-
+top:14px;
 left:50%;
-top:50%;
+transform:translateX(-50%);
 
-transform:translate(-50%,-50%);
+z-index:2500;
 
-z-index:1500;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
 
-text-align:center;
-
-width:max-content;
-
-pointer-events:none;
-
-user-select:none;
--webkit-user-select:none;
+pointer-events:auto;
 }
 
-/* =========================================================
-DESKTOP DIGITAL CLOCK
-========================================================= */
+.bd-time{
+padding:5px 11px;
+border-radius:20px;
 
-@media(min-width:769px){
+background:rgba(0,0,0,.45);
+border:1px solid rgba(255,255,255,.18);
 
-.digital-clock{
-top:38%;
-}
-
-.clock-time{
-
-font-size:30px;
-
-font-weight:900;
-
-letter-spacing:4px;
-
-line-height:1;
-
-color:#fff;
-
-white-space:nowrap;
-
-text-shadow:
-0 4px 20px rgba(0,0,0,.65);
-}
-
-.clock-date{
-
-margin-top:12px;
-
-font-size:10px;
-
-font-weight:700;
-
-letter-spacing:2px;
-
-line-height:1.2;
-
-color:rgba(255,255,255,.88);
-
-white-space:nowrap;
-
-text-shadow:
-0 3px 12px rgba(0,0,0,.6);
-}
-
-}
-
-/* =========================================================
-MOBILE DIGITAL CLOCK
-========================================================= */
-
-@media(max-width:768px){
-
-.digital-clock{
-top:30%;
-}
-
-.clock-time{
-
-font-size:clamp(38px,10vw,65px);
-
-font-weight:900;
-
-letter-spacing:2px;
-
-line-height:1;
-
-color:#fff;
-
-white-space:nowrap;
-
-text-shadow:
-0 4px 18px rgba(0,0,0,.65);
-}
-
-.clock-date{
-
-margin-top:9px;
-
-font-size:clamp(10px,2.9vw,15px);
-
-font-weight:700;
-
-letter-spacing:2px;
-
-line-height:1.2;
-
-color:rgba(255,255,255,.88);
-
-white-space:nowrap;
-
-text-shadow:
-0 3px 10px rgba(0,0,0,.6);
-}
-
-}
-
-/* =========================================================
-CLOCK HIDE WHEN VIDEO ON
-========================================================= */
-
-body.popup-active .digital-clock{
-display:none;
-}
-
-/* =========================================================
-PLAYLIST TOGGLE BUTTON (CENTERED)
-========================================================= */
-
-.playlist-toggle-btn{
-background:rgba(0,0,0,.25);
-border:1px solid rgba(255,255,255,.15);
 color:rgba(255,255,255,.9);
-font-size:10px;
+
+font-size:11px;
 font-weight:600;
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
+letter-spacing:.3px;
+
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
 display:flex;
 align-items:center;
-gap:5px;
+gap:6px;
+}
+
+.live-dot{
+width:7px;
+height:7px;
+
+background:#ff3b30;
+border-radius:50%;
+
+box-shadow:0 0 8px #ff3b30;
+
+animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+
+0%{
+opacity:1;
+transform:scale(1);
+}
+
+50%{
+opacity:.3;
+transform:scale(.8);
+}
+
+100%{
+opacity:1;
+transform:scale(1);
+}
+
+}
+
+.playlist-toggle-btn{
+padding:5px 12px;
+
+border-radius:20px;
+
+background:rgba(0,0,0,.45);
+border:1px solid rgba(255,255,255,.18);
+
+color:rgba(255,255,255,.9);
+
+font-size:11px;
+font-weight:600;
+
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+gap:6px;
+
 cursor:pointer;
 touch-action:manipulation;
--webkit-tap-highlight-color:transparent;
-padding:3px 8px;
-border-radius:15px;
-transition: transform .2s, background .2s;
-position:relative;
-z-index:1611;
-margin-top: 15px;
 
-width:max-content;
-grid-column: 2;
+-webkit-tap-highlight-color:transparent;
+
+transition:
+transform .2s,
+background .2s;
 }
 
 .playlist-toggle-btn:active{
-transform:scale(.92);
+transform:scale(.95);
 }
 
 .playlist-toggle-btn svg{
-width:13px;
-height:13px;
+width:14px;
+height:14px;
 fill:#fff;
+}
+
+body.popup-active .playlist-toggle-btn{
+display:none;
 }
 
 /* =========================================================
@@ -313,13 +243,13 @@ height:auto;
 
 background:#000;
 
-border-radius:0px;
+border-radius:18px;
 
 overflow:hidden;
 
 z-index:1701;
 
-border:0px solid rgba(255,255,255,.25);
+border:1px solid rgba(255,255,255,.25);
 
 box-shadow:
 0 25px 50px rgba(0,0,0,.7);
@@ -329,7 +259,7 @@ visibility:hidden;
 
 pointer-events:none;
 
-transform:scale(.75);
+transform:scale(.92);
 
 transition:
 opacity .3s ease,
@@ -384,7 +314,77 @@ VIDEO PLAYLIST
 ========================================================= */
 
 .video-playlist{
-display:none!important;
+width:100%;
+
+margin-top:1px;
+
+max-height:calc(100dvh - 410px);
+min-height:80px;
+
+padding:7px;
+
+border-radius:15px;
+
+background:rgba(20,20,20,.52);
+
+border:1px solid rgba(255,255,255,.18);
+
+backdrop-filter:blur(25px) saturate(150%);
+-webkit-backdrop-filter:blur(25px) saturate(150%);
+
+box-shadow:
+0 15px 40px rgba(0,0,0,.55);
+
+opacity:0;
+visibility:hidden;
+
+pointer-events:none;
+
+position:relative;
+
+z-index:1705;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
+
+overscroll-behavior:contain;
+
+overflow:hidden;
+
+flex-shrink:0;
+}
+
+.video-playlist.active{
+opacity:1;
+visibility:visible;
+
+pointer-events:auto;
+
+touch-action:pan-y;
+
+z-index:1705;
+}
+
+/* =========================================================
+VIDEO PLAYLIST TITLE
+========================================================= */
+
+.video-playlist-title{
+font-size:10px;
+font-weight:700;
+
+color:rgba(255,255,255,.9);
+
+padding:4px 7px 6px;
+
+border-bottom:1px solid rgba(255,255,255,.13);
+
+margin-bottom:5px;
+
+flex-shrink:0;
+
+pointer-events:none;
 }
 
 /* =========================================================
@@ -393,12 +393,42 @@ VIDEO SONG LIST
 
 .video-song-list{
 width:100%;
-height:100%;
+
+height:calc(100% - 27px);
 
 overflow-y:auto;
 overflow-x:hidden;
 
-display:none!important;
+display:flex;
+flex-direction:column;
+
+gap:5px;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
+
+overscroll-behavior:contain;
+
+scrollbar-width:thin;
+
+pointer-events:auto;
+
+position:relative;
+
+z-index:1706;
+
+-webkit-user-select:none;
+user-select:none;
+}
+
+.video-song-list::-webkit-scrollbar{
+width:3px;
+}
+
+.video-song-list::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.35);
+border-radius:5px;
 }
 
 /* =========================================================
@@ -406,7 +436,91 @@ VIDEO SONG ITEM
 ========================================================= */
 
 .video-song-item{
-display:none!important;
+display:flex;
+align-items:center;
+gap:9px;
+
+width:100%;
+min-height:54px;
+
+padding:7px 8px;
+
+border-radius:10px;
+
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.08);
+
+cursor:pointer;
+
+touch-action:manipulation;
+
+-webkit-tap-highlight-color:transparent;
+
+transition:
+background .2s ease,
+transform .15s ease,
+border-color .2s ease;
+
+flex-shrink:0;
+
+pointer-events:auto;
+
+position:relative;
+z-index:1707;
+}
+
+.video-song-item:active{
+transform:scale(.98);
+background:rgba(255,255,255,.18);
+}
+
+.video-song-item.active{
+background:rgba(255,255,255,.20);
+border-color:rgba(255,255,255,.30);
+}
+
+.video-song-item img{
+width:44px;
+height:44px;
+
+border-radius:8px;
+
+object-fit:cover;
+
+flex-shrink:0;
+
+pointer-events:none;
+
+-webkit-user-drag:none;
+}
+
+.video-song-info{
+flex:1;
+min-width:0;
+pointer-events:none;
+}
+
+.video-song-title{
+font-size:11.5px;
+font-weight:700;
+
+color:#fff;
+
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.video-song-artist{
+font-size:9.5px;
+
+color:rgba(255,255,255,.55);
+
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+
+margin-top:2px;
 }
 
 /* =========================================================
@@ -436,11 +550,11 @@ MUSIC PLAYER
 ========================================================= */
 
 .player{
-width:min(460px,96%);
+width:min(440px,94%);
 
-height:124px;
+height:120px;
 
-padding:14px 16px;
+padding:14px 18px;
 
 border:1px solid rgba(255,255,255,.18);
 
@@ -457,7 +571,7 @@ box-shadow:
 display:flex;
 align-items:center;
 
-gap:10px;
+gap:12px;
 
 position:relative;
 
@@ -564,7 +678,7 @@ justify-content:center;
 }
 
 .title{
-font-size:15px;
+font-size:16px;
 
 font-weight:700;
 
@@ -578,7 +692,7 @@ letter-spacing:.2px;
 }
 
 .artist{
-font-size:11.5px;
+font-size:12px;
 
 color:rgba(255,255,255,.65);
 
@@ -586,8 +700,8 @@ white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 
-margin-top:1px;
-margin-bottom:5px;
+margin-top:2px;
+margin-bottom:8px;
 }
 
 /* =========================================================
@@ -598,7 +712,7 @@ SEEK
 position:relative;
 
 width:100%;
-height:4.5px;
+height:5px;
 
 border-radius:10px;
 
@@ -647,28 +761,11 @@ z-index:2;
 }
 
 .time-display{
-font-size:10px;
+font-size:11px;
 
-color:rgba(255,255,255,.6);
-
-font-variant-numeric:tabular-nums;
-
-display:none;
-}
-
-.info-bottom-row{
-display: grid;
-grid-template-columns: 1fr auto 1fr;
-align-items: center;
-width: 100%;
-margin-top: 4px;
-}
-
-.time-info{
-font-size:10px;
 color:rgba(255,255,255,.65);
+
 font-variant-numeric:tabular-nums;
-grid-column: 1;
 }
 
 /* =========================================================
@@ -680,7 +777,7 @@ display:flex;
 
 align-items:center;
 
-gap:6px;
+gap:8px;
 
 flex-shrink:0;
 
@@ -762,7 +859,7 @@ opacity .2s ease;
 }
 
 .vol-slider-wrapper.active{
-width:48px;
+width:55px;
 
 opacity:1;
 
@@ -773,7 +870,7 @@ margin-left:2px;
 -webkit-appearance:none;
 appearance:none;
 
-width:48px;
+width:55px;
 height:3.5px;
 
 background:rgba(255,255,255,.3);
@@ -814,8 +911,8 @@ PLAY
 ========================================================= */
 
 .play{
-width:40px;
-height:40px;
+width:44px;
+height:44px;
 
 border-radius:50%;
 
@@ -847,8 +944,8 @@ z-index:1611;
 }
 
 .play svg{
-width:18px;
-height:18px;
+width:20px;
+height:20px;
 
 fill:#000;
 
@@ -870,6 +967,10 @@ DESKTOP
 
 @media(min-width:769px){
 
+/* ---------------------------------------------------------
+DESKTOP NORMAL / VIDEO OFF
+--------------------------------------------------------- */
+
 .app{
 height:100dvh;
 width:100%;
@@ -879,18 +980,18 @@ display:flex;
 align-items:flex-end;
 justify-content:center;
 
-padding:0 40px 40px;
+padding:0 40px 65px;
 }
 
 .player{
-width:min(600px,75vw);
+width:min(560px,70vw);
 
-height:124px;
+height:120px;
 
 margin:0;
 
-transform:scale(.85) translateY(25px);
-transform-origin:center bottom;
+transform:none;
+transform-origin:left bottom;
 }
 
 .video-section{
@@ -906,34 +1007,53 @@ transform:none;
 
 width:min(620px,42vw);
 
-height:auto;
+height:92dvh;
 
 z-index:1700;
 
 pointer-events:none;
 }
 
+.top-widgets{
+display:flex;
+
+top:14px;
+left:50%;
+
+transform:translateX(-50%);
+
+z-index:2500;
+}
+
+
+/* ---------------------------------------------------------
+DESKTOP VIDEO ON
+--------------------------------------------------------- */
+
 body.popup-active .app{
 
 display:flex;
 
 align-items:flex-end;
-justify-content:center;
+justify-content:flex-start;
 
 padding:0 40px 65px;
 }
 
 body.popup-active .player{
 
-width:min(780px,55vw);
+/*
+   পুরো controller এখন আগের থেকে একটু ডানে।
+   ভিতরের কোনো item আলাদা করে সরানো হয়নি।
+*/
+
+width:min(760px,52vw);
 
 margin:0;
 
-transform:scale(.82);
-transform-origin:center bottom;
+transform:translateX(-5px) scale(.92);
 
-position:relative;
-top:40px;
+transform-origin:left bottom;
 
 z-index:1601;
 }
@@ -948,15 +1068,15 @@ align-items:stretch;
 
 position:fixed;
 
-top:15.75vh;
-right:27vw;
+top:4vh;
+right:4vw;
 left:auto;
 
 transform:none;
 
 width:min(620px,42vw);
 
-height:auto;
+height:92dvh;
 
 opacity:1;
 
@@ -969,7 +1089,7 @@ body.popup-active .video-popup{
 
 position:relative;
 
-width:90%;
+width:100%;
 
 aspect-ratio:16 / 9;
 
@@ -987,47 +1107,120 @@ pointer-events:auto;
 
 transform:scale(1);
 
-transition: transform .5s cubic-bezier(.2,.8,.2,1);
-
-border-radius:0px;
+border-radius:18px;
 
 z-index:1701;
-box-shadow:none!important;
-}
-
-@keyframes tvOpen{
-    from{
-        transform:scale(.75);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
-
-body.popup-active .video-popup{
-    animation:tvOpen .5s cubic-bezier(.2,.8,.2,1);
 }
 
 body.popup-active .video-playlist{
-display:none!important;
-box-shadow:none!important;
+
+width:100%;
+
+flex:1;
+
+min-height:100px;
+
+height:auto;
+
+max-height:none;
+
+margin-top:10px;
+
+opacity:1;
+
+visibility:visible;
+
+pointer-events:auto;
+
+position:relative;
+
+z-index:1705;
+
+overflow:hidden;
 }
 
 body.popup-active .video-song-list{
-display:none!important;
+
+height:calc(100% - 27px);
+
+overflow-y:auto;
+
+overflow-x:hidden;
+
+touch-action:pan-y;
+
+-webkit-overflow-scrolling:touch;
 }
 
-body.popup-active .video-song-item{
-display:none!important;
+body.popup-active .top-widgets{
+
+display:flex;
+
+top:14px;
+
+/*
+   BD time controller-এর visual center-এর
+   ঠিক ওপর থাকবে।
+   Controller = 760px পর্যন্ত, scale = .92,
+   তাই center হিসাব করে position করা হয়েছে।
+*/
+
+left:calc(
+35px + min(349.6px, 23.92vw)
+);
+
+transform:translateX(-50%);
+
+z-index:2500;
 }
+
+body.popup-active .playlist-toggle-btn{
+display:none;
+}
+
+/*
+   কোনো transform নেই।
+   তাই controller-এর ভিতরের item
+   আলাদা করে বামে/ডানে যাবে না।
+*/
 
 body.popup-active .controls{
 z-index:1610;
 }
 
+body.popup-active .video-song-item{
+cursor:pointer;
+pointer-events:auto;
 }
+
+
+/* ---------------------------------------------------------
+DESKTOP SMALL HEIGHT
+--------------------------------------------------------- */
+
+@media(max-height:800px){
+
+body.popup-active .video-section{
+
+top:3vh;
+
+height:94dvh;
+}
+
+body.popup-active .video-popup{
+
+border-radius:15px;
+}
+
+body.popup-active .video-playlist{
+
+margin-top:7px;
+}
+
+}
+
+}
+
 
 /* =========================================================
 MOBILE
@@ -1040,22 +1233,22 @@ padding-bottom:60px;
 }
 
 .player{
-height:120px;
+height:116px;
 
-padding:12px 12px;
+padding:12px 14px;
 
 border-radius:58px;
 
-gap:8px;
+gap:10px;
 }
 
 .cover-wrapper{
-width:76px;
-height:76px;
+width:78px;
+height:78px;
 }
 
 .title{
-font-size:14px;
+font-size:15px;
 }
 
 .artist{
@@ -1063,13 +1256,22 @@ font-size:11px;
 }
 
 .play{
-width:38px;
-height:38px;
+width:42px;
+height:42px;
+}
+
+.top-widgets{
+top:10px;
+}
+
+.bd-time{
+font-size:10px;
+padding:4px 9px;
 }
 
 .playlist-toggle-btn{
-font-size:9.5px;
-padding:3px 7px;
+font-size:10px;
+padding:4px 9px;
 }
 
 .playlist-drawer{
@@ -1077,14 +1279,14 @@ width:180px;
 }
 
 .video-section{
-top:18.17%;
-left:49.65%;
+top:6%;
+left:50%;
 
 right:auto;
 
 transform:translateX(-50%);
 
-width:84.55%;
+width:94%;
 
 opacity:1;
 }
@@ -1100,23 +1302,60 @@ aspect-ratio:16 / 9;
 
 height:auto;
 
-border-radius:0px;
-box-shadow:none!important;
+border-radius:16px;
 }
 
 .video-playlist{
-display:none!important;
+margin-top:1px;
+
+max-height:calc(100dvh - 350px);
+
+min-height:80px;
+
+padding:7px;
+
+border-radius:14px;
 }
 
 .video-song-list{
-display:none!important;
+height:calc(100% - 27px);
+
+pointer-events:auto;
+
+touch-action:pan-y;
+
+overflow-y:auto;
+
+-webkit-overflow-scrolling:touch;
 }
 
 .video-song-item{
-display:none!important;
+min-height:52px;
+
+padding:6px 7px;
+
+gap:8px;
+
+pointer-events:auto;
+
+touch-action:manipulation;
+}
+
+.video-song-item img{
+width:42px;
+height:42px;
+}
+
+.video-song-title{
+font-size:11px;
+}
+
+.video-song-artist{
+font-size:9px;
 }
 
 }
+
 
 /* =========================================================
 SMALL HEIGHT
@@ -1134,10 +1373,24 @@ height:auto;
 }
 
 .video-playlist{
-display:none!important;
+max-height:calc(100dvh - 300px);
+
+min-height:70px;
+
+margin-top:1px;
+}
+
+.video-song-item{
+min-height:48px;
+}
+
+.video-song-item img{
+width:40px;
+height:40px;
 }
 
 }
+
 
 /* =========================================================
 VERY SMALL WIDTH
@@ -1150,14 +1403,36 @@ width:96%;
 }
 
 .video-playlist{
-display:none!important;
+margin-top:1px;
+
+padding:6px;
+
+max-height:calc(100dvh - 300px);
 }
 
-.video-song-list{
-display:none!important;
+.video-song-item{
+min-height:48px;
+
+padding:5px 6px;
+
+gap:7px;
+}
+
+.video-song-item img{
+width:39px;
+height:39px;
+}
+
+.video-song-title{
+font-size:10px;
+}
+
+.video-song-artist{
+font-size:8.5px;
 }
 
 }
+
 
 /* =========================================================
 DRAWER
@@ -1236,7 +1511,7 @@ display:flex;
 
 align-items:center;
 
-gap:5px;
+justify-content:space-between;
 
 padding:6px 8px;
 
@@ -1250,84 +1525,27 @@ border-radius:8px;
 }
 
 .drawer-title{
-font-size:10px;
+font-size:11px;
 font-weight:700;
 color:#fff;
-white-space:nowrap;
-cursor:pointer;
 }
 
-.drawer-title:hover{
-opacity:0.8;
-}
-
-/* =========================================================
-DRAWER SEARCH BOX & CLEAR BUTTON STYLING
-========================================================= */
-
-.drawer-search-container{
-position:relative;
-flex:1;
-min-width:0;
-display:flex;
-align-items:center;
-}
-
-.drawer-search-box{
-width:100%;
-padding:4px 22px 4px 6px;
-background:rgba(255,255,255,.08);
-border:1px solid rgba(255,255,255,.15);
-border-radius:6px;
-color:#fff;
-font-size:9.5px;
-outline:none;
-}
-
-.drawer-search-box::placeholder{
-color:rgba(255,255,255,.5);
-}
-
-.search-clear-btn{
-position:absolute;
-right:5px;
-top:40%;
-transform:translateY(-50%);
+.close-btn{
 background:transparent;
+
 border:0;
-color:rgba(255,255,255,0.75);
-font-size:20px;
+
+color:rgba(255,255,255,.9);
+
+font-size:16px;
+
 cursor:pointer;
-padding:0 3px;
+
+padding:0 2px;
+
 line-height:1;
-display:none;
-}
 
-.search-clear-btn:hover{
-color:#fff;
-}
-
-/* IMPORT BUTTON STYLING */
-.import-btn{
-width:100%;
-background:rgba(255,255,255,0.15);
-border:1px solid rgba(255,255,255,0.25);
-color:#fff;
-font-size:10px;
-font-weight:700;
-padding:6px;
-border-radius:6px;
-margin-bottom:8px;
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-gap:4px;
-transition:background 0.2s;
-}
-
-.import-btn:active{
-transform:scale(0.97);
+touch-action:manipulation;
 }
 
 .song-list{
@@ -1455,26 +1673,42 @@ margin-top:.5px;
 <div class="bg"></div>
 
 <!-- =========================================================
-DIGITAL CLOCK
+TOP WIDGETS
 ========================================================= -->
 
-<div class="digital-clock">
+<div class="top-widgets">
 
-<div
-class="clock-time"
-id="clockTime"
+<div class="bd-time">
+
+<span>BD</span>
+
+<span class="live-dot"></span>
+
+<span id="bdTimeVal">
+--:--:-- --
+</span>
+
+</div>
+
+<button
+class="playlist-toggle-btn"
+onclick="toggleDrawer()"
 >
-12:00:00 PM
+
+<svg viewBox="0 0 24 24">
+
+<path d="
+M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z
+"/>
+
+</svg>
+
+<span>Playlist</span>
+
+</button>
+
 </div>
 
-<div
-class="clock-date"
-id="clockDate"
->
-25 AUGUST 2026
-</div>
-
-</div>
 
 <!-- =========================================================
 VIDEO OVERLAY
@@ -1484,6 +1718,7 @@ VIDEO OVERLAY
 id="videoOverlay"
 class="video-overlay">
 </div>
+
 
 <!-- =========================================================
 VIDEO SECTION
@@ -1503,6 +1738,9 @@ class="video-popup"
 
 </div>
 
+
+<!-- VIDEO PLAYLIST -->
+
 <div
 id="videoPlaylist"
 class="video-playlist"
@@ -1516,12 +1754,24 @@ Playlist Songs
 class="video-song-list"
 id="videoSongList"
 >
+
+<div style="
+text-align:center;
+color:rgba(255,255,255,.7);
+font-size:9px;
+padding:10px;
+">
+
 Loading...
+
+</div>
+
 </div>
 
 </div>
 
 </div>
+
 
 <!-- =========================================================
 DRAWER
@@ -1541,30 +1791,18 @@ id="drawer"
 
 <div class="drawer-header">
 
-<!-- প্লেলিস্ট টাইটেলে ক্লিক করলে ড্রয়ার হাইড হবে -->
-<div class="drawer-title" onclick="toggleDrawer()" title="Hide Playlist">
-Playlist
+<div class="drawer-title">
+Playlist Songs
 </div>
 
-<!-- সার্চ কন্টেইনার ও ক্রস বাটন -->
-<div class="drawer-search-container">
-<input 
-type="text" 
-class="drawer-search-box" 
-id="drawerSearch" 
-placeholder="Search..." 
-oninput="filterPlaylist(this.value)"
+<button
+class="close-btn"
+onclick="toggleDrawer()"
 >
-<button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">&times;</button>
-</div>
-
-</div>
-
-<!-- LOCAL FILE IMPORT BUTTON -->
-<input type="file" id="localAudioInput" accept="audio/*" multiple style="display:none;" onchange="importLocalSongs(this.files)">
-<button class="import-btn" onclick="document.getElementById('localAudioInput').click()">
-  <span>+ Import Songs</span>
+&times;
 </button>
+
+</div>
 
 <div
 class="song-list"
@@ -1585,6 +1823,7 @@ Loading...
 </div>
 
 </div>
+
 
 <!-- =========================================================
 MAIN APP
@@ -1636,21 +1875,17 @@ id="fill">
 
 </div>
 
-<div class="info-bottom-row">
+<div class="time-display">
 
-<div class="time-info">
-<span id="current">0:00</span> / <span id="duration">0:00</span>
-</div>
+<span id="current">
+0:00
+</span>
 
-<button
-class="playlist-toggle-btn"
-onclick="toggleDrawer()"
->
-<svg viewBox="0 0 24 24">
-<path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/>
-</svg>
-<span>Playlist</span>
-</button>
+/
+
+<span id="duration">
+0:00
+</span>
 
 </div>
 
@@ -1678,6 +1913,7 @@ M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1
 
 </button>
 
+
 <button
 class="play"
 id="play"
@@ -1696,6 +1932,7 @@ M8 5v14l11-7z
 </svg>
 
 </button>
+
 
 <div class="vol-container">
 
@@ -1739,69 +1976,14 @@ oninput="changeVolume(this.value)"
 
 </div>
 
+
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* =========================================================
-DIGITAL CLOCK
-========================================================= */
-
-function updateDigitalClock(){
-
-const now=new Date();
-
-const time=
-new Intl.DateTimeFormat(
-"en-US",
-{
-timeZone:"Asia/Dhaka",
-hour:"2-digit",
-minute:"2-digit",
-second:"2-digit",
-hour12:true
-}
-).format(now);
-
-const date=
-new Intl.DateTimeFormat(
-"en-US",
-{
-timeZone:"Asia/Dhaka",
-day:"2-digit",
-month:"long",
-year:"numeric"
-}
-).format(now);
-
-document.getElementById(
-"clockTime"
-).textContent=time;
-
-document.getElementById(
-"clockDate"
-).textContent=date.toUpperCase();
-
-}
-
-updateDigitalClock();
-
-setInterval(
-updateDigitalClock,
-1000
-);
-
-
-/* =========================================================
-YOUTUBE & LOCAL PLAYLIST MANAGEMENT
-========================================================= */
-
 const PLAYLIST_ID="PLbvY05KVYwoo";
 
 let player=null;
-let localAudio=new Audio(); // HTML5 Audio Engine for Local Files
-let isLocal=false;          // Flag to check if current track is local
-
 let playing=false;
 
 let playlistItems=[];
@@ -1823,55 +2005,40 @@ let changingTrack=false;
 
 
 /* =========================================================
-LOCAL AUDIO EVENTS
+BD TIME
 ========================================================= */
 
-localAudio.ontimeupdate = function(){
-  if(isLocal && !isDragging){
-    const current = localAudio.currentTime;
-    const duration = localAudio.duration || 0;
-    const pos = duration ? current / duration : 0;
-    
-    document.getElementById("fill").style.width = (pos * 100) + "%";
-    document.getElementById("current").textContent = format(current);
-    document.getElementById("duration").textContent = format(duration);
-  }
+function updateBDTime(){
+
+const options={
+
+timeZone:"Asia/Dhaka",
+
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit",
+
+hour12:true
+
 };
 
-localAudio.onended = function(){
-  if(isLocal){
-    playing = false;
-    updatePlayUI(false);
-    nextSong();
-  }
-};
+document.getElementById(
+"bdTimeVal"
+).textContent=
 
+new Intl.DateTimeFormat(
+"en-US",
+options
+).format(new Date());
 
-/* =========================================================
-IMPORT LOCAL SONGS
-========================================================= */
-
-function importLocalSongs(files){
-  if(!files || files.length === 0) return;
-
-  const newTracks = Array.from(files).map((file, i) => {
-    return {
-      id: "local_" + Date.now() + "_" + i,
-      title: file.name.replace(/\.[^/.]+$/, ""),
-      artist: "Local Storage",
-      isLocalTrack: true,
-      fileUrl: URL.createObjectURL(file),
-      coverUrl: "logo.png"
-    };
-  });
-
-  sortedPlaylistData = [...newTracks, ...sortedPlaylistData];
-  sortedPlaylistItems = sortedPlaylistData.map(item => item.id);
-  sortingReady = true;
-
-  renderSortedPlaylists();
-  highlightActiveTrack();
 }
+
+updateBDTime();
+
+setInterval(
+updateBDTime,
+1000
+);
 
 
 /* =========================================================
@@ -1940,87 +2107,138 @@ updateProgress,
 
 
 /* =========================================================
-UPDATE PLAY / PAUSE UI
-========================================================= */
-
-function updatePlayUI(isPlaying){
-  const cover = document.getElementById("cover");
-  const playBtn = document.getElementById("play");
-  const playIcon = document.getElementById("play-icon");
-
-  if(isPlaying){
-    playing = true;
-    playBtn.classList.add("playing");
-    playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    cover.classList.add("spinning");
-  } else {
-    playing = false;
-    playBtn.classList.remove("playing");
-    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-    cover.classList.remove("spinning");
-  }
-}
-
-
-/* =========================================================
 PLAYER STATE
 ========================================================= */
 
 function state(e){
 
+const cover=
+document.getElementById("cover");
+
+const playBtn=
+document.getElementById("play");
+
+const playIcon=
+document.getElementById("play-icon");
+
 highlightActiveTrack();
+highlightVideoActiveTrack();
 
-if(e.data===YT.PlayerState.PLAYING && !isLocal){
-  updatePlayUI(true);
-  updateInfo();
+if(
+e.data===YT.PlayerState.PLAYING
+){
+
+playing=true;
+
+playBtn.classList.add(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+cover.classList.add(
+"spinning"
+);
+
+updateInfo();
+
 }
 
-else if(e.data===YT.PlayerState.PAUSED && !isLocal){
-  updatePlayUI(false);
+else if(
+e.data===YT.PlayerState.PAUSED
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
 }
 
-else if(e.data===YT.PlayerState.ENDED && !isLocal){
-  updatePlayUI(false);
-  if(!changingTrack){
-    setTimeout(nextSong, 100);
-  }
+else if(
+e.data===YT.PlayerState.ENDED
+){
+
+playing=false;
+
+playBtn.classList.remove(
+"playing"
+);
+
+playIcon.innerHTML=
+'<path d="M8 5v14l11-7z"/>';
+
+cover.classList.remove(
+"spinning"
+);
+
+if(!changingTrack){
+
+setTimeout(
+nextSong,
+100
+);
+
+}
+
 }
 
 }
 
 
 /* =========================================================
-PLAY / PAUSE TOGGLE
+PLAY / PAUSE
 ========================================================= */
 
 function togglePlay(){
 
+if(!player)return;
+
 try{
 
-if(isLocal){
-  if(playing){
-    localAudio.pause();
-    updatePlayUI(false);
-  } else {
-    localAudio.play();
-    updatePlayUI(true);
-  }
-} else {
-  if(!player) return;
-  
-  if(playing){
-    player.pauseVideo();
-  } else {
-    const currentId = player.getVideoData() && player.getVideoData().video_id;
-    if(sortedPlaylistItems.length > 0 && sortingReady && !currentId){
-      playSpecificTrack(currentSortedIndex);
-    } else {
-      player.playVideo();
-    }
-  }
+if(playing){
+
+player.pauseVideo();
+
 }
 
-} catch(e){}
+else{
+
+const currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+if(
+sortedPlaylistItems.length>0 &&
+sortingReady &&
+!currentId
+){
+
+player.loadVideoById(
+sortedPlaylistItems[currentSortedIndex]
+);
+
+}
+
+else{
+
+player.playVideo();
+
+}
+
+}
+
+}
+catch(e){}
 
 }
 
@@ -2039,6 +2257,11 @@ document.getElementById(
 const overlay=
 document.getElementById(
 "videoOverlay"
+);
+
+const videoPlaylist=
+document.getElementById(
+"videoPlaylist"
 );
 
 const iconSvg=
@@ -2061,12 +2284,51 @@ overlay.classList.add(
 "active"
 );
 
+videoPlaylist.classList.add(
+"active"
+);
+
 document.body.classList.add(
 "popup-active"
 );
 
 iconSvg.innerHTML=
 '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>';
+
+if(
+sortingReady &&
+sortedPlaylistData.length>0
+){
+
+renderVideoPlaylist();
+
+}
+
+else{
+
+loadPlaylistItems();
+
+}
+
+requestAnimationFrame(()=>{
+
+requestAnimationFrame(()=>{
+
+adjustVideoPlaylistHeight();
+
+});
+
+});
+
+setTimeout(
+adjustVideoPlaylistHeight,
+100
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+300
+);
 
 }
 
@@ -2080,6 +2342,10 @@ overlay.classList.remove(
 "active"
 );
 
+videoPlaylist.classList.remove(
+"active"
+);
+
 document.body.classList.remove(
 "popup-active"
 );
@@ -2090,6 +2356,184 @@ iconSvg.innerHTML=
 }
 
 }
+
+
+/* =========================================================
+VIDEO PLAYLIST HEIGHT
+========================================================= */
+
+function adjustVideoPlaylistHeight(){
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+const playlist=
+document.getElementById(
+"videoPlaylist"
+);
+
+const playerCard=
+document.getElementById(
+"playerCard"
+);
+
+const videoSection=
+document.getElementById(
+"videoSection"
+);
+
+if(
+!popup ||
+!playlist ||
+!playerCard
+)
+return;
+
+if(
+!popup.classList.contains("active")
+)
+return;
+
+
+/* =========================================================
+DESKTOP
+========================================================= */
+
+if(window.innerWidth>=769){
+
+if(!videoSection)
+return;
+
+const sectionRect=
+videoSection.getBoundingClientRect();
+
+const popupRect=
+popup.getBoundingClientRect();
+
+const available=
+sectionRect.bottom -
+popupRect.bottom -
+10;
+
+const safeHeight=
+Math.max(
+100,
+available
+);
+
+playlist.style.height=
+safeHeight+"px";
+
+playlist.style.maxHeight=
+safeHeight+"px";
+
+return;
+
+}
+
+
+/* =========================================================
+MOBILE / SMALL SCREEN
+========================================================= */
+
+const popupRect=
+popup.getBoundingClientRect();
+
+const playerRect=
+playerCard.getBoundingClientRect();
+
+const top=
+popupRect.bottom+1;
+
+const bottom=
+playerRect.top-20;
+
+let available=
+bottom-top;
+
+if(available>70){
+
+let safeHeight=
+Math.min(
+available,
+playerRect.top-top-2
+);
+
+safeHeight=
+Math.max(
+70,
+safeHeight
+);
+
+playlist.style.height=
+safeHeight+"px";
+
+playlist.style.maxHeight=
+safeHeight+"px";
+
+}
+
+else{
+
+playlist.style.height="70px";
+playlist.style.maxHeight="70px";
+
+}
+
+requestAnimationFrame(()=>{
+
+const finalRect=
+playlist.getBoundingClientRect();
+
+const finalPlayerRect=
+playerCard.getBoundingClientRect();
+
+if(
+finalRect.bottom >
+finalPlayerRect.top
+){
+
+const correctedHeight=
+Math.max(
+70,
+finalPlayerRect.top-top-2
+);
+
+playlist.style.height=
+correctedHeight+"px";
+
+playlist.style.maxHeight=
+correctedHeight+"px";
+
+}
+
+});
+
+}
+
+
+/* =========================================================
+RESIZE
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
+);
+
+}
+);
 
 
 /* =========================================================
@@ -2164,11 +2608,14 @@ resetVolTimer();
 
 function changeVolume(val){
 
-if(player && typeof player.setVolume==="function"){
-  player.setVolume(val);
-}
-if(localAudio){
-  localAudio.volume = val / 100;
+if(
+player &&
+typeof player.setVolume===
+"function"
+){
+
+player.setVolume(val);
+
 }
 
 resetVolTimer();
@@ -2182,10 +2629,48 @@ NEXT SONG
 
 function nextSong(){
 
-if(sortedPlaylistItems.length===0) return;
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
 
-const nextIndex = (currentSortedIndex + 1) % sortedPlaylistItems.length;
-playSpecificTrack(nextIndex);
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+const nextIndex=
+(currentSortedIndex+1)%
+sortedPlaylistItems.length;
+
+currentSortedIndex=
+nextIndex;
+
+playSpecificTrack(
+nextIndex
+);
 
 }
 
@@ -2196,10 +2681,49 @@ PREVIOUS SONG
 
 function previousSong(){
 
-if(sortedPlaylistItems.length===0) return;
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
 
-const previousIndex = (currentSortedIndex - 1 + sortedPlaylistItems.length) % sortedPlaylistItems.length;
-playSpecificTrack(previousIndex);
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const found=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(found!==-1){
+
+currentSortedIndex=found;
+
+}
+
+}
+
+const previousIndex=
+(currentSortedIndex-1+
+sortedPlaylistItems.length)%
+sortedPlaylistItems.length;
+
+currentSortedIndex=
+previousIndex;
+
+playSpecificTrack(
+previousIndex
+);
 
 }
 
@@ -2210,16 +2734,33 @@ FORCE UPDATE UI
 
 function forceUpdateUI(index){
 
-if(!sortedPlaylistData[index]) return;
+if(
+!sortedPlaylistData[index]
+)
+return;
 
-const data = sortedPlaylistData[index];
+const data=
+sortedPlaylistData[index];
 
-document.getElementById("cover").src = data.isLocalTrack ? data.coverUrl : `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
-document.getElementById("title").textContent = data.title || "Unknown Title";
-document.getElementById("artist").textContent = data.artist || "Unknown Artist";
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
 
-currentSortedIndex = index;
+document.getElementById(
+"title"
+).textContent=
+data.title || "YouTube Music";
+
+document.getElementById(
+"artist"
+).textContent=
+data.artist || "YouTube Music";
+
+currentSortedIndex=index;
+
 highlightActiveTrack();
+highlightVideoActiveTrack();
 
 }
 
@@ -2245,8 +2786,7 @@ e=>{
 if(
 e.target.closest(".controls") ||
 e.target.closest(".btn") ||
-e.target.closest(".play") ||
-e.target.closest(".playlist-toggle-btn")
+e.target.closest(".play")
 ){
 
 swipeActive=false;
@@ -2333,87 +2873,226 @@ swipeActive=false;
 SEEK
 ========================================================= */
 
-function getSeekPosition(clientX, el){
-  const rect = el.getBoundingClientRect();
-  if(!rect.width) return 0;
-  return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+function getSeekPosition(
+clientX,
+el
+){
+
+const rect=
+el.getBoundingClientRect();
+
+if(!rect.width)
+return 0;
+
+return Math.max(
+0,
+Math.min(
+1,
+(clientX-rect.left)/
+rect.width
+)
+);
+
 }
 
 function updateSeekVisual(pos){
-  document.getElementById("fill").style.width = (pos*100) + "%";
 
-  if(isLocal){
-    const duration = localAudio.duration;
-    if(duration){
-      document.getElementById("current").textContent = format(pos * duration);
-      document.getElementById("duration").textContent = format(duration);
-    }
-  } else if(player && typeof player.getDuration === "function"){
-    const duration = player.getDuration();
-    if(duration){
-      document.getElementById("current").textContent = format(pos * duration);
-      document.getElementById("duration").textContent = format(duration);
-    }
-  }
+document.getElementById(
+"fill"
+).style.width=
+(pos*100)+"%";
+
+if(
+player &&
+typeof player.getDuration===
+"function"
+){
+
+const duration=
+player.getDuration();
+
+if(duration){
+
+document.getElementById(
+"current"
+).textContent=
+format(pos*duration);
+
+document.getElementById(
+"duration"
+).textContent=
+format(duration);
+
 }
 
-seekElement.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  e.stopPropagation();
-  isDragging = true;
-  try{ seekElement.setPointerCapture(e.pointerId); }catch(err){}
-  updateSeekVisual(getSeekPosition(e.clientX, seekElement));
-}, { passive: false });
+}
 
-seekElement.addEventListener("pointermove", e => {
-  if(!isDragging) return;
-  e.preventDefault();
-  e.stopPropagation();
-  updateSeekVisual(getSeekPosition(e.clientX, seekElement));
-}, { passive: false });
+}
 
-seekElement.addEventListener("pointerup", e => {
-  if(!isDragging) return;
-  e.preventDefault();
-  e.stopPropagation();
+seekElement.addEventListener(
+"pointerdown",
+e=>{
 
-  const pos = getSeekPosition(e.clientX, seekElement);
-  updateSeekVisual(pos);
+e.preventDefault();
+e.stopPropagation();
 
-  if(isLocal){
-    if(localAudio.duration){
-      localAudio.currentTime = pos * localAudio.duration;
-    }
-  } else if(player && typeof player.getDuration === "function"){
-    const duration = player.getDuration();
-    if(duration){
-      player.seekTo(pos * duration, true);
-    }
-  }
+isDragging=true;
 
-  isDragging = false;
-  try{ seekElement.releasePointerCapture(e.pointerId); }catch(err){}
-}, { passive: false });
+try{
+
+seekElement.setPointerCapture(
+e.pointerId
+);
+
+}
+catch(err){}
+
+updateSeekVisual(
+getSeekPosition(
+e.clientX,
+seekElement
+)
+);
+
+},
+{
+passive:false
+}
+);
+
+seekElement.addEventListener(
+"pointermove",
+e=>{
+
+if(!isDragging)
+return;
+
+e.preventDefault();
+e.stopPropagation();
+
+updateSeekVisual(
+getSeekPosition(
+e.clientX,
+seekElement
+)
+);
+
+},
+{
+passive:false
+}
+);
+
+seekElement.addEventListener(
+"pointerup",
+e=>{
+
+if(!isDragging)
+return;
+
+e.preventDefault();
+e.stopPropagation();
+
+const pos=
+getSeekPosition(
+e.clientX,
+seekElement
+);
+
+updateSeekVisual(pos);
+
+if(
+player &&
+typeof player.getDuration===
+"function"
+){
+
+const duration=
+player.getDuration();
+
+if(duration){
+
+player.seekTo(
+pos*duration,
+true
+);
+
+}
+
+}
+
+isDragging=false;
+
+try{
+
+seekElement.releasePointerCapture(
+e.pointerId
+);
+
+}
+catch(err){}
+
+},
+{
+passive:false
+}
+);
 
 
 /* =========================================================
-PROGRESS (YOUTUBE)
+PROGRESS
 ========================================================= */
 
 function updateProgress(){
-  if(isDragging || isLocal) return;
-  if(!player || typeof player.getCurrentTime !== "function") return;
 
-  try{
-    const current = player.getCurrentTime();
-    const duration = player.getDuration();
-    if(!duration) return;
+if(isDragging)
+return;
 
-    const pos = Math.max(0, Math.min(1, current / duration));
-    document.getElementById("fill").style.width = (pos * 100) + "%";
-    document.getElementById("current").textContent = format(current);
-    document.getElementById("duration").textContent = format(duration);
-  } catch(e){}
+if(
+!player ||
+typeof player.getCurrentTime!==
+"function"
+)
+return;
+
+try{
+
+const current=
+player.getCurrentTime();
+
+const duration=
+player.getDuration();
+
+if(!duration)
+return;
+
+const pos=
+Math.max(
+0,
+Math.min(
+1,
+current/duration
+)
+);
+
+document.getElementById(
+"fill"
+).style.width=
+(pos*100)+"%";
+
+document.getElementById(
+"current"
+).textContent=
+format(current);
+
+document.getElementById(
+"duration"
+).textContent=
+format(duration);
+
+}
+catch(e){}
+
 }
 
 
@@ -2422,9 +3101,25 @@ FORMAT
 ========================================================= */
 
 function format(s){
-  if(!s || isNaN(s)) return "0:00";
-  s = Math.floor(s);
-  return Math.floor(s/60) + ":" + String(s%60).padStart(2, "0");
+
+if(
+!s ||
+isNaN(s)
+){
+
+return "0:00";
+
+}
+
+s=Math.floor(s);
+
+return Math.floor(s/60)+":"+
+String(
+s%60
+).padStart(
+2,"0"
+);
+
 }
 
 
@@ -2434,53 +3129,160 @@ LOAD PLAYLIST
 
 function loadPlaylistItems(){
 
-if(!player || typeof player.getPlaylist !== "function") return;
+if(
+!player ||
+typeof player.getPlaylist!==
+"function"
+)
+return;
 
-const ids = player.getPlaylist();
-if(!ids || ids.length === 0){
-  setTimeout(loadPlaylistItems, 600);
-  return;
+const ids=
+player.getPlaylist();
+
+if(
+!ids ||
+ids.length===0
+){
+
+setTimeout(
+loadPlaylistItems,
+600
+);
+
+return;
+
 }
 
-playlistItems = ids;
+playlistItems=ids;
 
-const requests = playlistItems.map((id, index) => {
-  return fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
-    .then(r => r.json())
-    .then(data => {
-      return {
-        id: id,
-        title: (data && data.title) ? data.title : `Track #${index+1}`,
-        artist: (data && data.author_name) ? data.author_name : "YouTube Music",
-        isLocalTrack: false,
-        originalIndex: index
-      };
-    })
-    .catch(() => {
-      return {
-        id: id,
-        title: `Track #${index+1}`,
-        artist: "YouTube Music",
-        isLocalTrack: false,
-        originalIndex: index
-      };
-    });
+sortedPlaylistItems=[];
+sortedPlaylistData=[];
+
+sortingReady=false;
+
+const requests=
+playlistItems.map(
+(id,index)=>{
+
+return fetch(
+`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`
+)
+
+.then(
+r=>r.json()
+)
+
+.then(
+data=>{
+
+return{
+
+id:id,
+
+title:
+(data && data.title)
+?
+data.title
+:
+`Track #${index+1}`,
+
+artist:
+(data && data.author_name)
+?
+data.author_name
+:
+"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+)
+
+.catch(
+()=>{
+
+return{
+
+id:id,
+
+title:`Track #${index+1}`,
+
+artist:"YouTube Music",
+
+originalIndex:index
+
+};
+
+}
+);
+
 });
 
-Promise.all(requests).then(results => {
-  results.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" }));
+Promise.all(requests)
+.then(
+results=>{
 
-  // Keep any existing local tracks on top
-  const existingLocals = sortedPlaylistData.filter(item => item.isLocalTrack);
-  sortedPlaylistData = [...existingLocals, ...results];
-  sortedPlaylistItems = sortedPlaylistData.map(item => item.id);
+results.sort(
+(a,b)=>{
 
-  sortingReady = true;
+return a.title.localeCompare(
+b.title,
+undefined,
+{
+numeric:true,
+sensitivity:"base"
+}
+);
 
-  renderSortedPlaylists();
-  highlightActiveTrack();
-  updateInfo();
 });
+
+sortedPlaylistData=results;
+
+sortedPlaylistItems=
+results.map(
+item=>item.id
+);
+
+sortingReady=true;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+if(currentId){
+
+const currentIndex=
+sortedPlaylistItems.indexOf(
+currentId
+);
+
+if(currentIndex!==-1){
+
+currentSortedIndex=
+currentIndex;
+
+}
+
+}
+
+renderSortedPlaylists();
+
+highlightActiveTrack();
+highlightVideoActiveTrack();
+
+updateInfo();
+
+}
+);
 
 }
 
@@ -2490,7 +3292,10 @@ RENDER PLAYLISTS
 ========================================================= */
 
 function renderSortedPlaylists(){
-  renderMainPlaylist();
+
+renderMainPlaylist();
+renderVideoPlaylist();
+
 }
 
 
@@ -2500,53 +3305,162 @@ MAIN PLAYLIST
 
 function renderMainPlaylist(){
 
-const list = document.getElementById("songList");
-list.innerHTML = "";
+const list=
+document.getElementById(
+"songList"
+);
 
-sortedPlaylistData.forEach((data, index) => {
-  const item = document.createElement("div");
-  item.className = "song-item";
-  item.id = `track-${index}`;
-  item.onclick = () => playSpecificTrack(index);
+list.innerHTML="";
 
-  const thumbSrc = data.isLocalTrack ? data.coverUrl : `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
+sortedPlaylistData.forEach(
+(data,index)=>{
 
-  item.innerHTML = `
-    <img src="${thumbSrc}" alt="thumb">
-    <div class="song-item-info">
-      <div class="song-item-title">${escapeHtml(data.title)}</div>
-      <div class="song-item-artist">${escapeHtml(data.artist)}</div>
-    </div>
-  `;
+const item=
+document.createElement(
+"div"
+);
 
-  list.appendChild(item);
+item.className=
+"song-item";
+
+item.id=
+`track-${index}`;
+
+item.onclick=()=>{
+
+playSpecificTrack(
+index
+);
+
+};
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
+alt="thumb"
+>
+
+<div class="song-item-info">
+
+<div class="song-item-title">
+${escapeHtml(data.title)}
+</div>
+
+<div class="song-item-artist">
+${escapeHtml(data.artist)}
+</div>
+
+</div>
+
+`;
+
+list.appendChild(item);
+
 });
 
 }
 
 
 /* =========================================================
-PLAYLIST SEARCH FILTER & CLEAR FUNCTIONS
+VIDEO PLAYLIST
 ========================================================= */
 
-function filterPlaylist(query){
-  const filter = query.toLowerCase();
-  const items = document.querySelectorAll(".song-item");
-  const clearBtn = document.getElementById("searchClearBtn");
+function renderVideoPlaylist(){
 
-  clearBtn.style.display = query.length > 0 ? "block" : "none";
+const list=
+document.getElementById(
+"videoSongList"
+);
 
-  items.forEach(item => {
-    const title = item.querySelector(".song-item-title").textContent.toLowerCase();
-    const artist = item.querySelector(".song-item-artist").textContent.toLowerCase();
-    item.style.display = (title.includes(filter) || artist.includes(filter)) ? "flex" : "none";
-  });
+if(
+!sortedPlaylistData ||
+sortedPlaylistData.length===0
+){
+
+list.innerHTML=`
+
+<div style="
+text-align:center;
+color:rgba(255,255,255,.7);
+font-size:9px;
+padding:10px;
+">
+Loading...
+</div>
+
+`;
+
+return;
+
 }
 
-function clearSearch(){
-  const searchInput = document.getElementById("drawerSearch");
-  searchInput.value = "";
-  filterPlaylist("");
+list.innerHTML="";
+
+sortedPlaylistData.forEach(
+(data,index)=>{
+
+const item=
+document.createElement(
+"div"
+);
+
+item.className=
+"video-song-item";
+
+item.id=
+`video-track-${index}`;
+
+item.addEventListener(
+"click",
+function(e){
+
+e.preventDefault();
+e.stopPropagation();
+
+playSpecificTrack(
+index
+);
+
+},
+{
+passive:false
+}
+);
+
+item.innerHTML=`
+
+<img
+src="https://i.ytimg.com/vi/${data.id}/hqdefault.jpg"
+alt="thumb"
+draggable="false"
+>
+
+<div class="video-song-info">
+
+<div class="video-song-title">
+${escapeHtml(data.title)}
+</div>
+
+<div class="video-song-artist">
+${escapeHtml(data.artist)}
+</div>
+
+</div>
+
+`;
+
+list.appendChild(item);
+
+});
+
+highlightVideoActiveTrack();
+
+setTimeout(
+adjustVideoPlaylistHeight,
+20
+);
+
 }
 
 
@@ -2555,10 +3469,19 @@ ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(text){
-  if(!text) return "";
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+
+if(!text)
+return "";
+
+const div=
+document.createElement(
+"div"
+);
+
+div.textContent=text;
+
+return div.innerHTML;
+
 }
 
 
@@ -2568,45 +3491,97 @@ PLAY SPECIFIC TRACK
 
 function playSpecificTrack(index){
 
-if(!sortedPlaylistData[index]) return;
+if(
+!player ||
+!sortedPlaylistData[index]
+)
+return;
 
-const data = sortedPlaylistData[index];
-currentSortedIndex = index;
+const data=
+sortedPlaylistData[index];
+
+const id=data.id;
+
+currentSortedIndex=index;
 
 forceUpdateUI(index);
-changingTrack = true;
 
-if(data.isLocalTrack){
-  // Play Local Audio File
-  isLocal = true;
-  if(player && typeof player.pauseVideo === "function"){
-    player.pauseVideo();
-  }
-  
-  localAudio.src = data.fileUrl;
-  localAudio.play();
-  updatePlayUI(true);
-} else {
-  // Play YouTube Video
-  isLocal = false;
-  localAudio.pause();
-  
-  try{
-    player.loadVideoById(data.id);
-  } catch(e){
-    changingTrack = false;
-    return;
-  }
+changingTrack=true;
+
+try{
+
+player.loadVideoById(id);
+
+}
+catch(e){
+
+changingTrack=false;
+
+return;
+
 }
 
-setTimeout(() => { changingTrack = false; }, 700);
+setTimeout(
+()=>{
 
-const drawer = document.getElementById("drawer");
-const drawerOverlay = document.getElementById("overlay");
-drawer.classList.remove("open");
-drawerOverlay.classList.remove("active");
+changingTrack=false;
+
+},
+700
+);
+
+const drawer=
+document.getElementById(
+"drawer"
+);
+
+const drawerOverlay=
+document.getElementById(
+"overlay"
+);
+
+drawer.classList.remove(
+"open"
+);
+
+drawerOverlay.classList.remove(
+"active"
+);
+
+const popup=
+document.getElementById(
+"videoPopup"
+);
+
+if(
+popup.classList.contains(
+"active"
+)
+){
+
+document
+.getElementById(
+"videoPlaylist"
+)
+.classList.add(
+"active"
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+50
+);
+
+setTimeout(
+adjustVideoPlaylistHeight,
+150
+);
+
+}
 
 highlightActiveTrack();
+
+highlightVideoActiveTrack();
 
 }
 
@@ -2617,13 +3592,75 @@ ACTIVE MAIN TRACK
 
 function highlightActiveTrack(){
 
-if(sortedPlaylistItems.length === 0) return;
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
 
-const currentData = sortedPlaylistData[currentSortedIndex];
-const currentId = currentData ? currentData.id : "";
+let currentId="";
 
-document.querySelectorAll(".song-item").forEach((item, index) => {
-  item.classList.toggle("active", sortedPlaylistData[index] && sortedPlaylistData[index].id === currentId);
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+document
+.querySelectorAll(
+".song-item"
+)
+.forEach(
+(item,index)=>{
+
+item.classList.toggle(
+"active",
+sortedPlaylistItems[index]===currentId
+);
+
+});
+
+}
+
+
+/* =========================================================
+ACTIVE VIDEO TRACK
+========================================================= */
+
+function highlightVideoActiveTrack(){
+
+if(
+!player ||
+sortedPlaylistItems.length===0
+)
+return;
+
+let currentId="";
+
+try{
+
+currentId=
+player.getVideoData() &&
+player.getVideoData().video_id;
+
+}
+catch(e){}
+
+document
+.querySelectorAll(
+".video-song-item"
+)
+.forEach(
+(item,index)=>{
+
+item.classList.toggle(
+"active",
+sortedPlaylistItems[index]===currentId
+);
+
 });
 
 }
@@ -2635,25 +3672,61 @@ UPDATE INFO
 
 function updateInfo(){
 
-if(isLocal) return;
-
-if(!player || typeof player.getVideoData !== "function") return;
+if(
+!player ||
+typeof player.getVideoData!==
+"function"
+)
+return;
 
 try{
-  const d = player.getVideoData();
-  if(!d || !d.video_id) return;
 
-  document.getElementById("cover").src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
-  if(d.title) document.getElementById("title").textContent = d.title;
-  if(d.author) document.getElementById("artist").textContent = d.author;
+const d=
+player.getVideoData();
 
-  const sortedIndex = sortedPlaylistItems.indexOf(d.video_id);
-  if(sortedIndex !== -1){
-    currentSortedIndex = sortedIndex;
-  }
+if(
+!d ||
+!d.video_id
+)
+return;
 
-  highlightActiveTrack();
-} catch(e){}
+document.getElementById(
+"cover"
+).src=
+`https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+
+if(d.title){
+
+document.getElementById(
+"title"
+).textContent=d.title;
+
+}
+
+if(d.author){
+
+document.getElementById(
+"artist"
+).textContent=d.author;
+
+}
+
+const sortedIndex=
+sortedPlaylistItems.indexOf(
+d.video_id
+);
+
+if(sortedIndex!==-1){
+
+currentSortedIndex=sortedIndex;
+
+}
+
+highlightActiveTrack();
+highlightVideoActiveTrack();
+
+}
+catch(e){}
 
 }
 
@@ -2664,18 +3737,67 @@ DRAWER
 
 function toggleDrawer(){
 
-const drawer = document.getElementById("drawer");
-const overlay = document.getElementById("overlay");
-const opening = !drawer.classList.contains("open");
+const popup=
+document.getElementById(
+"videoPopup"
+);
 
-drawer.classList.toggle("open", opening);
-overlay.classList.toggle("active", opening);
+if(
+popup &&
+popup.classList.contains(
+"active"
+)
+){
 
-if(opening && !sortingReady){
-  loadPlaylistItems();
+return;
+
+}
+
+const drawer=
+document.getElementById(
+"drawer"
+);
+
+const overlay=
+document.getElementById(
+"overlay"
+);
+
+const opening=
+!drawer.classList.contains(
+"open"
+);
+
+drawer.classList.toggle(
+"open",
+opening
+);
+
+overlay.classList.toggle(
+"active",
+opening
+);
+
+if(
+opening &&
+!sortingReady
+){
+
+loadPlaylistItems();
+
 }
 
 }
+
+
+/* =========================================================
+INITIAL
+========================================================= */
+
+setTimeout(
+adjustVideoPlaylistHeight,
+600
+);
 
 </script>
 
