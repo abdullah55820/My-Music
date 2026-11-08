@@ -163,7 +163,7 @@ button {
   grid-column: 1/-1;
 }
 
-/* Big Audio Style Player Overlay/Section */
+/* Big Audio Style Player Section */
 .player {
   display: none;
   background: #121726;
@@ -239,7 +239,6 @@ button {
   margin: 0;
 }
 
-/* Audio Player Container (Video hidden or formatted like audio player) */
 .audio-frame-container {
   width: 100%;
   background: #0b0e17;
@@ -250,13 +249,13 @@ button {
 
 .frame {
   width: 100%;
-  height: 80px; /* Compact height like an audio bar widget */
+  height: 80px;
   border: 0;
   border-radius: 10px;
   background: transparent;
 }
 
-/* Bottom Mini Bar for when player is minimized */
+/* Bottom Mini Bar */
 .mini-bar {
   position: fixed;
   bottom: 0;
@@ -356,7 +355,6 @@ button {
 
 <p class="hint">যেমন: Arijit Singh, Atif Aslam, বাংলা গান…</p>
 
-<!-- Big Audio Style Player Section -->
 <section class="player" id="player">
   <div class="player-top-bar">
     <span>NOW PLAYING (AUDIO MODE)</span>
@@ -404,7 +402,6 @@ button {
 
 </main>
 
-<!-- Bottom Mini Player Bar (Wap / Minimize view) -->
 <div class="mini-bar" id="miniBar">
   <div class="mini-left" id="expandPlayer">
     <img id="miniThumb" alt="">
@@ -418,7 +415,7 @@ button {
 
 <script>
 
-// Public Invidious servers
+// Updated reliable Invidious servers list
 const instances = [
   'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
@@ -434,19 +431,15 @@ const statusEl = document.getElementById('status');
 const heading = document.getElementById('heading');
 const more = document.getElementById('loadMore');
 
-let currentQuery = 'Top Bangla and Hindi hits'; // হোমপেজে প্রথম দেখানোর জন্য ডিফল্ট সার্চ টার্ম
+let currentQuery = 'Top Bangla and Hindi hits';
 let page = 1;
 let activeInstance = '';
 let busy = false;
-
-let currentPlayingVideo = null;
-let currentThumbnail = '';
 
 function setStatus(text) {
   statusEl.textContent = text;
 }
 
-// Get thumbnail
 function bestThumb(video) {
   const thumbnails = video.videoThumbnails || [];
   return (
@@ -457,7 +450,6 @@ function bestThumb(video) {
   ).url || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
 }
 
-// Create song card
 function makeCard(video) {
   const card = document.createElement('article');
   card.className = 'card';
@@ -494,27 +486,20 @@ function makeCard(video) {
   return card;
 }
 
-// Open Big Audio Player
 function openPlayer(video, thumbnail) {
-  currentPlayingVideo = video;
-  currentThumbnail = thumbnail;
-
   document.getElementById('playingThumb').src = thumbnail;
   document.getElementById('playingTitle').textContent = video.title || '';
   document.getElementById('playingArtist').textContent = video.author || '';
 
-  // Mini bar update
   document.getElementById('miniThumb').src = thumbnail;
   document.getElementById('miniTitle').textContent = video.title || '';
   document.getElementById('miniArtist').textContent = video.author || '';
 
-  // Load stream in iframe (with autoplay)
   document.getElementById('videoFrame').src =
     'https://www.youtube-nocookie.com/embed/' +
     encodeURIComponent(video.videoId) +
     '?autoplay=1&rel=0';
 
-  // Show big player, hide mini bar
   document.getElementById('player').classList.add('active');
   document.getElementById('miniBar').classList.remove('active');
 
@@ -524,13 +509,11 @@ function openPlayer(video, thumbnail) {
   });
 }
 
-// Minimize / Wap to bottom bar
 document.getElementById('minimizePlayer').addEventListener('click', () => {
   document.getElementById('player').classList.remove('active');
   document.getElementById('miniBar').classList.add('active');
 });
 
-// Expand from mini bar back to big player
 document.getElementById('expandPlayer').addEventListener('click', () => {
   document.getElementById('player').classList.add('active');
   document.getElementById('miniBar').classList.remove('active');
@@ -540,14 +523,12 @@ document.getElementById('expandPlayer').addEventListener('click', () => {
   });
 });
 
-// Close player completely
 document.getElementById('closePlayer').addEventListener('click', () => {
   document.getElementById('videoFrame').src = '';
   document.getElementById('player').classList.remove('active');
   document.getElementById('miniBar').classList.remove('active');
 });
 
-// Search / Fetch songs
 async function search(query, pageNumber = 1, append = false) {
   if (busy) return;
 
@@ -583,8 +564,6 @@ async function search(query, pageNumber = 1, append = false) {
       data = json;
       used = base;
       break;
-    } else {
-      // Continue loop on error
     } catch (error) {
       console.warn('Instance failed:', base, error);
     }
@@ -633,7 +612,6 @@ async function search(query, pageNumber = 1, append = false) {
   busy = false;
 }
 
-// Search form submit
 form.addEventListener('submit', event => {
   event.preventDefault();
   const query = input.value.trim();
@@ -642,14 +620,12 @@ form.addEventListener('submit', event => {
   }
 });
 
-// Load more
 more.addEventListener('click', () => {
   if (currentQuery) {
     search(currentQuery, page + 1, true);
   }
 });
 
-// **অটো রান:** সাইটে ঢুকলেই যেন হোমপেজে গানগুলো চলে আসে
 window.addEventListener('DOMContentLoaded', () => {
   search(currentQuery, 1, false);
 });
