@@ -163,7 +163,7 @@ button {
   grid-column: 1/-1;
 }
 
-/* Big Audio Style Player Section */
+/* Clean Audio Player Style (Apple Music Vibe) */
 .player {
   display: none;
   background: #121726;
@@ -206,13 +206,13 @@ button {
 }
 
 .big-artwork-wrap {
-  width: 220px;
-  height: 220px;
+  width: 250px;
+  height: 250px;
   margin: 0 auto 20px;
   border-radius: 20px;
   overflow: hidden;
-  border: 2px solid var(--line);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border: 1px solid var(--line);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
 }
 
 .big-artwork-wrap img {
@@ -223,7 +223,7 @@ button {
 
 .song-info-center {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .song-info-center h3 {
@@ -239,20 +239,16 @@ button {
   margin: 0;
 }
 
+/* Hidden Video Frame so it plays pure audio in background without showing video box */
 .audio-frame-container {
-  width: 100%;
-  background: #0b0e17;
-  border-radius: 16px;
-  padding: 12px;
-  border: 1px solid var(--line);
+  display: none; 
 }
 
 .frame {
-  width: 100%;
-  height: 80px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
   border: 0;
-  border-radius: 10px;
-  background: transparent;
 }
 
 /* Bottom Mini Bar */
@@ -326,7 +322,7 @@ button {
   .wrap { padding: 17px 13px 130px; }
   .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
   .brand { font-size: 22px; }
-  .big-artwork-wrap { width: 170px; height: 170px; }
+  .big-artwork-wrap { width: 190px; height: 190px; }
 }
 </style>
 </head>
@@ -355,10 +351,11 @@ button {
 
 <p class="hint">যেমন: Arijit Singh, Atif Aslam, বাংলা গান…</p>
 
+<!-- Clean Audio Player Box (No video frame visible) -->
 <section class="player" id="player">
   <div class="player-top-bar">
-    <span>NOW PLAYING (AUDIO MODE)</span>
-    <button class="minimize-btn" id="minimizePlayer" type="button">⬇ নিচের দিকে রাখো</button>
+    <span>AUDIO PLAYER</span>
+    <button class="minimize-btn" id="minimizePlayer" type="button">⬇ নিচের দিকে রাখੋ</button>
   </div>
 
   <div class="big-artwork-wrap">
@@ -370,12 +367,12 @@ button {
     <p id="playingArtist">Artist Name</p>
   </div>
 
+  <!-- Hidden iframe to keep background audio playing -->
   <div class="audio-frame-container">
     <iframe
       class="frame"
       id="videoFrame"
       allow="autoplay; encrypted-media"
-      allowfullscreen
       title="Audio player">
     </iframe>
   </div>
@@ -397,11 +394,12 @@ button {
 </button>
 
 <p class="note">
-  হোমপেজে ঢুকলেই স্বয়ংক্রিয়ভাবে জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলে বড় অডিও প্লেয়ারে বাজবে এবং মিনিমাইজ করে আবার নিচে রাখতে পারবেন।
+  হোমপেজে ঢুকলেই স্বয়ংক্রিয়ভাবে জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলে বড় সুন্দর অডিও প্লেয়ারে বাজবে এবং মিনিমাইজ করে আবার নিচে রাখতে পারবেন।
 </p>
 
 </main>
 
+<!-- Bottom Mini Bar -->
 <div class="mini-bar" id="miniBar">
   <div class="mini-left" id="expandPlayer">
     <img id="miniThumb" alt="">
@@ -415,7 +413,6 @@ button {
 
 <script>
 
-// Updated reliable Invidious servers list
 const instances = [
   'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
