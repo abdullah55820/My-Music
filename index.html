@@ -30,7 +30,7 @@ body {
 .wrap {
   max-width: 1050px;
   margin: auto;
-  padding: 22px 18px 120px;
+  padding: 22px 18px 140px;
 }
 
 .top {
@@ -163,52 +163,150 @@ button {
   grid-column: 1/-1;
 }
 
+/* Big Audio Style Player Overlay/Section */
 .player {
   display: none;
-  background: #171c2c;
+  background: #121726;
   border: 1px solid #35304f;
-  border-radius: 22px;
-  padding: 15px;
-  margin: 18px 0;
+  border-radius: 24px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: fadeIn 0.25s ease;
 }
 
 .player.active { display: block; }
 
-.player-head {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.player-top-bar {
   display: flex;
-  gap: 14px;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
-.player-head img {
-  width: 70px;
-  height: 70px;
+.player-top-bar span {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.minimize-btn {
+  background: #202638;
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 13px;
+  min-height: 34px;
+}
+
+.big-artwork-wrap {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.big-artwork-wrap img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 13px;
 }
 
-.player-head strong {
-  display: block;
-  font-size: 14px;
-  line-height: 1.35;
+.song-info-center {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.player-head small { color: var(--muted); }
+.song-info-center h3 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.song-info-center p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Audio Player Container (Video hidden or formatted like audio player) */
+.audio-frame-container {
+  width: 100%;
+  background: #0b0e17;
+  border-radius: 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+}
 
 .frame {
   width: 100%;
-  aspect-ratio: 16/9;
+  height: 80px; /* Compact height like an audio bar widget */
   border: 0;
-  border-radius: 14px;
-  background: #000;
+  border-radius: 10px;
+  background: transparent;
 }
 
-.close {
-  margin-left: auto;
-  background: #292e40;
-  min-height: 38px;
-  padding: 0 12px;
+/* Bottom Mini Bar for when player is minimized */
+.mini-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #111522f2;
+  backdrop-filter: blur(18px);
+  border-top: 1px solid var(--line);
+  padding: 10px 18px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.mini-bar.active {
+  display: flex;
+}
+
+.mini-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 0;
+  flex: 1;
+}
+
+.mini-left img {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.mini-text {
+  min-width: 0;
+}
+
+.mini-text div {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-text small {
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .load {
@@ -216,26 +314,6 @@ button {
   margin: 22px auto 0;
   background: #252b40;
   border: 1px solid var(--line);
-}
-
-.bottom {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #111522ed;
-  backdrop-filter: blur(18px);
-  border-top: 1px solid var(--line);
-  padding: 12px 18px;
-  display: flex;
-  justify-content: center;
-  z-index: 4;
-}
-
-.bottom span {
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
 }
 
 .note {
@@ -246,11 +324,10 @@ button {
 }
 
 @media(max-width:480px) {
-  .wrap { padding: 17px 13px 110px; }
+  .wrap { padding: 17px 13px 130px; }
   .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
   .brand { font-size: 22px; }
-  .search button { padding: 0 15px; }
-  .tag { font-size: 10px; }
+  .big-artwork-wrap { width: 170px; height: 170px; }
 }
 </style>
 </head>
@@ -264,7 +341,7 @@ button {
     <div class="brand">SOUND<span>FLOW</span></div>
     <div class="tag">Discover • Search • Listen</div>
   </div>
-  <div class="tag">No API key</div>
+  <div class="tag">Audio Mode</div>
 </header>
 
 <form class="search" id="searchForm">
@@ -273,44 +350,47 @@ button {
     type="search"
     placeholder="গানের নাম বা শিল্পীর নাম লিখো…"
     autocomplete="off"
-    required
   >
   <button type="submit">Search</button>
 </form>
 
 <p class="hint">যেমন: Arijit Singh, Atif Aslam, বাংলা গান…</p>
 
+<!-- Big Audio Style Player Section -->
 <section class="player" id="player">
-
-  <div class="player-head">
-    <img id="playingThumb" alt="">
-
-    <div style="min-width:0;flex:1">
-      <strong id="playingTitle"></strong>
-      <small id="playingArtist"></small>
-    </div>
-
-    <button class="close" id="closePlayer" type="button">✕</button>
+  <div class="player-top-bar">
+    <span>NOW PLAYING (AUDIO MODE)</span>
+    <button class="minimize-btn" id="minimizePlayer" type="button">⬇ নিচের দিকে রাখো</button>
   </div>
 
-  <iframe
-    class="frame"
-    id="videoFrame"
-    allow="autoplay; encrypted-media; picture-in-picture"
-    allowfullscreen
-    title="Music player">
-  </iframe>
+  <div class="big-artwork-wrap">
+    <img id="playingThumb" alt="Artwork">
+  </div>
 
+  <div class="song-info-center">
+    <h3 id="playingTitle">Song Title</h3>
+    <p id="playingArtist">Artist Name</p>
+  </div>
+
+  <div class="audio-frame-container">
+    <iframe
+      class="frame"
+      id="videoFrame"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+      title="Audio player">
+    </iframe>
+  </div>
 </section>
 
 <div class="section">
-  <h2 id="heading">Popular searches</h2>
+  <h2 id="heading">Trending All Songs</h2>
   <span class="status" id="status" aria-live="polite">Ready</span>
 </div>
 
 <div class="grid" id="results">
   <div class="empty">
-    উপরে গানের নাম লিখে Search চাপো।
+    গান লোড হচ্ছে...
   </div>
 </div>
 
@@ -319,21 +399,28 @@ button {
 </button>
 
 <p class="note">
-  Search uses public Invidious instances.
-  এগুলো তৃতীয় পক্ষের পাবলিক সার্ভার—কখনো বন্ধ বা ধীর হতে পারে।
-  কিছু ভিডিও YouTube-এর নিয়ম, অঞ্চল বা embedding সীমাবদ্ধতার কারণে নাও চলতে পারে।
+  হোমপেজে ঢুকলেই স্বয়ংক্রিয়ভাবে জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলে বড় অডিও প্লেয়ারে বাজবে এবং মিনিমাইজ করে আবার নিচে রাখতে পারবেন।
 </p>
 
 </main>
 
-<div class="bottom">
-  <span>♪ SoundFlow Music Player</span>
+<!-- Bottom Mini Player Bar (Wap / Minimize view) -->
+<div class="mini-bar" id="miniBar">
+  <div class="mini-left" id="expandPlayer">
+    <img id="miniThumb" alt="">
+    <div class="mini-text">
+      <div id="miniTitle"></div>
+      <small id="miniArtist"></small>
+    </div>
+  </div>
+  <button type="button" id="closePlayer" style="padding: 0 12px; min-height: 36px; background: #242a3b; font-size: 12px;">✕ বন্ধ</button>
 </div>
 
 <script>
 
 // Public Invidious servers
 const instances = [
+  'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
   'https://yt.chocolatemoo53.com',
@@ -347,10 +434,13 @@ const statusEl = document.getElementById('status');
 const heading = document.getElementById('heading');
 const more = document.getElementById('loadMore');
 
-let currentQuery = '';
+let currentQuery = 'Top Bangla and Hindi hits'; // হোমপেজে প্রথম দেখানোর জন্য ডিফল্ট সার্চ টার্ম
 let page = 1;
 let activeInstance = '';
 let busy = false;
+
+let currentPlayingVideo = null;
+let currentThumbnail = '';
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -359,7 +449,6 @@ function setStatus(text) {
 // Get thumbnail
 function bestThumb(video) {
   const thumbnails = video.videoThumbnails || [];
-
   return (
     thumbnails.find(x => x.quality === 'medium') ||
     thumbnails.find(x => x.quality === 'high') ||
@@ -370,7 +459,6 @@ function bestThumb(video) {
 
 // Create song card
 function makeCard(video) {
-
   const card = document.createElement('article');
   card.className = 'card';
   card.tabIndex = 0;
@@ -406,23 +494,29 @@ function makeCard(video) {
   return card;
 }
 
-// Open player
+// Open Big Audio Player
 function openPlayer(video, thumbnail) {
+  currentPlayingVideo = video;
+  currentThumbnail = thumbnail;
 
   document.getElementById('playingThumb').src = thumbnail;
+  document.getElementById('playingTitle').textContent = video.title || '';
+  document.getElementById('playingArtist').textContent = video.author || '';
 
-  document.getElementById('playingTitle').textContent =
-    video.title || '';
+  // Mini bar update
+  document.getElementById('miniThumb').src = thumbnail;
+  document.getElementById('miniTitle').textContent = video.title || '';
+  document.getElementById('miniArtist').textContent = video.author || '';
 
-  document.getElementById('playingArtist').textContent =
-    video.author || '';
-
+  // Load stream in iframe (with autoplay)
   document.getElementById('videoFrame').src =
     'https://www.youtube-nocookie.com/embed/' +
     encodeURIComponent(video.videoId) +
     '?autoplay=1&rel=0';
 
+  // Show big player, hide mini bar
   document.getElementById('player').classList.add('active');
+  document.getElementById('miniBar').classList.remove('active');
 
   document.getElementById('player').scrollIntoView({
     behavior: 'smooth',
@@ -430,37 +524,46 @@ function openPlayer(video, thumbnail) {
   });
 }
 
-// Close player
-document.getElementById('closePlayer').addEventListener('click', () => {
-
-  document.getElementById('videoFrame').src = '';
-
+// Minimize / Wap to bottom bar
+document.getElementById('minimizePlayer').addEventListener('click', () => {
   document.getElementById('player').classList.remove('active');
-
+  document.getElementById('miniBar').classList.add('active');
 });
 
-// Search songs
-async function search(query, pageNumber = 1, append = false) {
+// Expand from mini bar back to big player
+document.getElementById('expandPlayer').addEventListener('click', () => {
+  document.getElementById('player').classList.add('active');
+  document.getElementById('miniBar').classList.remove('active');
+  document.getElementById('player').scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+});
 
+// Close player completely
+document.getElementById('closePlayer').addEventListener('click', () => {
+  document.getElementById('videoFrame').src = '';
+  document.getElementById('player').classList.remove('active');
+  document.getElementById('miniBar').classList.remove('active');
+});
+
+// Search / Fetch songs
+async function search(query, pageNumber = 1, append = false) {
   if (busy) return;
 
   busy = true;
-  setStatus('Searching…');
+  setStatus('গান লোড হচ্ছে…');
   more.hidden = true;
 
   if (!append) {
-    results.innerHTML =
-      '<div class="empty">গান খোঁজা হচ্ছে…</div>';
+    results.innerHTML = '<div class="empty">গান খোঁজা হচ্ছে…</div>';
   }
 
   let data = null;
   let used = '';
 
-  // Try available servers one by one
   for (const base of instances) {
-
     try {
-
       const url =
         base +
         '/api/v1/search?q=' +
@@ -469,44 +572,32 @@ async function search(query, pageNumber = 1, append = false) {
         pageNumber;
 
       const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
       });
 
-      if (!response.ok) {
-        throw new Error('HTTP ' + response.status);
-      }
+      if (!response.ok) throw new Error('HTTP ' + response.status);
 
       const json = await response.json();
-
-      if (!Array.isArray(json)) {
-        throw new Error('Invalid response');
-      }
+      if (!Array.isArray(json)) throw new Error('Invalid response');
 
       data = json;
       used = base;
       break;
-
+    } else {
+      // Continue loop on error
     } catch (error) {
-
       console.warn('Instance failed:', base, error);
-
     }
   }
 
-  // If all servers fail
   if (!data) {
-
     if (!append) {
       results.innerHTML = `
         <div class="empty">
-          এখন কোনো Invidious সার্ভার থেকে ফলাফল আনা যাচ্ছে না।
-          একটু পরে আবার চেষ্টা করো।
+          সার্ভারের সাথে সংযোগ স্থাপন করা যাচ্ছে না। একটু পরে আবার চেষ্টা করো।
         </div>
       `;
     }
-
     setStatus('Server unavailable');
     busy = false;
     return;
@@ -514,22 +605,18 @@ async function search(query, pageNumber = 1, append = false) {
 
   activeInstance = used;
 
-  const videos = data.filter(video =>
-    video.type === 'video' && video.videoId
-  );
+  const videos = data.filter(video => video.type === 'video' && video.videoId);
 
   if (!append) {
     results.innerHTML = '';
   }
 
   if (!videos.length && !append) {
-
     results.innerHTML = `
       <div class="empty">
         কোনো গান পাওয়া যায়নি। অন্য নামে সার্চ করো।
       </div>
     `;
-
   }
 
   videos.forEach(video => {
@@ -539,35 +626,32 @@ async function search(query, pageNumber = 1, append = false) {
   page = pageNumber;
   currentQuery = query;
 
-  heading.textContent = 'Search results';
-
+  heading.textContent = append || pageNumber > 1 ? 'Search results' : 'Trending All Songs';
   setStatus(videos.length + 'টি গান');
 
   more.hidden = videos.length === 0;
-
   busy = false;
 }
 
-// Search form
+// Search form submit
 form.addEventListener('submit', event => {
-
   event.preventDefault();
-
   const query = input.value.trim();
-
   if (query) {
     search(query, 1, false);
   }
-
 });
 
 // Load more
 more.addEventListener('click', () => {
-
   if (currentQuery) {
     search(currentQuery, page + 1, true);
   }
+});
 
+// **অটো রান:** সাইটে ঢুকলেই যেন হোমপেজে গানগুলো চলে আসে
+window.addEventListener('DOMContentLoaded', () => {
+  search(currentQuery, 1, false);
 });
 
 </script>
