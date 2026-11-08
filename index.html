@@ -3,27 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#090b13">
+<meta name="theme-color" content="#000000">
 <title>SoundFlow — Music</title>
 
 <style>
 :root {
   color-scheme: dark;
   --bg: #090b13;
-  --panel: #121625;
-  --muted: #9ba3b8;
-  --line: #252c40;
-  --accent: #a78bfa;
-  --pink: #fb7185;
+  --muted: #8e8e93;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #ff2d55;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: radial-gradient(ellipse at 20% 0%, #252047 0, transparent 42%), var(--bg);
+  background: var(--bg);
   color: #f7f7fb;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
 }
 
@@ -62,10 +60,10 @@ body {
 .search input {
   min-width: 0;
   flex: 1;
-  background: #171c2c;
+  background: #1c1c1e;
   border: 1px solid var(--line);
-  border-radius: 15px;
-  padding: 15px;
+  border-radius: 14px;
+  padding: 14px;
   color: white;
   font-size: 16px;
   outline: none;
@@ -77,9 +75,9 @@ button {
   border: 0;
   border-radius: 14px;
   padding: 0 19px;
-  background: linear-gradient(135deg, #a78bfa, #ec4899);
+  background: linear-gradient(135deg, #ff2d55, #ff5e3a);
   color: white;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 15px;
   cursor: pointer;
   min-height: 48px;
@@ -115,9 +113,9 @@ button {
 }
 
 .card {
-  background: linear-gradient(160deg, #171d30, #101421);
+  background: #1c1c1e;
   border: 1px solid var(--line);
-  border-radius: 17px;
+  border-radius: 16px;
   padding: 10px;
   cursor: pointer;
   min-width: 0;
@@ -131,12 +129,12 @@ button {
   aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 12px;
-  background: #242a3b;
+  background: #2c2c2e;
 }
 
 .title {
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 650;
   line-height: 1.35;
   margin: 10px 2px 5px;
   display: -webkit-box;
@@ -155,7 +153,7 @@ button {
 }
 
 .empty {
-  border: 1px dashed #39415a;
+  border: 1px dashed var(--line);
   padding: 28px 15px;
   border-radius: 16px;
   color: var(--muted);
@@ -163,56 +161,42 @@ button {
   grid-column: 1/-1;
 }
 
-/* Apple Music Style Full Custom Audio Player */
+/* --- EXACT APPLE MUSIC STYLE FULL PLAYER --- */
 .player {
   display: none;
-  background: rgba(18, 23, 37, 0.85);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 28px;
-  padding: 24px;
+  background: #121212;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  padding: 30px 24px;
   margin: 20px 0;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-  animation: fadeIn 0.25s ease;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+  animation: fadeIn 0.3s ease;
 }
 
 .player.active { display: block; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.player-top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.player-top-bar span {
-  font-size: 12px;
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.minimize-btn {
-  background: #202638;
-  color: var(--muted);
-  border-radius: 10px;
-  padding: 6px 14px;
-  font-size: 12px;
-  min-height: 34px;
+.player-top-handle {
+  width: 36px;
+  height: 5px;
+  background: #3a3a3c;
+  border-radius: 3px;
+  margin: 0 auto 20px;
+  cursor: pointer;
 }
 
 .big-artwork-wrap {
-  width: 240px;
-  height: 240px;
-  margin: 0 auto 20px;
-  border-radius: 24px;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 25px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+  background: #2c2c2e;
 }
 
 .big-artwork-wrap img {
@@ -221,94 +205,121 @@ button {
   object-fit: cover;
 }
 
-.song-info-center {
-  text-align: center;
-  margin-bottom: 20px;
+.song-meta-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 320px;
+  margin: 0 auto 18px;
 }
 
-.song-info-center h3 {
-  font-size: 18px;
-  margin: 0 0 6px;
+.song-info-text h3 {
+  font-size: 20px;
+  margin: 0 0 4px;
   font-weight: 700;
-  line-height: 1.4;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
-.song-info-center p {
-  font-size: 13px;
+.song-info-text p {
+  font-size: 14px;
   color: var(--muted);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
-/* Audio Controls (Apple Music Style UI) */
-.controls-wrap {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.progress-bar-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.time-text {
-  font-size: 11px;
+.like-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  min-height: auto;
   color: var(--muted);
-  width: 40px;
-  text-align: center;
+}
+.like-btn.liked { color: #ff2d55; }
+
+/* Progress Bar (Apple Style) */
+.progress-container {
+  max-width: 320px;
+  margin: 0 auto 25px;
 }
 
 .seek-slider {
-  flex: 1;
+  width: 100%;
   -webkit-appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
+  height: 5px;
+  border-radius: 3px;
+  background: #3a3a3c;
   outline: none;
   cursor: pointer;
 }
 
 .seek-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* Play Controls Row */
+.controls-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.ctrl-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  min-height: auto;
+}
+
+.play-pause-circle {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 8px 20px rgba(255,255,255,0.25);
   cursor: pointer;
 }
 
-.btn-group {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 25px;
-}
-
-.play-main-btn {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #000;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  min-height: auto;
-  box-shadow: 0 4px 15px rgba(255,255,255,0.2);
-}
-
-/* Real YouTube Iframe API container (Hidden cleanly) */
+/* Hidden YouTube API container */
 #ytPlayerContainer {
   position: absolute;
-  top: -9999px;
   left: -9999px;
+  top: -9999px;
   width: 1px;
   height: 1px;
   opacity: 0;
-  pointer-events: none;
 }
 
 /* Bottom Mini Bar */
@@ -317,8 +328,8 @@ button {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #111522f2;
-  backdrop-filter: blur(18px);
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(20px);
   border-top: 1px solid var(--line);
   padding: 10px 18px;
   display: none;
@@ -339,8 +350,8 @@ button {
 }
 
 .mini-left img {
-  width: 45px;
-  height: 45px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   object-fit: cover;
 }
@@ -360,16 +371,26 @@ button {
   color: var(--muted);
 }
 
+.mini-play-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 12px;
+  min-height: auto;
+}
+
 .load {
   display: block;
   margin: 22px auto 0;
-  background: #252b40;
+  background: #1c1c1e;
   border: 1px solid var(--line);
 }
 
 .note {
   font-size: 11px;
-  color: #778097;
+  color: var(--muted);
   line-height: 1.5;
   margin-top: 24px;
 }
@@ -378,7 +399,7 @@ button {
   .wrap { padding: 17px 13px 130px; }
   .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
   .brand { font-size: 22px; }
-  .big-artwork-wrap { width: 190px; height: 190px; }
+  .big-artwork-wrap { width: 230px; height: 230px; }
 }
 </style>
 </head>
@@ -392,7 +413,7 @@ button {
     <div class="brand">SOUND<span>FLOW</span></div>
     <div class="tag">Discover • Search • Listen</div>
   </div>
-  <div class="tag">Audio Mode</div>
+  <div class="tag">Apple Music Style</div>
 </header>
 
 <form class="search" id="searchForm">
@@ -407,36 +428,38 @@ button {
 
 <p class="hint">যেমন: Arijit Singh, Atif Aslam, বাংলা গান…</p>
 
-<!-- Apple Music Pure Audio Player UI -->
+<!-- Apple Music Style Full Player Box -->
 <section class="player" id="player">
-  <div class="player-top-bar">
-    <span>AUDIO PLAYER</span>
-    <button class="minimize-btn" id="minimizePlayer" type="button">⬇ নিচের দিকে রাখো</button>
-  </div>
+  <div class="player-top-handle" id="minimizePlayer" title="নিচে নামান"></div>
 
   <div class="big-artwork-wrap">
     <img id="playingThumb" alt="Artwork">
   </div>
 
-  <div class="song-info-center">
-    <h3 id="playingTitle">Song Title</h3>
-    <p id="playingArtist">Artist Name</p>
+  <div class="song-meta-box">
+    <div class="song-info-text">
+      <h3 id="playingTitle">Song Title</h3>
+      <p id="playingArtist">Artist Name</p>
+    </div>
+    <button class="like-btn" id="likeBtn" type="button">♥</button>
   </div>
 
-  <div class="controls-wrap">
-    <div class="progress-bar-container">
-      <span class="time-text" id="currentTime">0:00</span>
-      <input type="range" class="seek-slider" id="seekSlider" value="0" max="100">
-      <span class="time-text" id="durationTime">0:00</span>
+  <div class="progress-container">
+    <input type="range" class="seek-slider" id="seekSlider" value="0" max="100">
+    <div class="time-row">
+      <span id="currentTime">0:00</span>
+      <span id="durationTime">0:00</span>
     </div>
+  </div>
 
-    <div class="btn-group">
-      <button class="play-main-btn" id="mainPlayBtn" type="button">▶</button>
-    </div>
+  <div class="controls-row">
+    <button class="ctrl-btn" id="prevBtn" type="button">⏮</button>
+    <div class="play-pause-circle" id="mainPlayBtn">▶</div>
+    <button class="ctrl-btn" id="nextBtn" type="button">⏭</button>
   </div>
 </section>
 
-<!-- Invisible YouTube Player API Element -->
+<!-- Hidden YouTube API Frame -->
 <div id="ytPlayerContainer">
   <div id="ytPlayer"></div>
 </div>
@@ -457,7 +480,7 @@ button {
 </button>
 
 <p class="note">
-  হোমপেজে ঢুকলেই স্বয়ংক্রিয়ভাবে জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলে অডিও প্লেয়ারে সরাসরি বাজবে।
+  হোমপেজে ঢুকলেই জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলেই হুবহু অ্যাপল মিউজিক স্টাইল প্লেয়ারে গান বাজবে।
 </p>
 
 </main>
@@ -471,8 +494,8 @@ button {
       <small id="miniArtist"></small>
     </div>
   </div>
-  <button type="button" id="miniPlayBtn" style="padding: 0 14px; min-height: 36px; background: #fff; color: #000; font-size: 13px; font-weight: bold; border-radius: 8px;">▶</button>
-  <button type="button" id="closePlayer" style="padding: 0 10px; min-height: 36px; background: transparent; color: var(--muted); font-size: 14px;">✕</button>
+  <button type="button" class="mini-play-btn" id="miniPlayBtn">▶</button>
+  <button type="button" id="closePlayer" style="background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:0 8px;">✕</button>
 </div>
 
 <!-- Load YouTube Iframe API -->
@@ -500,6 +523,7 @@ const miniPlayBtn = document.getElementById('miniPlayBtn');
 const seekSlider = document.getElementById('seekSlider');
 const currentTimeEl = document.getElementById('currentTime');
 const durationTimeEl = document.getElementById('durationTime');
+const likeBtn = document.getElementById('likeBtn');
 
 let ytPlayer = null;
 let currentQuery = 'Top Bangla and Hindi hits';
@@ -508,7 +532,7 @@ let busy = false;
 let updateTimer = null;
 let isPlaying = false;
 
-// Initialize YouTube API Player
+// YouTube API Setup
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('ytPlayer', {
     height: '100',
@@ -581,6 +605,10 @@ function togglePlay() {
 
 mainPlayBtn.addEventListener('click', togglePlay);
 miniPlayBtn.addEventListener('click', togglePlay);
+
+likeBtn.addEventListener('click', () => {
+  likeBtn.classList.toggle('liked');
+});
 
 function bestThumb(video) {
   const thumbnails = video.videoThumbnails || [];
