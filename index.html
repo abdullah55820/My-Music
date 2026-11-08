@@ -9,7 +9,7 @@
 <style>
 :root {
   color-scheme: dark;
-  --bg: #090b13;
+  --bg: #000000;
   --muted: #8e8e93;
   --line: rgba(255, 255, 255, 0.12);
   --accent: #ff2d55;
@@ -28,7 +28,7 @@ body {
 .wrap {
   max-width: 1050px;
   margin: auto;
-  padding: 22px 18px 140px;
+  padding: 22px 18px 60px;
 }
 
 .top {
@@ -161,42 +161,77 @@ button {
   grid-column: 1/-1;
 }
 
-/* --- EXACT APPLE MUSIC STYLE FULL PLAYER --- */
+/* --- FULL SCREEN APPLE MUSIC STYLE PLAYER OVERLAY --- */
 .player {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
   display: none;
-  background: #121212;
-  border: 1px solid var(--line);
-  border-radius: 30px;
-  padding: 30px 24px;
-  margin: 20px 0;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-  animation: fadeIn 0.3s ease;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 24px 50px;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
 }
 
-.player.active { display: block; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+.player.active {
+  display: flex;
 }
 
-.player-top-handle {
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.player-top-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.collapse-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
   width: 36px;
-  height: 5px;
-  background: #3a3a3c;
-  border-radius: 3px;
-  margin: 0 auto 20px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  min-height: auto;
+}
+
+.player-top-bar span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.player-content-center {
+  max-width: 380px;
+  width: 100%;
+  margin: auto;
 }
 
 .big-artwork-wrap {
-  width: 280px;
-  height: 280px;
-  margin: 0 auto 25px;
-  border-radius: 20px;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.7);
-  background: #2c2c2e;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  background: #1c1c1e;
+  margin-bottom: 30px;
 }
 
 .big-artwork-wrap img {
@@ -209,35 +244,34 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 320px;
-  margin: 0 auto 18px;
+  margin-bottom: 25px;
 }
 
 .song-info-text h3 {
-  font-size: 20px;
-  margin: 0 0 4px;
+  font-size: 22px;
+  margin: 0 0 6px;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 260px;
+  max-width: 280px;
 }
 
 .song-info-text p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 260px;
+  max-width: 280px;
 }
 
 .like-btn {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 26px;
   cursor: pointer;
   padding: 0;
   min-height: auto;
@@ -245,35 +279,34 @@ button {
 }
 .like-btn.liked { color: #ff2d55; }
 
-/* Progress Bar (Apple Style) */
+/* Progress Bar */
 .progress-container {
-  max-width: 320px;
-  margin: 0 auto 25px;
+  margin-bottom: 30px;
 }
 
 .seek-slider {
   width: 100%;
   -webkit-appearance: none;
-  height: 5px;
+  height: 6px;
   border-radius: 3px;
-  background: #3a3a3c;
+  background: #2c2c2e;
   outline: none;
   cursor: pointer;
 }
 
 .seek-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  box-shadow: 0 0 8px rgba(255,255,255,0.5);
 }
 
 .time-row {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 8px;
 }
@@ -283,32 +316,30 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
-  max-width: 320px;
-  margin: 0 auto;
+  gap: 50px;
 }
 
 .ctrl-btn {
   background: none;
   border: none;
   color: #fff;
-  font-size: 24px;
+  font-size: 28px;
   cursor: pointer;
   padding: 0;
   min-height: auto;
 }
 
 .play-pause-circle {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   background: #fff;
   color: #000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  box-shadow: 0 8px 20px rgba(255,255,255,0.25);
+  font-size: 28px;
+  box-shadow: 0 10px 25px rgba(255,255,255,0.3);
   cursor: pointer;
 }
 
@@ -320,65 +351,6 @@ button {
   width: 1px;
   height: 1px;
   opacity: 0;
-}
-
-/* Bottom Mini Bar */
-.mini-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(28, 28, 30, 0.92);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--line);
-  padding: 10px 18px;
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 10;
-}
-
-.mini-bar.active { display: flex; }
-
-.mini-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  min-width: 0;
-  flex: 1;
-}
-
-.mini-left img {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.mini-text { min-width: 0; }
-
-.mini-text div {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mini-text small {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.mini-play-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 0 12px;
-  min-height: auto;
 }
 
 .load {
@@ -396,10 +368,9 @@ button {
 }
 
 @media(max-width:480px) {
-  .wrap { padding: 17px 13px 130px; }
+  .wrap { padding: 17px 13px 50px; }
   .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
   .brand { font-size: 22px; }
-  .big-artwork-wrap { width: 230px; height: 230px; }
 }
 </style>
 </head>
@@ -413,7 +384,7 @@ button {
     <div class="brand">SOUND<span>FLOW</span></div>
     <div class="tag">Discover • Search • Listen</div>
   </div>
-  <div class="tag">Apple Music Style</div>
+  <div class="tag">Full Screen Mode</div>
 </header>
 
 <form class="search" id="searchForm">
@@ -427,42 +398,6 @@ button {
 </form>
 
 <p class="hint">যেমন: Arijit Singh, Atif Aslam, বাংলা গান…</p>
-
-<!-- Apple Music Style Full Player Box -->
-<section class="player" id="player">
-  <div class="player-top-handle" id="minimizePlayer" title="নিচে নামান"></div>
-
-  <div class="big-artwork-wrap">
-    <img id="playingThumb" alt="Artwork">
-  </div>
-
-  <div class="song-meta-box">
-    <div class="song-info-text">
-      <h3 id="playingTitle">Song Title</h3>
-      <p id="playingArtist">Artist Name</p>
-    </div>
-    <button class="like-btn" id="likeBtn" type="button">♥</button>
-  </div>
-
-  <div class="progress-container">
-    <input type="range" class="seek-slider" id="seekSlider" value="0" max="100">
-    <div class="time-row">
-      <span id="currentTime">0:00</span>
-      <span id="durationTime">0:00</span>
-    </div>
-  </div>
-
-  <div class="controls-row">
-    <button class="ctrl-btn" id="prevBtn" type="button">⏮</button>
-    <div class="play-pause-circle" id="mainPlayBtn">▶</div>
-    <button class="ctrl-btn" id="nextBtn" type="button">⏭</button>
-  </div>
-</section>
-
-<!-- Hidden YouTube API Frame -->
-<div id="ytPlayerContainer">
-  <div id="ytPlayer"></div>
-</div>
 
 <div class="section">
   <h2 id="heading">Trending All Songs</h2>
@@ -480,22 +415,52 @@ button {
 </button>
 
 <p class="note">
-  হোমপেজে ঢুকলেই জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলেই হুবহু অ্যাপল মিউজিক স্টাইল প্লেয়ারে গান বাজবে।
+  হোমপেজে ঢুকলেই জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলেই সেটি সরাসরি পুরো স্ক্রিন জুড়ে (Full Screen) ওপেন হয়ে গান বাজবে।
 </p>
 
 </main>
 
-<!-- Bottom Mini Bar -->
-<div class="mini-bar" id="miniBar">
-  <div class="mini-left" id="expandPlayer">
-    <img id="miniThumb" alt="">
-    <div class="mini-text">
-      <div id="miniTitle"></div>
-      <small id="miniArtist"></small>
+<!-- --- FULL SCREEN APPLE MUSIC STYLE PLAYER OVERLAY --- -->
+<section class="player" id="player">
+  <div class="player-top-bar">
+    <button class="collapse-btn" id="minimizePlayer" type="button">⌵</button>
+    <span>Playing from Search</span>
+  </div>
+
+  <div class="player-content-center">
+    <div class="big-artwork-wrap">
+      <img id="playingThumb" alt="Artwork">
+    </div>
+
+    <div class="song-meta-box">
+      <div class="song-info-text">
+        <h3 id="playingTitle">Song Title</h3>
+        <p id="playingArtist">Artist Name</p>
+      </div>
+      <button class="like-btn" id="likeBtn" type="button">♥</button>
+    </div>
+
+    <div class="progress-container">
+      <input type="range" class="seek-slider" id="seekSlider" value="0" max="100">
+      <div class="time-row">
+        <span id="currentTime">0:00</span>
+        <span id="durationTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button class="ctrl-btn" id="prevBtn" type="button">⏮</button>
+      <div class="play-pause-circle" id="mainPlayBtn">▶</div>
+      <button class="ctrl-btn" id="nextBtn" type="button">⏭</button>
     </div>
   </div>
-  <button type="button" class="mini-play-btn" id="miniPlayBtn">▶</button>
-  <button type="button" id="closePlayer" style="background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:0 8px;">✕</button>
+  
+  <div></div> <!-- Spacing alignment -->
+</section>
+
+<!-- Hidden YouTube API Frame -->
+<div id="ytPlayerContainer">
+  <div id="ytPlayer"></div>
 </div>
 
 <!-- Load YouTube Iframe API -->
@@ -519,7 +484,6 @@ const heading = document.getElementById('heading');
 const more = document.getElementById('loadMore');
 
 const mainPlayBtn = document.getElementById('mainPlayBtn');
-const miniPlayBtn = document.getElementById('miniPlayBtn');
 const seekSlider = document.getElementById('seekSlider');
 const currentTimeEl = document.getElementById('currentTime');
 const durationTimeEl = document.getElementById('durationTime');
@@ -552,12 +516,10 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
     mainPlayBtn.textContent = '❚❚';
-    miniPlayBtn.textContent = '❚❚';
     startTimer();
   } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isPlaying = false;
     mainPlayBtn.textContent = '▶';
-    miniPlayBtn.textContent = '▶';
     stopTimer();
   }
 }
@@ -604,7 +566,6 @@ function togglePlay() {
 }
 
 mainPlayBtn.addEventListener('click', togglePlay);
-miniPlayBtn.addEventListener('click', togglePlay);
 
 likeBtn.addEventListener('click', () => {
   likeBtn.classList.toggle('liked');
@@ -651,37 +612,17 @@ function openPlayer(video, thumbnail) {
   document.getElementById('playingTitle').textContent = video.title || '';
   document.getElementById('playingArtist').textContent = video.author || '';
 
-  document.getElementById('miniThumb').src = thumbnail;
-  document.getElementById('miniTitle').textContent = video.title || '';
-  document.getElementById('miniArtist').textContent = video.author || '';
-
   if (ytPlayer && ytPlayer.loadVideoById) {
     ytPlayer.loadVideoById(video.videoId);
   }
 
+  // ফুল স্ক্রিন প্লেয়ার ওভারলে ওপেন হবে
   document.getElementById('player').classList.add('active');
-  document.getElementById('miniBar').classList.remove('active');
-
-  document.getElementById('player').scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  });
 }
 
+// ওপরের ডাউন অ্যারো (⌵) চাপলে ফুল স্ক্রিন প্লেয়ার বন্ধ হয়ে হোমপেজে ফিরে আসবে
 document.getElementById('minimizePlayer').addEventListener('click', () => {
   document.getElementById('player').classList.remove('active');
-  document.getElementById('miniBar').classList.add('active');
-});
-
-document.getElementById('expandPlayer').addEventListener('click', () => {
-  document.getElementById('player').classList.add('active');
-  document.getElementById('miniBar').classList.remove('active');
-});
-
-document.getElementById('closePlayer').addEventListener('click', () => {
-  if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
-  document.getElementById('player').classList.remove('active');
-  document.getElementById('miniBar').classList.remove('active');
 });
 
 async function search(query, pageNumber = 1, append = false) {
