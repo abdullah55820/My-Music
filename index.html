@@ -9,9 +9,9 @@
 <style>
 :root {
   color-scheme: dark;
-  --bg: #000000;
+  --bg: #090b13;
   --muted: #8e8e93;
-  --line: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.15);
   --accent: #ff2d55;
 }
 
@@ -28,7 +28,7 @@ body {
 .wrap {
   max-width: 1050px;
   margin: auto;
-  padding: 22px 18px 60px;
+  padding: 22px 18px 100px;
 }
 
 .top {
@@ -161,30 +161,37 @@ button {
   grid-column: 1/-1;
 }
 
-/* --- FULL SCREEN APPLE MUSIC STYLE PLAYER OVERLAY --- */
+/* --- FULL SCREEN BLURRED BACKGROUND PLAYER --- */
 .player {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000000;
   z-index: 9999;
   display: none;
   flex-direction: column;
   justify-content: space-between;
   padding: 40px 24px 50px;
   overflow-y: auto;
-  animation: slideUp 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(100%);
 }
 
 .player.active {
   display: flex;
+  transform: translateY(0);
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+/* Dynamic Blurred Background Layer */
+.player-bg-blur {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(55px) brightness(0.4);
+  transform: scale(1.2);
+  z-index: -1;
 }
 
 .player-top-bar {
@@ -196,7 +203,7 @@ button {
 }
 
 .collapse-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   color: #fff;
   width: 36px;
@@ -213,9 +220,10 @@ button {
 }
 
 .player-top-bar span {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
+  color: #d1d1d6;
+  letter-spacing: 0.5px;
 }
 
 .player-content-center {
@@ -227,9 +235,9 @@ button {
 .big-artwork-wrap {
   width: 100%;
   aspect-ratio: 1/1;
-  border-radius: 22px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.7);
   background: #1c1c1e;
   margin-bottom: 30px;
 }
@@ -244,11 +252,11 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 22px;
 }
 
 .song-info-text h3 {
-  font-size: 22px;
+  font-size: 20px;
   margin: 0 0 6px;
   font-weight: 700;
   color: #fff;
@@ -259,8 +267,8 @@ button {
 }
 
 .song-info-text p {
-  font-size: 15px;
-  color: var(--muted);
+  font-size: 14px;
+  color: #d1d1d6;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -279,68 +287,132 @@ button {
 }
 .like-btn.liked { color: #ff2d55; }
 
-/* Progress Bar */
+/* Custom Progress Bar (White played part) */
 .progress-container {
-  margin-bottom: 30px;
+  margin-bottom: 35px;
 }
 
 .seek-slider {
   width: 100%;
   -webkit-appearance: none;
-  height: 6px;
+  height: 5px;
   border-radius: 3px;
-  background: #2c2c2e;
+  background: rgba(255, 255, 255, 0.25);
   outline: none;
   cursor: pointer;
 }
 
 .seek-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 8px rgba(255,255,255,0.5);
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
 }
 
 .time-row {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: var(--muted);
+  color: #d1d1d6;
   margin-top: 8px;
 }
 
-/* Play Controls Row */
+/* Realistic Play Controls Row */
 .controls-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 50px;
+  gap: 45px;
 }
 
 .ctrl-btn {
   background: none;
   border: none;
   color: #fff;
-  font-size: 28px;
+  font-size: 22px;
   cursor: pointer;
   padding: 0;
   min-height: auto;
+  opacity: 0.9;
+  transition: opacity 0.2s;
 }
+.ctrl-btn:active { opacity: 0.5; }
 
 .play-pause-circle {
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
   background: #fff;
   color: #000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  box-shadow: 0 10px 25px rgba(255,255,255,0.3);
+  font-size: 26px;
+  box-shadow: 0 10px 30px rgba(255,255,255,0.35);
   cursor: pointer;
+  transition: transform 0.1s;
+}
+.play-pause-circle:active { transform: scale(0.95); }
+
+/* --- BOTTOM MINI BAR (When minimized) --- */
+.mini-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--line);
+  padding: 10px 18px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 998;
+}
+
+.mini-bar.active { display: flex; }
+
+.mini-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 0;
+  flex: 1;
+}
+
+.mini-left img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.mini-text { min-width: 0; }
+
+.mini-text div {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-text small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.mini-play-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 12px;
+  min-height: auto;
 }
 
 /* Hidden YouTube API container */
@@ -368,7 +440,7 @@ button {
 }
 
 @media(max-width:480px) {
-  .wrap { padding: 17px 13px 50px; }
+  .wrap { padding: 17px 13px 80px; }
   .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
   .brand { font-size: 22px; }
 }
@@ -384,7 +456,7 @@ button {
     <div class="brand">SOUND<span>FLOW</span></div>
     <div class="tag">Discover • Search • Listen</div>
   </div>
-  <div class="tag">Full Screen Mode</div>
+  <div class="tag">Full Screen Blur Mode</div>
 </header>
 
 <form class="search" id="searchForm">
@@ -415,13 +487,15 @@ button {
 </button>
 
 <p class="note">
-  হোমপেজে ঢুকলেই জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলেই সেটি সরাসরি পুরো স্ক্রিন জুড়ে (Full Screen) ওপেন হয়ে গান বাজবে।
+  হোমপেজে ঢুকলেই জনপ্রিয় গানগুলো দেখাবে। যেকোনো গানে ক্লিক করলেই ব্যাকগ্রাউন্ডে ব্লার ইফেক্টসহ ফুল-স্ক্রিন প্লেয়ার ওপেন হবে। নিচের দিকে সোয়াইপ বা ডাউন অ্যারো চাপলে এটি মিনিমাইজ হয়ে নিচে থাকবে।
 </p>
 
 </main>
 
-<!-- --- FULL SCREEN APPLE MUSIC STYLE PLAYER OVERLAY --- -->
+<!-- --- FULL SCREEN BLURRED PLAYER OVERLAY --- -->
 <section class="player" id="player">
+  <div class="player-bg-blur" id="playerBgBlur"></div>
+
   <div class="player-top-bar">
     <button class="collapse-btn" id="minimizePlayer" type="button">⌵</button>
     <span>Playing from Search</span>
@@ -455,15 +529,27 @@ button {
     </div>
   </div>
   
-  <div></div> <!-- Spacing alignment -->
+  <div></div>
 </section>
+
+<!-- Bottom Mini Bar (When minimized) -->
+<div class="mini-bar" id="miniBar">
+  <div class="mini-left" id="expandPlayer">
+    <img id="miniThumb" alt="">
+    <div class="mini-text">
+      <div id="miniTitle"></div>
+      <small id="miniArtist"></small>
+    </div>
+  </div>
+  <button type="button" class="mini-play-btn" id="miniPlayBtn">▶</button>
+  <button type="button" id="closePlayer" style="background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:0 8px;">✕</button>
+</div>
 
 <!-- Hidden YouTube API Frame -->
 <div id="ytPlayerContainer">
   <div id="ytPlayer"></div>
 </div>
 
-<!-- Load YouTube Iframe API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -484,10 +570,13 @@ const heading = document.getElementById('heading');
 const more = document.getElementById('loadMore');
 
 const mainPlayBtn = document.getElementById('mainPlayBtn');
+const miniPlayBtn = document.getElementById('miniPlayBtn');
 const seekSlider = document.getElementById('seekSlider');
 const currentTimeEl = document.getElementById('currentTime');
 const durationTimeEl = document.getElementById('durationTime');
 const likeBtn = document.getElementById('likeBtn');
+const playerEl = document.getElementById('player');
+const miniBarEl = document.getElementById('miniBar');
 
 let ytPlayer = null;
 let currentQuery = 'Top Bangla and Hindi hits';
@@ -516,10 +605,12 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
     mainPlayBtn.textContent = '❚❚';
+    miniPlayBtn.textContent = '❚❚';
     startTimer();
   } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isPlaying = false;
     mainPlayBtn.textContent = '▶';
+    miniPlayBtn.textContent = '▶';
     stopTimer();
   }
 }
@@ -539,7 +630,10 @@ function startTimer() {
       currentTimeEl.textContent = formatTime(current);
       durationTimeEl.textContent = formatTime(duration);
       if (duration > 0) {
-        seekSlider.value = (current / duration) * 100;
+        const val = (current / duration) * 100;
+        seekSlider.value = val;
+        // Progress bar white color fill dynamic styling
+        seekSlider.style.background = `linear-gradient(to right, #ffffff ${val}%, rgba(255, 255, 255, 0.25) ${val}%)`;
       }
     }
   }, 1000);
@@ -551,8 +645,10 @@ function stopTimer() {
 
 seekSlider.addEventListener('input', () => {
   if (ytPlayer && ytPlayer.getDuration) {
-    const seekToSec = (seekSlider.value / 100) * ytPlayer.getDuration();
+    const duration = ytPlayer.getDuration();
+    const seekToSec = (seekSlider.value / 100) * duration;
     ytPlayer.seekTo(seekToSec, true);
+    seekSlider.style.background = `linear-gradient(to right, #ffffff ${seekSlider.value}%, rgba(255, 255, 255, 0.25) ${seekSlider.value}%)`;
   }
 });
 
@@ -566,6 +662,7 @@ function togglePlay() {
 }
 
 mainPlayBtn.addEventListener('click', togglePlay);
+miniPlayBtn.addEventListener('click', togglePlay);
 
 likeBtn.addEventListener('click', () => {
   likeBtn.classList.toggle('liked');
@@ -609,20 +706,51 @@ function makeCard(video) {
 
 function openPlayer(video, thumbnail) {
   document.getElementById('playingThumb').src = thumbnail;
+  document.getElementById('playerBgBlur').style.backgroundImage = `url('${thumbnail}')`;
   document.getElementById('playingTitle').textContent = video.title || '';
   document.getElementById('playingArtist').textContent = video.author || '';
+
+  document.getElementById('miniThumb').src = thumbnail;
+  document.getElementById('miniTitle').textContent = video.title || '';
+  document.getElementById('miniArtist').textContent = video.author || '';
 
   if (ytPlayer && ytPlayer.loadVideoById) {
     ytPlayer.loadVideoById(video.videoId);
   }
 
-  // ফুল স্ক্রিন প্লেয়ার ওভারলে ওপেন হবে
-  document.getElementById('player').classList.add('active');
+  playerEl.classList.add('active');
+  miniBarEl.classList.remove('active');
 }
 
-// ওপরের ডাউন অ্যারো (⌵) চাপলে ফুল স্ক্রিন প্লেয়ার বন্ধ হয়ে হোমপেজে ফিরে আসবে
+// Minimize: Swipe Down or click collapse arrow
 document.getElementById('minimizePlayer').addEventListener('click', () => {
-  document.getElementById('player').classList.remove('active');
+  playerEl.classList.remove('active');
+  miniBarEl.classList.add('active');
+});
+
+// Touch gesture for swipe down to minimize
+let touchStartY = 0;
+playerEl.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+});
+playerEl.addEventListener('touchend', e => {
+  let touchEndY = e.changedTouches[0].clientY;
+  if (touchEndY - touchStartY > 120) { // Swipe down threshold
+    playerEl.classList.remove('active');
+    miniBarEl.classList.add('active');
+  }
+});
+
+// Expand from mini bar
+document.getElementById('expandPlayer').addEventListener('click', () => {
+  playerEl.classList.add('active');
+  miniBarEl.classList.remove('active');
+});
+
+// Close completely
+document.getElementById('closePlayer').addEventListener('click', () => {
+  if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+  miniBarEl.classList.remove('active');
 });
 
 async function search(query, pageNumber = 1, append = false) {
