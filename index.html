@@ -202,6 +202,14 @@ button {
   opacity:.5;
 }
 
+/* HOME AUTO LOAD SENTINEL */
+
+#homeSentinel {
+  width:100%;
+  height:2px;
+  pointer-events:none;
+}
+
 /* BOTTOM NAV */
 
 .bottom-nav {
@@ -802,13 +810,12 @@ body.full-player-open .bottom-nav {
       <span class="status" id="homeStatus">Discover music</span>
     </div>
 
-    <div class="grid" id="homeResults">
-      <div class="empty">গান লোড হচ্ছে...</div>
-    </div>
+    <div class="grid" id="homeResults"></div>
 
-    <button class="load" id="homeMore" hidden>
-      আরও গান দেখাও
-    </button>
+    <!-- Auto-load trigger -->
+    <div id="homeSentinel" aria-hidden="true"></div>
+
+    <!-- Home-এর জন্য আর More button নেই -->
 
   </div>
 
@@ -1124,6 +1131,7 @@ const HOME_SEEN_KEY = 'soundflow_home_seen_v1';
 let homeSeenIds = new Set();
 
 try {
+
   const saved = JSON.parse(
     localStorage.getItem(HOME_SEEN_KEY) || '[]'
   );
@@ -1139,8 +1147,6 @@ function saveHomeSeen() {
   try {
 
     const ids = Array.from(homeSeenIds);
-
-    /* Keep storage at a reasonable size */
 
     localStorage.setItem(
       HOME_SEEN_KEY,
@@ -1183,6 +1189,134 @@ const pageData = {
 
 };
 
+/* HOME AUTO LOAD STATE */
+
+const HOME_BATCH_SIZE = 20;
+
+const HOME_MAX_PAGE_ATTEMPTS = 12;
+
+let homeHasMore = true;
+let homeAutoLoading = false;
+let homeObserver = null;
+
+/*
+  Sentinel আগেই তৈরি।
+  এটি লুকানো হবে না, কারণ hidden element
+  IntersectionObserver-এ কাজ করে না।
+*/
+
+function setupHomeObserver() {
+
+  if (!('IntersectionObserver' in window)) {
+    return;
+  }
+
+  const sentinel = $('homeSentinel');
+
+  if (!sentinel || homeObserver) return;
+
+  homeObserver = new IntersectionObserver(entries => {
+
+    for (const entry of entries) {
+
+      if (!entry.isIntersecting) continue;
+
+      if (activeTab !== 'home') continue;
+
+      if (playerMode === 'full') continue;
+
+      if (homeAutoLoading) continue;
+
+      if (!homeHasMore) continue;
+
+      const state = pageData.home;
+
+      if (state.busy) continue;
+
+      if (!state.videos.length) continue;
+
+      loadNextHomeBatch();
+
+    }
+
+  }, {
+
+    root:null,
+    rootMargin:'700px 0px',
+    threshold:0
+
+  });
+
+  homeObserver.observe(sentinel);
+
+}
+
+function refreshHomeObserver() {
+
+  if (!homeObserver) {
+    setupHomeObserver();
+    return;
+  }
+
+  const sentinel = $('homeSentinel');
+
+  if (!sentinel) return;
+
+  /*
+    Re-observe করলে content ছোট হলেও
+    পরের batch trigger হতে পারবে।
+  */
+
+  homeObserver.unobserve(sentinel);
+
+  requestAnimationFrame(() => {
+
+    if (homeObserver && homeHasMore) {
+      homeObserver.observe(sentinel);
+    }
+
+  });
+
+}
+
+async function loadNextHomeBatch() {
+
+  if (homeAutoLoading || !homeHasMore) return;
+
+  const state = pageData.home;
+
+  if (state.busy) return;
+
+  homeAutoLoading = true;
+
+  try {
+
+    await loadSongs(
+      'home',
+      state.query,
+      state.page + 1,
+      true
+    );
+
+  } finally {
+
+    homeAutoLoading = false;
+
+    if (homeHasMore && activeTab === 'home') {
+
+      /*
+        নতুন content render হওয়ার পর
+        sentinel আবার পরীক্ষা করা হবে।
+      */
+
+      refreshHomeObserver();
+
+    }
+
+  }
+
+}
+
 /* SERVERS */
 
 const instances = [
@@ -1224,11 +1358,18 @@ function setActiveTab(tab) {
     renderLibrary();
   }
 
-  /* Every return to Home loads the next batch */
+  /*
+    Home-এ ফিরে এলে আগের গানগুলো থাকবে।
+    Auto-load sentinel পরের গান আনবে।
+  */
 
-  if (tab === 'home' && previousTab !== 'home') {
+  if (tab === 'home') {
 
-    loadHome();
+    if (!pageData.home.videos.length) {
+      loadHome();
+    } else {
+      refreshHomeObserver();
+    }
 
   }
 
@@ -1882,7 +2023,9 @@ playerScreen.addEventListener('touchstart',e => {
 
   if (playerMode !== 'full') return;
 
-  /* Controls must never trigger swipe-to-minimize */
+  /*
+    Controls must never trigger swipe-to-minimize.
+  */
 
   if (e.target.closest('button,input')) return;
 
@@ -1898,8 +2041,6 @@ playerScreen.addEventListener('touchstart',e => {
 playerScreen.addEventListener('touchmove',e => {
 
   if (playerMode !== 'full') return;
-
-  /* Keep seek slider and buttons interactive */
 
   if (e.target.closest('button,input')) return;
 
@@ -2106,18 +2247,29 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     : $('searchStatus');
 
   const more = type === 'home'
-    ? $('homeMore')
+    ? null
     : $('searchMore');
 
-  status.textContent = 'গান লোড হচ্ছে…';
+  if (more) {
+    more.hidden = true;
+    more.disabled = true;
+  }
 
-  more.hidden = true;
-  more.disabled = true;
+  /*
+    Home-এ কোনো loading text দেখানো হবে না।
+    Search-এর ক্ষেত্রেও নতুন search শুরু হলে
+    আগের ফলাফল পরিষ্কার হবে।
+  */
 
   if (!append) {
 
-    grid.innerHTML =
-      '<div class="empty">গান খোঁজা হচ্ছে…</div>';
+    if (type === 'search') {
+      grid.innerHTML = '';
+    }
+
+    if (type === 'home') {
+      grid.innerHTML = '';
+    }
 
   }
 
@@ -2134,12 +2286,14 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   );
 
   /*
-    Home: একবারে কয়েকটি API page পরীক্ষা করবে।
-    আগে দেখা গান বাদ দিয়ে নতুন গান সংগ্রহ করবে।
+    Home: প্রতি batch-এ ২০টি নতুন গান সংগ্রহ করবে।
+    প্রয়োজন হলে একাধিক API page পরীক্ষা করবে।
     Search: আগের মতো এক পেজ লোড করবে।
   */
 
-  const maxAttempts = type === 'home' ? 6 : 1;
+  const maxAttempts = type === 'home'
+    ? HOME_MAX_PAGE_ATTEMPTS
+    : 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
 
@@ -2204,14 +2358,34 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
       collected.push(video);
 
+      /*
+        প্রতি batch-এ ২০টি নতুন গান হলেই
+        Home-এর API fetching থামবে।
+      */
+
+      if (
+        type === 'home' &&
+        collected.length >= HOME_BATCH_SIZE
+      ) {
+        break;
+      }
+
+    }
+
+    if (
+      type === 'home' &&
+      collected.length >= HOME_BATCH_SIZE
+    ) {
+      break;
     }
 
     /*
       Search-এর জন্য এক পেজই যথেষ্ট।
-      Home-এ নতুন গান পেলে আর পরের page খুঁজবে না।
+      Home-এ ২০টি না পাওয়া পর্যন্ত
+      পরের page পরীক্ষা করা হবে।
     */
 
-    if (type !== 'home' || collected.length > 0) {
+    if (type !== 'home') {
       break;
     }
 
@@ -2229,10 +2403,18 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
   if (failed && !append) {
 
-    grid.innerHTML =
-      '<div class="empty">সার্ভার সংযোগে ব্যর্থ। পরে আবার চেষ্টা করুন।</div>';
+    if (type === 'home') {
 
-    status.textContent = 'Server Error';
+      status.textContent = 'Connection unavailable';
+
+    } else {
+
+      grid.innerHTML =
+        '<div class="empty">সার্ভার সংযোগে ব্যর্থ। পরে আবার চেষ্টা করুন।</div>';
+
+      status.textContent = 'Server Error';
+
+    }
 
     state.busy = false;
 
@@ -2255,8 +2437,8 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       state.videos.push(video);
 
       /*
-        Home-এ শুধু স্ক্রিনে দেখানো গানকে
-        seen list-এ রাখা হচ্ছে।
+        Home-এ দেখানো গানগুলো localStorage-এ
+        রাখা হবে, যাতে আবার না আসে।
       */
 
       if (type === 'home') {
@@ -2273,7 +2455,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
   }
 
-  if (!state.videos.length) {
+  if (!state.videos.length && type === 'search') {
 
     grid.innerHTML =
       '<div class="empty">কোনো গান পাওয়া যায়নি।</div>';
@@ -2286,28 +2468,59 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   status.textContent =
     state.videos.length + ' Songs';
 
+  if (type === 'search') {
+
+    more.hidden =
+      reachedEnd || collected.length === 0;
+
+    more.disabled = false;
+
+  }
+
   /*
-    নতুন গান পাওয়া গেলে More button থাকবে।
-    API-তে ফলাফল শেষ হলে আর দেখাবে না।
+    Home-এর পরবর্তী batch বন্ধ হবে শুধু
+    যখন API-তে আর কোনো ফলাফল পাওয়া যাবে না,
+    অথবা অনেকগুলো page পরীক্ষা করেও
+    নতুন গান পাওয়া যাবে না।
   */
 
-  more.hidden =
-    reachedEnd || collected.length === 0;
+  if (type === 'home') {
 
-  more.disabled = false;
+    if (reachedEnd) {
 
-  if (
-    type === 'home' &&
-    collected.length === 0 &&
-    state.videos.length
-  ) {
+      homeHasMore = false;
 
-    status.textContent =
-      state.videos.length + ' Songs · নতুন গান পাওয়া যায়নি';
+    } else if (
+      collected.length === 0 &&
+      lastCheckedPage >= pageNumber + maxAttempts - 1
+    ) {
+
+      /*
+        অনেক page পরীক্ষা করেও নতুন গান না পেলে
+        endless request বন্ধ রাখা হচ্ছে।
+      */
+
+      homeHasMore = false;
+
+    }
+
+    if (collected.length > 0) {
+      homeHasMore = !reachedEnd;
+    }
 
   }
 
   state.busy = false;
+
+  /*
+    Batch শেষ হওয়ার পর observer আবার চালু হবে।
+  */
+
+  if (type === 'home') {
+
+    refreshHomeObserver();
+
+  }
 
 }
 
@@ -2317,9 +2530,11 @@ function loadHome() {
 
   const state = pageData.home;
 
-  if (state.busy) return;
+  if (state.busy || homeAutoLoading) return;
 
   if (!state.videos.length) {
+
+    homeHasMore = true;
 
     loadSongs(
       'home',
@@ -2330,34 +2545,11 @@ function loadHome() {
 
   } else {
 
-    /*
-      Home-এ আবার ফিরলে পরের page থেকে
-      নতুন গান লোড হবে।
-    */
-
-    loadSongs(
-      'home',
-      state.query,
-      state.page + 1,
-      true
-    );
+    refreshHomeObserver();
 
   }
 
 }
-
-$('homeMore').addEventListener('click',() => {
-
-  const state = pageData.home;
-
-  loadSongs(
-    'home',
-    state.query,
-    state.page + 1,
-    true
-  );
-
-});
 
 /* SEARCH */
 
@@ -2435,6 +2627,8 @@ function renderLibrary() {
 updateIcons();
 
 setProgressColor(0);
+
+setupHomeObserver();
 
 loadHome();
 
