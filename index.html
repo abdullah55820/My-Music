@@ -493,7 +493,8 @@ body.full-player-open .bottom-nav {
 
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
+  justify-content:flex-start;
+  gap:clamp(14px,3.2vh,30px);
 
   flex:1;
   min-height:0;
@@ -596,24 +597,35 @@ body.full-player-open .bottom-nav {
   flex-shrink:0;
 }
 
+/*
+  Touch area বড় (30px), কিন্তু দেখতে bar আগের মতোই 5px পাতলা।
+  Negative margin দিয়ে layout এর জায়গা আগের মতো রাখা হয়েছে।
+*/
 .seek-slider {
   width:100%;
-  height:5px;
+  height:30px;
+  margin:-12px 0 -13px;
 
   display:block;
   appearance:none;
   -webkit-appearance:none;
 
-  border-radius:10px;
+  border-radius:0;
   outline:none;
 
-  background:linear-gradient(
+  background-color:transparent;
+
+  background-image:linear-gradient(
     to right,
     #fff 0%,
     #fff 0%,
     rgba(255,255,255,.3) 0%,
     rgba(255,255,255,.3) 100%
   );
+
+  background-size:100% 5px;
+  background-position:center;
+  background-repeat:no-repeat;
 }
 
 .seek-slider::-webkit-slider-thumb {
@@ -727,9 +739,18 @@ body.full-player-open .bottom-nav {
   flex-shrink:0;
 }
 
+/* touch area বড়, কিন্তু দেখতে bar টা আগের মতোই পাতলা */
 .volume-row .seek-slider {
   flex:1;
   min-width:0;
+
+  height:30px;
+  border-radius:0;
+
+  background-size:100% 5px;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-color:transparent;
 }
 
 /* MINI PLAYER */
@@ -1130,32 +1151,6 @@ body.full-player-open .bottom-nav {
 
     </div>
 
-    <div class="volume-row">
-
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>
-        <path d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/>
-      </svg>
-
-      <input
-        type="range"
-        id="volumeSlider"
-        class="seek-slider"
-        min="0"
-        max="100"
-        value="100"
-        aria-label="Volume"
-      >
-
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>
-        <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
-        <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
-      </svg>
-
-    </div>
 
   </div>
 
@@ -1207,7 +1202,6 @@ const $ = id => document.getElementById(id);
 const playerScreen = $('player');
 const miniPlayer = $('miniPlayer');
 const seekSlider = $('seekSlider');
-const volumeSlider = $('volumeSlider');
 
 /* STATE */
 
@@ -1613,8 +1607,6 @@ window.onYouTubeIframeAPIReady = function() {
 
         apiReady = true;
 
-        applyVolume();
-
         if (pendingVideoId) {
           const id = pendingVideoId;
           pendingVideoId = null;
@@ -1650,7 +1642,6 @@ function onPlayerStateChange(event) {
     isPlaying = true;
     updateIcons();
     startTimer();
-    applyVolume();
 
   }
 
@@ -1708,7 +1699,7 @@ function setProgressColor(percent) {
 
   const value = Math.max(0,Math.min(100,percent));
 
-  seekSlider.style.background = `
+  seekSlider.style.backgroundImage = `
     linear-gradient(
       to right,
       #fff 0%,
@@ -1802,66 +1793,6 @@ function resetProgress() {
   $('durationTime').textContent = '0:00';
 
 }
-
-/* VOLUME */
-
-let currentVolume = 100;
-
-try {
-
-  const saved = localStorage.getItem('soundflow_volume');
-
-  if (saved !== null && Number.isFinite(Number(saved))) {
-    currentVolume = Math.max(0,Math.min(100,Number(saved)));
-  }
-
-} catch(e) {}
-
-function setVolumeColor(percent) {
-
-  const value = Math.max(0,Math.min(100,percent));
-
-  volumeSlider.style.background = `
-    linear-gradient(
-      to right,
-      #fff 0%,
-      #fff ${value}%,
-      rgba(255,255,255,.3) ${value}%,
-      rgba(255,255,255,.3) 100%
-    )
-  `;
-
-}
-
-function applyVolume() {
-
-  if (!ytPlayer || !apiReady) return;
-
-  try {
-    ytPlayer.setVolume(currentVolume);
-  } catch(e) {}
-
-}
-
-volumeSlider.value = currentVolume;
-setVolumeColor(currentVolume);
-
-volumeSlider.addEventListener('input',() => {
-
-  currentVolume = Number(volumeSlider.value);
-
-  setVolumeColor(currentVolume);
-  applyVolume();
-
-});
-
-volumeSlider.addEventListener('change',() => {
-
-  try {
-    localStorage.setItem('soundflow_volume',String(currentVolume));
-  } catch(e) {}
-
-});
 
 /* PLAY PAUSE */
 
