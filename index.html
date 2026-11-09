@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#000000" id="themeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -17,6 +17,7 @@
   --muted:#98989f;
   --accent:#ff2d55;
   --line:rgba(255,255,255,.12);
+  --player-tint:#2a2a2c;
 }
 
 * {
@@ -36,6 +37,13 @@ body {
   font-family:-apple-system,BlinkMacSystemFont,
   "SF Pro Display","Segoe UI",sans-serif;
   min-height:100vh;
+}
+
+/* Full player open থাকলে page scroll বন্ধ (body fixed না করে) */
+html.full-player-open,
+body.full-player-open {
+  overflow:hidden;
+  overscroll-behavior:none;
 }
 
 button {
@@ -300,7 +308,13 @@ body.full-player-open .bottom-nav {
   overflow:hidden;
   overscroll-behavior:none;
 
-  background:transparent !important;
+  /*
+    Safari (iOS) status bar / Dynamic Island এর পেছনের রং
+    নেয় উপরের fixed element এর background-color থেকে।
+    আগে এটা transparent ছিল, তাই body-র কালো রং আসত।
+    এখন album art থেকে বের করা রং বসে (JS দিয়ে --player-tint সেট হয়)।
+  */
+  background-color:var(--player-tint,#2a2a2c) !important;
 
   isolation:isolate;
 
@@ -314,7 +328,8 @@ body.full-player-open .bottom-nav {
 
   transition:
     opacity .38s cubic-bezier(.22,1,.36,1),
-    visibility .38s;
+    visibility .38s,
+    background-color .4s ease;
 }
 
 .player.active {
@@ -327,11 +342,6 @@ body.full-player-open .bottom-nav {
 
 .player-bg {
   position:absolute;
-
-  /*
-    Full screen background.
-    Safe area এবং Status Bar-এর দিকেও extend করবে।
-  */
 
   top:-250px;
   left:-150px;
@@ -1105,10 +1115,110 @@ let pendingVideoId = null;
 
 let activeTab = 'home';
 
+/* PLAYER TINT (status bar / Dynamic Island রং) */
+
+const FALLBACK_TINT = '#2a2a2c';
+const tintCache = {};
+let currentTint = FALLBACK_TINT;
+
+function syncTint() {
+
+  // Full player এর পেছনের রং
+  document.documentElement.style.setProperty(
+    '--player-tint',
+    currentTint
+  );
+
+  // Safari-র status bar tint:
+  // full player খোলা থাকলে album রং, নইলে আগের মতো কালো
+  const meta = $('themeColor');
+
+  if (meta) {
+    meta.setAttribute(
+      'content',
+      playerMode === 'full' ? currentTint : '#000000'
+    );
+  }
+
+}
+
+function loadTint(video) {
+
+  const id = video.videoId;
+
+  if (!id) return;
+
+  if (tintCache[id]) {
+    currentTint = tintCache[id];
+    syncTint();
+    return;
+  }
+
+  currentTint = FALLBACK_TINT;
+  syncTint();
+
+  const img = new Image();
+
+  img.crossOrigin = 'anonymous';
+
+  img.onload = () => {
+
+    try {
+
+      const canvas = document.createElement('canvas');
+
+      canvas.width = 16;
+      canvas.height = 16;
+
+      const ctx = canvas.getContext('2d',{
+        willReadFrequently:true
+      });
+
+      // মাঝের অংশের উপরের অর্ধেক (blur background এর উপরের দিকের রং)
+      const sx = img.naturalWidth * 0.3;
+      const sw = img.naturalWidth * 0.4;
+      const sh = img.naturalHeight * 0.5;
+
+      ctx.drawImage(img,sx,0,sw,sh,0,0,16,16);
+
+      const data = ctx.getImageData(0,0,16,16).data;
+
+      let r = 0, g = 0, b = 0, n = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        n++;
+      }
+
+      if (!n) return;
+
+      const color =
+        `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`;
+
+      tintCache[id] = color;
+
+      const playing = playQueue[currentIndex];
+
+      if (playing && playing.videoId === id) {
+        currentTint = color;
+        syncTint();
+      }
+
+    } catch(e) {
+      // CORS block করলে fallback রং-ই থাকবে
+    }
+
+  };
+
+  img.src = `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+
+}
+
 /* SCROLL LOCK */
 
 let savedScrollY = 0;
-let originalBodyStyles = null;
 
 /* HOME STORAGE */
 
@@ -1691,9 +1801,13 @@ function setSongInfo(video) {
     getLikes().includes(video.videoId)
   );
 
+  loadTint(video);
+
 }
 
-/* SCROLL LOCK */
+/* SCROLL LOCK
+   body কে position:fixed করা হয় না, কারণ তাতে Safari page কে
+   status bar এর নিচে extend করা বন্ধ করে দিতে পারে। */
 
 function lockPageScroll() {
 
@@ -1701,48 +1815,17 @@ function lockPageScroll() {
 
   savedScrollY = window.scrollY || window.pageYOffset || 0;
 
-  const body = document.body;
-
-  originalBodyStyles = {
-    position:body.style.position,
-    top:body.style.top,
-    left:body.style.left,
-    right:body.style.right,
-    width:body.style.width,
-    overflow:body.style.overflow
-  };
-
-  body.style.position = 'fixed';
-  body.style.top = `-${savedScrollY}px`;
-  body.style.left = '0';
-  body.style.right = '0';
-  body.style.width = '100%';
-  body.style.overflow = 'hidden';
-
-  body.classList.add('full-player-open');
+  document.documentElement.classList.add('full-player-open');
+  document.body.classList.add('full-player-open');
 
 }
 
 function unlockPageScroll() {
 
-  const body = document.body;
+  if (!document.body.classList.contains('full-player-open')) return;
 
-  if (!body.classList.contains('full-player-open')) return;
-
-  body.classList.remove('full-player-open');
-
-  if (originalBodyStyles) {
-
-    body.style.position = originalBodyStyles.position;
-    body.style.top = originalBodyStyles.top;
-    body.style.left = originalBodyStyles.left;
-    body.style.right = originalBodyStyles.right;
-    body.style.width = originalBodyStyles.width;
-    body.style.overflow = originalBodyStyles.overflow;
-
-    originalBodyStyles = null;
-
-  }
+  document.documentElement.classList.remove('full-player-open');
+  document.body.classList.remove('full-player-open');
 
   window.scrollTo(0,savedScrollY);
 
@@ -1755,6 +1838,7 @@ function showFullPlayer() {
   playerMode = 'full';
 
   lockPageScroll();
+  syncTint();
 
   miniPlayer.classList.remove('visible');
   playerScreen.classList.add('active');
@@ -1768,6 +1852,7 @@ function minimizePlayer() {
   playerMode = 'mini';
 
   unlockPageScroll();
+  syncTint();
 
   playerScreen.classList.remove('active');
   miniPlayer.classList.add('visible');
@@ -1781,6 +1866,7 @@ function expandPlayer() {
   playerMode = 'full';
 
   lockPageScroll();
+  syncTint();
 
   miniPlayer.classList.remove('visible');
   playerScreen.classList.add('active');
@@ -1792,6 +1878,7 @@ function closePlayer() {
   playerMode = 'closed';
 
   unlockPageScroll();
+  syncTint();
 
   playerScreen.classList.remove('active');
   miniPlayer.classList.remove('visible');
@@ -1829,12 +1916,12 @@ function playSongAt(index,list) {
 
   currentIndex = index;
 
-  setSongInfo(video);
-  resetProgress();
-
   if (playerMode === 'closed') {
     showFullPlayer();
   }
+
+  setSongInfo(video);
+  resetProgress();
 
   if (apiReady && ytPlayer) {
 
