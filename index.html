@@ -392,6 +392,37 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
+/*
+  TOP FADE
+  Status bar এর পেছনের অংশ Safari নিজে একটা flat রং দিয়ে ভরে (page এর বাইরে)।
+  সেই রং থেকে blur background-এ যেন seam ছাড়া মিশে যায়, তাই
+  উপর থেকে tint রং ধীরে ধীরে transparent হয়ে যাচ্ছে।
+*/
+
+.player-top-fade {
+  position:absolute;
+
+  top:0;
+  left:0;
+  right:0;
+
+  height:calc(env(safe-area-inset-top) + 150px);
+
+  z-index:1;
+
+  background:linear-gradient(
+    180deg,
+    var(--player-tint,#2a2a2c) 0%,
+    color-mix(in srgb,var(--player-tint,#2a2a2c) 92%,transparent) 14%,
+    color-mix(in srgb,var(--player-tint,#2a2a2c) 70%,transparent) 32%,
+    color-mix(in srgb,var(--player-tint,#2a2a2c) 42%,transparent) 52%,
+    color-mix(in srgb,var(--player-tint,#2a2a2c) 18%,transparent) 76%,
+    transparent 100%
+  );
+
+  pointer-events:none;
+}
+
 /* TOP BAR */
 
 .player-top-bar {
@@ -963,6 +994,7 @@ body.full-player-open .bottom-nav {
 
   <div class="player-bg" id="playerBg"></div>
   <div class="player-shade"></div>
+  <div class="player-top-fade"></div>
 
   <div class="player-top-bar">
 
