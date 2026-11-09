@@ -188,10 +188,16 @@ button {
   margin:10px 0 18px;
 }
 
-.search input {
+.search-field {
+  position:relative;
   flex:1;
   min-width:0;
-  padding:14px;
+}
+
+.search input {
+  width:100%;
+  min-width:0;
+  padding:14px 42px 14px 14px;
   background:var(--surface);
   color:var(--text);
   border:1px solid var(--line);
@@ -208,7 +214,27 @@ button {
   border-color:var(--accent);
 }
 
-.search button {
+.search-clear {
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:18px;
+  line-height:1;
+}
+
+.search-clear[hidden] {
+  display:none;
+}
+
+.search button[type="submit"] {
   padding:0 19px;
   border-radius:14px;
   background:var(--accent);
@@ -1128,26 +1154,39 @@ body.full-player-open .bottom-nav {
   <div class="wrap">
 
     <form class="search" id="searchForm">
-      <input
-        id="query"
-        type="search"
-        placeholder="গানের নাম বা শিল্পীর নাম লিখো…"
-        autocomplete="off"
-      >
+
+      <div class="search-field">
+
+        <input
+          id="query"
+          type="search"
+          placeholder="Search songs or artists..."
+          autocomplete="off"
+        >
+
+        <button
+          class="search-clear"
+          id="searchClear"
+          type="button"
+          aria-label="Clear search"
+          hidden
+        >×</button>
+
+      </div>
+
       <button type="submit">Search</button>
+
     </form>
 
     <div class="section">
       <h2>Search Results</h2>
-      <span class="status" id="searchStatus">Search songs</span>
+      <span class="status" id="searchStatus">Search for music</span>
     </div>
 
-    <div class="grid" id="searchResults">
-      <div class="empty">তোমার পছন্দের গান খুঁজে নাও।</div>
-    </div>
+    <div class="grid" id="searchResults"></div>
 
     <button class="load" id="searchMore" hidden>
-      আরও গান দেখাও
+      Load More
     </button>
 
   </div>
@@ -1688,16 +1727,20 @@ function setupHomeObserver() {
       if (homeAutoLoading) continue;
       if (!homeHasMore) continue;
       if (pageData.home.busy) continue;
-      if (!pageData.home.videos.length) continue;
 
       loadNextHomeBatch();
 
     }
 
   },{
+
     root:null,
-    rootMargin:'700px 0px',
+
+    /* Start loading before reaching the bottom */
+    rootMargin:'1800px 0px',
+
     threshold:0
+
   });
 
   homeObserver.observe(sentinel);
@@ -2756,7 +2799,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     } else {
 
       grid.innerHTML =
-        '<div class="empty">সার্ভার সংযোগে ব্যর্থ। পরে আবার চেষ্টা করুন।</div>';
+        '<div class="empty">Unable to connect. Please try again.</div>';
 
       status.textContent = 'Server Error';
 
@@ -2809,7 +2852,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   if (!state.videos.length && type === 'search') {
 
     grid.innerHTML =
-      '<div class="empty">কোনো গান পাওয়া যায়নি।</div>';
+      '<div class="empty">No songs found. Try another search.</div>';
 
   }
 
@@ -2893,8 +2936,7 @@ function refreshHomeFeed() {
   const state = pageData.home;
 
   /*
-    আগের Home request চললে সেটি বন্ধ করে দেওয়া হবে।
-    এতে পুরোনো request নতুন feed-কে বাধা দিতে পারবে না।
+    আগের Home request চললে সেটি বন্ধ করা হবে।
   */
 
   if (state.controller) {
@@ -2907,22 +2949,12 @@ function refreshHomeFeed() {
   homeAutoLoading = false;
   homeHasMore = true;
 
-  /*
-    প্রতিবার আলাদা search query নেওয়া হবে।
-    আগের query সঙ্গে সঙ্গে আবার নেওয়া হবে না।
-  */
-
   const newQuery = getHomeRefreshQuery();
 
   state.query = newQuery;
   state.page = 0;
 
   $('homeStatus').textContent = 'Discovering new songs...';
-
-  /*
-    পুরোনো গান fetch শেষ হওয়ার আগে সরানো হবে না।
-    নতুন গান পাওয়া গেলে loadSongs নিজেই পুরোনো cards replace করবে।
-  */
 
   loadSongs(
     'home',
@@ -2935,13 +2967,49 @@ function refreshHomeFeed() {
 
 /* SEARCH */
 
+const searchInput = $('query');
+const searchClear = $('searchClear');
+
+searchInput.addEventListener('input',() => {
+
+  searchClear.hidden = !searchInput.value.length;
+
+});
+
+searchClear.addEventListener('click',() => {
+
+  searchInput.value = '';
+
+  searchClear.hidden = true;
+
+  pageData.search.controller?.abort();
+
+  pageData.search.busy = false;
+  pageData.search.controller = null;
+
+  pageData.search.videos = [];
+  pageData.search.page = 1;
+  pageData.search.query = '';
+
+  $('searchResults').innerHTML = '';
+
+  $('searchStatus').textContent = 'Search for music';
+
+  $('searchMore').hidden = true;
+
+  searchInput.focus();
+
+});
+
 $('searchForm').addEventListener('submit',e => {
 
   e.preventDefault();
 
-  const query = $('query').value.trim();
+  const query = searchInput.value.trim();
 
   if (!query) return;
+
+  searchClear.hidden = false;
 
   loadSongs(
     'search',
@@ -3087,9 +3155,9 @@ function renderLibrary() {
 
       grid.innerHTML = `
         <div class="empty">
-          এখনো কোনো গান Favourite করা হয়নি।
+          No favourite songs yet.
           <br><br>
-          গান শুনতে গিয়ে ❤️ বাটনে চাপ দাও।
+          Tap the ❤️ button while playing a song.
         </div>
       `;
 
