@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#171719">
+<meta name="theme-color" content="#000000">
 <title>SoundFlow — Music</title>
 
 <style>
@@ -296,8 +296,7 @@ body.full-player-open .bottom-nav {
   overflow:hidden;
   overscroll-behavior:none;
 
-  /* আগের solid black background সরানো হয়েছে */
-  background:transparent;
+  background:transparent !important;
 
   isolation:isolate;
 
@@ -319,13 +318,17 @@ body.full-player-open .bottom-nav {
   transform:translateY(0);
 }
 
-/* BLURRED ALBUM BACKGROUND */
+/* FULL SCREEN ALBUM BLUR BACKGROUND */
 
 .player-bg {
   position:absolute;
 
-  /* Safe area সহ পুরো স্ক্রিনের পেছনে */
-  inset:-100px;
+  /*
+    Background Status Bar ও Dynamic Island
+    এলাকার পেছনেও extend করবে।
+  */
+
+  inset:-150px -80px -100px;
 
   z-index:0;
 
@@ -333,8 +336,10 @@ body.full-player-open .bottom-nav {
   background-position:center;
   background-repeat:no-repeat;
 
-  filter:blur(48px);
-  transform:scale(1.25);
+  filter:blur(55px);
+  -webkit-filter:blur(55px);
+
+  transform:translateZ(0) scale(1.3);
 
   opacity:1;
 
@@ -343,24 +348,26 @@ body.full-player-open .bottom-nav {
   transition:background-image .3s ease;
 }
 
-/* TOP STATUS AREA + PLAYER SHADE */
+/* PLAYER SHADE */
 
 .player-shade {
   position:absolute;
-  inset:0;
+
+  inset:-1px 0 0;
+
   z-index:1;
 
   /*
-    উপরের অংশে কম কালো রাখা হয়েছে।
-    তাই Status Bar / Dynamic Island এলাকার
-    পেছনে Album Blur দেখা যাবে।
+    উপরের Status Bar এলাকায় খুব কম কালো।
+    মাঝখানে Balanced Shade।
+    নিচে একটু বেশি Dark Shade।
   */
 
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.12) 0%,
-    rgba(0,0,0,.22) 24%,
-    rgba(0,0,0,.38) 55%,
+    rgba(0,0,0,.05) 0%,
+    rgba(0,0,0,.16) 25%,
+    rgba(0,0,0,.38) 60%,
     rgba(0,0,0,.72) 100%
   );
 
@@ -1172,10 +1179,6 @@ function restoreHomeCache() {
     );
 
     if (!cache || !Array.isArray(cache.videos)) return false;
-
-    /*
-      Cache ৭ দিন পর্যন্ত ব্যবহার করা হবে।
-    */
 
     if (
       cache.savedAt &&
@@ -2053,12 +2056,6 @@ function makeCard(video,index,list) {
 
 async function fetchSongs(query,pageNumber,controller) {
 
-  /*
-    একের পর এক Server চেষ্টা না করে
-    একাধিক Server-এ একসঙ্গে Request পাঠানো হবে।
-    প্রথম সফল Response পাওয়া গেলে সেটিই ব্যবহার হবে।
-  */
-
   const controllers = [];
 
   const requests = instances.map(base => {
@@ -2105,11 +2102,6 @@ async function fetchSongs(query,pageNumber,controller) {
   try {
 
     const result = await Promise.any(requests);
-
-    /*
-      দ্রুততম সফল Server পাওয়া গেছে।
-      বাকি Request বন্ধ করা হচ্ছে।
-    */
 
     controllers.forEach(c => c.abort());
 
@@ -2337,10 +2329,6 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
     }
 
-    /*
-      Home Cache আপডেট করা হচ্ছে।
-    */
-
     saveHomeCache();
     saveHomeSeen();
 
@@ -2456,12 +2444,6 @@ function renderLibrary() {
 
 updateIcons();
 setProgressColor(0);
-
-/*
-  প্রথমেই Cache দেখানো হবে।
-  তারপর Background-এ পরবর্তী গান আনার
-  জন্য Observer প্রস্তুত হবে।
-*/
 
 restoreHomeCache();
 
