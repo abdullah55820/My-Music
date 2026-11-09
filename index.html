@@ -12,8 +12,12 @@
 <title>SoundFlow — Music</title>
 
 <style>
+
+/* THEME */
+
 :root {
   color-scheme:light dark;
+
   --bg:#f2f2f7;
   --surface:#ffffff;
   --surface-2:#e5e5ea;
@@ -21,11 +25,13 @@
   --muted:#6c6c70;
   --line:rgba(0,0,0,.08);
   --accent:#007aff;
+
   --glass-bg:rgba(255,255,255,.46);
   --glass-bg-strong:rgba(255,255,255,.74);
   --glass-border:rgba(255,255,255,.8);
   --glass-hl:rgba(255,255,255,.95);
   --glass-shadow:rgba(30,40,80,.20);
+
   --card-shadow:0 1px 2px rgba(0,0,0,.05);
   --player-tint:#2a2a2c;
 }
@@ -39,11 +45,13 @@
     --muted:#98989f;
     --line:rgba(255,255,255,.12);
     --accent:#0a84ff;
+
     --glass-bg:rgba(50,50,58,.40);
     --glass-bg-strong:rgba(44,44,52,.72);
     --glass-border:rgba(255,255,255,.17);
     --glass-hl:rgba(255,255,255,.32);
     --glass-shadow:rgba(0,0,0,.55);
+
     --card-shadow:none;
   }
 }
@@ -299,6 +307,7 @@ button {
   place-items:center;
   border-radius:12px;
   overflow:hidden;
+
   background:linear-gradient(
     145deg,
     color-mix(in srgb,var(--accent) 26%,var(--surface-2)),
@@ -341,8 +350,10 @@ button {
   border-radius:50%;
   background:var(--glass-bg-strong);
   color:var(--accent);
+
   backdrop-filter:blur(14px) saturate(180%);
   -webkit-backdrop-filter:blur(14px) saturate(180%);
+
   box-shadow:
     0 2px 8px rgba(0,0,0,.25),
     inset 0 1px 0 var(--glass-hl);
@@ -373,14 +384,18 @@ button {
   bottom:calc(env(safe-area-inset-bottom) + 10px);
   height:66px;
   padding:6px;
+
   display:flex;
   align-items:center;
   gap:4px;
+
   border-radius:34px;
   background:var(--glass-bg);
   border:1px solid var(--glass-border);
+
   backdrop-filter:blur(26px) saturate(210%) brightness(1.04);
   -webkit-backdrop-filter:blur(26px) saturate(210%) brightness(1.04);
+
   box-shadow:
     0 14px 34px var(--glass-shadow),
     inset 0 1px 0 var(--glass-hl),
@@ -394,6 +409,7 @@ button {
   inset:0;
   border-radius:inherit;
   pointer-events:none;
+
   background:linear-gradient(
     180deg,
     rgba(255,255,255,.26) 0%,
@@ -406,14 +422,17 @@ button {
   position:relative;
   flex:1;
   height:54px;
+
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:3px;
+
   border-radius:28px;
   background:transparent;
   color:var(--muted);
+
   transition:
     color .25s,
     background .25s,
@@ -434,6 +453,7 @@ button {
 .nav-btn.active {
   color:var(--accent);
   background:color-mix(in srgb,var(--accent) 15%,transparent);
+
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.4),
     inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent);
@@ -449,28 +469,37 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/* FULL PLAYER */
+/* ============================================================
+   FULL PLAYER — REFINED LAYOUT
+   ============================================================ */
 
 .player {
   position:fixed;
   inset:0;
   z-index:9999;
+
   display:flex;
   flex-direction:column;
   color:#fff;
+
   padding:
     calc(env(safe-area-inset-top) + 12px)
     24px
     calc(env(safe-area-inset-bottom) + 18px);
+
   overflow:hidden;
   overscroll-behavior:none;
+
   background-color:var(--player-tint,#2a2a2c) !important;
   isolation:isolate;
+
   visibility:hidden;
   opacity:0;
   pointer-events:none;
+
   transform:none;
   -webkit-transform:none;
+
   transition:
     opacity .38s cubic-bezier(.22,1,.36,1),
     visibility .38s,
@@ -483,10 +512,13 @@ body.full-player-open .bottom-nav {
   top:0;
   left:0;
   right:0;
+
   height:calc(100vh + var(--player-lift,0px));
+
   padding-top:calc(
     env(safe-area-inset-top) + var(--player-lift,0px) + 12px
   );
+
   visibility:visible;
   opacity:1;
   pointer-events:auto;
@@ -501,15 +533,20 @@ body.full-player-open .bottom-nav {
   right:-150px;
   bottom:-250px;
   z-index:0;
+
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+
   filter:blur(55px);
   -webkit-filter:blur(55px);
+
   transform:translateZ(0) scale(1.3);
   -webkit-transform:translateZ(0) scale(1.3);
+
   opacity:1;
   pointer-events:none;
+
   will-change:background-image,transform;
   transition:background-image .3s ease;
 }
@@ -523,6 +560,7 @@ body.full-player-open .bottom-nav {
   right:0;
   bottom:0;
   z-index:1;
+
   background:linear-gradient(
     180deg,
     rgba(0,0,0,.04) 0%,
@@ -531,6 +569,7 @@ body.full-player-open .bottom-nav {
     rgba(0,0,0,.58) 75%,
     rgba(0,0,0,.78) 100%
   );
+
   pointer-events:none;
 }
 
@@ -539,9 +578,11 @@ body.full-player-open .bottom-nav {
 .player-top-bar {
   position:relative;
   z-index:2;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   min-height:30px;
   flex-shrink:0;
 }
@@ -549,6 +590,7 @@ body.full-player-open .bottom-nav {
 .grabber {
   width:100%;
   height:30px;
+
   display:grid;
   place-items:center;
   background:transparent;
@@ -567,14 +609,21 @@ body.full-player-open .bottom-nav {
 .player-content-center {
   position:relative;
   z-index:2;
+
   width:100%;
   max-width:390px;
   margin:0 auto;
+
   display:flex;
   flex-direction:column;
+
+  /* আগের চেয়ে কম gap */
   gap:clamp(8px,1.5vh,16px);
+
   flex:1;
   min-height:0;
+
+  /* নিচের অতিরিক্ত ফাঁকা জায়গা সরানো */
   padding-bottom:0;
 }
 
@@ -583,10 +632,14 @@ body.full-player-open .bottom-nav {
 .artwork-zone {
   flex:.82;
   min-height:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   container-type:size;
+
+  /* Thumbnail সামান্য উপরে */
   transform:translateY(-8px);
 }
 
@@ -595,13 +648,18 @@ body.full-player-open .bottom-nav {
 .big-artwork-wrap {
   width:min(100%,39vh);
   width:min(100cqw,100cqh);
+
   aspect-ratio:1/1;
   flex-shrink:0;
   overflow:hidden;
+
   border-radius:14px;
   background:#222;
+
   box-shadow:0 20px 55px rgba(0,0,0,.5);
+
   transform:scale(1);
+
   transition:
     transform .5s cubic-bezier(.22,1,.36,1),
     box-shadow .5s cubic-bezier(.22,1,.36,1);
@@ -623,6 +681,8 @@ body.full-player-open .bottom-nav {
 
 .player-info-group {
   flex-shrink:0;
+
+  /* Info section সামান্য উপরে */
   transform:translateY(-5px);
 }
 
@@ -633,6 +693,7 @@ body.full-player-open .bottom-nav {
   justify-content:space-between;
   align-items:center;
   gap:12px;
+
   margin-bottom:14px;
   flex-shrink:0;
 }
@@ -646,6 +707,7 @@ body.full-player-open .bottom-nav {
   margin:0 0 5px;
   font-size:22px;
   font-weight:750;
+
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -655,6 +717,7 @@ body.full-player-open .bottom-nav {
   margin:0;
   font-size:17px;
   color:rgba(255,255,255,.62);
+
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -663,8 +726,10 @@ body.full-player-open .bottom-nav {
 .like-btn {
   width:44px;
   height:44px;
+
   display:grid;
   place-items:center;
+
   background:transparent;
   color:rgba(255,255,255,.8);
   flex-shrink:0;
@@ -695,12 +760,16 @@ body.full-player-open .bottom-nav {
   width:100%;
   height:30px;
   margin:-12px 0 -13px;
+
   display:block;
   appearance:none;
   -webkit-appearance:none;
+
   border-radius:0;
   outline:none;
+
   background-color:transparent;
+
   background-image:linear-gradient(
     to right,
     #fff 0%,
@@ -708,6 +777,7 @@ body.full-player-open .bottom-nav {
     rgba(255,255,255,.3) 0%,
     rgba(255,255,255,.3) 100%
   );
+
   background-size:100% 5px;
   background-position:center;
   background-repeat:no-repeat;
@@ -716,10 +786,13 @@ body.full-player-open .bottom-nav {
 .seek-slider::-webkit-slider-thumb {
   appearance:none;
   -webkit-appearance:none;
+
   width:13px;
   height:13px;
+
   border-radius:50%;
   background:#fff;
+
   box-shadow:0 1px 7px rgba(0,0,0,.4);
 }
 
@@ -735,6 +808,7 @@ body.full-player-open .bottom-nav {
   display:flex;
   justify-content:space-between;
   margin-top:10px;
+
   font-size:11px;
   color:rgba(255,255,255,.7);
   font-variant-numeric:tabular-nums;
@@ -746,18 +820,24 @@ body.full-player-open .bottom-nav {
   display:flex;
   justify-content:center;
   align-items:center;
+
   gap:clamp(35px,12vw,55px);
   flex-shrink:0;
+
+  /* Controls আগের চেয়ে উপরে */
   transform:translateY(-8px);
 }
 
 .ctrl-btn {
   width:64px;
   height:64px;
+
   display:grid;
   place-items:center;
+
   background:transparent;
   color:white;
+
   transition:transform .15s;
 }
 
@@ -780,10 +860,13 @@ body.full-player-open .bottom-nav {
 .play-pause-circle {
   width:84px;
   height:84px;
+
   display:grid;
   place-items:center;
+
   background:transparent;
   color:#fff;
+
   transition:transform .15s;
 }
 
@@ -801,29 +884,40 @@ body.full-player-open .bottom-nav {
 .mini-player {
   position:fixed;
   z-index:9500;
+
   left:0;
   right:0;
   margin:0 auto;
   width:min(calc(100% - 32px),520px);
+
   bottom:calc(env(safe-area-inset-bottom) + 86px);
+
   min-height:68px;
   padding:9px 11px;
+
   display:flex;
   align-items:center;
   gap:11px;
+
   color:var(--text);
   background:var(--glass-bg-strong);
+
   border:1px solid var(--glass-border);
   border-radius:22px;
+
   backdrop-filter:blur(26px) saturate(200%);
   -webkit-backdrop-filter:blur(26px) saturate(200%);
+
   box-shadow:
     0 10px 28px var(--glass-shadow),
     inset 0 1px 0 var(--glass-hl);
+
   opacity:0;
   visibility:hidden;
   pointer-events:none;
+
   transform:translateY(35px) scale(.97);
+
   transition:
     opacity .35s cubic-bezier(.22,1,.36,1),
     transform .48s cubic-bezier(.22,1,.36,1),
@@ -898,6 +992,7 @@ body.full-player-open .bottom-nav {
 /* RESPONSIVE */
 
 @media(max-width:480px) {
+
   .wrap {
     padding:12px 13px 180px;
   }
@@ -923,11 +1018,13 @@ body.full-player-open .bottom-nav {
   .player-content-center {
     max-width:370px;
   }
+
 }
 
 /* SHORT SCREEN */
 
 @media(max-height:720px) {
+
   .player-content-center {
     gap:8px;
   }
@@ -968,11 +1065,13 @@ body.full-player-open .bottom-nav {
     width:56px;
     height:56px;
   }
+
 }
 
 /* VERY SHORT SCREEN */
 
 @media(max-height:600px) {
+
   .player-content-center {
     gap:6px;
   }
@@ -1001,7 +1100,9 @@ body.full-player-open .bottom-nav {
   .song-info-text p {
     font-size:15px;
   }
+
 }
+
 </style>
 </head>
 
@@ -1015,6 +1116,7 @@ body.full-player-open .bottom-nav {
 
 <main class="page active" id="homePage">
   <div class="wrap">
+
     <div class="section">
       <h2>Home</h2>
       <span class="status" id="homeStatus">Discover music</span>
@@ -1022,6 +1124,7 @@ body.full-player-open .bottom-nav {
 
     <div class="grid" id="homeResults"></div>
     <div id="homeSentinel" aria-hidden="true"></div>
+
   </div>
 </main>
 
@@ -1029,6 +1132,7 @@ body.full-player-open .bottom-nav {
 
 <main class="page" id="searchPage">
   <div class="wrap">
+
     <form class="search" id="searchForm">
       <input
         id="query"
@@ -1051,6 +1155,7 @@ body.full-player-open .bottom-nav {
     <button class="load" id="searchMore" hidden>
       আরও গান দেখাও
     </button>
+
   </div>
 </main>
 
@@ -1058,8 +1163,11 @@ body.full-player-open .bottom-nav {
 
 <main class="page" id="libraryPage">
   <div class="wrap">
+
     <div class="section">
+
       <div class="section-left">
+
         <button class="back-btn" id="libraryBack" type="button"
                 aria-label="Back to library" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1070,13 +1178,16 @@ body.full-player-open .bottom-nav {
         </button>
 
         <h2 id="libraryTitle">Library</h2>
+
       </div>
 
       <span class="status" id="libraryStatus">1 Folder</span>
+
     </div>
 
     <div class="grid" id="libraryFolders"></div>
     <div class="grid" id="libraryResults" hidden></div>
+
   </div>
 </main>
 
@@ -1142,7 +1253,9 @@ body.full-player-open .bottom-nav {
     </div>
 
     <div class="player-info-group">
+
       <div class="song-meta-box">
+
         <div class="song-info-text">
           <h3 id="playingTitle">Song Title</h3>
           <p id="playingArtist">Artist Name</p>
@@ -1158,9 +1271,11 @@ body.full-player-open .bottom-nav {
             <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/>
           </svg>
         </button>
+
       </div>
 
       <div class="progress-container">
+
         <input
           type="range"
           id="seekSlider"
@@ -1174,10 +1289,13 @@ body.full-player-open .bottom-nav {
           <span id="currentTime">0:00</span>
           <span id="durationTime">0:00</span>
         </div>
+
       </div>
+
     </div>
 
     <div class="controls-row">
+
       <button class="ctrl-btn" id="prevBtn" type="button">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M11 6v12L2 12zM21 6v12l-9-6z"/>
@@ -1196,14 +1314,17 @@ body.full-player-open .bottom-nav {
           <path d="M3 6v12l9-6zM13 6v12l9-6z"/>
         </svg>
       </button>
+
     </div>
 
   </div>
+
 </section>
 
 <!-- MINI PLAYER -->
 
 <div class="mini-player" id="miniPlayer">
+
   <img class="mini-thumb" id="miniThumb" alt="">
 
   <div class="mini-info" id="expandPlayer">
@@ -1226,6 +1347,7 @@ body.full-player-open .bottom-nav {
       <path d="M6 6l12 12M18 6 6 18"/>
     </svg>
   </button>
+
 </div>
 
 <!-- YOUTUBE -->
@@ -1250,13 +1372,19 @@ const seekSlider = $('seekSlider');
 
 let ytPlayer = null;
 let apiReady = false;
+
 let playerMode = 'closed';
+
 let playQueue = [];
 let currentIndex = -1;
+
 let isPlaying = false;
+
 let updateTimer = null;
 let pendingVideoId = null;
+
 let activeTab = 'home';
+
 let libraryView = 'folders';
 
 /* THEME COLOR */
@@ -1276,6 +1404,7 @@ const tintCache = {};
 let currentTint = FALLBACK_TINT;
 
 function syncTint() {
+
   document.documentElement.style.setProperty(
     '--player-tint',
     currentTint
@@ -1289,17 +1418,21 @@ function syncTint() {
       playerMode === 'full' ? currentTint : baseThemeColor()
     );
   }
+
 }
 
 if (schemeQuery) {
+
   if (schemeQuery.addEventListener) {
     schemeQuery.addEventListener('change',syncTint);
   } else if (schemeQuery.addListener) {
     schemeQuery.addListener(syncTint);
   }
+
 }
 
 function loadTint(video) {
+
   const id = video.videoId;
 
   if (!id) return;
@@ -1314,11 +1447,15 @@ function loadTint(video) {
   syncTint();
 
   const img = new Image();
+
   img.crossOrigin = 'anonymous';
 
   img.onload = () => {
+
     try {
+
       const canvas = document.createElement('canvas');
+
       canvas.width = 16;
       canvas.height = 16;
 
@@ -1358,9 +1495,11 @@ function loadTint(video) {
       }
 
     } catch(e) {}
+
   };
 
   img.src = `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+
 }
 
 /* SCROLL LOCK */
@@ -1411,6 +1550,7 @@ function saveHomeCache() {
 /* PAGE DATA */
 
 const pageData = {
+
   home:{
     videos:[],
     page:0,
@@ -1426,12 +1566,15 @@ const pageData = {
     busy:false,
     controller:null
   }
+
 };
 
 /* RESTORE HOME CACHE */
 
 function restoreHomeCache() {
+
   try {
+
     const cache = JSON.parse(
       localStorage.getItem(HOME_CACHE_KEY) || 'null'
     );
@@ -1455,6 +1598,7 @@ function restoreHomeCache() {
     pageData.home.page = Number(cache.page) || 0;
 
     const grid = $('homeResults');
+
     grid.innerHTML = '';
 
     valid.forEach((video,index) => {
@@ -1471,6 +1615,7 @@ function restoreHomeCache() {
   } catch(e) {
     return false;
   }
+
 }
 
 /* HOME AUTO LOAD */
@@ -1483,6 +1628,7 @@ let homeAutoLoading = false;
 let homeObserver = null;
 
 function setupHomeObserver() {
+
   if (!('IntersectionObserver' in window)) return;
 
   const sentinel = $('homeSentinel');
@@ -1490,7 +1636,9 @@ function setupHomeObserver() {
   if (!sentinel || homeObserver) return;
 
   homeObserver = new IntersectionObserver(entries => {
+
     for (const entry of entries) {
+
       if (!entry.isIntersecting) continue;
       if (activeTab !== 'home') continue;
       if (playerMode === 'full') continue;
@@ -1500,7 +1648,9 @@ function setupHomeObserver() {
       if (!pageData.home.videos.length) continue;
 
       loadNextHomeBatch();
+
     }
+
   },{
     root:null,
     rootMargin:'700px 0px',
@@ -1508,9 +1658,11 @@ function setupHomeObserver() {
   });
 
   homeObserver.observe(sentinel);
+
 }
 
 function refreshHomeObserver() {
+
   if (!homeObserver) {
     setupHomeObserver();
     return;
@@ -1527,9 +1679,11 @@ function refreshHomeObserver() {
       homeObserver.observe(sentinel);
     }
   });
+
 }
 
 async function loadNextHomeBatch() {
+
   if (homeAutoLoading || !homeHasMore) return;
 
   const state = pageData.home;
@@ -1539,19 +1693,24 @@ async function loadNextHomeBatch() {
   homeAutoLoading = true;
 
   try {
+
     await loadSongs(
       'home',
       state.query,
       state.page + 1,
       true
     );
+
   } finally {
+
     homeAutoLoading = false;
 
     if (homeHasMore && activeTab === 'home') {
       refreshHomeObserver();
     }
+
   }
+
 }
 
 /* SERVERS */
@@ -1560,44 +1719,14 @@ const instances = [
   'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
-  'https://invidious.nerdvpn.de',
+  'https://yt.chocolatemoo53.com',
   'https://invidious.tiekoetter.com'
 ];
-
-/* HOME REFRESH SEARCH QUERIES */
-
-const HOME_REFRESH_QUERIES = [
-  'Latest Bangla new songs 2026',
-  'New Hindi Bollywood songs 2026',
-  'Latest Bengali music releases',
-  'New Indian songs 2026',
-  'Latest Bangla movie songs',
-  'Latest Hindi romantic songs 2026',
-  'New Bengali song releases 2026',
-  'Latest Bollywood music videos'
-];
-
-let lastHomeRefreshQuery = '';
-
-function getHomeRefreshQuery() {
-  const choices = HOME_REFRESH_QUERIES.filter(
-    query => query !== lastHomeRefreshQuery
-  );
-
-  const pool = choices.length ? choices : HOME_REFRESH_QUERIES;
-
-  const selected = pool[
-    Math.floor(Math.random() * pool.length)
-  ];
-
-  lastHomeRefreshQuery = selected;
-
-  return selected;
-}
 
 /* PAGE NAVIGATION */
 
 function setActiveTab(tab) {
+
   if (!['home','search','library'].includes(tab)) return;
   if (activeTab === tab) return;
 
@@ -1617,66 +1746,22 @@ function setActiveTab(tab) {
   }
 
   if (tab === 'home') {
+
     if (!pageData.home.videos.length) {
       loadHome();
     } else {
       refreshHomeObserver();
     }
-  }
-}
 
-/* HOME REFRESH */
-
-function refreshHomeFeed() {
-  const state = pageData.home;
-
-  // আগের চলমান request বন্ধ
-  if (state.controller) {
-    state.controller.abort();
   }
 
-  // নতুন request-এর জন্য state reset
-  state.controller = null;
-  state.busy = false;
-
-  homeAutoLoading = false;
-  homeHasMore = true;
-
-  // পুরোনো গান এবং grid এখনই মুছবে না
-  // নতুন গান পাওয়া গেলেই পুরোনো গান replace হবে
-
-  // নতুন query নির্বাচন
-  state.query = getHomeRefreshQuery();
-
-  // শুধু status update
-  $('homeStatus').textContent = 'Discovering new music…';
-
-  // পেজের উপরে যাবে, reload হবে না
-  window.scrollTo({
-    top:0,
-    behavior:'smooth'
-  });
-
-  // নতুন গান লোড
-  loadSongs(
-    'home',
-    state.query,
-    1,
-    false
-  );
 }
-
-/* NAV BUTTON EVENTS */
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click',() => {
-    const tab = btn.dataset.tab;
 
-    // Home-এ থেকেই Home চাপলে refresh
-    if (tab === 'home' && activeTab === 'home') {
-      refreshHomeFeed();
-      return;
-    }
+  btn.addEventListener('click',() => {
+
+    const tab = btn.dataset.tab;
 
     if (
       tab === 'library' &&
@@ -1688,13 +1773,17 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     }
 
     setActiveTab(tab);
+
   });
+
 });
 
 /* YOUTUBE API */
 
 window.onYouTubeIframeAPIReady = function() {
+
   ytPlayer = new YT.Player('ytPlayer', {
+
     height:'200',
     width:'200',
 
@@ -1707,7 +1796,9 @@ window.onYouTubeIframeAPIReady = function() {
     },
 
     events:{
+
       onReady:() => {
+
         apiReady = true;
 
         if (pendingVideoId) {
@@ -1715,43 +1806,59 @@ window.onYouTubeIframeAPIReady = function() {
           pendingVideoId = null;
           ytPlayer.loadVideoById(id);
         }
+
       },
 
       onStateChange:onPlayerStateChange,
 
       onError:event => {
+
         console.log('YouTube Error:',event.data);
+
         isPlaying = false;
         updateIcons();
         stopTimer();
+
       }
+
     }
+
   });
+
 };
 
 /* PLAYER STATE */
 
 function onPlayerStateChange(event) {
+
   if (event.data === YT.PlayerState.PLAYING) {
+
     isPlaying = true;
     updateIcons();
     setArtworkState(true);
     startTimer();
+
   }
 
   else if (event.data === YT.PlayerState.PAUSED) {
+
     isPlaying = false;
     updateIcons();
     setArtworkState(false);
     stopTimer();
+
   }
 
   else if (event.data === YT.PlayerState.ENDED) {
+
     isPlaying = false;
     updateIcons();
     stopTimer();
+
     nextSong();
+
   }
+
 }
 
 /* ICONS */
@@ -1760,11 +1867,13 @@ const playSVG = '<path d="M7 4v16l13-8z"/>';
 const pauseSVG = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 function updateIcons() {
+
   $('mainPlayIcon').innerHTML =
     isPlaying ? pauseSVG : playSVG;
 
   $('miniPlayIcon').innerHTML =
     isPlaying ? pauseSVG : playSVG;
+
 }
 
 /* ARTWORK STATE */
@@ -1776,17 +1885,20 @@ function setArtworkState(playing) {
 /* TIME */
 
 function formatTime(sec) {
+
   if (!Number.isFinite(sec) || sec < 0) return '0:00';
 
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
 
   return m + ':' + String(s).padStart(2,'0');
+
 }
 
 /* PROGRESS */
 
 function setProgressColor(percent) {
+
   const value = Math.max(0,Math.min(100,percent));
 
   seekSlider.style.backgroundImage = `
@@ -1798,12 +1910,15 @@ function setProgressColor(percent) {
       rgba(255,255,255,.3) 100%
     )
   `;
+
 }
 
 function updateProgress() {
+
   if (!ytPlayer || !apiReady) return;
 
   try {
+
     const current = ytPlayer.getCurrentTime() || 0;
     const duration = ytPlayer.getDuration() || 0;
 
@@ -1811,14 +1926,18 @@ function updateProgress() {
     $('durationTime').textContent = formatTime(duration);
 
     if (duration > 0) {
+
       const percent = Math.min(100,(current / duration) * 100);
 
       if (!seekSlider.matches(':active')) {
         seekSlider.value = percent;
         setProgressColor(percent);
       }
+
     }
+
   } catch(e) {}
+
 }
 
 function startTimer() {
@@ -1837,19 +1956,24 @@ function stopTimer() {
 /* SEEK */
 
 seekSlider.addEventListener('input',() => {
+
   const percent = Number(seekSlider.value);
 
   setProgressColor(percent);
 
   if (ytPlayer && apiReady) {
+
     const duration = ytPlayer.getDuration() || 0;
 
     $('currentTime').textContent =
       formatTime(duration * percent / 100);
+
   }
+
 });
 
 seekSlider.addEventListener('change',() => {
+
   if (!ytPlayer || !apiReady) return;
 
   const duration = ytPlayer.getDuration() || 0;
@@ -1859,18 +1983,23 @@ seekSlider.addEventListener('change',() => {
   }
 
   updateProgress();
+
 });
 
 function resetProgress() {
+
   seekSlider.value = 0;
   setProgressColor(0);
+
   $('currentTime').textContent = '0:00';
   $('durationTime').textContent = '0:00';
+
 }
 
 /* PLAY PAUSE */
 
 function togglePlay() {
+
   if (!ytPlayer || !apiReady) return;
 
   if (isPlaying) {
@@ -1878,6 +2007,7 @@ function togglePlay() {
   } else {
     ytPlayer.playVideo();
   }
+
 }
 
 $('mainPlayBtn').addEventListener('click',e => {
@@ -1895,6 +2025,7 @@ $('miniPlayBtn').addEventListener('click',e => {
 /* THUMBNAIL */
 
 function bestThumb(video) {
+
   const thumbnails = video.videoThumbnails || [];
 
   return (
@@ -1904,28 +2035,35 @@ function bestThumb(video) {
     thumbnails[0] ||
     {}
   ).url || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
+
 }
 
 /* FAVOURITES */
 
 function getLikes() {
+
   try {
     return JSON.parse(localStorage.getItem('soundflow_likes') || '[]');
   } catch(e) {
     return [];
   }
+
 }
 
 function getLikedSongs() {
+
   try {
     return JSON.parse(localStorage.getItem('soundflow_liked_songs') || '[]');
   } catch(e) {
     return [];
   }
+
 }
 
 function saveLikedSongs(songs) {
+
   try {
+
     localStorage.setItem(
       'soundflow_liked_songs',
       JSON.stringify(songs)
@@ -1935,12 +2073,15 @@ function saveLikedSongs(songs) {
       'soundflow_likes',
       JSON.stringify(songs.map(v => v.videoId))
     );
+
   } catch(e) {}
+
 }
 
 /* SONG INFO */
 
 function setSongInfo(video) {
+
   const thumbnail = bestThumb(video);
 
   $('playingThumb').src = thumbnail;
@@ -1968,11 +2109,13 @@ function setSongInfo(video) {
   );
 
   loadTint(video);
+
 }
 
 /* SCROLL LOCK */
 
 function getTopLift() {
+
   const probe = document.createElement('div');
 
   probe.style.cssText =
@@ -1986,9 +2129,11 @@ function getTopLift() {
   probe.remove();
 
   return safeTop > 0 ? 0 : 70;
+
 }
 
 function lockPageScroll() {
+
   if (document.body.classList.contains('full-player-open')) return;
 
   savedScrollY = window.scrollY || window.pageYOffset || 0;
@@ -2000,9 +2145,11 @@ function lockPageScroll() {
 
   document.documentElement.classList.add('full-player-open');
   document.body.classList.add('full-player-open');
+
 }
 
 function applyPlayerScroll() {
+
   const lift = parseFloat(
     getComputedStyle(document.documentElement)
       .getPropertyValue('--player-lift')
@@ -2013,9 +2160,11 @@ function applyPlayerScroll() {
   requestAnimationFrame(() => {
     if (playerMode === 'full') window.scrollTo(0,lift);
   });
+
 }
 
 function unlockPageScroll() {
+
   if (!document.body.classList.contains('full-player-open')) return;
 
   document.documentElement.classList.remove('full-player-open');
@@ -2024,11 +2173,13 @@ function unlockPageScroll() {
   document.documentElement.style.setProperty('--player-lift','0px');
 
   window.scrollTo(0,savedScrollY);
+
 }
 
 /* PLAYER MODES */
 
 function showFullPlayer() {
+
   playerMode = 'full';
 
   lockPageScroll();
@@ -2038,9 +2189,11 @@ function showFullPlayer() {
   playerScreen.classList.add('active');
 
   applyPlayerScroll();
+
 }
 
 function minimizePlayer() {
+
   if (playerMode !== 'full') return;
 
   playerMode = 'mini';
@@ -2050,9 +2203,11 @@ function minimizePlayer() {
 
   playerScreen.classList.remove('active');
   miniPlayer.classList.add('visible');
+
 }
 
 function expandPlayer() {
+
   if (playerMode !== 'mini') return;
 
   playerMode = 'full';
@@ -2064,9 +2219,11 @@ function expandPlayer() {
   playerScreen.classList.add('active');
 
   applyPlayerScroll();
+
 }
 
 function closePlayer() {
+
   playerMode = 'closed';
 
   unlockPageScroll();
@@ -2090,11 +2247,13 @@ function closePlayer() {
   updateIcons();
   setArtworkState(true);
   resetProgress();
+
 }
 
 /* PLAY SONG */
 
 function playSongAt(index,list) {
+
   if (list) {
     playQueue = list.slice();
   }
@@ -2115,18 +2274,24 @@ function playSongAt(index,list) {
   resetProgress();
 
   if (apiReady && ytPlayer) {
+
     ytPlayer.loadVideoById({
       videoId:video.videoId,
       startSeconds:0
     });
+
   } else {
+
     pendingVideoId = video.videoId;
+
   }
+
 }
 
 /* NEXT / PREVIOUS */
 
 function nextSong() {
+
   if (!playQueue.length || currentIndex < 0) return;
 
   let next = currentIndex + 1;
@@ -2134,9 +2299,11 @@ function nextSong() {
   if (next >= playQueue.length) next = 0;
 
   playSongAt(next);
+
 }
 
 function previousSong() {
+
   if (!playQueue.length || currentIndex < 0) return;
 
   let previous = currentIndex - 1;
@@ -2144,6 +2311,7 @@ function previousSong() {
   if (previous < 0) previous = playQueue.length - 1;
 
   playSongAt(previous);
+
 }
 
 $('nextBtn').addEventListener('click',e => {
@@ -2189,6 +2357,7 @@ let touchStartY = 0;
 let touchStarted = false;
 
 playerScreen.addEventListener('touchstart',e => {
+
   touchStarted = false;
 
   if (playerMode !== 'full') return;
@@ -2200,16 +2369,20 @@ playerScreen.addEventListener('touchstart',e => {
   touchStartY = touch.clientY;
 
   touchStarted = true;
+
 },{passive:true});
 
 playerScreen.addEventListener('touchmove',e => {
+
   if (playerMode !== 'full') return;
   if (e.target.closest('button:not(.grabber),input')) return;
 
   if (e.cancelable) e.preventDefault();
+
 },{passive:false});
 
 playerScreen.addEventListener('touchend',e => {
+
   if (!touchStarted) return;
 
   touchStarted = false;
@@ -2224,6 +2397,7 @@ playerScreen.addEventListener('touchend',e => {
   if (deltaY > 90 && deltaY > deltaX * 1.5) {
     minimizePlayer();
   }
+
 },{passive:true});
 
 playerScreen.addEventListener('touchcancel',() => {
@@ -2233,6 +2407,7 @@ playerScreen.addEventListener('touchcancel',() => {
 /* LIKE BUTTON */
 
 $('likeBtn').addEventListener('click',e => {
+
   e.preventDefault();
   e.stopPropagation();
 
@@ -2248,14 +2423,18 @@ $('likeBtn').addEventListener('click',e => {
   let likes = getLikes();
 
   if (likes.includes(id)) {
+
     likes = likes.filter(x => x !== id);
     songs = songs.filter(x => x.videoId !== id);
+
   } else {
+
     likes.push(id);
 
     if (!songs.some(x => x.videoId === id)) {
       songs.unshift(video);
     }
+
   }
 
   saveLikedSongs(songs);
@@ -2268,11 +2447,13 @@ $('likeBtn').addEventListener('click',e => {
   if (activeTab === 'library') {
     renderLibrary();
   }
+
 });
 
 /* SONG CARDS */
 
 function makeCard(video,index,list) {
+
   const card = document.createElement('article');
 
   card.className = 'card';
@@ -2301,21 +2482,26 @@ function makeCard(video,index,list) {
   card.addEventListener('click',play);
 
   card.addEventListener('keydown',e => {
+
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       play();
     }
+
   });
 
   return card;
+
 }
 
 /* FAST API FETCH */
 
 async function fetchSongs(query,pageNumber,controller) {
+
   const controllers = [];
 
   const requests = instances.map(base => {
+
     const child = new AbortController();
 
     controllers.push(child);
@@ -2335,36 +2521,48 @@ async function fetchSongs(query,pageNumber,controller) {
       }
     )
     .then(response => {
+
       if (!response.ok) {
         throw new Error('Server error');
       }
 
       return response.json();
+
     })
     .then(json => {
+
       if (!Array.isArray(json)) {
         throw new Error('Invalid response');
       }
 
       return json;
+
     });
+
   });
 
   try {
+
     const result = await Promise.any(requests);
 
     controllers.forEach(c => c.abort());
 
     return result;
+
   } catch(e) {
+
     controllers.forEach(c => c.abort());
+
     return null;
+
   }
+
 }
 
 /* LOAD SONGS */
 
 async function loadSongs(type,query,pageNumber=1,append=false) {
+
   const state = pageData[type];
 
   if (!state || state.busy) return;
@@ -2417,6 +2615,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     : 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+
     if (controller.signal.aborted) break;
 
     const currentPage = pageNumber + attempt;
@@ -2429,7 +2628,6 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       controller
     );
 
-    // পুরোনো request হলে আর কিছু করবে না
     if (state.controller !== controller) return;
 
     if (controller.signal.aborted) {
@@ -2438,8 +2636,11 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     }
 
     if (!data) {
+
       if (attempt === 0) failed = true;
+
       break;
+
     }
 
     const found = data.filter(v =>
@@ -2452,6 +2653,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     }
 
     for (const video of found) {
+
       const id = video.videoId;
 
       if (existing.has(id)) continue;
@@ -2469,6 +2671,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       ) {
         break;
       }
+
     }
 
     if (
@@ -2479,6 +2682,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     }
 
     if (type !== 'home') break;
+
   }
 
   if (state.controller !== controller) return;
@@ -2489,33 +2693,28 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   }
 
   if (failed && !append) {
+
     if (type === 'home') {
       status.textContent = 'Connection unavailable';
     } else {
+
       grid.innerHTML =
         '<div class="empty">সার্ভার সংযোগে ব্যর্থ। পরে আবার চেষ্টা করুন।</div>';
 
       status.textContent = 'Server Error';
+
     }
 
     state.busy = false;
+
     return;
+
   }
 
   if (collected.length) {
 
-    /*
-      HOME REFRESH FIX:
-      নতুন গান পাওয়া গেলেই আগের তালিকা replace হবে।
-      নতুন গান না পাওয়া পর্যন্ত পুরোনো তালিকা থাকবে।
-    */
-
-    if (type === 'home' && pageNumber === 1 && !append) {
-      state.videos = [];
-      grid.innerHTML = '';
-    }
-
     collected.forEach(video => {
+
       state.videos.push(video);
 
       if (type === 'home') {
@@ -2527,17 +2726,16 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       grid.appendChild(
         makeCard(video,index,state.videos)
       );
+
     });
+
   }
 
   if (!state.videos.length && type === 'search') {
+
     grid.innerHTML =
       '<div class="empty">কোনো গান পাওয়া যায়নি।</div>';
-  }
 
-  if (!state.videos.length && type === 'home' && !failed) {
-    grid.innerHTML =
-      '<div class="empty">নতুন গান খুঁজে পাওয়া যায়নি। আবার Home চাপ দিয়ে চেষ্টা করো।</div>';
   }
 
   state.page = lastCheckedPage;
@@ -2546,26 +2744,36 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   status.textContent = state.videos.length + ' Songs';
 
   if (type === 'search') {
+
     more.hidden =
       reachedEnd || collected.length === 0;
 
     more.disabled = false;
+
   }
 
   if (type === 'home') {
+
     if (reachedEnd) {
+
       homeHasMore = false;
+
     } else if (
       collected.length === 0 &&
       lastCheckedPage >= pageNumber + maxAttempts - 1
     ) {
+
       homeHasMore = false;
+
     } else if (collected.length > 0) {
+
       homeHasMore = true;
+
     }
 
     saveHomeCache();
     saveHomeSeen();
+
   }
 
   state.busy = false;
@@ -2573,16 +2781,19 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   if (type === 'home') {
     refreshHomeObserver();
   }
+
 }
 
 /* HOME */
 
 function loadHome() {
+
   const state = pageData.home;
 
   if (state.busy || homeAutoLoading) return;
 
   if (!state.videos.length) {
+
     homeHasMore = true;
 
     loadSongs(
@@ -2591,14 +2802,19 @@ function loadHome() {
       1,
       false
     );
+
   } else {
+
     refreshHomeObserver();
+
   }
+
 }
 
 /* SEARCH */
 
 $('searchForm').addEventListener('submit',e => {
+
   e.preventDefault();
 
   const query = $('query').value.trim();
@@ -2611,9 +2827,11 @@ $('searchForm').addEventListener('submit',e => {
     1,
     false
   );
+
 });
 
 $('searchMore').addEventListener('click',() => {
+
   const state = pageData.search;
 
   if (!state.query) return;
@@ -2624,6 +2842,7 @@ $('searchMore').addEventListener('click',() => {
     state.page + 1,
     true
   );
+
 });
 
 /* LIBRARY */
@@ -2635,14 +2854,17 @@ const HEART_SVG = `
 `;
 
 function setLibraryView(view) {
+
   libraryView = view;
 
   renderLibrary();
 
   window.scrollTo(0,0);
+
 }
 
 function makeFolderCard(name,songs,onOpen) {
+
   const card = document.createElement('article');
 
   card.className = 'card';
@@ -2653,11 +2875,13 @@ function makeFolderCard(name,songs,onOpen) {
   cover.className = 'folder-cover';
 
   if (songs.length) {
+
     const quad = songs.length >= 4;
 
     cover.dataset.layout = quad ? 'quad' : 'single';
 
     songs.slice(0,quad ? 4 : 1).forEach(video => {
+
       const img = document.createElement('img');
 
       img.loading = 'lazy';
@@ -2665,6 +2889,7 @@ function makeFolderCard(name,songs,onOpen) {
       img.src = bestThumb(video);
 
       cover.appendChild(img);
+
     });
 
     const badge = document.createElement('div');
@@ -2673,13 +2898,16 @@ function makeFolderCard(name,songs,onOpen) {
     badge.innerHTML = HEART_SVG;
 
     cover.appendChild(badge);
+
   } else {
+
     const icon = document.createElement('div');
 
     icon.className = 'folder-empty-icon';
     icon.innerHTML = HEART_SVG;
 
     cover.appendChild(icon);
+
   }
 
   const title = document.createElement('div');
@@ -2698,16 +2926,20 @@ function makeFolderCard(name,songs,onOpen) {
   card.addEventListener('click',onOpen);
 
   card.addEventListener('keydown',e => {
+
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onOpen();
     }
+
   });
 
   return card;
+
 }
 
 function renderLibrary() {
+
   const songs = getLikedSongs();
 
   const folders = $('libraryFolders');
@@ -2718,6 +2950,7 @@ function renderLibrary() {
   const status = $('libraryStatus');
 
   if (libraryView === 'favourites') {
+
     folders.hidden = true;
     grid.hidden = false;
 
@@ -2729,6 +2962,7 @@ function renderLibrary() {
     grid.innerHTML = '';
 
     if (!songs.length) {
+
       grid.innerHTML = `
         <div class="empty">
           এখনো কোনো গান Favourite করা হয়নি।
@@ -2738,15 +2972,19 @@ function renderLibrary() {
       `;
 
       return;
+
     }
 
     songs.forEach((video,index) => {
+
       grid.appendChild(
         makeCard(video,index,songs)
       );
+
     });
 
     return;
+
   }
 
   grid.hidden = true;
@@ -2766,6 +3004,7 @@ function renderLibrary() {
       () => setLibraryView('favourites')
     )
   );
+
 }
 
 $('libraryBack').addEventListener('click',() => {
