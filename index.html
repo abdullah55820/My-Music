@@ -39,11 +39,18 @@ body {
   min-height:100vh;
 }
 
-/* Full player open থাকলে page scroll বন্ধ (body fixed না করে) */
-html.full-player-open,
-body.full-player-open {
-  overflow:hidden;
+/*
+  Full player খোলা থাকলে অন্য page গুলো লুকানো থাকে এবং player নিজেই
+  document এর content হয়ে যায় (fixed না)। এতে Safari home page এর মতোই
+  status bar এর নিচে content blur করে দেখায়।
+*/
+html.full-player-open {
   overscroll-behavior:none;
+}
+
+body.full-player-open > .header,
+body.full-player-open > main.page {
+  display:none !important;
 }
 
 button {
@@ -332,7 +339,24 @@ body.full-player-open .bottom-nav {
     background-color .4s ease;
 }
 
+/*
+  Active অবস্থায় player fixed না, document এর ভেতরের absolute content।
+  --player-lift: উপরে বাড়তি জায়গা, যেটা scroll করে status bar এর নিচে
+  পাঠানো হয় (JS সেট করে), যাতে Safari সেখানে blur effect দেখায়।
+*/
 .player.active {
+  position:absolute;
+  inset:auto;
+  top:0;
+  left:0;
+  right:0;
+
+  height:calc(100vh + var(--player-lift,0px));
+
+  padding-top:calc(
+    env(safe-area-inset-top) + var(--player-lift,0px) + 12px
+  );
+
   visibility:visible;
   opacity:1;
   pointer-events:auto;
@@ -994,7 +1018,6 @@ body.full-player-open .bottom-nav {
 
   <div class="player-bg" id="playerBg"></div>
   <div class="player-shade"></div>
-  <div class="player-top-fade"></div>
 
   <div class="player-top-bar">
 
@@ -1841,14 +1864,56 @@ function setSongInfo(video) {
    body কে position:fixed করা হয় না, কারণ তাতে Safari page কে
    status bar এর নিচে extend করা বন্ধ করে দিতে পারে। */
 
+/* status bar যদি page এর layout এর বাইরে থাকে (safe-area = 0),
+   তাহলে player কে একটু উপরে "lift" করে scroll করে রাখি,
+   যাতে উপরের অংশ status bar এর নিচে blur হয়ে দেখায়। */
+
+function getTopLift() {
+
+  const probe = document.createElement('div');
+
+  probe.style.cssText =
+    'position:absolute;visibility:hidden;pointer-events:none;' +
+    'padding-top:env(safe-area-inset-top);';
+
+  document.body.appendChild(probe);
+
+  const safeTop = probe.offsetHeight;
+
+  probe.remove();
+
+  return safeTop > 0 ? 0 : 70;
+
+}
+
 function lockPageScroll() {
 
   if (document.body.classList.contains('full-player-open')) return;
 
   savedScrollY = window.scrollY || window.pageYOffset || 0;
 
+  document.documentElement.style.setProperty(
+    '--player-lift',
+    getTopLift() + 'px'
+  );
+
   document.documentElement.classList.add('full-player-open');
   document.body.classList.add('full-player-open');
+
+}
+
+function applyPlayerScroll() {
+
+  const lift = parseFloat(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--player-lift')
+  ) || 0;
+
+  window.scrollTo(0,lift);
+
+  requestAnimationFrame(() => {
+    if (playerMode === 'full') window.scrollTo(0,lift);
+  });
 
 }
 
@@ -1858,6 +1923,8 @@ function unlockPageScroll() {
 
   document.documentElement.classList.remove('full-player-open');
   document.body.classList.remove('full-player-open');
+
+  document.documentElement.style.setProperty('--player-lift','0px');
 
   window.scrollTo(0,savedScrollY);
 
@@ -1874,6 +1941,8 @@ function showFullPlayer() {
 
   miniPlayer.classList.remove('visible');
   playerScreen.classList.add('active');
+
+  applyPlayerScroll();
 
 }
 
@@ -1902,6 +1971,8 @@ function expandPlayer() {
 
   miniPlayer.classList.remove('visible');
   playerScreen.classList.add('active');
+
+  applyPlayerScroll();
 
 }
 
