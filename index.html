@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#000000" id="themeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,13 +12,53 @@
 <title>SoundFlow — Music</title>
 
 <style>
+
+/* ============================================================
+   THEME  (মোবাইল Dark হলে Dark, Light হলে Light)
+   ============================================================ */
+
 :root {
-  color-scheme:dark;
-  --bg:#000;
-  --muted:#98989f;
-  --accent:#ff2d55;
-  --line:rgba(255,255,255,.12);
+  color-scheme:light dark;
+
+  --bg:#f2f2f7;
+  --surface:#ffffff;
+  --surface-2:#e5e5ea;
+  --text:#000000;
+  --muted:#6c6c70;
+  --line:rgba(0,0,0,.08);
+  --accent:#007aff;
+
+  --glass-bg:rgba(255,255,255,.46);
+  --glass-bg-strong:rgba(255,255,255,.74);
+  --glass-border:rgba(255,255,255,.8);
+  --glass-hl:rgba(255,255,255,.95);
+  --glass-shadow:rgba(30,40,80,.20);
+
+  --card-shadow:0 1px 2px rgba(0,0,0,.05);
+
   --player-tint:#2a2a2c;
+}
+
+@media (prefers-color-scheme:dark) {
+
+  :root {
+    --bg:#000000;
+    --surface:#1c1c1e;
+    --surface-2:#2c2c2e;
+    --text:#ffffff;
+    --muted:#98989f;
+    --line:rgba(255,255,255,.12);
+    --accent:#0a84ff;
+
+    --glass-bg:rgba(50,50,58,.40);
+    --glass-bg-strong:rgba(44,44,52,.72);
+    --glass-border:rgba(255,255,255,.17);
+    --glass-hl:rgba(255,255,255,.32);
+    --glass-shadow:rgba(0,0,0,.55);
+
+    --card-shadow:none;
+  }
+
 }
 
 * {
@@ -26,14 +67,14 @@
 }
 
 html {
-  background:#000;
+  background:var(--bg);
   min-height:100%;
 }
 
 body {
   margin:0;
-  background:#000;
-  color:#fff;
+  background:var(--bg);
+  color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,
   "SF Pro Display","Segoe UI",sans-serif;
   min-height:100vh;
@@ -64,7 +105,9 @@ button {
   display:none!important;
 }
 
-/* HEADER */
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 .header {
   max-width:1050px;
@@ -82,7 +125,9 @@ button {
   color:var(--accent);
 }
 
-/* PAGES */
+/* ============================================================
+   PAGES
+   ============================================================ */
 
 .page {
   display:none;
@@ -95,28 +140,65 @@ button {
 .wrap {
   max-width:1050px;
   margin:auto;
-  padding:15px 16px 160px;
+  padding:15px 16px 180px;
 }
 
 .section {
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap:10px;
   margin:18px 0 15px;
+}
+
+.section-left {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
 }
 
 .section h2 {
   font-size:19px;
   margin:0;
   font-weight:750;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .status {
   color:var(--muted);
   font-size:12px;
+  white-space:nowrap;
 }
 
-/* SEARCH */
+.back-btn {
+  width:36px;
+  height:36px;
+  margin-left:-8px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+  background:transparent;
+  color:var(--accent);
+  flex-shrink:0;
+}
+
+.back-btn svg {
+  width:24px;
+  height:24px;
+}
+
+.back-btn:active {
+  background:color-mix(in srgb,var(--accent) 15%,transparent);
+}
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
 
 .search {
   display:flex;
@@ -128,12 +210,16 @@ button {
   flex:1;
   min-width:0;
   padding:14px;
-  background:#1c1c1e;
-  color:white;
+  background:var(--surface);
+  color:var(--text);
   border:1px solid var(--line);
   border-radius:14px;
   font-size:16px;
   outline:none;
+}
+
+.search input::placeholder {
+  color:var(--muted);
 }
 
 .search input:focus {
@@ -143,11 +229,14 @@ button {
 .search button {
   padding:0 19px;
   border-radius:14px;
-  background:linear-gradient(135deg,#ff2d55,#ff5e3a);
+  background:var(--accent);
+  color:#fff;
   font-weight:700;
 }
 
-/* SONG GRID */
+/* ============================================================
+   SONG GRID
+   ============================================================ */
 
 .grid {
   display:grid;
@@ -156,8 +245,9 @@ button {
 }
 
 .card {
-  background:#1c1c1e;
+  background:var(--surface);
   border:1px solid var(--line);
+  box-shadow:var(--card-shadow);
   border-radius:16px;
   padding:10px;
   cursor:pointer;
@@ -174,7 +264,7 @@ button {
   aspect-ratio:1;
   object-fit:cover;
   border-radius:12px;
-  background:#292929;
+  background:var(--surface-2);
 }
 
 .title {
@@ -205,6 +295,7 @@ button {
   border-radius:16px;
   color:var(--muted);
   font-size:13px;
+  line-height:1.6;
 }
 
 .load {
@@ -212,9 +303,9 @@ button {
   margin:22px auto;
   padding:13px 22px;
   border-radius:14px;
-  background:#1c1c1e;
+  background:var(--surface);
   border:1px solid var(--line);
-  color:white;
+  color:var(--text);
   font-weight:650;
 }
 
@@ -226,7 +317,84 @@ button {
   opacity:.5;
 }
 
-/* HOME SENTINEL */
+/* ============================================================
+   LIBRARY FOLDER
+   ============================================================ */
+
+.folder-cover {
+  position:relative;
+
+  width:100%;
+  aspect-ratio:1;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:12px;
+  overflow:hidden;
+
+  background:linear-gradient(
+    145deg,
+    color-mix(in srgb,var(--accent) 26%,var(--surface-2)),
+    var(--surface-2)
+  );
+}
+
+.folder-cover[data-layout="quad"] {
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:2px;
+}
+
+.folder-cover img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.folder-cover[data-layout="single"] img {
+  position:absolute;
+  inset:0;
+}
+
+.folder-empty-icon {
+  width:38%;
+  height:38%;
+  color:var(--accent);
+}
+
+.folder-badge {
+  position:absolute;
+  left:8px;
+  bottom:8px;
+
+  width:30px;
+  height:30px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+  background:var(--glass-bg-strong);
+  color:var(--accent);
+
+  backdrop-filter:blur(14px) saturate(180%);
+  -webkit-backdrop-filter:blur(14px) saturate(180%);
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.25),
+    inset 0 1px 0 var(--glass-hl);
+}
+
+.folder-badge svg {
+  width:16px;
+  height:16px;
+}
+
+/* ============================================================
+   HOME SENTINEL
+   ============================================================ */
 
 #homeSentinel {
   width:100%;
@@ -234,43 +402,81 @@ button {
   pointer-events:none;
 }
 
-/* BOTTOM NAV */
+/* ============================================================
+   BOTTOM NAV  (Liquid Glass)
+   ============================================================ */
 
 .bottom-nav {
   position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
   z-index:9000;
 
+  left:0;
+  right:0;
+  margin:0 auto;
+  width:min(calc(100% - 32px),520px);
+
+  bottom:calc(env(safe-area-inset-bottom) + 10px);
+
+  height:66px;
+  padding:6px;
+
   display:flex;
-  justify-content:space-around;
   align-items:center;
+  gap:4px;
 
-  height:calc(68px + env(safe-area-inset-bottom));
-  padding:7px 15px calc(7px + env(safe-area-inset-bottom));
+  border-radius:34px;
 
-  background:rgba(20,20,22,.94);
-  border-top:1px solid rgba(255,255,255,.09);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
 
-  backdrop-filter:blur(25px) saturate(160%);
-  -webkit-backdrop-filter:blur(25px) saturate(160%);
+  backdrop-filter:blur(26px) saturate(210%) brightness(1.04);
+  -webkit-backdrop-filter:blur(26px) saturate(210%) brightness(1.04);
+
+  box-shadow:
+    0 14px 34px var(--glass-shadow),
+    inset 0 1px 0 var(--glass-hl),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    inset 0 0 22px rgba(255,255,255,.06);
+}
+
+/* উপরের দিকের হালকা আলোর ঝিলিক */
+.bottom-nav::before {
+  content:"";
+  position:absolute;
+  inset:0;
+
+  border-radius:inherit;
+  pointer-events:none;
+
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.26) 0%,
+    rgba(255,255,255,.06) 42%,
+    rgba(255,255,255,0) 60%
+  );
 }
 
 .nav-btn {
+  position:relative;
+
   flex:1;
-  height:53px;
+  height:54px;
 
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:4px;
+  gap:3px;
 
+  border-radius:28px;
   background:transparent;
-  color:#85858d;
+  color:var(--muted);
 
-  transition:color .2s,transform .2s;
+  transition:
+    color .25s,
+    background .25s,
+    box-shadow .25s,
+    transform .2s;
 }
 
 .nav-btn svg {
@@ -285,10 +491,16 @@ button {
 
 .nav-btn.active {
   color:var(--accent);
+
+  background:color-mix(in srgb,var(--accent) 15%,transparent);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent);
 }
 
 .nav-btn:active {
-  transform:scale(.91);
+  transform:scale(.93);
 }
 
 body.full-player-open .bottom-nav {
@@ -297,7 +509,9 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/* FULL PLAYER */
+/* ============================================================
+   FULL PLAYER  (সবসময় album-রঙের dark look, সাদা লেখা)
+   ============================================================ */
 
 .player {
   position:fixed;
@@ -307,19 +521,19 @@ body.full-player-open .bottom-nav {
   display:flex;
   flex-direction:column;
 
+  color:#fff;
+
   padding:
     calc(env(safe-area-inset-top) + 12px)
     24px
-    calc(env(safe-area-inset-bottom) + 24px);
+    calc(env(safe-area-inset-bottom) + 18px);
 
   overflow:hidden;
   overscroll-behavior:none;
 
   /*
-    Safari (iOS) status bar / Dynamic Island এর পেছনের রং
-    নেয় উপরের fixed element এর background-color থেকে।
-    আগে এটা transparent ছিল, তাই body-র কালো রং আসত।
-    এখন album art থেকে বের করা রং বসে (JS দিয়ে --player-tint সেট হয়)।
+    Safari (iOS) status bar এর পেছনের রং নেয় fixed element এর
+    background-color থেকে। album art থেকে বের করা রং এখানে বসে।
   */
   background-color:var(--player-tint,#2a2a2c) !important;
 
@@ -416,37 +630,6 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/*
-  TOP FADE
-  Status bar এর পেছনের অংশ Safari নিজে একটা flat রং দিয়ে ভরে (page এর বাইরে)।
-  সেই রং থেকে blur background-এ যেন seam ছাড়া মিশে যায়, তাই
-  উপর থেকে tint রং ধীরে ধীরে transparent হয়ে যাচ্ছে।
-*/
-
-.player-top-fade {
-  position:absolute;
-
-  top:0;
-  left:0;
-  right:0;
-
-  height:calc(env(safe-area-inset-top) + 150px);
-
-  z-index:1;
-
-  background:linear-gradient(
-    180deg,
-    var(--player-tint,#2a2a2c) 0%,
-    color-mix(in srgb,var(--player-tint,#2a2a2c) 92%,transparent) 14%,
-    color-mix(in srgb,var(--player-tint,#2a2a2c) 70%,transparent) 32%,
-    color-mix(in srgb,var(--player-tint,#2a2a2c) 42%,transparent) 52%,
-    color-mix(in srgb,var(--player-tint,#2a2a2c) 18%,transparent) 76%,
-    transparent 100%
-  );
-
-  pointer-events:none;
-}
-
 /* TOP BAR (grabber) */
 
 .player-top-bar {
@@ -489,23 +672,39 @@ body.full-player-open .bottom-nav {
   width:100%;
   max-width:390px;
   margin:0 auto;
-  padding-top:10px;
 
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  gap:clamp(14px,3.2vh,30px);
+  gap:clamp(12px,2.6vh,26px);
 
   flex:1;
   min-height:0;
+
+  padding-bottom:clamp(8px,2.6vh,26px);
+}
+
+/*
+  Artwork zone: গান-info এর উপরের পুরো খালি জায়গা এটা নেয়।
+  Artwork ওই জায়গার মধ্যে যতটা সম্ভব বড় হয়ে মাঝখানে বসে,
+  তাই উপরে-নিচে অকারণে বড় ফাঁকা থাকে না।
+*/
+.artwork-zone {
+  flex:1;
+  min-height:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  container-type:size;
 }
 
 /* ARTWORK */
 
 .big-artwork-wrap {
-  width:min(100%,46vh);
+  width:min(100%,44vh);
+  width:min(100cqw,100cqh);
   aspect-ratio:1/1;
-  margin:0 auto;
 
   flex-shrink:0;
   overflow:hidden;
@@ -527,15 +726,15 @@ body.full-player-open .bottom-nav {
   box-shadow:0 10px 28px rgba(0,0,0,.35);
 }
 
-.player-info-group {
-  flex-shrink:0;
-}
-
 .big-artwork-wrap img {
   display:block;
   width:100%;
   height:100%;
   object-fit:cover;
+}
+
+.player-info-group {
+  flex-shrink:0;
 }
 
 /* SONG INFO */
@@ -546,7 +745,7 @@ body.full-player-open .bottom-nav {
   align-items:center;
   gap:12px;
 
-  margin-bottom:26px;
+  margin-bottom:22px;
   flex-shrink:0;
 }
 
@@ -556,7 +755,7 @@ body.full-player-open .bottom-nav {
 }
 
 .song-info-text h3 {
-  margin:0 0 6px;
+  margin:0 0 5px;
   font-size:22px;
   font-weight:750;
 
@@ -733,47 +932,20 @@ body.full-player-open .bottom-nav {
   height:66px;
 }
 
-/* VOLUME */
-
-.volume-row {
-  display:flex;
-  align-items:center;
-  gap:14px;
-
-  flex-shrink:0;
-  color:rgba(255,255,255,.62);
-}
-
-.volume-row svg {
-  width:20px;
-  height:20px;
-  flex-shrink:0;
-}
-
-/* touch area বড়, কিন্তু দেখতে bar টা আগের মতোই পাতলা */
-.volume-row .seek-slider {
-  flex:1;
-  min-width:0;
-
-  height:30px;
-  border-radius:0;
-
-  background-size:100% 5px;
-  background-position:center;
-  background-repeat:no-repeat;
-  background-color:transparent;
-}
-
-/* MINI PLAYER */
+/* ============================================================
+   MINI PLAYER  (Liquid Glass)
+   ============================================================ */
 
 .mini-player {
   position:fixed;
   z-index:9500;
 
-  left:12px;
-  right:12px;
+  left:0;
+  right:0;
+  margin:0 auto;
+  width:min(calc(100% - 32px),520px);
 
-  bottom:calc(77px + env(safe-area-inset-bottom));
+  bottom:calc(env(safe-area-inset-bottom) + 86px);
 
   min-height:68px;
   padding:9px 11px;
@@ -782,15 +954,19 @@ body.full-player-open .bottom-nav {
   align-items:center;
   gap:11px;
 
-  background:rgba(40,40,42,.94);
+  color:var(--text);
 
-  border:1px solid rgba(255,255,255,.13);
-  border-radius:17px;
+  background:var(--glass-bg-strong);
 
-  backdrop-filter:blur(25px) saturate(160%);
-  -webkit-backdrop-filter:blur(25px) saturate(160%);
+  border:1px solid var(--glass-border);
+  border-radius:22px;
 
-  box-shadow:0 8px 30px rgba(0,0,0,.4);
+  backdrop-filter:blur(26px) saturate(200%);
+  -webkit-backdrop-filter:blur(26px) saturate(200%);
+
+  box-shadow:
+    0 10px 28px var(--glass-shadow),
+    inset 0 1px 0 var(--glass-hl);
 
   opacity:0;
   visibility:hidden;
@@ -815,7 +991,7 @@ body.full-player-open .bottom-nav {
   width:47px;
   height:47px;
 
-  border-radius:9px;
+  border-radius:10px;
   object-fit:cover;
   flex-shrink:0;
 }
@@ -837,7 +1013,7 @@ body.full-player-open .bottom-nav {
 
 .mini-artist {
   font-size:11px;
-  color:rgba(255,255,255,.6);
+  color:var(--muted);
   margin-top:4px;
 
   white-space:nowrap;
@@ -853,7 +1029,7 @@ body.full-player-open .bottom-nav {
   place-items:center;
 
   background:transparent;
-  color:white;
+  color:var(--text);
   flex-shrink:0;
 }
 
@@ -862,7 +1038,9 @@ body.full-player-open .bottom-nav {
   height:24px;
 }
 
-/* YOUTUBE */
+/* ============================================================
+   YOUTUBE
+   ============================================================ */
 
 #ytPlayerContainer {
   position:fixed;
@@ -876,12 +1054,14 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/* RESPONSIVE */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 
 @media(max-width:480px) {
 
   .wrap {
-    padding:12px 13px 160px;
+    padding:12px 13px 180px;
   }
 
   .header {
@@ -910,12 +1090,8 @@ body.full-player-open .bottom-nav {
 
 @media(max-height:720px) {
 
-  .big-artwork-wrap {
-    width:min(100%,38vh);
-  }
-
   .song-meta-box {
-    margin-bottom:16px;
+    margin-bottom:14px;
   }
 
   .ctrl-btn {
@@ -942,15 +1118,20 @@ body.full-player-open .bottom-nav {
 
 @media(max-height:600px) {
 
-  .big-artwork-wrap {
-    width:min(100%,32vh);
-  }
-
   .song-meta-box {
     margin-bottom:10px;
   }
 
+  .song-info-text h3 {
+    font-size:19px;
+  }
+
+  .song-info-text p {
+    font-size:15px;
+  }
+
 }
+
 </style>
 </head>
 
@@ -1022,15 +1203,31 @@ body.full-player-open .bottom-nav {
   <div class="wrap">
 
     <div class="section">
-      <h2>My Library</h2>
-      <span class="status" id="libraryStatus">0 Songs</span>
+
+      <div class="section-left">
+
+        <button class="back-btn" id="libraryBack" type="button"
+                aria-label="Back to library" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.4" stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="m15 5-7 7 7 7"/>
+          </svg>
+        </button>
+
+        <h2 id="libraryTitle">Library</h2>
+
+      </div>
+
+      <span class="status" id="libraryStatus">1 Folder</span>
+
     </div>
 
-    <div class="grid" id="libraryResults">
-      <div class="empty">
-        এখনো কোনো গান Favourite করা হয়নি।
-      </div>
-    </div>
+    <!-- Folder list -->
+    <div class="grid" id="libraryFolders"></div>
+
+    <!-- Folder এর ভেতরের গান -->
+    <div class="grid" id="libraryResults" hidden></div>
 
   </div>
 
@@ -1093,49 +1290,53 @@ body.full-player-open .bottom-nav {
 
   <div class="player-content-center">
 
-    <div class="big-artwork-wrap" id="artworkWrap">
-      <img id="playingThumb" alt="Album Artwork">
+    <div class="artwork-zone">
+
+      <div class="big-artwork-wrap" id="artworkWrap">
+        <img id="playingThumb" alt="Album Artwork">
+      </div>
+
     </div>
 
     <div class="player-info-group">
 
-    <div class="song-meta-box">
+      <div class="song-meta-box">
 
-      <div class="song-info-text">
-        <h3 id="playingTitle">Song Title</h3>
-        <p id="playingArtist">Artist Name</p>
+        <div class="song-info-text">
+          <h3 id="playingTitle">Song Title</h3>
+          <p id="playingArtist">Artist Name</p>
+        </div>
+
+        <button class="like-btn" id="likeBtn" type="button">
+          <svg viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.8"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/>
+          </svg>
+        </button>
+
       </div>
 
-      <button class="like-btn" id="likeBtn" type="button">
-        <svg viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="1.8"
-             stroke-linecap="round"
-             stroke-linejoin="round">
-          <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/>
-        </svg>
-      </button>
+      <div class="progress-container">
 
-    </div>
+        <input
+          type="range"
+          id="seekSlider"
+          class="seek-slider"
+          min="0"
+          max="100"
+          value="0"
+        >
 
-    <div class="progress-container">
+        <div class="time-row">
+          <span id="currentTime">0:00</span>
+          <span id="durationTime">0:00</span>
+        </div>
 
-      <input
-        type="range"
-        id="seekSlider"
-        class="seek-slider"
-        min="0"
-        max="100"
-        value="0"
-      >
-
-      <div class="time-row">
-        <span id="currentTime">0:00</span>
-        <span id="durationTime">0:00</span>
       </div>
-
-    </div>
 
     </div>
 
@@ -1161,7 +1362,6 @@ body.full-player-open .bottom-nav {
       </button>
 
     </div>
-
 
   </div>
 
@@ -1231,6 +1431,19 @@ let pendingVideoId = null;
 
 let activeTab = 'home';
 
+/* 'folders' = Library এর folder list, 'favourites' = Favourites folder এর গান */
+let libraryView = 'folders';
+
+/* THEME COLOR (status bar রং) */
+
+const schemeQuery = window.matchMedia
+  ? window.matchMedia('(prefers-color-scheme: dark)')
+  : null;
+
+function baseThemeColor() {
+  return (schemeQuery && !schemeQuery.matches) ? '#f2f2f7' : '#000000';
+}
+
 /* PLAYER TINT (status bar / Dynamic Island রং) */
 
 const FALLBACK_TINT = '#2a2a2c';
@@ -1246,14 +1459,24 @@ function syncTint() {
   );
 
   // Safari-র status bar tint:
-  // full player খোলা থাকলে album রং, নইলে আগের মতো কালো
+  // full player খোলা থাকলে album রং, নইলে theme অনুযায়ী
   const meta = $('themeColor');
 
   if (meta) {
     meta.setAttribute(
       'content',
-      playerMode === 'full' ? currentTint : '#000000'
+      playerMode === 'full' ? currentTint : baseThemeColor()
     );
+  }
+
+}
+
+if (schemeQuery) {
+
+  if (schemeQuery.addEventListener) {
+    schemeQuery.addEventListener('change',syncTint);
+  } else if (schemeQuery.addListener) {
+    schemeQuery.addListener(syncTint);
   }
 
 }
@@ -1574,7 +1797,11 @@ function setActiveTab(tab) {
   });
 
   if (tab === 'library') {
+
+    // Library তে ঢুকলে সবসময় আগে folder list দেখাবে
+    libraryView = 'folders';
     renderLibrary();
+
   }
 
   if (tab === 'home') {
@@ -1590,9 +1817,25 @@ function setActiveTab(tab) {
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
+
   btn.addEventListener('click',() => {
-    setActiveTab(btn.dataset.tab);
+
+    const tab = btn.dataset.tab;
+
+    // Library তে থাকা অবস্থায় আবার Library চাপলে folder list এ ফেরে
+    if (
+      tab === 'library' &&
+      activeTab === 'library' &&
+      libraryView !== 'folders'
+    ) {
+      setLibraryView('folders');
+      return;
+    }
+
+    setActiveTab(tab);
+
   });
+
 });
 
 /* YOUTUBE API */
@@ -2672,45 +2915,179 @@ $('searchMore').addEventListener('click',() => {
 
 /* LIBRARY */
 
-function renderLibrary() {
+const HEART_SVG = `
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/>
+  </svg>
+`;
 
-  const grid = $('libraryResults');
+function setLibraryView(view) {
+
+  libraryView = view;
+
+  renderLibrary();
+
+  window.scrollTo(0,0);
+
+}
+
+function makeFolderCard(name,songs,onOpen) {
+
+  const card = document.createElement('article');
+
+  card.className = 'card';
+  card.tabIndex = 0;
+
+  const cover = document.createElement('div');
+
+  cover.className = 'folder-cover';
+
+  if (songs.length) {
+
+    const quad = songs.length >= 4;
+
+    cover.dataset.layout = quad ? 'quad' : 'single';
+
+    songs.slice(0,quad ? 4 : 1).forEach(video => {
+
+      const img = document.createElement('img');
+
+      img.loading = 'lazy';
+      img.alt = '';
+      img.src = bestThumb(video);
+
+      cover.appendChild(img);
+
+    });
+
+    const badge = document.createElement('div');
+
+    badge.className = 'folder-badge';
+    badge.innerHTML = HEART_SVG;
+
+    cover.appendChild(badge);
+
+  } else {
+
+    const icon = document.createElement('div');
+
+    icon.className = 'folder-empty-icon';
+    icon.innerHTML = HEART_SVG;
+
+    cover.appendChild(icon);
+
+  }
+
+  const title = document.createElement('div');
+
+  title.className = 'title';
+  title.textContent = name;
+
+  const count = document.createElement('div');
+
+  count.className = 'artist';
+  count.textContent =
+    songs.length + (songs.length === 1 ? ' song' : ' songs');
+
+  card.append(cover,title,count);
+
+  card.addEventListener('click',onOpen);
+
+  card.addEventListener('keydown',e => {
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpen();
+    }
+
+  });
+
+  return card;
+
+}
+
+function renderLibrary() {
 
   const songs = getLikedSongs();
 
-  $('libraryStatus').textContent =
-    songs.length + ' Songs';
+  const folders = $('libraryFolders');
+  const grid = $('libraryResults');
 
-  grid.innerHTML = '';
+  const back = $('libraryBack');
+  const title = $('libraryTitle');
+  const status = $('libraryStatus');
 
-  if (!songs.length) {
+  /* Favourites folder এর ভেতরের সব গান */
 
-    grid.innerHTML = `
-      <div class="empty">
-        এখনো কোনো গান Favourite করা হয়নি।
-        <br><br>
-        গান শুনতে গিয়ে ❤️ বাটনে চাপ দাও।
-      </div>
-    `;
+  if (libraryView === 'favourites') {
+
+    folders.hidden = true;
+    grid.hidden = false;
+
+    back.hidden = false;
+
+    title.textContent = 'Favourites';
+    status.textContent = songs.length + ' Songs';
+
+    grid.innerHTML = '';
+
+    if (!songs.length) {
+
+      grid.innerHTML = `
+        <div class="empty">
+          এখনো কোনো গান Favourite করা হয়নি।
+          <br><br>
+          গান শুনতে গিয়ে ❤️ বাটনে চাপ দাও।
+        </div>
+      `;
+
+      return;
+
+    }
+
+    songs.forEach((video,index) => {
+
+      grid.appendChild(
+        makeCard(video,index,songs)
+      );
+
+    });
 
     return;
 
   }
 
-  songs.forEach((video,index) => {
+  /* Library root: folder list */
 
-    grid.appendChild(
-      makeCard(video,index,songs)
-    );
+  grid.hidden = true;
+  folders.hidden = false;
 
-  });
+  back.hidden = true;
+
+  title.textContent = 'Library';
+  status.textContent = '1 Folder';
+
+  folders.innerHTML = '';
+
+  folders.appendChild(
+    makeFolderCard(
+      'Favourites',
+      songs,
+      () => setLibraryView('favourites')
+    )
+  );
 
 }
+
+$('libraryBack').addEventListener('click',() => {
+  setLibraryView('folders');
+});
 
 /* INITIALIZE */
 
 updateIcons();
 setProgressColor(0);
+syncTint();
 
 restoreHomeCache();
 
