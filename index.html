@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#171719">
 <title>SoundFlow — Music</title>
 
 <style>
@@ -18,6 +18,11 @@
 * {
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
+}
+
+html {
+  background:#000;
+  min-height:100%;
 }
 
 body {
@@ -202,7 +207,7 @@ button {
   opacity:.5;
 }
 
-/* HOME AUTO LOAD SENTINEL */
+/* HOME SENTINEL */
 
 #homeSentinel {
   width:100%;
@@ -289,10 +294,11 @@ body.full-player-open .bottom-nav {
     calc(env(safe-area-inset-bottom) + 24px);
 
   overflow:hidden;
-  overflow-y:hidden;
   overscroll-behavior:none;
 
-  background:#080808;
+  /* আগের solid black background সরানো হয়েছে */
+  background:transparent;
+
   isolation:isolate;
 
   visibility:hidden;
@@ -313,38 +319,53 @@ body.full-player-open .bottom-nav {
   transform:translateY(0);
 }
 
-/* BACKGROUND */
+/* BLURRED ALBUM BACKGROUND */
 
 .player-bg {
   position:absolute;
-  inset:-50px;
+
+  /* Safe area সহ পুরো স্ক্রিনের পেছনে */
+  inset:-100px;
+
   z-index:0;
 
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
 
-  filter:blur(45px);
-  transform:scale(1.2);
-  opacity:.85;
+  filter:blur(48px);
+  transform:scale(1.25);
+
+  opacity:1;
 
   pointer-events:none;
+
+  transition:background-image .3s ease;
 }
+
+/* TOP STATUS AREA + PLAYER SHADE */
 
 .player-shade {
   position:absolute;
   inset:0;
   z-index:1;
 
+  /*
+    উপরের অংশে কম কালো রাখা হয়েছে।
+    তাই Status Bar / Dynamic Island এলাকার
+    পেছনে Album Blur দেখা যাবে।
+  */
+
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.48),
-    rgba(0,0,0,.30) 40%,
-    rgba(0,0,0,.76) 100%
+    rgba(0,0,0,.12) 0%,
+    rgba(0,0,0,.22) 24%,
+    rgba(0,0,0,.38) 55%,
+    rgba(0,0,0,.72) 100%
   );
 
-  backdrop-filter:saturate(130%);
-  -webkit-backdrop-filter:saturate(130%);
+  backdrop-filter:saturate(140%);
+  -webkit-backdrop-filter:saturate(140%);
 
   pointer-events:none;
 }
@@ -812,10 +833,7 @@ body.full-player-open .bottom-nav {
 
     <div class="grid" id="homeResults"></div>
 
-    <!-- Auto-load trigger -->
     <div id="homeSentinel" aria-hidden="true"></div>
-
-    <!-- Home-এর জন্য আর More button নেই -->
 
   </div>
 
@@ -878,56 +896,41 @@ body.full-player-open .bottom-nav {
 
 </main>
 
-<!-- BOTTOM NAVIGATION -->
+<!-- BOTTOM NAV -->
 
 <nav class="bottom-nav" id="bottomNav">
 
   <button class="nav-btn active" data-tab="home" type="button">
-
     <svg viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" stroke-linejoin="round">
-
       <path d="m3 10 9-7 9 7"/>
       <path d="M5 9v11h14V9"/>
       <path d="M9 20v-6h6v6"/>
-
     </svg>
-
     <span>Home</span>
-
   </button>
 
   <button class="nav-btn" data-tab="search" type="button">
-
     <svg viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="1.9"
          stroke-linecap="round">
-
       <circle cx="10.8" cy="10.8" r="6.8"/>
       <path d="m16 16 5 5"/>
-
     </svg>
-
     <span>Search</span>
-
   </button>
 
   <button class="nav-btn" data-tab="library" type="button">
-
     <svg viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="1.8"
          stroke-linecap="round" stroke-linejoin="round">
-
       <path d="M4 4h16v17H4z"/>
       <path d="M8 4v17"/>
       <path d="M12 9h5"/>
       <path d="M12 13h5"/>
-
     </svg>
-
     <span>Library</span>
-
   </button>
 
 </nav>
@@ -942,17 +945,13 @@ body.full-player-open .bottom-nav {
   <div class="player-top-bar">
 
     <button class="collapse-btn" id="minimizePlayer" type="button">
-
       <svg viewBox="0 0 24 24"
            fill="none"
            stroke="currentColor"
            stroke-width="2.5"
            stroke-linecap="round">
-
         <path d="m6 9 6 6 6-6"/>
-
       </svg>
-
     </button>
 
     <span>NOW PLAYING</span>
@@ -973,18 +972,14 @@ body.full-player-open .bottom-nav {
       </div>
 
       <button class="like-btn" id="likeBtn" type="button">
-
         <svg viewBox="0 0 24 24"
              fill="none"
              stroke="currentColor"
              stroke-width="1.8"
              stroke-linecap="round"
              stroke-linejoin="round">
-
           <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/>
-
         </svg>
-
       </button>
 
     </div>
@@ -1010,30 +1005,22 @@ body.full-player-open .bottom-nav {
     <div class="controls-row">
 
       <button class="ctrl-btn" id="prevBtn" type="button">
-
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M6 5h2v14H6zM19 6v12L9 12z"/>
         </svg>
-
       </button>
 
       <button class="play-pause-circle" id="mainPlayBtn" type="button">
-
         <svg id="mainPlayIcon" viewBox="0 0 24 24"
              fill="currentColor">
-
           <path d="M7 4v16l13-8z"/>
-
         </svg>
-
       </button>
 
       <button class="ctrl-btn" id="nextBtn" type="button">
-
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M16 5h2v14h-2zM5 6v12l10-6z"/>
         </svg>
-
       </button>
 
     </div>
@@ -1049,37 +1036,24 @@ body.full-player-open .bottom-nav {
   <img class="mini-thumb" id="miniThumb" alt="">
 
   <div class="mini-info" id="expandPlayer">
-
-    <div class="mini-title" id="miniTitle">
-      Song Title
-    </div>
-
-    <div class="mini-artist" id="miniArtist">
-      Artist
-    </div>
-
+    <div class="mini-title" id="miniTitle">Song Title</div>
+    <div class="mini-artist" id="miniArtist">Artist</div>
   </div>
 
   <button class="mini-control" id="miniPlayBtn" type="button">
-
     <svg id="miniPlayIcon" viewBox="0 0 24 24" fill="currentColor">
       <path d="M7 4v16l13-8z"/>
     </svg>
-
   </button>
 
   <button class="mini-control" id="miniCloseBtn" type="button">
-
     <svg viewBox="0 0 24 24"
          fill="none"
          stroke="currentColor"
          stroke-width="2"
          stroke-linecap="round">
-
       <path d="M6 6l12 12M18 6 6 18"/>
-
     </svg>
-
   </button>
 
 </div>
@@ -1119,19 +1093,19 @@ let pendingVideoId = null;
 
 let activeTab = 'home';
 
-/* SCROLL LOCK STATE */
+/* SCROLL LOCK */
 
 let savedScrollY = 0;
 let originalBodyStyles = null;
 
-/* HOME HISTORY */
+/* HOME STORAGE */
 
 const HOME_SEEN_KEY = 'soundflow_home_seen_v1';
+const HOME_CACHE_KEY = 'soundflow_home_cache_v2';
 
 let homeSeenIds = new Set();
 
 try {
-
   const saved = JSON.parse(
     localStorage.getItem(HOME_SEEN_KEY) || '[]'
   );
@@ -1139,39 +1113,37 @@ try {
   if (Array.isArray(saved)) {
     homeSeenIds = new Set(saved);
   }
-
 } catch(e) {}
 
 function saveHomeSeen() {
-
   try {
-
-    const ids = Array.from(homeSeenIds);
-
     localStorage.setItem(
       HOME_SEEN_KEY,
-      JSON.stringify(ids.slice(-5000))
+      JSON.stringify(Array.from(homeSeenIds).slice(-5000))
     );
-
   } catch(e) {}
-
 }
 
 function markHomeSeen(videoId) {
-
   if (!videoId) return;
-
   homeSeenIds.add(videoId);
+}
 
-  saveHomeSeen();
-
+function saveHomeCache() {
+  try {
+    localStorage.setItem(HOME_CACHE_KEY,JSON.stringify({
+      videos:pageData.home.videos.slice(-200),
+      page:pageData.home.page,
+      savedAt:Date.now()
+    }));
+  } catch(e) {}
 }
 
 /* PAGE DATA */
 
 const pageData = {
 
-  home: {
+  home:{
     videos:[],
     page:0,
     query:'Top Bangla Hindi songs',
@@ -1179,7 +1151,7 @@ const pageData = {
     controller:null
   },
 
-  search: {
+  search:{
     videos:[],
     page:1,
     query:'',
@@ -1189,27 +1161,71 @@ const pageData = {
 
 };
 
-/* HOME AUTO LOAD STATE */
+/* RESTORE HOME CACHE */
+
+function restoreHomeCache() {
+
+  try {
+
+    const cache = JSON.parse(
+      localStorage.getItem(HOME_CACHE_KEY) || 'null'
+    );
+
+    if (!cache || !Array.isArray(cache.videos)) return false;
+
+    /*
+      Cache ৭ দিন পর্যন্ত ব্যবহার করা হবে।
+    */
+
+    if (
+      cache.savedAt &&
+      Date.now() - cache.savedAt > 7 * 24 * 60 * 60 * 1000
+    ) {
+      return false;
+    }
+
+    const valid = cache.videos.filter(v =>
+      v && v.videoId
+    );
+
+    if (!valid.length) return false;
+
+    pageData.home.videos = valid;
+    pageData.home.page = Number(cache.page) || 0;
+
+    const grid = $('homeResults');
+
+    grid.innerHTML = '';
+
+    valid.forEach((video,index) => {
+      grid.appendChild(
+        makeCard(video,index,pageData.home.videos)
+      );
+    });
+
+    $('homeStatus').textContent =
+      valid.length + ' Songs';
+
+    return true;
+
+  } catch(e) {
+    return false;
+  }
+
+}
+
+/* HOME AUTO LOAD */
 
 const HOME_BATCH_SIZE = 20;
-
 const HOME_MAX_PAGE_ATTEMPTS = 12;
 
 let homeHasMore = true;
 let homeAutoLoading = false;
 let homeObserver = null;
 
-/*
-  Sentinel আগেই তৈরি।
-  এটি লুকানো হবে না, কারণ hidden element
-  IntersectionObserver-এ কাজ করে না।
-*/
-
 function setupHomeObserver() {
 
-  if (!('IntersectionObserver' in window)) {
-    return;
-  }
+  if (!('IntersectionObserver' in window)) return;
 
   const sentinel = $('homeSentinel');
 
@@ -1220,31 +1236,23 @@ function setupHomeObserver() {
     for (const entry of entries) {
 
       if (!entry.isIntersecting) continue;
-
       if (activeTab !== 'home') continue;
-
       if (playerMode === 'full') continue;
-
       if (homeAutoLoading) continue;
-
       if (!homeHasMore) continue;
 
-      const state = pageData.home;
+      if (pageData.home.busy) continue;
 
-      if (state.busy) continue;
-
-      if (!state.videos.length) continue;
+      if (!pageData.home.videos.length) continue;
 
       loadNextHomeBatch();
 
     }
 
-  }, {
-
+  },{
     root:null,
     rootMargin:'700px 0px',
     threshold:0
-
   });
 
   homeObserver.observe(sentinel);
@@ -1262,19 +1270,12 @@ function refreshHomeObserver() {
 
   if (!sentinel) return;
 
-  /*
-    Re-observe করলে content ছোট হলেও
-    পরের batch trigger হতে পারবে।
-  */
-
   homeObserver.unobserve(sentinel);
 
   requestAnimationFrame(() => {
-
     if (homeObserver && homeHasMore) {
       homeObserver.observe(sentinel);
     }
-
   });
 
 }
@@ -1303,14 +1304,7 @@ async function loadNextHomeBatch() {
     homeAutoLoading = false;
 
     if (homeHasMore && activeTab === 'home') {
-
-      /*
-        নতুন content render হওয়ার পর
-        sentinel আবার পরীক্ষা করা হবে।
-      */
-
       refreshHomeObserver();
-
     }
 
   }
@@ -1320,13 +1314,11 @@ async function loadNextHomeBatch() {
 /* SERVERS */
 
 const instances = [
-
   'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
   'https://yt.chocolatemoo53.com',
   'https://invidious.tiekoetter.com'
-
 ];
 
 /* PAGE NAVIGATION */
@@ -1335,9 +1327,7 @@ function setActiveTab(tab) {
 
   if (!['home','search','library'].includes(tab)) return;
 
-  const previousTab = activeTab;
-
-  if (previousTab === tab) return;
+  if (activeTab === tab) return;
 
   activeTab = tab;
 
@@ -1346,22 +1336,12 @@ function setActiveTab(tab) {
   $('libraryPage').classList.toggle('active',tab === 'library');
 
   document.querySelectorAll('.nav-btn').forEach(btn => {
-
-    btn.classList.toggle(
-      'active',
-      btn.dataset.tab === tab
-    );
-
+    btn.classList.toggle('active',btn.dataset.tab === tab);
   });
 
   if (tab === 'library') {
     renderLibrary();
   }
-
-  /*
-    Home-এ ফিরে এলে আগের গানগুলো থাকবে।
-    Auto-load sentinel পরের গান আনবে।
-  */
 
   if (tab === 'home') {
 
@@ -1376,13 +1356,9 @@ function setActiveTab(tab) {
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
-
   btn.addEventListener('click',() => {
-
     setActiveTab(btn.dataset.tab);
-
   });
-
 });
 
 /* YOUTUBE API */
@@ -1394,7 +1370,7 @@ window.onYouTubeIframeAPIReady = function() {
     height:'200',
     width:'200',
 
-    playerVars: {
+    playerVars:{
       autoplay:0,
       controls:0,
       disablekb:1,
@@ -1402,20 +1378,16 @@ window.onYouTubeIframeAPIReady = function() {
       rel:0
     },
 
-    events: {
+    events:{
 
       onReady:() => {
 
         apiReady = true;
 
         if (pendingVideoId) {
-
           const id = pendingVideoId;
-
           pendingVideoId = null;
-
           ytPlayer.loadVideoById(id);
-
         }
 
       },
@@ -1427,7 +1399,6 @@ window.onYouTubeIframeAPIReady = function() {
         console.log('YouTube Error:',event.data);
 
         isPlaying = false;
-
         updateIcons();
         stopTimer();
 
@@ -1446,7 +1417,6 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
 
     isPlaying = true;
-
     updateIcons();
     startTimer();
 
@@ -1455,7 +1425,6 @@ function onPlayerStateChange(event) {
   else if (event.data === YT.PlayerState.PAUSED) {
 
     isPlaying = false;
-
     updateIcons();
     stopTimer();
 
@@ -1464,7 +1433,6 @@ function onPlayerStateChange(event) {
   else if (event.data === YT.PlayerState.ENDED) {
 
     isPlaying = false;
-
     updateIcons();
     stopTimer();
 
@@ -1477,7 +1445,6 @@ function onPlayerStateChange(event) {
 /* ICONS */
 
 const playSVG = '<path d="M7 4v16l13-8z"/>';
-
 const pauseSVG = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 function updateIcons() {
@@ -1535,17 +1502,11 @@ function updateProgress() {
 
     if (duration > 0) {
 
-      const percent = Math.min(
-        100,
-        (current / duration) * 100
-      );
+      const percent = Math.min(100,(current / duration) * 100);
 
       if (!seekSlider.matches(':active')) {
-
         seekSlider.value = percent;
-
         setProgressColor(percent);
-
       }
 
     }
@@ -1555,25 +1516,16 @@ function updateProgress() {
 }
 
 function startTimer() {
-
   stopTimer();
-
   updateProgress();
-
   updateTimer = setInterval(updateProgress,400);
-
 }
 
 function stopTimer() {
-
   if (updateTimer) {
-
     clearInterval(updateTimer);
-
     updateTimer = null;
-
   }
-
 }
 
 /* SEEK */
@@ -1602,12 +1554,7 @@ seekSlider.addEventListener('change',() => {
   const duration = ytPlayer.getDuration() || 0;
 
   if (duration > 0) {
-
-    ytPlayer.seekTo(
-      duration * Number(seekSlider.value) / 100,
-      true
-    );
-
+    ytPlayer.seekTo(duration * Number(seekSlider.value) / 100,true);
   }
 
   updateProgress();
@@ -1617,7 +1564,6 @@ seekSlider.addEventListener('change',() => {
 function resetProgress() {
 
   seekSlider.value = 0;
-
   setProgressColor(0);
 
   $('currentTime').textContent = '0:00';
@@ -1640,21 +1586,15 @@ function togglePlay() {
 }
 
 $('mainPlayBtn').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   togglePlay();
-
 });
 
 $('miniPlayBtn').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   togglePlay();
-
 });
 
 /* THUMBNAIL */
@@ -1664,17 +1604,11 @@ function bestThumb(video) {
   const thumbnails = video.videoThumbnails || [];
 
   return (
-
     thumbnails.find(x => x.quality === 'maxres') ||
-
     thumbnails.find(x => x.quality === 'high') ||
-
     thumbnails.find(x => x.quality === 'medium') ||
-
     thumbnails[0] ||
-
     {}
-
   ).url || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
 
 }
@@ -1684,15 +1618,9 @@ function bestThumb(video) {
 function getLikes() {
 
   try {
-
-    return JSON.parse(
-      localStorage.getItem('soundflow_likes') || '[]'
-    );
-
+    return JSON.parse(localStorage.getItem('soundflow_likes') || '[]');
   } catch(e) {
-
     return [];
-
   }
 
 }
@@ -1700,15 +1628,9 @@ function getLikes() {
 function getLikedSongs() {
 
   try {
-
-    return JSON.parse(
-      localStorage.getItem('soundflow_liked_songs') || '[]'
-    );
-
+    return JSON.parse(localStorage.getItem('soundflow_liked_songs') || '[]');
   } catch(e) {
-
     return [];
-
   }
 
 }
@@ -1767,9 +1689,7 @@ function setSongInfo(video) {
 
 function lockPageScroll() {
 
-  if (document.body.classList.contains('full-player-open')) {
-    return;
-  }
+  if (document.body.classList.contains('full-player-open')) return;
 
   savedScrollY = window.scrollY || window.pageYOffset || 0;
 
@@ -1829,7 +1749,6 @@ function showFullPlayer() {
   lockPageScroll();
 
   miniPlayer.classList.remove('visible');
-
   playerScreen.classList.add('active');
 
 }
@@ -1843,7 +1762,6 @@ function minimizePlayer() {
   unlockPageScroll();
 
   playerScreen.classList.remove('active');
-
   miniPlayer.classList.add('visible');
 
 }
@@ -1857,7 +1775,6 @@ function expandPlayer() {
   lockPageScroll();
 
   miniPlayer.classList.remove('visible');
-
   playerScreen.classList.add('active');
 
 }
@@ -1869,7 +1786,6 @@ function closePlayer() {
   unlockPageScroll();
 
   playerScreen.classList.remove('active');
-
   miniPlayer.classList.remove('visible');
 
   stopTimer();
@@ -1879,14 +1795,12 @@ function closePlayer() {
   }
 
   pendingVideoId = null;
-
   isPlaying = false;
 
   currentIndex = -1;
   playQueue = [];
 
   updateIcons();
-
   resetProgress();
 
 }
@@ -1908,7 +1822,6 @@ function playSongAt(index,list) {
   currentIndex = index;
 
   setSongInfo(video);
-
   resetProgress();
 
   if (playerMode === 'closed') {
@@ -1938,9 +1851,7 @@ function nextSong() {
 
   let next = currentIndex + 1;
 
-  if (next >= playQueue.length) {
-    next = 0;
-  }
+  if (next >= playQueue.length) next = 0;
 
   playSongAt(next);
 
@@ -1952,63 +1863,46 @@ function previousSong() {
 
   let previous = currentIndex - 1;
 
-  if (previous < 0) {
-    previous = playQueue.length - 1;
-  }
+  if (previous < 0) previous = playQueue.length - 1;
 
   playSongAt(previous);
 
 }
 
 $('nextBtn').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   nextSong();
-
 });
 
 $('prevBtn').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   previousSong();
-
 });
 
 /* MINIMIZE */
 
 $('minimizePlayer').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   minimizePlayer();
-
 });
 
 /* EXPAND MINI */
 
 $('expandPlayer').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   expandPlayer();
-
 });
 
 /* CLOSE MINI */
 
 $('miniCloseBtn').addEventListener('click',e => {
-
   e.preventDefault();
   e.stopPropagation();
-
   closePlayer();
-
 });
 
 /* PLAYER TOUCH HANDLING */
@@ -2022,11 +1916,6 @@ playerScreen.addEventListener('touchstart',e => {
   touchStarted = false;
 
   if (playerMode !== 'full') return;
-
-  /*
-    Controls must never trigger swipe-to-minimize.
-  */
-
   if (e.target.closest('button,input')) return;
 
   const touch = e.touches[0];
@@ -2041,12 +1930,9 @@ playerScreen.addEventListener('touchstart',e => {
 playerScreen.addEventListener('touchmove',e => {
 
   if (playerMode !== 'full') return;
-
   if (e.target.closest('button,input')) return;
 
-  if (e.cancelable) {
-    e.preventDefault();
-  }
+  if (e.cancelable) e.preventDefault();
 
 },{passive:false});
 
@@ -2061,26 +1947,16 @@ playerScreen.addEventListener('touchend',e => {
   const touch = e.changedTouches[0];
 
   const deltaY = touch.clientY - touchStartY;
+  const deltaX = Math.abs(touch.clientX - touchStartX);
 
-  const deltaX = Math.abs(
-    touch.clientX - touchStartX
-  );
-
-  if (
-    deltaY > 90 &&
-    deltaY > deltaX * 1.5
-  ) {
-
+  if (deltaY > 90 && deltaY > deltaX * 1.5) {
     minimizePlayer();
-
   }
 
 },{passive:true});
 
 playerScreen.addEventListener('touchcancel',() => {
-
   touchStarted = false;
-
 });
 
 /* LIKE BUTTON */
@@ -2099,13 +1975,11 @@ $('likeBtn').addEventListener('click',e => {
   const id = video.videoId;
 
   let songs = getLikedSongs();
-
   let likes = getLikes();
 
   if (likes.includes(id)) {
 
     likes = likes.filter(x => x !== id);
-
     songs = songs.filter(x => x.videoId !== id);
 
   } else {
@@ -2158,20 +2032,15 @@ function makeCard(video,index,list) {
 
   card.append(img,title,artist);
 
-  const play = () => {
-    playSongAt(index,list);
-  };
+  const play = () => playSongAt(index,list);
 
   card.addEventListener('click',play);
 
   card.addEventListener('keydown',e => {
 
     if (e.key === 'Enter' || e.key === ' ') {
-
       e.preventDefault();
-
       play();
-
     }
 
   });
@@ -2180,43 +2049,79 @@ function makeCard(video,index,list) {
 
 }
 
-/* FETCH API */
+/* FAST API FETCH */
 
 async function fetchSongs(query,pageNumber,controller) {
 
-  for (const base of instances) {
+  /*
+    একের পর এক Server চেষ্টা না করে
+    একাধিক Server-এ একসঙ্গে Request পাঠানো হবে।
+    প্রথম সফল Response পাওয়া গেলে সেটিই ব্যবহার হবে।
+  */
 
-    if (controller.signal.aborted) break;
+  const controllers = [];
 
-    try {
+  const requests = instances.map(base => {
 
-      const response = await fetch(
+    const child = new AbortController();
 
-        `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${pageNumber}`,
+    controllers.push(child);
 
-        {
-          signal:controller.signal
-        }
+    const abortParent = () => child.abort();
 
-      );
+    controller.signal.addEventListener(
+      'abort',
+      abortParent,
+      {once:true}
+    );
 
-      if (!response.ok) continue;
+    return fetch(
+      `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${pageNumber}`,
+      {
+        signal:child.signal
+      }
+    )
+    .then(response => {
 
-      const json = await response.json();
-
-      if (Array.isArray(json)) {
-        return json;
+      if (!response.ok) {
+        throw new Error('Server error');
       }
 
-    } catch(e) {
+      return response.json();
 
-      if (e.name === 'AbortError') break;
+    })
+    .then(json => {
 
-    }
+      if (!Array.isArray(json)) {
+        throw new Error('Invalid response');
+      }
+
+      return json;
+
+    });
+
+  });
+
+  try {
+
+    const result = await Promise.any(requests);
+
+    /*
+      দ্রুততম সফল Server পাওয়া গেছে।
+      বাকি Request বন্ধ করা হচ্ছে।
+    */
+
+    controllers.forEach(c => c.abort());
+
+    return result;
+
+  } catch(e) {
+
+    controllers.forEach(c => c.abort());
+
+    return null;
 
   }
-
-  return null;
 
 }
 
@@ -2255,41 +2160,21 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     more.disabled = true;
   }
 
-  /*
-    Home-এ কোনো loading text দেখানো হবে না।
-    Search-এর ক্ষেত্রেও নতুন search শুরু হলে
-    আগের ফলাফল পরিষ্কার হবে।
-  */
-
-  if (!append) {
-
-    if (type === 'search') {
-      grid.innerHTML = '';
-    }
-
-    if (type === 'home') {
-      grid.innerHTML = '';
-    }
-
+  if (!append && type === 'search') {
+    grid.innerHTML = '';
+    state.videos = [];
+    state.page = 0;
   }
 
   let collected = [];
 
   let lastCheckedPage = pageNumber;
-
   let reachedEnd = false;
-
   let failed = false;
 
   const existing = new Set(
     state.videos.map(v => v.videoId)
   );
-
-  /*
-    Home: প্রতি batch-এ ২০টি নতুন গান সংগ্রহ করবে।
-    প্রয়োজন হলে একাধিক API page পরীক্ষা করবে।
-    Search: আগের মতো এক পেজ লোড করবে।
-  */
 
   const maxAttempts = type === 'home'
     ? HOME_MAX_PAGE_ATTEMPTS
@@ -2312,18 +2197,13 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     if (state.controller !== controller) return;
 
     if (controller.signal.aborted) {
-
       state.busy = false;
-
       return;
-
     }
 
     if (!data) {
 
-      if (attempt === 0) {
-        failed = true;
-      }
+      if (attempt === 0) failed = true;
 
       break;
 
@@ -2334,11 +2214,8 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     );
 
     if (!found.length) {
-
       reachedEnd = true;
-
       break;
-
     }
 
     for (const video of found) {
@@ -2347,21 +2224,12 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
       if (existing.has(id)) continue;
 
-      if (
-        type === 'home' &&
-        homeSeenIds.has(id)
-      ) {
+      if (type === 'home' && homeSeenIds.has(id)) {
         continue;
       }
 
       existing.add(id);
-
       collected.push(video);
-
-      /*
-        প্রতি batch-এ ২০টি নতুন গান হলেই
-        Home-এর API fetching থামবে।
-      */
 
       if (
         type === 'home' &&
@@ -2379,34 +2247,21 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       break;
     }
 
-    /*
-      Search-এর জন্য এক পেজই যথেষ্ট।
-      Home-এ ২০টি না পাওয়া পর্যন্ত
-      পরের page পরীক্ষা করা হবে।
-    */
-
-    if (type !== 'home') {
-      break;
-    }
+    if (type !== 'home') break;
 
   }
 
   if (state.controller !== controller) return;
 
   if (controller.signal.aborted) {
-
     state.busy = false;
-
     return;
-
   }
 
   if (failed && !append) {
 
     if (type === 'home') {
-
       status.textContent = 'Connection unavailable';
-
     } else {
 
       grid.innerHTML =
@@ -2422,24 +2277,11 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
   }
 
-  if (!append && type === 'search') {
-
-    state.videos = [];
-
-    grid.innerHTML = '';
-
-  }
-
   if (collected.length) {
 
     collected.forEach(video => {
 
       state.videos.push(video);
-
-      /*
-        Home-এ দেখানো গানগুলো localStorage-এ
-        রাখা হবে, যাতে আবার না আসে।
-      */
 
       if (type === 'home') {
         markHomeSeen(video.videoId);
@@ -2465,8 +2307,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
   state.page = lastCheckedPage;
   state.query = query;
 
-  status.textContent =
-    state.videos.length + ' Songs';
+  status.textContent = state.videos.length + ' Songs';
 
   if (type === 'search') {
 
@@ -2476,13 +2317,6 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
     more.disabled = false;
 
   }
-
-  /*
-    Home-এর পরবর্তী batch বন্ধ হবে শুধু
-    যখন API-তে আর কোনো ফলাফল পাওয়া যাবে না,
-    অথবা অনেকগুলো page পরীক্ষা করেও
-    নতুন গান পাওয়া যাবে না।
-  */
 
   if (type === 'home') {
 
@@ -2495,31 +2329,27 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
       lastCheckedPage >= pageNumber + maxAttempts - 1
     ) {
 
-      /*
-        অনেক page পরীক্ষা করেও নতুন গান না পেলে
-        endless request বন্ধ রাখা হচ্ছে।
-      */
-
       homeHasMore = false;
 
+    } else if (collected.length > 0) {
+
+      homeHasMore = true;
+
     }
 
-    if (collected.length > 0) {
-      homeHasMore = !reachedEnd;
-    }
+    /*
+      Home Cache আপডেট করা হচ্ছে।
+    */
+
+    saveHomeCache();
+    saveHomeSeen();
 
   }
 
   state.busy = false;
 
-  /*
-    Batch শেষ হওয়ার পর observer আবার চালু হবে।
-  */
-
   if (type === 'home') {
-
     refreshHomeObserver();
-
   }
 
 }
@@ -2625,8 +2455,15 @@ function renderLibrary() {
 /* INITIALIZE */
 
 updateIcons();
-
 setProgressColor(0);
+
+/*
+  প্রথমেই Cache দেখানো হবে।
+  তারপর Background-এ পরবর্তী গান আনার
+  জন্য Observer প্রস্তুত হবে।
+*/
+
+restoreHomeCache();
 
 setupHomeObserver();
 
