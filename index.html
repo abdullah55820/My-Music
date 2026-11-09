@@ -617,13 +617,11 @@ body.full-player-open .bottom-nav {
   display:flex;
   flex-direction:column;
 
-  /* আগের চেয়ে কম gap */
   gap:clamp(8px,1.5vh,16px);
 
   flex:1;
   min-height:0;
 
-  /* নিচের অতিরিক্ত ফাঁকা জায়গা সরানো */
   padding-bottom:0;
 }
 
@@ -639,7 +637,6 @@ body.full-player-open .bottom-nav {
 
   container-type:size;
 
-  /* Thumbnail সামান্য উপরে */
   transform:translateY(-8px);
 }
 
@@ -681,8 +678,6 @@ body.full-player-open .bottom-nav {
 
 .player-info-group {
   flex-shrink:0;
-
-  /* Info section সামান্য উপরে */
   transform:translateY(-5px);
 }
 
@@ -824,7 +819,6 @@ body.full-player-open .bottom-nav {
   gap:clamp(35px,12vw,55px);
   flex-shrink:0;
 
-  /* Controls আগের চেয়ে উপরে */
   transform:translateY(-8px);
 }
 
@@ -1597,6 +1591,14 @@ function restoreHomeCache() {
     pageData.home.videos = valid;
     pageData.home.page = Number(cache.page) || 0;
 
+    /* CACHE SONGS ALSO COUNT AS SEEN */
+
+    valid.forEach(video => {
+      markHomeSeen(video.videoId);
+    });
+
+    saveHomeSeen();
+
     const grid = $('homeResults');
 
     grid.innerHTML = '';
@@ -1626,6 +1628,47 @@ const HOME_MAX_PAGE_ATTEMPTS = 12;
 let homeHasMore = true;
 let homeAutoLoading = false;
 let homeObserver = null;
+
+/* HOME REFRESH QUERIES */
+
+const HOME_REFRESH_QUERIES = [
+
+  'Latest Bangla new songs 2026',
+  'New Hindi Bollywood songs 2026',
+  'Latest Bengali music releases',
+  'New Indian songs 2026',
+  'Latest Bangla movie songs',
+  'Latest Hindi romantic songs 2026',
+  'New Bengali song releases 2026',
+  'Latest Bollywood music videos',
+  'New Bangla popular songs',
+  'Latest Indian music videos'
+
+];
+
+let lastHomeRefreshQuery = '';
+
+function getHomeRefreshQuery() {
+
+  const options = HOME_REFRESH_QUERIES.filter(
+    query => query !== lastHomeRefreshQuery
+  );
+
+  const available = options.length
+    ? options
+    : HOME_REFRESH_QUERIES;
+
+  const query = available[
+    Math.floor(Math.random() * available.length)
+  ];
+
+  lastHomeRefreshQuery = query;
+
+  return query;
+
+}
+
+/* HOME OBSERVER */
 
 function setupHomeObserver() {
 
@@ -1675,12 +1718,20 @@ function refreshHomeObserver() {
   homeObserver.unobserve(sentinel);
 
   requestAnimationFrame(() => {
-    if (homeObserver && homeHasMore) {
+
+    if (
+      homeObserver &&
+      homeHasMore &&
+      activeTab === 'home'
+    ) {
       homeObserver.observe(sentinel);
     }
+
   });
 
 }
+
+/* LOAD NEXT HOME BATCH */
 
 async function loadNextHomeBatch() {
 
@@ -1745,17 +1796,9 @@ function setActiveTab(tab) {
     renderLibrary();
   }
 
-  if (tab === 'home') {
-
-    if (!pageData.home.videos.length) {
-      loadHome();
-    } else {
-      refreshHomeObserver();
-    }
-
-  }
-
 }
+
+/* NAV BUTTONS */
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
 
@@ -1770,6 +1813,20 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     ) {
       setLibraryView('folders');
       return;
+    }
+
+    /* EVERY HOME TAP REFRESHES THE FEED */
+
+    if (tab === 'home') {
+
+      if (activeTab !== 'home') {
+        setActiveTab('home');
+      }
+
+      refreshHomeFeed();
+
+      return;
+
     }
 
     setActiveTab(tab);
@@ -2711,6 +2768,24 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
   }
 
+  /*
+    HOME REFRESH:
+    নতুন গান পাওয়া গেলেই পুরোনো Home cards replace হবে।
+    নতুন গান না পেলে আগের গানগুলো screen-এ থাকবে।
+  */
+
+  if (
+    type === 'home' &&
+    !append &&
+    state.videos.length &&
+    collected.length
+  ) {
+
+    state.videos = [];
+    grid.innerHTML = '';
+
+  }
+
   if (collected.length) {
 
     collected.forEach(video => {
@@ -2784,7 +2859,7 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
 }
 
-/* HOME */
+/* HOME INITIAL LOAD */
 
 function loadHome() {
 
@@ -2808,6 +2883,53 @@ function loadHome() {
     refreshHomeObserver();
 
   }
+
+}
+
+/* HOME REFRESH */
+
+function refreshHomeFeed() {
+
+  const state = pageData.home;
+
+  /*
+    আগের Home request চললে সেটি বন্ধ করে দেওয়া হবে।
+    এতে পুরোনো request নতুন feed-কে বাধা দিতে পারবে না।
+  */
+
+  if (state.controller) {
+    state.controller.abort();
+  }
+
+  state.busy = false;
+  state.controller = null;
+
+  homeAutoLoading = false;
+  homeHasMore = true;
+
+  /*
+    প্রতিবার আলাদা search query নেওয়া হবে।
+    আগের query সঙ্গে সঙ্গে আবার নেওয়া হবে না।
+  */
+
+  const newQuery = getHomeRefreshQuery();
+
+  state.query = newQuery;
+  state.page = 0;
+
+  $('homeStatus').textContent = 'Discovering new songs...';
+
+  /*
+    পুরোনো গান fetch শেষ হওয়ার আগে সরানো হবে না।
+    নতুন গান পাওয়া গেলে loadSongs নিজেই পুরোনো cards replace করবে।
+  */
+
+  loadSongs(
+    'home',
+    newQuery,
+    1,
+    false
+  );
 
 }
 
