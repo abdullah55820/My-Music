@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <title>SoundFlow — Music</title>
 
 <style>
@@ -303,11 +307,13 @@ body.full-player-open .bottom-nav {
   visibility:hidden;
   opacity:0;
   pointer-events:none;
-  transform:translateY(25px);
+
+  /* iOS compositing fix */
+  transform:none;
+  -webkit-transform:none;
 
   transition:
     opacity .38s cubic-bezier(.22,1,.36,1),
-    transform .48s cubic-bezier(.22,1,.36,1),
     visibility .38s;
 }
 
@@ -315,7 +321,6 @@ body.full-player-open .bottom-nav {
   visibility:visible;
   opacity:1;
   pointer-events:auto;
-  transform:translateY(0);
 }
 
 /* FULL SCREEN ALBUM BLUR BACKGROUND */
@@ -324,11 +329,14 @@ body.full-player-open .bottom-nav {
   position:absolute;
 
   /*
-    Background Status Bar ও Dynamic Island
-    এলাকার পেছনেও extend করবে।
+    Full screen background.
+    Safe area এবং Status Bar-এর দিকেও extend করবে।
   */
 
-  inset:-150px -80px -100px;
+  top:-250px;
+  left:-150px;
+  right:-150px;
+  bottom:-250px;
 
   z-index:0;
 
@@ -340,11 +348,13 @@ body.full-player-open .bottom-nav {
   -webkit-filter:blur(55px);
 
   transform:translateZ(0) scale(1.3);
+  -webkit-transform:translateZ(0) scale(1.3);
 
   opacity:1;
 
   pointer-events:none;
 
+  will-change:background-image,transform;
   transition:background-image .3s ease;
 }
 
@@ -353,26 +363,21 @@ body.full-player-open .bottom-nav {
 .player-shade {
   position:absolute;
 
-  inset:-1px 0 0;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
 
   z-index:1;
 
-  /*
-    উপরের Status Bar এলাকায় খুব কম কালো।
-    মাঝখানে Balanced Shade।
-    নিচে একটু বেশি Dark Shade।
-  */
-
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.05) 0%,
-    rgba(0,0,0,.16) 25%,
-    rgba(0,0,0,.38) 60%,
-    rgba(0,0,0,.72) 100%
+    rgba(0,0,0,.04) 0%,
+    rgba(0,0,0,.12) 20%,
+    rgba(0,0,0,.30) 48%,
+    rgba(0,0,0,.58) 75%,
+    rgba(0,0,0,.78) 100%
   );
-
-  backdrop-filter:saturate(140%);
-  -webkit-backdrop-filter:saturate(140%);
 
   pointer-events:none;
 }
