@@ -87,7 +87,8 @@ body {
   transition:background .25s,color .25s;
 }
 
-/* FIXED BACKGROUND LAYER */
+/* FIXED BACKGROUND */
+
 body::before {
   content:"";
   position:fixed;
@@ -150,15 +151,30 @@ input,select {
   display:none!important;
 }
 
-/* HEADER */
+/* FIXED HEADER */
 
 .header {
-  max-width:1050px;
-  margin:auto;
-  padding:20px 16px 5px;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:8000;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 16px;
+  margin:0;
+  background:color-mix(in srgb,var(--bg) 78%,transparent);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
 }
 
 .brand {
+  width:100%;
+  max-width:1050px;
+  margin:auto;
   font-size:25px;
   font-weight:900;
   letter-spacing:-1px;
@@ -172,6 +188,9 @@ input,select {
 
 .page {
   display:none;
+  padding-top:60px;
+  position:relative;
+  z-index:1;
 }
 
 .page.active {
@@ -1061,7 +1080,7 @@ body.full-player-open .bottom-nav {
   }
 
   .header {
-    padding:17px 13px 5px;
+    padding:0 13px;
   }
 
   .grid {
@@ -1304,7 +1323,7 @@ body.full-player-open .bottom-nav {
         </label>
 
         <button class="reset-btn" id="removeBackground" type="button">
-          Reset to Default Wallpaper
+          Reset Background
         </button>
       </div>
     </div>
@@ -1316,15 +1335,6 @@ body.full-player-open .bottom-nav {
         <div class="setting-label">Recently Played</div>
         <div class="setting-help" id="recentCount">0 songs played</div>
       </div>
-
-      <div class="setting-row">
-        <div class="setting-label">Discovery</div>
-        <div class="setting-help">
-          Home-এ Bangla ও Indian গান মিশিয়ে দেখানো হবে।
-          আগে দেখা গান পুনরায় দেখানো এড়িয়ে চলবে।
-          শোনা গানের নাম অনুযায়ী Similar Songs খোঁজা হবে।
-        </div>
-      </div>
     </div>
 
     <div class="settings-section">
@@ -1333,7 +1343,7 @@ body.full-player-open .bottom-nav {
         Reset Customization
       </button>
       <div class="setting-help">
-        এতে Theme, Background ও Profile Photo reset হবে।
+        এতে Theme, Accent Color, Background ও Profile Photo reset হবে।
         Favourites ও Recent Songs মুছে যাবে না।
       </div>
     </div>
@@ -1651,8 +1661,10 @@ const WALLPAPERS = {
   city:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=85'
 };
 
+/* Empty means no custom wallpaper */
+
 function getCurrentBackground() {
-  return localStorage.getItem(BG_KEY) || 'mountain';
+  return localStorage.getItem(BG_KEY) || '';
 }
 
 function backgroundImageValue(value) {
@@ -1756,8 +1768,11 @@ $('backgroundUpload').addEventListener('change',async e => {
   e.target.value = '';
 });
 
+/* RESET BACKGROUND COMPLETELY */
+
 $('removeBackground').addEventListener('click',() => {
-  localStorage.setItem(BG_KEY,'mountain');
+  localStorage.removeItem(BG_KEY);
+  $('backgroundUpload').value = '';
   applyBackground();
 });
 
@@ -1802,13 +1817,15 @@ $('removeAvatar').addEventListener('click',() => {
 /* RESET CUSTOMIZATION */
 
 $('resetSettings').addEventListener('click',() => {
-  if (!confirm('Theme, Background ও Profile Photo reset করবে?')) return;
+  if (!confirm('Theme, Accent Color, Background ও Profile Photo reset করবে?')) return;
 
   localStorage.removeItem(THEME_KEY);
   localStorage.removeItem(ACCENT_KEY);
   localStorage.removeItem(AVATAR_KEY);
+  localStorage.removeItem(BG_KEY);
 
-  localStorage.setItem(BG_KEY,'mountain');
+  $('backgroundUpload').value = '';
+  $('avatarUpload').value = '';
 
   applyTheme();
   applyBackground();
@@ -2148,7 +2165,7 @@ function makeSimilarQuery(video) {
   return `${title} ${artist} similar songs`;
 }
 
-/* HOME DISCOVERY */
+/* HOME SONG DISCOVERY */
 
 function getHomeQueries() {
   const queries = [];
@@ -2270,6 +2287,8 @@ async function loadNextHomeBatch() {
   }
 }
 
+/* HOME REFRESH */
+
 async function refreshHome() {
   if (homeAutoLoading || pageData.home.busy) return;
 
@@ -2289,29 +2308,39 @@ async function refreshHome() {
   $('homeStatus').textContent = 'Refreshing…';
   $('homeMore').hidden = true;
 
-  homeAutoLoading = false;
+  try {
+    const songs = await fetchFreshHomeSongs();
 
-  const songs = await fetchFreshHomeSongs();
+    grid.innerHTML = '';
 
-  grid.innerHTML = '';
-
-  if (songs.length) {
-    appendHomeSongs(songs);
-    $('homeStatus').textContent = songs.length + ' Fresh Songs';
-    homeHasMore = true;
-  } else {
+    if (songs.length) {
+      appendHomeSongs(songs);
+      $('homeStatus').textContent = songs.length + ' Fresh Songs';
+      homeHasMore = true;
+    } else {
+      grid.innerHTML = `
+        <div class="empty">
+          নতুন গান পাওয়া যায়নি।<br>
+          কিছুক্ষণ পর আবার Refresh করো।
+        </div>
+      `;
+      $('homeStatus').textContent = 'No new songs';
+      homeHasMore = false;
+    }
+  } catch(e) {
     grid.innerHTML = `
       <div class="empty">
-        নতুন গান পাওয়া যায়নি।<br>
-        কিছুক্ষণ পর আবার Refresh করো।
+        গান লোড করা যায়নি।<br>
+        ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করো।
       </div>
     `;
-    $('homeStatus').textContent = 'No new songs';
+    $('homeStatus').textContent = 'Connection unavailable';
     homeHasMore = false;
+  } finally {
+    homeAutoLoading = false;
+    $('homeMore').hidden = !homeHasMore;
+    refreshHomeObserver();
   }
-
-  $('homeMore').hidden = !homeHasMore;
-  refreshHomeObserver();
 }
 
 /* HOME REFRESH BUTTON */
@@ -3136,9 +3165,17 @@ function setActiveTab(tab) {
   scrollTopSmooth();
 }
 
+/* NAV BUTTON ACTIONS */
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click',() => {
     const tab = btn.dataset.tab;
+
+    /* HOME pressed while already on HOME = refresh */
+    if (tab === 'home' && activeTab === 'home') {
+      refreshHome();
+      return;
+    }
 
     if (
       tab === 'library' &&
@@ -3161,18 +3198,23 @@ async function loadInitialHome() {
   homeAutoLoading = true;
   $('homeStatus').textContent = 'Discovering music…';
 
-  const songs = await fetchFreshHomeSongs();
+  try {
+    const songs = await fetchFreshHomeSongs();
 
-  if (songs.length) {
-    appendHomeSongs(songs);
-    homeHasMore = true;
-  } else {
-    $('homeResults').innerHTML = `
-      <div class="empty">
-        গান লোড করা যায়নি।<br>
-        ইন্টারনেট সংযোগ দেখে Refresh করো।
-      </div>
-    `;
+    if (songs.length) {
+      appendHomeSongs(songs);
+      homeHasMore = true;
+    } else {
+      $('homeResults').innerHTML = `
+        <div class="empty">
+          গান লোড করা যায়নি।<br>
+          ইন্টারনেট সংযোগ দেখে Refresh করো।
+        </div>
+      `;
+      $('homeStatus').textContent = 'Connection unavailable';
+      homeHasMore = false;
+    }
+  } catch(e) {
     $('homeStatus').textContent = 'Connection unavailable';
     homeHasMore = false;
   }
