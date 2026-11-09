@@ -151,13 +151,13 @@ input,select {
   display:none!important;
 }
 
-/* FIXED HEADER */
+/* HEADER - NOW SCROLLS WITH PAGE */
 
 .header {
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
+  position:relative;
+  top:auto;
+  left:auto;
+  right:auto;
   z-index:8000;
   height:60px;
   display:flex;
@@ -188,7 +188,7 @@ input,select {
 
 .page {
   display:none;
-  padding-top:60px;
+  padding-top:0;
   position:relative;
   z-index:1;
 }
@@ -1139,7 +1139,6 @@ body.full-player-open .bottom-nav {
 
     <div class="section">
       <h2>Home</h2>
-      <button class="action-btn" id="refreshHome" type="button">↻ Refresh</button>
     </div>
 
     <div class="section" style="margin-top:0">
@@ -1661,8 +1660,6 @@ const WALLPAPERS = {
   city:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=85'
 };
 
-/* Empty means no custom wallpaper */
-
 function getCurrentBackground() {
   return localStorage.getItem(BG_KEY) || '';
 }
@@ -1964,10 +1961,10 @@ const instances = [
 const BANGLA_QUERIES = [
   'Bangla official music video',
   'Bangla new song official music video',
-  'Bangla movie song official',
-  'Bangla music video 2026',
-  'Bangla romantic song official',
-  'Bangla popular song official'
+  'Bangla movie song official video',
+  'Bangladeshi music video official',
+  'Bangla romantic song official video',
+  'Bangla popular song official video'
 ];
 
 const INDIAN_QUERIES = [
@@ -1975,8 +1972,9 @@ const INDIAN_QUERIES = [
   'Hindi new song official music video',
   'Bollywood songs official video',
   'Indian music video official',
-  'Hindi romantic song official',
-  'Punjabi official music video'
+  'Hindi romantic song official video',
+  'Punjabi official music video',
+  'Indian Bengali official music video'
 ];
 
 let homeQueryRound = 0;
@@ -1987,24 +1985,50 @@ let homeObserver = null;
 
 const HOME_BATCH_SIZE = 20;
 
-/* OFFICIAL CHANNEL HEURISTIC */
+/* OFFICIAL CHANNEL FILTER */
 
 const officialTerms = [
   't-series',
   'sony music india',
+  'sony music',
   'zee music',
   'saregama',
   'tips official',
+  'tips music',
   'yrf',
   'yash raj films',
   'times music',
   'eros now',
   'vevo',
+  'g series',
+  'g-series',
+  'eagle music',
+  'cmv',
+  'cd choice',
+  'dhruba music',
+  'laser vision',
+  'soundtek',
+  'sangeeta',
+  'bangladhol',
+  'rtv music',
+  'tiger media',
+  'anupam',
+  'svf',
+  'windows production',
+  'grassroot entertainment',
+  'think music',
+  'aditya music',
+  'lahari music',
+  'junglee music',
+  'white hill music',
+  'speed records',
+  'geet mp3',
+  'desi melodies',
+  'apna punjab',
+  'panorama music',
   'music',
   'records',
-  'films',
-  'official',
-  'label'
+  'films'
 ];
 
 const unwantedTerms = [
@@ -2018,11 +2042,20 @@ const unwantedTerms = [
   'fan made',
   'fanmade',
   'cover version',
+  'cover song',
   'karaoke',
   'reaction',
   'shorts',
   'whatsapp status',
-  'edit audio'
+  'edit audio',
+  'bass boosted',
+  'remix',
+  'mashup',
+  'dj remix',
+  'full screen status',
+  'sad status',
+  'love status',
+  'video status'
 ];
 
 function isLikelyUnofficial(video) {
@@ -2040,17 +2073,37 @@ function officialScore(video) {
 
   let score = 0;
 
-  if (officialTerms.some(term => author.includes(term))) score += 5;
-  if (author.includes('topic')) score += 2;
-  if (title.includes('official video')) score += 3;
-  if (title.includes('official music video')) score += 3;
-  if (isLikelyUnofficial(video)) score -= 8;
+  if (officialTerms.some(term => author.includes(term))) {
+    score += 6;
+  }
+
+  if (author.includes('topic')) {
+    score += 3;
+  }
+
+  if (title.includes('official music video')) {
+    score += 5;
+  } else if (title.includes('official video')) {
+    score += 4;
+  } else if (title.includes('official audio')) {
+    score += 3;
+  } else if (title.includes('official')) {
+    score += 2;
+  }
+
+  if (title.includes('music video')) score += 1;
+
+  if (isLikelyUnofficial(video)) {
+    score -= 10;
+  }
 
   return score;
 }
 
 function rankVideos(videos) {
-  return videos.slice().sort((a,b) => officialScore(b)-officialScore(a));
+  return videos
+    .filter(video => !isLikelyUnofficial(video))
+    .sort((a,b) => officialScore(b)-officialScore(a));
 }
 
 /* FETCH SONGS */
@@ -2150,43 +2203,24 @@ function addRecentSong(video) {
   }
 }
 
-/* SIMILAR SONG QUERY */
-
-function makeSimilarQuery(video) {
-  if (!video) return '';
-
-  let title = (video.title || '').replace(/\(.*?\)|\[.*?\]/g,'').trim();
-  let artist = (video.author || '').trim();
-
-  title = title.split('|')[0].split(' - ')[0].trim();
-
-  if (!title) return '';
-
-  return `${title} ${artist} similar songs`;
-}
-
 /* HOME SONG DISCOVERY */
 
 function getHomeQueries() {
-  const queries = [];
+  const bangla = BANGLA_QUERIES[
+    homeQueryRound % BANGLA_QUERIES.length
+  ];
 
-  if (lastPlayedSong) {
-    const similar = makeSimilarQuery(lastPlayedSong);
-    if (similar) queries.push(similar);
-  }
-
-  const b = BANGLA_QUERIES[homeQueryRound % BANGLA_QUERIES.length];
-  const i = INDIAN_QUERIES[homeQueryRound % INDIAN_QUERIES.length];
-
-  if (homeQueryRound % 2 === 0) {
-    queries.push(b,i);
-  } else {
-    queries.push(i,b);
-  }
+  const indian = INDIAN_QUERIES[
+    homeQueryRound % INDIAN_QUERIES.length
+  ];
 
   homeQueryRound++;
 
-  return [...new Set(queries)];
+  /* Both categories are always searched together */
+  return [
+    {query:bangla,category:'bangla'},
+    {query:indian,category:'indian'}
+  ];
 }
 
 async function fetchFreshHomeSongs() {
@@ -2202,39 +2236,53 @@ async function fetchFreshHomeSongs() {
   state.controller = controller;
 
   const queries = getHomeQueries();
-  let collected = [];
+
+  const collected = [];
   const existing = new Set(state.videos.map(v => v.videoId));
 
+  const PER_CATEGORY_LIMIT = 10;
+
   try {
-    for (const query of queries) {
-      if (collected.length >= HOME_BATCH_SIZE) break;
+    for (const item of queries) {
       if (controller.signal.aborted) break;
 
-      const data = await fetchSongs(query,1,controller);
+      const data = await fetchSongs(item.query,1,controller);
 
       if (!data || controller.signal.aborted) continue;
 
       const valid = data.filter(v =>
-        v && v.type === 'video' && v.videoId
+        v &&
+        v.type === 'video' &&
+        v.videoId
       );
 
       const ranked = rankVideos(valid);
+
+      let categoryCount = 0;
 
       for (const video of ranked) {
         if (existing.has(video.videoId)) continue;
         if (homeSeenIds.has(video.videoId)) continue;
 
+        /*
+          Prefer original uploads:
+          known labels, Topic channels, or videos
+          clearly marked as official.
+        */
+        if (officialScore(video) < 2) continue;
+
         existing.add(video.videoId);
         collected.push(video);
+        categoryCount++;
 
-        if (collected.length >= HOME_BATCH_SIZE) break;
+        if (categoryCount >= PER_CATEGORY_LIMIT) break;
       }
     }
   } finally {
     state.busy = false;
   }
 
-  return collected;
+  return collected.slice(0,HOME_BATCH_SIZE);
 }
 
 function appendHomeSongs(songs) {
@@ -2262,6 +2310,8 @@ function appendHomeSongs(songs) {
   saveHomeCache();
 }
 
+/* LOAD MORE HOME SONGS */
+
 async function loadNextHomeBatch() {
   if (homeAutoLoading || !homeHasMore) return;
 
@@ -2287,7 +2337,10 @@ async function loadNextHomeBatch() {
   }
 }
 
-/* HOME REFRESH */
+/* HOME REFRESH
+   Keep old songs visible while fetching.
+   Replace them only after fresh songs arrive.
+*/
 
 async function refreshHome() {
   if (homeAutoLoading || pageData.home.busy) return;
@@ -2302,40 +2355,55 @@ async function refreshHome() {
   scrollTopSmooth();
 
   const grid = $('homeResults');
-  grid.innerHTML = '<div class="empty">Finding fresh music for you…</div>';
 
-  pageData.home.videos = [];
-  $('homeStatus').textContent = 'Refreshing…';
+  /* Do not clear the existing grid here */
+  $('homeStatus').textContent = 'Finding fresh music…';
   $('homeMore').hidden = true;
 
   try {
     const songs = await fetchFreshHomeSongs();
 
-    grid.innerHTML = '';
-
     if (songs.length) {
+
+      /* Replace old songs only after fresh songs are ready */
+      pageData.home.videos = [];
+      grid.innerHTML = '';
+
       appendHomeSongs(songs);
+
       $('homeStatus').textContent = songs.length + ' Fresh Songs';
       homeHasMore = true;
+
     } else {
-      grid.innerHTML = `
-        <div class="empty">
-          নতুন গান পাওয়া যায়নি।<br>
-          কিছুক্ষণ পর আবার Refresh করো।
-        </div>
-      `;
-      $('homeStatus').textContent = 'No new songs';
-      homeHasMore = false;
+
+      /* Keep old songs if no fresh songs are available */
+      if (pageData.home.videos.length) {
+        $('homeStatus').textContent = 'Showing previous songs';
+      } else {
+        grid.innerHTML = `
+          <div class="empty">
+            নতুন গান পাওয়া যায়নি।<br>
+            কিছুক্ষণ পর আবার Home চাপো।
+          </div>
+        `;
+
+        $('homeStatus').textContent = 'No new songs';
+      }
+
+      homeHasMore = true;
     }
+
   } catch(e) {
-    grid.innerHTML = `
-      <div class="empty">
-        গান লোড করা যায়নি।<br>
-        ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করো।
-      </div>
-    `;
-    $('homeStatus').textContent = 'Connection unavailable';
-    homeHasMore = false;
+
+    /* Keep old songs if connection fails */
+    if (pageData.home.videos.length) {
+      $('homeStatus').textContent = 'Showing previous songs';
+    } else {
+      $('homeStatus').textContent = 'Connection unavailable';
+    }
+
+    homeHasMore = true;
+
   } finally {
     homeAutoLoading = false;
     $('homeMore').hidden = !homeHasMore;
@@ -2343,9 +2411,8 @@ async function refreshHome() {
   }
 }
 
-/* HOME REFRESH BUTTON */
+/* HOME LOAD MORE */
 
-$('refreshHome').addEventListener('click',refreshHome);
 $('homeMore').addEventListener('click',loadNextHomeBatch);
 
 /* HOME OBSERVER */
@@ -3171,7 +3238,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click',() => {
     const tab = btn.dataset.tab;
 
-    /* HOME pressed while already on HOME = refresh */
+    /* Home pressed while already on Home = refresh */
     if (tab === 'home' && activeTab === 'home') {
       refreshHome();
       return;
@@ -3208,7 +3275,7 @@ async function loadInitialHome() {
       $('homeResults').innerHTML = `
         <div class="empty">
           গান লোড করা যায়নি।<br>
-          ইন্টারনেট সংযোগ দেখে Refresh করো।
+          ইন্টারনেট সংযোগ দেখে আবার Home চাপো।
         </div>
       `;
       $('homeStatus').textContent = 'Connection unavailable';
