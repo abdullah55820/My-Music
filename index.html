@@ -447,7 +447,7 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/* TOP BAR */
+/* TOP BAR (grabber) */
 
 .player-top-bar {
   position:relative;
@@ -457,37 +457,27 @@ body.full-player-open .bottom-nav {
   align-items:center;
   justify-content:center;
 
-  min-height:46px;
+  min-height:30px;
   flex-shrink:0;
 }
 
-.player-top-bar span {
-  font-size:13px;
-  font-weight:750;
-  letter-spacing:1.5px;
-  color:rgba(255,255,255,.88);
-}
-
-.collapse-btn {
-  position:absolute;
-  left:0;
-
-  width:43px;
-  height:43px;
+.grabber {
+  width:100%;
+  height:30px;
 
   display:grid;
   place-items:center;
 
-  border-radius:50%;
-  background:rgba(255,255,255,.15);
-
-  backdrop-filter:blur(15px);
-  -webkit-backdrop-filter:blur(15px);
+  background:transparent;
 }
 
-.collapse-btn svg {
-  width:22px;
-  height:22px;
+.grabber span {
+  display:block;
+  width:46px;
+  height:5px;
+
+  border-radius:3px;
+  background:rgba(255,255,255,.55);
 }
 
 /* CENTER */
@@ -498,30 +488,35 @@ body.full-player-open .bottom-nav {
 
   width:100%;
   max-width:390px;
-  margin:auto;
+  margin:0 auto;
+  padding-top:10px;
 
   display:flex;
   flex-direction:column;
+  justify-content:space-between;
 
+  flex:1;
   min-height:0;
-  flex-shrink:1;
 }
 
 /* ARTWORK */
 
 .big-artwork-wrap {
-  width:100%;
+  width:min(100%,46vh);
   aspect-ratio:1/1;
-  max-height:min(40vh,390px);
+  margin:0 auto;
 
-  flex-shrink:1;
+  flex-shrink:0;
   overflow:hidden;
 
-  border-radius:23px;
+  border-radius:14px;
   background:#222;
 
   box-shadow:0 20px 55px rgba(0,0,0,.5);
-  margin-bottom:25px;
+}
+
+.player-info-group {
+  flex-shrink:0;
 }
 
 .big-artwork-wrap img {
@@ -539,7 +534,7 @@ body.full-player-open .bottom-nav {
   align-items:center;
   gap:12px;
 
-  margin-bottom:25px;
+  margin-bottom:26px;
   flex-shrink:0;
 }
 
@@ -549,8 +544,8 @@ body.full-player-open .bottom-nav {
 }
 
 .song-info-text h3 {
-  margin:0 0 7px;
-  font-size:21px;
+  margin:0 0 6px;
+  font-size:22px;
   font-weight:750;
 
   white-space:nowrap;
@@ -560,8 +555,8 @@ body.full-player-open .bottom-nav {
 
 .song-info-text p {
   margin:0;
-  font-size:14px;
-  color:rgba(255,255,255,.7);
+  font-size:17px;
+  color:rgba(255,255,255,.62);
 
   white-space:nowrap;
   overflow:hidden;
@@ -589,11 +584,15 @@ body.full-player-open .bottom-nav {
   color:#ff2d55;
 }
 
+.like-btn.liked svg {
+  fill:currentColor;
+}
+
 /* PROGRESS */
 
 .progress-container {
   width:100%;
-  margin-bottom:28px;
+  margin-bottom:0;
   flex-shrink:0;
 }
 
@@ -661,8 +660,8 @@ body.full-player-open .bottom-nav {
 }
 
 .ctrl-btn {
-  width:48px;
-  height:48px;
+  width:64px;
+  height:64px;
 
   display:grid;
   place-items:center;
@@ -674,8 +673,15 @@ body.full-player-open .bottom-nav {
 }
 
 .ctrl-btn svg {
-  width:32px;
-  height:32px;
+  width:46px;
+  height:46px;
+}
+
+.ctrl-btn svg,
+.play-pause-circle svg {
+  stroke:currentColor;
+  stroke-width:1.4;
+  stroke-linejoin:round;
 }
 
 .ctrl-btn:active {
@@ -683,27 +689,47 @@ body.full-player-open .bottom-nav {
 }
 
 .play-pause-circle {
-  width:72px;
-  height:72px;
+  width:84px;
+  height:84px;
 
   display:grid;
   place-items:center;
 
-  border-radius:50%;
-  background:#fff;
-  color:#000;
+  background:transparent;
+  color:#fff;
 
-  box-shadow:0 8px 25px rgba(0,0,0,.3);
   transition:transform .15s;
 }
 
 .play-pause-circle:active {
-  transform:scale(.91);
+  transform:scale(.88);
 }
 
 .play-pause-circle svg {
-  width:31px;
-  height:31px;
+  width:66px;
+  height:66px;
+}
+
+/* VOLUME */
+
+.volume-row {
+  display:flex;
+  align-items:center;
+  gap:14px;
+
+  flex-shrink:0;
+  color:rgba(255,255,255,.62);
+}
+
+.volume-row svg {
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+}
+
+.volume-row .seek-slider {
+  flex:1;
+  min-width:0;
 }
 
 /* MINI PLAYER */
@@ -853,21 +879,31 @@ body.full-player-open .bottom-nav {
 @media(max-height:720px) {
 
   .big-artwork-wrap {
-    max-height:min(34vh,280px);
-    margin-bottom:16px;
+    width:min(100%,38vh);
   }
 
   .song-meta-box {
-    margin-bottom:17px;
+    margin-bottom:16px;
   }
 
-  .progress-container {
-    margin-bottom:18px;
+  .ctrl-btn {
+    width:56px;
+    height:56px;
+  }
+
+  .ctrl-btn svg {
+    width:40px;
+    height:40px;
   }
 
   .play-pause-circle {
-    width:64px;
-    height:64px;
+    width:72px;
+    height:72px;
+  }
+
+  .play-pause-circle svg {
+    width:56px;
+    height:56px;
   }
 
 }
@@ -875,16 +911,11 @@ body.full-player-open .bottom-nav {
 @media(max-height:600px) {
 
   .big-artwork-wrap {
-    max-height:29vh;
-    margin-bottom:12px;
+    width:min(100%,32vh);
   }
 
   .song-meta-box {
-    margin-bottom:12px;
-  }
-
-  .progress-container {
-    margin-bottom:12px;
+    margin-bottom:10px;
   }
 
 }
@@ -1021,17 +1052,10 @@ body.full-player-open .bottom-nav {
 
   <div class="player-top-bar">
 
-    <button class="collapse-btn" id="minimizePlayer" type="button">
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2.5"
-           stroke-linecap="round">
-        <path d="m6 9 6 6 6-6"/>
-      </svg>
+    <button class="grabber" id="minimizePlayer" type="button"
+            aria-label="Minimize player">
+      <span></span>
     </button>
-
-    <span>NOW PLAYING</span>
 
   </div>
 
@@ -1040,6 +1064,8 @@ body.full-player-open .bottom-nav {
     <div class="big-artwork-wrap">
       <img id="playingThumb" alt="Album Artwork">
     </div>
+
+    <div class="player-info-group">
 
     <div class="song-meta-box">
 
@@ -1079,11 +1105,13 @@ body.full-player-open .bottom-nav {
 
     </div>
 
+    </div>
+
     <div class="controls-row">
 
       <button class="ctrl-btn" id="prevBtn" type="button">
         <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M6 5h2v14H6zM19 6v12L9 12z"/>
+          <path d="M11 6v12L2 12zM21 6v12l-9-6z"/>
         </svg>
       </button>
 
@@ -1096,9 +1124,36 @@ body.full-player-open .bottom-nav {
 
       <button class="ctrl-btn" id="nextBtn" type="button">
         <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M16 5h2v14h-2zM5 6v12l10-6z"/>
+          <path d="M3 6v12l9-6zM13 6v12l9-6z"/>
         </svg>
       </button>
+
+    </div>
+
+    <div class="volume-row">
+
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>
+        <path d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/>
+      </svg>
+
+      <input
+        type="range"
+        id="volumeSlider"
+        class="seek-slider"
+        min="0"
+        max="100"
+        value="100"
+        aria-label="Volume"
+      >
+
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>
+        <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+        <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+      </svg>
 
     </div>
 
@@ -1152,6 +1207,7 @@ const $ = id => document.getElementById(id);
 const playerScreen = $('player');
 const miniPlayer = $('miniPlayer');
 const seekSlider = $('seekSlider');
+const volumeSlider = $('volumeSlider');
 
 /* STATE */
 
@@ -1557,6 +1613,8 @@ window.onYouTubeIframeAPIReady = function() {
 
         apiReady = true;
 
+        applyVolume();
+
         if (pendingVideoId) {
           const id = pendingVideoId;
           pendingVideoId = null;
@@ -1592,6 +1650,7 @@ function onPlayerStateChange(event) {
     isPlaying = true;
     updateIcons();
     startTimer();
+    applyVolume();
 
   }
 
@@ -1743,6 +1802,66 @@ function resetProgress() {
   $('durationTime').textContent = '0:00';
 
 }
+
+/* VOLUME */
+
+let currentVolume = 100;
+
+try {
+
+  const saved = localStorage.getItem('soundflow_volume');
+
+  if (saved !== null && Number.isFinite(Number(saved))) {
+    currentVolume = Math.max(0,Math.min(100,Number(saved)));
+  }
+
+} catch(e) {}
+
+function setVolumeColor(percent) {
+
+  const value = Math.max(0,Math.min(100,percent));
+
+  volumeSlider.style.background = `
+    linear-gradient(
+      to right,
+      #fff 0%,
+      #fff ${value}%,
+      rgba(255,255,255,.3) ${value}%,
+      rgba(255,255,255,.3) 100%
+    )
+  `;
+
+}
+
+function applyVolume() {
+
+  if (!ytPlayer || !apiReady) return;
+
+  try {
+    ytPlayer.setVolume(currentVolume);
+  } catch(e) {}
+
+}
+
+volumeSlider.value = currentVolume;
+setVolumeColor(currentVolume);
+
+volumeSlider.addEventListener('input',() => {
+
+  currentVolume = Number(volumeSlider.value);
+
+  setVolumeColor(currentVolume);
+  applyVolume();
+
+});
+
+volumeSlider.addEventListener('change',() => {
+
+  try {
+    localStorage.setItem('soundflow_volume',String(currentVolume));
+  } catch(e) {}
+
+});
 
 /* PLAY PAUSE */
 
@@ -2114,7 +2233,7 @@ playerScreen.addEventListener('touchstart',e => {
   touchStarted = false;
 
   if (playerMode !== 'full') return;
-  if (e.target.closest('button,input')) return;
+  if (e.target.closest('button:not(.grabber),input')) return;
 
   const touch = e.touches[0];
 
@@ -2128,7 +2247,7 @@ playerScreen.addEventListener('touchstart',e => {
 playerScreen.addEventListener('touchmove',e => {
 
   if (playerMode !== 'full') return;
-  if (e.target.closest('button,input')) return;
+  if (e.target.closest('button:not(.grabber),input')) return;
 
   if (e.cancelable) e.preventDefault();
 
