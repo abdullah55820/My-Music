@@ -77,6 +77,8 @@ html {
 }
 
 body {
+  position:relative;
+  isolation:isolate;
   margin:0;
   background:var(--bg);
   color:var(--text);
@@ -85,17 +87,43 @@ body {
   transition:background .25s,color .25s;
 }
 
+/* FIXED BACKGROUND LAYER */
 body::before {
   content:"";
   position:fixed;
   inset:0;
-  z-index:-1;
+  z-index:0;
   pointer-events:none;
   background-image:var(--custom-bg,none);
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  opacity:var(--custom-bg-opacity,1);
+  opacity:1;
+  transform:translateZ(0);
+}
+
+body.has-custom-bg {
+  background:var(--bg);
+}
+
+body.has-custom-bg .header,
+body.has-custom-bg main.page {
+  position:relative;
+  z-index:1;
+}
+
+body.has-custom-bg .card,
+body.has-custom-bg .profile-card,
+body.has-custom-bg .setting-row {
+  background:color-mix(in srgb,var(--surface) 78%,transparent);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+body.has-custom-bg .search input {
+  background:color-mix(in srgb,var(--surface) 78%,transparent);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
 }
 
 html.full-player-open {
@@ -522,6 +550,65 @@ input,select {
   color:#ff453a;
   font-weight:750;
   margin-top:8px;
+}
+
+/* DEFAULT WALLPAPERS */
+
+.wallpaper-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:11px;
+  margin-top:12px;
+}
+
+.wallpaper-option {
+  position:relative;
+  aspect-ratio:16/10;
+  overflow:hidden;
+  border-radius:13px;
+  border:2px solid transparent;
+  background-size:cover;
+  background-position:center;
+  cursor:pointer;
+  transition:transform .2s,border-color .2s;
+}
+
+.wallpaper-option:active {
+  transform:scale(.96);
+}
+
+.wallpaper-option.selected {
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+
+.wallpaper-option span {
+  position:absolute;
+  left:8px;
+  bottom:8px;
+  padding:5px 9px;
+  border-radius:20px;
+  background:rgba(0,0,0,.48);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  backdrop-filter:blur(10px);
+}
+
+.wallpaper-option.selected::after {
+  content:"✓";
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:23px;
+  height:23px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#fff;
+  background:var(--accent);
+  font-size:13px;
+  font-weight:900;
 }
 
 /* BOTTOM NAV */
@@ -1153,20 +1240,71 @@ body.full-player-open .bottom-nav {
       </div>
     </div>
 
+    <!-- BACKGROUND WALLPAPERS -->
+
     <div class="settings-section">
       <h3 class="settings-heading">Background</h3>
 
       <div class="setting-row">
-        <div class="setting-label">Your Background Photo</div>
-        <label class="upload-label">
-          Choose Photo
+        <div class="setting-label">Choose a Wallpaper</div>
+
+        <div class="wallpaper-grid" id="wallpaperGrid">
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="mountain"
+            aria-label="Mountain wallpaper">
+            <span>Mountain</span>
+          </button>
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="ocean"
+            aria-label="Ocean wallpaper">
+            <span>Ocean</span>
+          </button>
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="night"
+            aria-label="Night wallpaper">
+            <span>Night</span>
+          </button>
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="forest"
+            aria-label="Forest wallpaper">
+            <span>Forest</span>
+          </button>
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="minimal"
+            aria-label="Minimal wallpaper">
+            <span>Minimal</span>
+          </button>
+
+          <button class="wallpaper-option"
+            type="button"
+            data-wallpaper="city"
+            aria-label="City wallpaper">
+            <span>City</span>
+          </button>
+
+        </div>
+
+        <div class="setting-help">
+          পছন্দের Default Wallpaper নির্বাচন করো অথবা নিজের ছবি ব্যবহার করো।
+        </div>
+
+        <label class="upload-label" style="margin-top:13px">
+          Choose Your Photo
           <input type="file" id="backgroundUpload" accept="image/*">
         </label>
-        <div class="setting-help">
-          নিজের ছবি Background হিসেবে ব্যবহার করতে পারবে।
-        </div>
+
         <button class="reset-btn" id="removeBackground" type="button">
-          Remove Background
+          Reset to Default Wallpaper
         </button>
       </div>
     </div>
@@ -1502,15 +1640,65 @@ $('colorOptions').addEventListener('click',e => {
   applyTheme();
 });
 
-/* BACKGROUND IMAGE */
+/* DEFAULT WALLPAPERS */
+
+const WALLPAPERS = {
+  mountain:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85',
+  ocean:'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1400&q=85',
+  night:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85',
+  forest:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1400&q=85',
+  minimal:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1400&q=85',
+  city:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=85'
+};
+
+function getCurrentBackground() {
+  return localStorage.getItem(BG_KEY) || 'mountain';
+}
+
+function backgroundImageValue(value) {
+  let image = '';
+
+  if (WALLPAPERS[value]) {
+    image = WALLPAPERS[value];
+  } else if (value && value.startsWith('data:image/')) {
+    image = value;
+  } else if (value && /^https:\/\//i.test(value)) {
+    image = value;
+  }
+
+  return image ? `url("${image}")` : 'none';
+}
 
 function applyBackground() {
-  const bg = localStorage.getItem(BG_KEY);
+  const selected = getCurrentBackground();
+  const image = backgroundImageValue(selected);
 
-  document.documentElement.style.setProperty(
-    '--custom-bg',
-    bg ? `url("${bg}")` : 'none'
-  );
+  document.documentElement.style.setProperty('--custom-bg',image);
+
+  document.body.classList.toggle('has-custom-bg',image !== 'none');
+
+  document.querySelectorAll('.wallpaper-option').forEach(option => {
+    option.classList.toggle(
+      'selected',
+      option.dataset.wallpaper === selected
+    );
+  });
+}
+
+function setupWallpaperCards() {
+  document.querySelectorAll('.wallpaper-option').forEach(option => {
+    const key = option.dataset.wallpaper;
+    const url = WALLPAPERS[key];
+
+    if (url) {
+      option.style.backgroundImage = `url("${url}")`;
+    }
+
+    option.addEventListener('click',() => {
+      localStorage.setItem(BG_KEY,key);
+      applyBackground();
+    });
+  });
 }
 
 function compressImage(file,maxSize=1000,quality=.78) {
@@ -1542,14 +1730,24 @@ function compressImage(file,maxSize=1000,quality=.78) {
   });
 }
 
+/* BACKGROUND IMAGE UPLOAD */
+
 $('backgroundUpload').addEventListener('change',async e => {
   const file = e.target.files[0];
   if (!file) return;
 
+  if (!file.type.startsWith('image/')) {
+    alert('শুধু ছবি নির্বাচন করো।');
+    e.target.value = '';
+    return;
+  }
+
   try {
     const data = await compressImage(file,1400,.72);
+
     localStorage.setItem(BG_KEY,data);
     applyBackground();
+
     alert('Background updated!');
   } catch(err) {
     alert('ছবিটি ব্যবহার করা যায়নি। অন্য ছবি চেষ্টা করো।');
@@ -1559,7 +1757,7 @@ $('backgroundUpload').addEventListener('change',async e => {
 });
 
 $('removeBackground').addEventListener('click',() => {
-  localStorage.removeItem(BG_KEY);
+  localStorage.setItem(BG_KEY,'mountain');
   applyBackground();
 });
 
@@ -1577,6 +1775,12 @@ function updateAvatar() {
 $('avatarUpload').addEventListener('change',async e => {
   const file = e.target.files[0];
   if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('শুধু ছবি নির্বাচন করো।');
+    e.target.value = '';
+    return;
+  }
 
   try {
     const data = await compressImage(file,500,.75);
@@ -1602,8 +1806,9 @@ $('resetSettings').addEventListener('click',() => {
 
   localStorage.removeItem(THEME_KEY);
   localStorage.removeItem(ACCENT_KEY);
-  localStorage.removeItem(BG_KEY);
   localStorage.removeItem(AVATAR_KEY);
+
+  localStorage.setItem(BG_KEY,'mountain');
 
   applyTheme();
   applyBackground();
@@ -1716,8 +1921,11 @@ function restoreHomeCache() {
   grid.innerHTML = '';
 
   valid.forEach((video,index) => {
+    markHomeSeen(video.videoId);
     grid.appendChild(makeCard(video,index,pageData.home.videos));
   });
+
+  saveHomeSeen();
 
   $('homeStatus').textContent = valid.length + ' Songs';
 
@@ -2017,6 +2225,10 @@ function appendHomeSongs(songs) {
   const state = pageData.home;
 
   songs.forEach(video => {
+    if (!video || !video.videoId) return;
+
+    if (state.videos.some(v => v.videoId === video.videoId)) return;
+
     state.videos.push(video);
     markHomeSeen(video.videoId);
 
@@ -2910,6 +3122,7 @@ function setActiveTab(tab) {
   if (tab === 'profile') {
     updateProfileStats();
     updateAvatar();
+    applyBackground();
   }
 
   if (tab === 'home') {
@@ -2972,6 +3185,7 @@ async function loadInitialHome() {
 /* INITIALIZE */
 
 applyTheme();
+setupWallpaperCards();
 applyBackground();
 updateAvatar();
 updateProfileStats();
