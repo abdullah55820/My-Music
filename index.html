@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<title>Sound — Music</title>
+<title>SoundFlow — Music</title>
 
 <style>
 :root {
@@ -151,7 +151,7 @@ input,select {
   display:none!important;
 }
 
-/* HEADER - NOW SCROLLS WITH PAGE */
+/* HEADER */
 
 .header {
   position:relative;
@@ -1139,18 +1139,14 @@ body.full-player-open .bottom-nav {
 
     <div class="section">
       <h2>Home</h2>
-    </div>
-
-    <div class="section" style="margin-top:0">
-      <span class="status" id="homeStatus">Discover music</span>
-      <span class="status" id="homeMixStatus">Bangla + Indian</span>
+      <span class="status" id="homeStatus">0 Songs</span>
     </div>
 
     <div class="grid" id="homeResults"></div>
     <div id="homeSentinel" aria-hidden="true"></div>
 
     <button class="load" id="homeMore" type="button" hidden>
-      আরও গান দেখাও
+      Load More
     </button>
 
   </div>
@@ -1178,7 +1174,7 @@ body.full-player-open .bottom-nav {
     </div>
 
     <button class="load" id="searchMore" hidden>
-      আরও গান দেখাও
+      Load More
     </button>
 
   </div>
@@ -1257,8 +1253,6 @@ body.full-player-open .bottom-nav {
         </div>
       </div>
     </div>
-
-    <!-- BACKGROUND WALLPAPERS -->
 
     <div class="settings-section">
       <h3 class="settings-heading">Background</h3>
@@ -1559,7 +1553,7 @@ let homeSeenIds = new Set(
 );
 
 function saveHomeSeen() {
-  saveJSON(HOME_SEEN_KEY,Array.from(homeSeenIds).slice(-5000));
+  saveJSON(HOME_SEEN_KEY,Array.from(homeSeenIds));
 }
 
 function markHomeSeen(id) {
@@ -1572,7 +1566,6 @@ function markHomeSeen(id) {
 const pageData = {
   home:{
     videos:[],
-    page:0,
     busy:false,
     controller:null
   },
@@ -1765,7 +1758,7 @@ $('backgroundUpload').addEventListener('change',async e => {
   e.target.value = '';
 });
 
-/* RESET BACKGROUND COMPLETELY */
+/* RESET BACKGROUND */
 
 $('removeBackground').addEventListener('click',() => {
   localStorage.removeItem(BG_KEY);
@@ -1910,8 +1903,13 @@ function loadTint(video) {
 /* HOME CACHE */
 
 function saveHomeCache() {
+  /*
+    Save all currently loaded Home songs.
+    There is no app-side fixed song count limit here.
+    Browser storage quota still applies.
+  */
   saveJSON(HOME_CACHE_KEY,{
-    videos:pageData.home.videos.slice(-200),
+    videos:pageData.home.videos,
     savedAt:Date.now()
   });
 }
@@ -1956,7 +1954,7 @@ const instances = [
   'https://invidious.tiekoetter.com'
 ];
 
-/* QUERY POOLS */
+/* MIXED MUSIC SEARCH QUERIES */
 
 const BANGLA_QUERIES = [
   'Bangla official music video',
@@ -1964,7 +1962,9 @@ const BANGLA_QUERIES = [
   'Bangla movie song official video',
   'Bangladeshi music video official',
   'Bangla romantic song official video',
-  'Bangla popular song official video'
+  'Bangla popular song official video',
+  'Indian Bengali official music video',
+  'Kolkata Bengali new song official video'
 ];
 
 const INDIAN_QUERIES = [
@@ -1974,6 +1974,7 @@ const INDIAN_QUERIES = [
   'Indian music video official',
   'Hindi romantic song official video',
   'Punjabi official music video',
+  'Punjabi new song official video',
   'Indian Bengali official music video'
 ];
 
@@ -1982,8 +1983,6 @@ let lastPlayedSong = null;
 let homeHasMore = true;
 let homeAutoLoading = false;
 let homeObserver = null;
-
-const HOME_BATCH_SIZE = 20;
 
 /* OFFICIAL CHANNEL FILTER */
 
@@ -2117,7 +2116,11 @@ async function fetchSongs(query,pageNumber,controller) {
 
     const abortParent = () => child.abort();
 
-    controller.signal.addEventListener('abort',abortParent,{once:true});
+    if (controller.signal.aborted) {
+      child.abort();
+    } else {
+      controller.signal.addEventListener('abort',abortParent,{once:true});
+    }
 
     return fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${pageNumber}`,
@@ -2205,6 +2208,12 @@ function addRecentSong(video) {
 
 /* HOME SONG DISCOVERY */
 
+/*
+  Each refresh uses a new pair of search queries.
+  Bangla and Indian music are collected together.
+  No category labels or separate category sections are created.
+*/
+
 function getHomeQueries() {
   const bangla = BANGLA_QUERIES[
     homeQueryRound % BANGLA_QUERIES.length
@@ -2216,12 +2225,13 @@ function getHomeQueries() {
 
   homeQueryRound++;
 
-  /* Both categories are always searched together */
-  return [
-    {query:bangla,category:'bangla'},
-    {query:indian,category:'indian'}
-  ];
+  return [bangla,indian];
 }
+
+/*
+  Fetch both query groups together.
+  Mix the results into one combined Home feed.
+*/
 
 async function fetchFreshHomeSongs() {
   const state = pageData.home;
@@ -2230,64 +2240,80 @@ async function fetchFreshHomeSongs() {
 
   state.busy = true;
 
-  if (state.controller) state.controller.abort();
+  if (state.controller) {
+    state.controller.abort();
+  }
 
   const controller = new AbortController();
   state.controller = controller;
 
   const queries = getHomeQueries();
 
-  const collected = [];
-  const existing = new Set(state.videos.map(v => v.videoId));
+  const existing = new Set(
+    state.videos.map(v => v.videoId)
+  );
 
-  const PER_CATEGORY_LIMIT = 10;
+  const collected = [];
 
   try {
-    for (const item of queries) {
-      if (controller.signal.aborted) break;
+    const results = await Promise.all(
+      queries.map(query => fetchSongs(query,1,controller))
+    );
 
-      const data = await fetchSongs(item.query,1,controller);
+    if (controller.signal.aborted) return [];
 
-      if (!data || controller.signal.aborted) continue;
+    const resultLists = results.map(data => {
+      if (!Array.isArray(data)) return [];
 
-      const valid = data.filter(v =>
-        v &&
-        v.type === 'video' &&
-        v.videoId
+      const valid = data.filter(video =>
+        video &&
+        video.type === 'video' &&
+        video.videoId
       );
 
-      const ranked = rankVideos(valid);
+      return rankVideos(valid).filter(video =>
+        officialScore(video) >= 2
+      );
+    });
 
-      let categoryCount = 0;
+    /*
+      Alternate results from both query groups.
+      This keeps the Home feed mixed instead of showing
+      separate Bangla and Hindi blocks.
+    */
 
-      for (const video of ranked) {
+    const maxLength = Math.max(
+      0,
+      ...resultLists.map(list => list.length)
+    );
+
+    for (let i=0;i<maxLength;i++) {
+      for (const list of resultLists) {
+        const video = list[i];
+
+        if (!video) continue;
         if (existing.has(video.videoId)) continue;
         if (homeSeenIds.has(video.videoId)) continue;
 
-        /*
-          Prefer original uploads:
-          known labels, Topic channels, or videos
-          clearly marked as official.
-        */
-        if (officialScore(video) < 2) continue;
-
         existing.add(video.videoId);
         collected.push(video);
-        categoryCount++;
-
-        if (categoryCount >= PER_CATEGORY_LIMIT) break;
       }
     }
+
   } finally {
     state.busy = false;
   }
 
-  return collected.slice(0,HOME_BATCH_SIZE);
+  return collected;
 }
+
+/* APPEND HOME SONGS */
 
 function appendHomeSongs(songs) {
   const grid = $('homeResults');
   const state = pageData.home;
+
+  let added = 0;
 
   songs.forEach(video => {
     if (!video || !video.videoId) return;
@@ -2302,12 +2328,18 @@ function appendHomeSongs(songs) {
     grid.appendChild(
       makeCard(video,index,state.videos)
     );
+
+    added++;
   });
 
   $('homeStatus').textContent = state.videos.length + ' Songs';
 
-  saveHomeSeen();
-  saveHomeCache();
+  if (added) {
+    saveHomeSeen();
+    saveHomeCache();
+  }
+
+  return added;
 }
 
 /* LOAD MORE HOME SONGS */
@@ -2316,7 +2348,6 @@ async function loadNextHomeBatch() {
   if (homeAutoLoading || !homeHasMore) return;
 
   homeAutoLoading = true;
-  $('homeStatus').textContent = 'Finding music…';
 
   try {
     const songs = await fetchFreshHomeSongs();
@@ -2325,11 +2356,15 @@ async function loadNextHomeBatch() {
       appendHomeSongs(songs);
       homeHasMore = true;
     } else {
-      $('homeStatus').textContent = 'No new songs found';
+      /*
+        Stop automatic observer loading when no new songs
+        are returned. Pressing Home can still search again.
+      */
       homeHasMore = false;
     }
+
   } catch(e) {
-    $('homeStatus').textContent = 'Connection unavailable';
+    homeHasMore = false;
   } finally {
     homeAutoLoading = false;
     $('homeMore').hidden = !homeHasMore;
@@ -2337,75 +2372,40 @@ async function loadNextHomeBatch() {
   }
 }
 
-/* HOME REFRESH
-   Keep old songs visible while fetching.
-   Replace them only after fresh songs arrive.
+/* HOME REFRESH */
+
+/*
+  Keep existing songs visible.
+  Fetch new songs in the background and append only unique results.
 */
 
 async function refreshHome() {
   if (homeAutoLoading || pageData.home.busy) return;
-
-  if (pageData.home.controller) {
-    pageData.home.controller.abort();
-  }
 
   homeHasMore = true;
   homeAutoLoading = true;
 
   scrollTopSmooth();
 
-  const grid = $('homeResults');
+  $('homeStatus').textContent =
+    pageData.home.videos.length + ' Songs';
 
-  /* Do not clear the existing grid here */
-  $('homeStatus').textContent = 'Finding fresh music…';
   $('homeMore').hidden = true;
 
   try {
     const songs = await fetchFreshHomeSongs();
 
     if (songs.length) {
-
-      /* Replace old songs only after fresh songs are ready */
-      pageData.home.videos = [];
-      grid.innerHTML = '';
-
       appendHomeSongs(songs);
-
-      $('homeStatus').textContent = songs.length + ' Fresh Songs';
-      homeHasMore = true;
-
-    } else {
-
-      /* Keep old songs if no fresh songs are available */
-      if (pageData.home.videos.length) {
-        $('homeStatus').textContent = 'Showing previous songs';
-      } else {
-        grid.innerHTML = `
-          <div class="empty">
-            নতুন গান পাওয়া যায়নি।<br>
-            কিছুক্ষণ পর আবার Home চাপো।
-          </div>
-        `;
-
-        $('homeStatus').textContent = 'No new songs';
-      }
-
-      homeHasMore = true;
     }
 
   } catch(e) {
-
-    /* Keep old songs if connection fails */
-    if (pageData.home.videos.length) {
-      $('homeStatus').textContent = 'Showing previous songs';
-    } else {
-      $('homeStatus').textContent = 'Connection unavailable';
-    }
-
-    homeHasMore = true;
-
+    console.log('Home refresh:',e);
   } finally {
     homeAutoLoading = false;
+    $('homeStatus').textContent =
+      pageData.home.videos.length + ' Songs';
+
     $('homeMore').hidden = !homeHasMore;
     refreshHomeObserver();
   }
@@ -2484,7 +2484,10 @@ async function loadSearchSongs(query,pageNumber=1,append=false) {
 
   const data = await fetchSongs(query,pageNumber,controller);
 
-  if (state.controller !== controller) return;
+  if (state.controller !== controller) {
+    state.busy = false;
+    return;
+  }
 
   if (!data) {
     if (!state.videos.length) {
@@ -3263,7 +3266,6 @@ async function loadInitialHome() {
   if (homeAutoLoading || pageData.home.videos.length) return;
 
   homeAutoLoading = true;
-  $('homeStatus').textContent = 'Discovering music…';
 
   try {
     const songs = await fetchFreshHomeSongs();
@@ -3275,19 +3277,25 @@ async function loadInitialHome() {
       $('homeResults').innerHTML = `
         <div class="empty">
           গান লোড করা যায়নি।<br>
-          ইন্টারনেট সংযোগ দেখে আবার Home চাপো।
+          ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করো।
         </div>
       `;
-      $('homeStatus').textContent = 'Connection unavailable';
+
       homeHasMore = false;
     }
+
   } catch(e) {
-    $('homeStatus').textContent = 'Connection unavailable';
+    $('homeStatus').textContent = '0 Songs';
     homeHasMore = false;
   }
 
   homeAutoLoading = false;
+
+  $('homeStatus').textContent =
+    pageData.home.videos.length + ' Songs';
+
   $('homeMore').hidden = !homeHasMore;
+
   refreshHomeObserver();
 }
 
@@ -3303,12 +3311,28 @@ updateIcons();
 setProgressColor(0);
 syncTint();
 
-restoreHomeCache();
+/*
+  Restore cached songs immediately.
+  Then load more songs in the background.
+*/
+
+const hasCachedHome = restoreHomeCache();
 
 setupHomeObserver();
 
-if (pageData.home.videos.length) {
+if (hasCachedHome) {
   homeHasMore = true;
+
+  /*
+    Do not make the user wait for the first screen.
+    Fetch additional songs after the cached feed is visible.
+  */
+  setTimeout(() => {
+    if (activeTab === 'home' && !homeAutoLoading) {
+      loadNextHomeBatch();
+    }
+  },800);
+
 } else {
   loadInitialHome();
 }
