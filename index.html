@@ -469,9 +469,7 @@ body.full-player-open .bottom-nav {
   pointer-events:none;
 }
 
-/* ============================================================
-   FULL PLAYER — REFINED LAYOUT
-   ============================================================ */
+/* FULL PLAYER */
 
 .player {
   position:fixed;
@@ -616,14 +614,10 @@ body.full-player-open .bottom-nav {
 
   display:flex;
   flex-direction:column;
-
-  /* আগের চেয়ে কম gap */
   gap:clamp(8px,1.5vh,16px);
 
   flex:1;
   min-height:0;
-
-  /* নিচের অতিরিক্ত ফাঁকা জায়গা সরানো */
   padding-bottom:0;
 }
 
@@ -638,8 +632,6 @@ body.full-player-open .bottom-nav {
   justify-content:center;
 
   container-type:size;
-
-  /* Thumbnail সামান্য উপরে */
   transform:translateY(-8px);
 }
 
@@ -681,8 +673,6 @@ body.full-player-open .bottom-nav {
 
 .player-info-group {
   flex-shrink:0;
-
-  /* Info section সামান্য উপরে */
   transform:translateY(-5px);
 }
 
@@ -823,8 +813,6 @@ body.full-player-open .bottom-nav {
 
   gap:clamp(35px,12vw,55px);
   flex-shrink:0;
-
-  /* Controls আগের চেয়ে উপরে */
   transform:translateY(-8px);
 }
 
@@ -1719,9 +1707,42 @@ const instances = [
   'https://invidious.privacyredirect.com',
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
-  'https://yt.chocolatemoo53.com',
+  'https://invidious.nerdvpn.de',
   'https://invidious.tiekoetter.com'
 ];
+
+/* HOME REFRESH SEARCH QUERIES */
+
+const HOME_REFRESH_QUERIES = [
+  'Latest Bangla new songs 2026',
+  'New Hindi Bollywood songs 2026',
+  'Latest Bengali music releases',
+  'New Indian songs 2026',
+  'Latest Bangla movie songs',
+  'Latest Hindi romantic songs 2026',
+  'New Bengali song releases 2026',
+  'Latest Bollywood music videos'
+];
+
+let lastHomeRefreshQuery = '';
+
+function getHomeRefreshQuery() {
+
+  const choices = HOME_REFRESH_QUERIES.filter(
+    query => query !== lastHomeRefreshQuery
+  );
+
+  const pool = choices.length ? choices : HOME_REFRESH_QUERIES;
+
+  const selected = pool[
+    Math.floor(Math.random() * pool.length)
+  ];
+
+  lastHomeRefreshQuery = selected;
+
+  return selected;
+
+}
 
 /* PAGE NAVIGATION */
 
@@ -1757,11 +1778,69 @@ function setActiveTab(tab) {
 
 }
 
+/* HOME REFRESH */
+
+function refreshHomeFeed() {
+
+  const state = pageData.home;
+
+  /* আগের চলমান request বন্ধ */
+
+  if (state.controller) {
+    state.controller.abort();
+  }
+
+  state.controller = null;
+  state.busy = false;
+
+  homeAutoLoading = false;
+  homeHasMore = true;
+
+  /* আগের গানগুলো সরানো */
+
+  state.videos = [];
+  state.page = 0;
+
+  $('homeResults').innerHTML = '';
+
+  /* নতুন search query */
+
+  state.query = getHomeRefreshQuery();
+
+  $('homeStatus').textContent = 'Discovering new music…';
+
+  /* উপরে ফিরে যাওয়া */
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+  /* নতুন গান লোড */
+
+  loadSongs(
+    'home',
+    state.query,
+    1,
+    false
+  );
+
+}
+
+/* NAV BUTTON EVENTS */
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
 
   btn.addEventListener('click',() => {
 
     const tab = btn.dataset.tab;
+
+    /* Homepage-এ থেকেই Home চাপলে refresh */
+
+    if (tab === 'home' && activeTab === 'home') {
+      refreshHomeFeed();
+      return;
+    }
 
     if (
       tab === 'library' &&
@@ -2735,6 +2814,13 @@ async function loadSongs(type,query,pageNumber=1,append=false) {
 
     grid.innerHTML =
       '<div class="empty">কোনো গান পাওয়া যায়নি।</div>';
+
+  }
+
+  if (!state.videos.length && type === 'home' && !failed) {
+
+    grid.innerHTML =
+      '<div class="empty">নতুন গান খুঁজে পাওয়া যায়নি। আবার Home চাপ দিয়ে চেষ্টা করো।</div>';
 
   }
 
