@@ -493,7 +493,7 @@ body.full-player-open .bottom-nav {
 
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
+  justify-content:center;
   gap:clamp(14px,3.2vh,30px);
 
   flex:1;
@@ -514,6 +514,17 @@ body.full-player-open .bottom-nav {
   background:#222;
 
   box-shadow:0 20px 55px rgba(0,0,0,.5);
+
+  transform:scale(1);
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    box-shadow .5s cubic-bezier(.22,1,.36,1);
+}
+
+/* Pause করলে artwork একটু ছোট, play করলে আগের size এ ফেরে */
+.big-artwork-wrap.paused {
+  transform:scale(.84);
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
 }
 
 .player-info-group {
@@ -1082,7 +1093,7 @@ body.full-player-open .bottom-nav {
 
   <div class="player-content-center">
 
-    <div class="big-artwork-wrap">
+    <div class="big-artwork-wrap" id="artworkWrap">
       <img id="playingThumb" alt="Album Artwork">
     </div>
 
@@ -1641,6 +1652,7 @@ function onPlayerStateChange(event) {
 
     isPlaying = true;
     updateIcons();
+    setArtworkState(true);
     startTimer();
 
   }
@@ -1649,6 +1661,7 @@ function onPlayerStateChange(event) {
 
     isPlaying = false;
     updateIcons();
+    setArtworkState(false);
     stopTimer();
 
   }
@@ -1677,6 +1690,14 @@ function updateIcons() {
 
   $('miniPlayIcon').innerHTML =
     isPlaying ? pauseSVG : playSVG;
+
+}
+
+/* ARTWORK SIZE (play = বড়, pause = একটু ছোট) */
+
+function setArtworkState(playing) {
+
+  $('artworkWrap').classList.toggle('paused',!playing);
 
 }
 
@@ -2049,6 +2070,7 @@ function closePlayer() {
   playQueue = [];
 
   updateIcons();
+  setArtworkState(true);
   resetProgress();
 
 }
