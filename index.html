@@ -24,9 +24,6 @@
   --ga:55%;
   --r:16px;
   --cols:2;
-  --br:1;
-  --bb:0px;
-  --ov:0;
   --glass:color-mix(in srgb,var(--gbase) var(--ga),transparent);
   --gborder:rgba(255,255,255,.16);
   --gshadow:rgba(0,0,0,.45);
@@ -92,29 +89,6 @@ svg{display:block}
   backdrop-filter:blur(var(--gb)) saturate(180%);
   -webkit-backdrop-filter:blur(var(--gb)) saturate(180%);
   box-shadow:0 8px 24px var(--gshadow);
-}
-
-/* ========== BACKGROUND (blur reduced) ========== */
-#bg{
-  position:fixed;
-  top: calc(-1 * env(safe-area-inset-top, 0px) - 40px);
-  left: -40px;
-  right: -40px;
-  bottom: -0px;
-  z-index:-2;
-  background-color:var(--bg);
-  background-position:center;
-  background-repeat:no-repeat;
-  filter:brightness(var(--br)) blur(var(--bb));
-  transition:filter .25s;
-}
-
-#bgOv{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  background:rgba(0,0,0,var(--ov));
-  pointer-events:none;
 }
 
 .header{
@@ -413,7 +387,7 @@ body.fp .nav{
   pointer-events:none;
 }
 
-/* ========== FULL PLAYER ========== */
+/* Full Player */
 .player{
   position:fixed;
   inset:0;
@@ -438,7 +412,6 @@ body.fp .nav{
   pointer-events:auto;
 }
 
-/* Status bar cover for full player - forces dark/tint */
 .player::before{
   content:'';
   position:absolute;
@@ -864,31 +837,6 @@ input[type=range]{
 .sw button.on{border-color:var(--text)}
 .sw input{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:none}
 
-.pvs{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin:10px 0;
-}
-
-.pv{
-  aspect-ratio:3/4;
-  border-radius:12px;
-  border:2px solid transparent;
-  background-size:cover;
-  background-position:center;
-  display:grid;
-  place-items:center;
-  color:#fff;
-  font-size:11px;
-  font-weight:700;
-}
-
-.pv.on{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px var(--accent);
-}
-
 .sb{
   display:inline-flex;
   align-items:center;
@@ -903,18 +851,9 @@ input[type=range]{
 
 .sb.p{background:var(--accent);color:#fff}
 .sb.d{color:#ff453a}
-
-.acts{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
 </style>
 </head>
 <body>
-
-<div id="bg" aria-hidden="true"></div>
-<div id="bgOv" aria-hidden="true"></div>
 
 <header class="header">
   <div class="brand">SOUND<span>FLOW</span></div>
@@ -1158,39 +1097,6 @@ input[type=range]{
     </div>
 
     <div class="sec g">
-      <h3>Background</h3>
-      <div class="pvs" id="presets"></div>
-
-      <div class="acts">
-        <button class="sb p" id="pickImg" type="button">Choose Photo</button>
-        <button class="sb" id="rmImg" type="button">Remove Photo</button>
-      </div>
-
-      <input type="file" id="imgFile" accept="image/*" hidden>
-
-      <div class="row"><div><b>Image Fit</b></div></div>
-      <div class="seg" data-k="fit">
-        <button data-v="cover">Fill Screen</button>
-        <button data-v="contain">Show Full</button>
-      </div>
-
-      <div class="row">
-        <div><b>Background Blur</b><small>Slide right to blur, left to clear</small></div>
-        <input type="range" data-k="bb" min="0" max="30">
-      </div>
-
-      <div class="row">
-        <div><b>Brightness</b></div>
-        <input type="range" data-k="br" min="40" max="130">
-      </div>
-
-      <div class="row">
-        <div><b>Dark Overlay</b></div>
-        <input type="range" data-k="ov" min="0" max="70">
-      </div>
-    </div>
-
-    <div class="sec g">
       <h3>Glass Effect</h3>
       <div class="row">
         <div><b>Blur Strength</b><small>Blur of cards, nav and player</small></div>
@@ -1206,7 +1112,6 @@ input[type=range]{
     <div class="sec g">
       <h3>Reset</h3>
       <button class="sb d" id="resetAll" type="button">Reset Customization</button>
-
       <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">
         Settings are saved automatically on this device.
       </div>
@@ -1282,27 +1187,11 @@ addEventListener('keydown',e=>{
 const DEF={
   theme:'system',
   accent:'#0a84ff',
-  preset:0,
-  custom:false,
-  fit:'cover',
-  bb:0,
-  br:100,
-  ov:0,
   gb:20,
   ga:55,
   r:16,
   cols:2
 };
-
-const PRESETS=[
-  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
-  'linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)',
-  'linear-gradient(160deg,#42275a,#734b6d 55%,#f7971e)',
-  'linear-gradient(160deg,#134e5e,#71b280)',
-  'linear-gradient(160deg,#232526,#414345 60%,#6b7280)',
-  'linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)',
-  'linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)'
-];
 
 const ACCENTS=[
   '#0a84ff',
@@ -1326,20 +1215,10 @@ function apply(){
     :d.dataset.theme=S.theme;
 
   st.setProperty('--accent',S.accent);
-  st.setProperty('--bb',S.bb+'px');
-  st.setProperty('--br',S.br/100);
-  st.setProperty('--ov',S.ov/100);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--ga',S.ga+'%');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols);
-
-  const img=S.custom?LS.get('sf_bgimg',''):'';
-  const grad=PRESETS[S.preset]||PRESETS[0];
-  const bg=$('bg');
-
-  bg.style.backgroundImage=img?`url("${img}"),${grad}`:grad;
-  bg.style.backgroundSize=img?`${S.fit},cover`:'cover';
 
   document.querySelectorAll('.seg').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
@@ -1359,13 +1238,6 @@ function apply(){
   document.querySelectorAll('#accents button').forEach(b=>{
     b.classList.toggle('on',b.dataset.c===S.accent);
   });
-
-  document.querySelectorAll('#presets .pv').forEach(p=>{
-    p.classList.toggle(
-      'on',
-      S.custom?p.dataset.i==='c':p.dataset.i===String(S.preset)
-    );
-  });
 }
 
 function buildSettingsUI(){
@@ -1383,44 +1255,6 @@ function buildSettingsUI(){
     };
     a.prepend(b);
   });
-
-  const p=$('presets');
-
-  PRESETS.forEach((g,i)=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='pv';
-    b.dataset.i=i;
-    b.style.backgroundImage=g;
-
-    b.onclick=()=>{
-      S.preset=i;
-      S.custom=false;
-      save();
-      apply();
-    };
-
-    p.appendChild(b);
-  });
-
-  const cb=document.createElement('button');
-  cb.type='button';
-  cb.className='pv';
-  cb.dataset.i='c';
-  cb.style.background='var(--surface-2)';
-  cb.textContent='Photo';
-
-  cb.onclick=()=>{
-    if(LS.get('sf_bgimg','')){
-      S.custom=true;
-      save();
-      apply();
-    }else{
-      $('imgFile').click();
-    }
-  };
-
-  p.appendChild(cb);
 
   document.querySelectorAll('input[data-k]').forEach(el=>{
     el.addEventListener('input',()=>{
@@ -1444,71 +1278,7 @@ function buildSettingsUI(){
   });
 }
 
-function compress(file){
-  return new Promise((res,rej)=>{
-    const fr=new FileReader();
-
-    fr.onerror=rej;
-
-    fr.onload=()=>{
-      const im=new Image();
-
-      im.onerror=rej;
-
-      im.onload=()=>{
-        const s=Math.min(1,1600/Math.max(im.width,im.height));
-        const c=document.createElement('canvas');
-
-        c.width=Math.round(im.width*s);
-        c.height=Math.round(im.height*s);
-
-        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-
-        try{
-          res(c.toDataURL('image/jpeg',.8));
-        }catch(e){
-          rej(e);
-        }
-      };
-
-      im.src=fr.result;
-    };
-
-    fr.readAsDataURL(file);
-  });
-}
-
-$('pickImg').onclick=()=>$('imgFile').click();
-
-$('imgFile').onchange=async e=>{
-  const f=e.target.files[0];
-  e.target.value='';
-
-  if(!f)return;
-
-  try{
-    const d=await compress(f);
-
-    if(!LS.set('sf_bgimg',d))throw 0;
-
-    S.custom=true;
-    save();
-    apply();
-
-  }catch(x){
-    alert('Could not use this image. Try a smaller one.');
-  }
-};
-
-$('rmImg').onclick=()=>{
-  try{localStorage.removeItem('sf_bgimg')}catch(e){}
-  S.custom=false;
-  save();
-  apply();
-};
-
 $('resetAll').onclick=()=>{
-  try{localStorage.removeItem('sf_bgimg')}catch(e){}
   S={...DEF};
   save();
   apply();
@@ -1933,7 +1703,6 @@ const D={
 let activeTab='home';
 let libView='folders';
 let qi=0;
-let homeRetryTimer=null;
 
 const HQ=[
   'Top Bangla Hindi songs',
