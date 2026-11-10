@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
 <title>SoundFlow — Music</title>
 
 <style>
@@ -73,6 +74,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   min-height:100dvh;
   overscroll-behavior-x:none;
+  background:var(--bg);
 }
 
 button{
@@ -94,30 +96,33 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* ========== FIXED: Clean Status Bar (matches full screen color) ========== */
+/* ========== STATUS BAR - CLEAN FULL BLEED ========== */
 .sys-glass{
   position:fixed;
   z-index:11000;
   top:0;
   left:0;
   right:0;
-  height:env(safe-area-inset-top);
+  height:env(safe-area-inset-top, 47px);
   pointer-events:none;
   background:transparent;
-  backdrop-filter:blur(50px) saturate(180%);
-  -webkit-backdrop-filter:blur(50px) saturate(180%);
+  backdrop-filter:blur(12px) saturate(160%);
+  -webkit-backdrop-filter:blur(12px) saturate(160%);
 }
 
-/* Full Player: soft tint match */
+/* Full player - soft tint only */
 body.fp .sys-glass{
-  background:color-mix(in srgb,var(--tint) 28%,transparent);
-  backdrop-filter:blur(50px) saturate(180%);
-  -webkit-backdrop-filter:blur(50px) saturate(180%);
+  background:color-mix(in srgb, var(--tint) 18%, transparent);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
 }
 
 #bg{
   position:fixed;
-  inset:-40px;
+  top: calc(-1 * env(safe-area-inset-top, 47px) - 80px);
+  left: -50px;
+  right: -50px;
+  bottom: -50px;
   z-index:-2;
   background-color:var(--bg);
   background-position:center;
@@ -137,7 +142,7 @@ body.fp .sys-glass{
 .header{
   max-width:1050px;
   margin:auto;
-  padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;
+  padding:calc(env(safe-area-inset-top, 47px) + 14px) 16px 4px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -438,7 +443,7 @@ body.fp .nav{
   display:flex;
   flex-direction:column;
   color:#fff;
-  padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);
+  padding:calc(env(safe-area-inset-top, 47px) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);
   overflow:hidden;
   overscroll-behavior:none;
   background:var(--tint);
@@ -742,7 +747,7 @@ body.fp .nav{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:calc(env(safe-area-inset-top) + 10px) 12px 8px;
+  padding:calc(env(safe-area-inset-top, 47px) + 10px) 12px 8px;
 }
 
 .sph h2{
