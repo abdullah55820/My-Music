@@ -77,6 +77,7 @@ body{
   min-height:100dvh;
   overscroll-behavior-x:none;
   isolation:isolate;
+  background:transparent;
 }
 
 button{
@@ -98,15 +99,17 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* FIXED BACKGROUND - iPhone SAFE AREA */
+/* iPHONE FULL SCREEN BACKGROUND FIX */
 #bg{
   position:fixed;
-  inset:-120px;
-  z-index:-2;
+  inset:-150px 0;
+  z-index:0;
   background-color:var(--bg);
-  background-position:center;
+  background-position:center center;
   background-repeat:no-repeat;
+  background-attachment:scroll;
   filter:brightness(var(--br)) blur(var(--bb));
+  transform:translateZ(0);
   transition:filter .25s;
   pointer-events:none;
 }
@@ -114,12 +117,15 @@ svg{display:block}
 #bgOv{
   position:fixed;
   inset:0;
-  z-index:-1;
+  z-index:1;
   background:rgba(0,0,0,var(--ov));
   pointer-events:none;
 }
 
+/* Header */
 .header{
+  position:relative;
+  z-index:2;
   max-width:1050px;
   margin:auto;
   padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;
@@ -148,7 +154,13 @@ svg{display:block}
 .ib svg{width:21px;height:21px}
 .ib:active{transform:scale(.9)}
 
-.page{display:none}
+/* Pages */
+.page{
+  display:none;
+  position:relative;
+  z-index:2;
+}
+
 .page.active{display:block}
 
 .wrap{
@@ -563,7 +575,6 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* Full width progress bar */
 .player input.seek{
   width:100%;
   min-width:100%;
@@ -901,9 +912,9 @@ input[type=range]{
 }
 </style>
 </head>
+
 <body>
 
-<!-- Background -->
 <div id="bg" aria-hidden="true"></div>
 <div id="bgOv" aria-hidden="true"></div>
 
@@ -1296,12 +1307,8 @@ const PRESETS=[
 ];
 
 const ACCENTS=[
-  '#0a84ff',
-  '#ff2d55',
-  '#30d158',
-  '#ff9f0a',
-  '#bf5af2',
-  '#64d2ff'
+  '#0a84ff','#ff2d55','#30d158',
+  '#ff9f0a','#bf5af2','#64d2ff'
 ];
 
 let S={...DEF,...LS.get('sf_settings_v2',{})};
@@ -1329,8 +1336,17 @@ function apply(){
   const grad=PRESETS[S.preset]||PRESETS[0];
   const bg=$('bg');
 
-  bg.style.backgroundImage=img?`url("${img}"),${grad}`:grad;
-  bg.style.backgroundSize=img?`${S.fit},cover`:'cover';
+  /* UPDATED BACKGROUND IMAGE HANDLING */
+  bg.style.backgroundImage=img
+    ?`url("${img}"),${grad}`
+    :grad;
+
+  bg.style.backgroundSize=img
+    ?`${S.fit},cover`
+    :'cover';
+
+  bg.style.backgroundPosition='center center';
+  bg.style.backgroundRepeat='no-repeat';
 
   document.querySelectorAll('.seg').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
@@ -1514,7 +1530,6 @@ function openProfile(){
 
 $('profBtn').onclick=openProfile;
 
-/* Profile close */
 $('spBack').onclick=$('spClose').onclick=()=>{
   history.back();
 };
@@ -1574,14 +1589,12 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }
-
   else if(e.data===YT.PlayerState.PAUSED){
     playing=false;
     icons();
     $('art').classList.add('paused');
     stopT();
   }
-
   else if(e.data===YT.PlayerState.ENDED){
     playing=false;
     icons();
@@ -1925,7 +1938,6 @@ const D={
 let activeTab='home';
 let libView='folders';
 let qi=0;
-let homeRetryTimer=null;
 
 const HQ=[
   'Top Bangla Hindi songs',
@@ -1940,7 +1952,6 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
-/* Session-only seen list */
 const seen=new Set();
 
 function card(v,i,list){
@@ -2448,8 +2459,6 @@ icons();
 setProg(0);
 renderLib();
 watchSentinel();
-
-/* Fresh home catalog after page reload */
 loadHomeMore();
 
 </script>
