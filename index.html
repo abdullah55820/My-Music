@@ -94,18 +94,25 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* iPhone status bar glass */
+/* FIXED: iPhone Status Bar Glass */
 .sys-glass{
   position:fixed;
   z-index:11000;
   top:0;
   left:0;
   right:0;
-  height:calc(env(safe-area-inset-top) + 4px);
+  height:env(safe-area-inset-top);
   pointer-events:none;
-  background:rgba(120,120,128,.12);
-  backdrop-filter:blur(28px) saturate(180%);
-  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  background:color-mix(in srgb,var(--bg) 22%,transparent);
+  backdrop-filter:blur(35px) saturate(180%);
+  -webkit-backdrop-filter:blur(35px) saturate(180%);
+}
+
+/* FIXED: Full Player Status Bar matches album tint */
+body.fp .sys-glass{
+  background:color-mix(in srgb,var(--tint) 35%,transparent);
+  backdrop-filter:blur(35px) saturate(180%);
+  -webkit-backdrop-filter:blur(35px) saturate(180%);
 }
 
 #bg{
@@ -262,7 +269,6 @@ svg{display:block}
   gap:12px;
 }
 
-/* Home only columns */
 #homeGrid{
   grid-template-columns:repeat(var(--cols),minmax(0,1fr));
   width:100%;
@@ -530,6 +536,8 @@ body.fp .nav{
 }
 
 .meta{
+  width:100%;
+  min-width:0;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -570,14 +578,20 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-.seek{
+/* FIXED: Full width progress bar */
+.player input.seek{
   width:100%;
+  min-width:100%;
+  max-width:100%;
   height:28px;
   margin:4px 0 0;
+  padding:0;
   display:block;
+  align-self:stretch;
   appearance:none;
   -webkit-appearance:none;
   outline:0;
+  border:0;
   background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;
 }
 
@@ -902,7 +916,6 @@ input[type=range]{
 }
 </style>
 </head>
-
 <body>
 
 <div class="sys-glass"></div>
@@ -926,7 +939,6 @@ input[type=range]{
       <span class="pill g"><h2>Home</h2></span>
       <span class="status g" id="homeStatus">Discover music</span>
     </div>
-
     <div class="grid" id="homeGrid"></div>
     <div id="sentinel"></div>
   </div>
@@ -935,15 +947,12 @@ input[type=range]{
 <!-- SEARCH -->
 <main class="page" id="searchPage">
   <div class="wrap">
-
     <form class="sbox g" id="sForm">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="10.8" cy="10.8" r="6.8"/>
         <path d="m16 16 5 5"/>
       </svg>
-
       <input id="q" type="search" placeholder="Songs, artists..." autocomplete="off" enterkeyhint="search">
-
       <button class="xbtn" id="clearQ" type="button" aria-label="Clear search" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
           <path d="M6 6l12 12M18 6 6 18"/>
@@ -957,16 +966,13 @@ input[type=range]{
     </div>
 
     <div class="grid" id="searchGrid" hidden></div>
-
     <button class="load g" id="searchMore" hidden>Load More</button>
-
   </div>
 </main>
 
 <!-- LIBRARY -->
 <main class="page" id="libraryPage">
   <div class="wrap">
-
     <div class="section">
       <span class="pill g">
         <button class="back" id="libBack" type="button" hidden aria-label="Back">
@@ -976,19 +982,16 @@ input[type=range]{
         </button>
         <h2 id="libTitle">Library</h2>
       </span>
-
       <span class="status g" id="libStatus">1 Folder</span>
     </div>
 
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
-
   </div>
 </main>
 
 <!-- NAV -->
 <nav class="nav g" id="nav">
-
   <button class="nb active" data-tab="home" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="m3 10 9-7 9 7"/>
@@ -1014,12 +1017,10 @@ input[type=range]{
     </svg>
     <span>Library</span>
   </button>
-
 </nav>
 
 <!-- FULL PLAYER -->
 <section class="player" id="player">
-
   <div class="pbg" id="pBg"></div>
   <div class="pshade"></div>
 
@@ -1028,7 +1029,6 @@ input[type=range]{
   </button>
 
   <div class="pc">
-
     <div class="az">
       <div class="art" id="art">
         <img id="pThumb" alt="">
@@ -1058,7 +1058,6 @@ input[type=range]{
     </div>
 
     <div class="ctr">
-
       <button class="cb" id="prevBtn" type="button" aria-label="Previous">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M11 6v12L2 12zM21 6v12l-9-6z"/>
@@ -1076,14 +1075,12 @@ input[type=range]{
           <path d="M3 6v12l9-6zM13 6v12l9-6z"/>
         </svg>
       </button>
-
     </div>
   </div>
 </section>
 
 <!-- MINI PLAYER -->
 <div class="mini g" id="mini">
-
   <img id="mThumb" alt="">
 
   <div class="mi" id="mInfo">
@@ -1102,14 +1099,11 @@ input[type=range]{
       <path d="M6 6l12 12M18 6 6 18"/>
     </svg>
   </button>
-
 </div>
 
 <!-- PROFILE / SETTINGS -->
 <section class="sp" id="sp" role="dialog" aria-modal="true">
-
   <div class="sph">
-
     <button class="ib g" id="spBack" type="button" aria-label="Back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
         <path d="m15 5-7 7 7 7"/>
@@ -1123,11 +1117,9 @@ input[type=range]{
         <path d="M6 6l12 12M18 6 6 18"/>
       </svg>
     </button>
-
   </div>
 
   <div class="spb">
-
     <div class="prof g">
       <div class="av">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -1135,7 +1127,6 @@ input[type=range]{
           <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
         </svg>
       </div>
-
       <div>
         <b>My SoundFlow</b>
         <small id="favCount">0 favourite songs</small>
@@ -1144,7 +1135,6 @@ input[type=range]{
 
     <div class="sec g">
       <h3>Appearance</h3>
-
       <div class="row"><div><b>Theme</b></div></div>
 
       <div class="seg" data-k="theme">
@@ -1154,7 +1144,6 @@ input[type=range]{
       </div>
 
       <div class="row"><div><b>Accent Color</b></div></div>
-
       <div class="sw" id="accents">
         <label style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)">
           <input type="color" data-k="accent" id="accentPick" style="opacity:0">
@@ -1162,7 +1151,6 @@ input[type=range]{
       </div>
 
       <div class="row"><div><b>Songs per Row</b></div></div>
-
       <div class="seg" data-k="cols">
         <button data-v="1">1</button>
         <button data-v="2">2</button>
@@ -1177,7 +1165,6 @@ input[type=range]{
 
     <div class="sec g">
       <h3>Background</h3>
-
       <div class="pvs" id="presets"></div>
 
       <div class="acts">
@@ -1188,7 +1175,6 @@ input[type=range]{
       <input type="file" id="imgFile" accept="image/*" hidden>
 
       <div class="row"><div><b>Image Fit</b></div></div>
-
       <div class="seg" data-k="fit">
         <button data-v="cover">Fill Screen</button>
         <button data-v="contain">Show Full</button>
@@ -1212,7 +1198,6 @@ input[type=range]{
 
     <div class="sec g">
       <h3>Glass Effect</h3>
-
       <div class="row">
         <div><b>Blur Strength</b><small>Blur of cards, nav and player</small></div>
         <input type="range" data-k="gb" min="0" max="40">
@@ -1232,7 +1217,6 @@ input[type=range]{
         Settings are saved automatically on this device.
       </div>
     </div>
-
   </div>
 </section>
 
