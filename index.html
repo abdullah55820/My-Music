@@ -2198,3 +2198,186 @@ async function doSearch(term){
   $('searchGrid').hidden=false;
   $('searchGrid').innerHTML='<div class="empty g">Searching…</div>';
   $('searchStatus').textContent='Searching…';
+  $('searchMore').hidden=true;
+
+  loadSearch(term,1,false);
+}
+
+async function loadSearch(term,page=1,append=false){
+  const st=D.search;
+
+  if(st.busy){
+    if(st.ctl)st.ctl.abort();
+  }
+
+  st.busy=true;
+
+  const ctl=new AbortController();
+  st.ctl=ctl;
+
+  const grid=$('searchGrid');
+
+  $('searchMore').hidden=true;
+
+  if(!append){
+    st.videos=[];
+    grid.innerHTML='<div class="empty g">Searching…</div>';
+  }
+
+  const data=await fetchSongs(term,page,ctl);
+
+  if(st.ctl!==ctl||ctl.signal.aborted)return;
+
+  st.busy=false;
+
+  if(data===null){
+    if(!append){
+      grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
+    }
+
+    $('searchStatus').textContent='Connection error';
+    return;
+  }
+
+  if(!append)grid.innerHTML='';
+
+  const ids=new Set(st.videos.map(v=>v.videoId));
+
+  const fresh=data.filter(v=>!ids.has(v.videoId));
+
+  fresh.forEach(v=>{
+    st.videos.push(v);
+    grid.appendChild(
+      card(v,st.videos.length-1,st.videos)
+    );
+  });
+
+  st.page=page;
+  st.query=term;
+
+  if(!st.videos.length){
+    grid.innerHTML='<div class="empty g">No songs found.</div>';
+  }
+
+  $('searchStatus').textContent=st.videos.length+' Songs';
+
+  $('searchMore').hidden=!data.length||!fresh.length;
+  $('searchMore').disabled=false;
+}
+
+function clearSearch(){
+  const st=D.search;
+
+  if(st.ctl)st.ctl.abort();
+
+  st.ctl=null;
+  st.busy=false;
+  st.videos=[];
+  st.query='';
+  st.page=1;
+
+  q.value='';
+
+  $('clearQ').hidden=true;
+  $('searchHeading').hidden=true;
+  $('searchGrid').hidden=true;
+  $('searchGrid').innerHTML='';
+  $('searchMore').hidden=true;
+
+  $('searchStatus').textContent='Search songs';
+
+  q.focus();
+}
+
+$('sForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  doSearch(q.value);
+});
+
+q.addEventListener('input',()=>{
+  $('clearQ').hidden=!q.value;
+});
+
+$('clearQ').onclick=clearSearch;
+
+$('searchMore').onclick=()=>{
+  const s=D.search;
+
+  if(s.query&&!s.busy){
+    loadSearch(s.query,s.page+1,true);
+  }
+};
+
+/* LIBRARY */
+const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
+
+function openFolder(){
+  libView='fav';
+  renderLib();
+  window.scrollTo(0,0);
+
+  pushLayer(()=>{
+    libView='folders';
+    renderLib();
+  });
+}
+
+function folderCard(name,songs,open){
+  const c=document.createElement('article');
+
+  c.className='card g';
+  c.tabIndex=0;
+
+  const cv=document.createElement('div');
+  cv.className='fcover';
+
+  if(songs.length){
+    const quad=songs.length>=4;
+
+    cv.dataset.l=quad?'quad':'single';
+
+    songs.slice(0,quad?4:1).forEach(v=>{
+      const i=document.createElement('img');
+      i.loading='lazy';
+      i.alt='';
+      i.src=thumbOf(v);
+      cv.appendChild(i);
+    });
+
+    const b=document.createElement('div');
+    b.className='fbadge g';
+    b.innerHTML=HEART;
+    cv.appendChild(b);
+
+  }else{
+    const i=document.createElement('div');
+    i.className='fempty';
+    i.innerHTML=HEART;
+    cv.appendChild(i);
+  }
+
+  const t=document.createElement('div');
+  t.className='title';
+  t.textContent=name;
+
+  const n=document.createElement('div');
+  n.className='artist';
+  n.textContent=songs.length+(songs.length===1?' song':' songs');
+
+  c.append(cv,t,n);
+
+  c.onclick=open;
+
+  c.onkeydown=e=>{
+    if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      open();
+    }
+  };
+
+  return c;
+}
+
+function renderLib(){
+  const songs=getLiked();
+  const fav=libView==='fav';
