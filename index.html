@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SoundFlow — Music</title>
 <style>
-:root{color-scheme:dark;--bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--text:#fff;--muted:#a1a1a8;--line:rgba(255,255,255,.14);--accent:#0a84ff;--gbase:#1c1c1e;--gb:20px;--ga:55%;--r:16px;--gmin:150px;--br:1;--bb:0px;--ov:0;--glass:color-mix(in srgb,var(--gbase) var(--ga),transparent);--gborder:rgba(255,255,255,.16);--gshadow:rgba(0,0,0,.45);--tint:#2a2a2c}
+:root{color-scheme:dark;--bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--text:#fff;--muted:#a1a1a8;--line:rgba(255,255,255,.14);--accent:#0a84ff;--gbase:#1c1c1e;--gb:20px;--ga:55%;--r:16px;--cols:2;--br:1;--bb:0px;--ov:0;--glass:color-mix(in srgb,var(--gbase) var(--ga),transparent);--gborder:rgba(255,255,255,.16);--gshadow:rgba(0,0,0,.45);--tint:#2a2a2c}
 :root[data-theme=light]{color-scheme:light;--bg:#f2f2f7;--surface:#fff;--surface-2:#e5e5ea;--text:#000;--muted:#6c6c70;--line:rgba(0,0,0,.1);--gbase:#fff;--gborder:rgba(255,255,255,.8);--gshadow:rgba(30,40,80,.18)}
 @media(prefers-color-scheme:light){:root:not([data-theme=dark]):not([data-theme=light]){color-scheme:light;--bg:#f2f2f7;--surface:#fff;--surface-2:#e5e5ea;--text:#000;--muted:#6c6c70;--line:rgba(0,0,0,.1);--gbase:#fff;--gborder:rgba(255,255,255,.8);--gshadow:rgba(30,40,80,.18)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -50,7 +50,7 @@ svg{display:block}
 .rlabel{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin:4px 2px 6px}
 .rlabel button{color:var(--accent);font-size:12px;text-transform:none;letter-spacing:0}
 /* grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--gmin),1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:12px}
 .card{border-radius:var(--r);padding:9px;cursor:pointer;min-width:0;transition:transform .2s}
 .card:active{transform:scale(.97)}
 .thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:calc(var(--r) - 4px);background:var(--surface-2);display:block}
@@ -91,10 +91,10 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 .meta p{margin:0;font-size:17px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .like{width:44px;height:44px;display:grid;place-items:center;color:rgba(255,255,255,.8);flex-shrink:0}
 .like svg{width:27px;height:27px}.like.liked{color:#ff2d55}.like.liked svg{fill:currentColor}
-.seek{width:100%;height:30px;margin:-12px 0 -13px;display:block;appearance:none;-webkit-appearance:none;outline:0;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat}
+.seek{width:100%;height:28px;margin:4px 0 0;display:block;appearance:none;-webkit-appearance:none;outline:0;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat}
 .seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
 .seek::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:#fff}
-.trow{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
+.trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
 .cb{width:64px;height:64px;display:grid;place-items:center;color:#fff}
 .cb svg{width:46px;height:46px}.cb.big{width:84px;height:84px}.cb.big svg{width:66px;height:66px}
@@ -226,8 +226,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="theme"><button data-v="system">System</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div>
       <div class="row"><div><b>Accent Color</b></div></div>
       <div class="sw" id="accents"><label style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)"><input type="color" data-k="accent" id="accentPick" style="opacity:0"></label></div>
-      <div class="row"><div><b>Card Size</b></div></div>
-      <div class="seg" data-k="gmin"><button data-v="105">Small</button><button data-v="150">Medium</button><button data-v="185">Large</button></div>
+      <div class="row"><div><b>Songs per Row</b></div></div>
+      <div class="seg" data-k="cols"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div>
       <div class="row"><div><b>Corner Roundness</b></div><input type="range" data-k="r" min="6" max="30"></div>
     </div>
 
@@ -271,7 +271,7 @@ addEventListener('touchend',e=>{if(!edge)return;edge=false;const t=e.changedTouc
 addEventListener('keydown',e=>{if(e.key==='Escape')goBack()});
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,custom:false,fit:'cover',bb:0,br:100,ov:0,gb:20,ga:55,r:16,gmin:150};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,custom:false,fit:'cover',bb:0,br:100,ov:0,gb:20,ga:55,r:16,cols:2};
 const PRESETS=['linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)','linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)','linear-gradient(160deg,#42275a,#734b6d 55%,#f7971e)','linear-gradient(160deg,#134e5e,#71b280)','linear-gradient(160deg,#232526,#414345 60%,#6b7280)','linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)','linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)'];
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 let S={...DEF,...LS.get('sf_settings_v2',{})};
@@ -280,7 +280,7 @@ function apply(){
   const d=document.documentElement,st=d.style;
   S.theme==='system'?d.removeAttribute('data-theme'):d.dataset.theme=S.theme;
   st.setProperty('--accent',S.accent);st.setProperty('--bb',S.bb+'px');st.setProperty('--br',S.br/100);st.setProperty('--ov',S.ov/100);
-  st.setProperty('--gb',S.gb+'px');st.setProperty('--ga',S.ga+'%');st.setProperty('--r',S.r+'px');st.setProperty('--gmin',S.gmin+'px');
+  st.setProperty('--gb',S.gb+'px');st.setProperty('--ga',S.ga+'%');st.setProperty('--r',S.r+'px');st.setProperty('--cols',S.cols);
   const img=S.custom?LS.get('sf_bgimg',''):'';
   const grad=PRESETS[S.preset]||PRESETS[0],bg=$('bg');
   bg.style.backgroundImage=img?`url("${img}"),${grad}`:grad;
@@ -376,7 +376,8 @@ $('likeBtn').addEventListener('click',e=>{
 /* ---------- SONGS ---------- */
 const instances=['https://invidious.privacyredirect.com','https://inv.nadeko.net','https://invidious.nerdvpn.de','https://yt.chocolatemoo53.com','https://invidious.tiekoetter.com'];
 const D={home:{videos:[],page:0,query:'Top Bangla Hindi songs',busy:false,ctl:null},search:{videos:[],page:1,query:'',busy:false,ctl:null}};
-let activeTab='home',libView='folders',homeMore=true;
+let activeTab='home',libView='folders',homeMore=true,qi=0;
+const HQ=['Top Bangla Hindi songs','Bangla new songs','Hindi romantic songs','Arijit Singh songs','Old Bangla hits','Bollywood hits','Bengali modern songs','Hindi lofi songs','Kishore Kumar songs','Anupam Roy songs'];
 const seen=new Set(LS.get('sf_home_seen_v1',[]));
 
 function card(v,i,list){
@@ -409,28 +410,23 @@ async function loadSongs(type,query,page=1,append=false){
   }
   if(st.ctl!==ctl||ctl.signal.aborted)return;
   st.busy=false;
-  if(fail&&!append){if(home)status.textContent='Connection unavailable';else{grid.innerHTML='<div class="empty g">Unable to connect. Please try again later.</div>';status.textContent='Server Error'}return}
+  if(fail&&(!append||home)){if(home){status.textContent='Connection unavailable';setTimeout(autoHome,3000)}else{grid.innerHTML='<div class="empty g">Unable to connect. Please try again later.</div>';status.textContent='Server Error'}return}
   if(!append&&!home)grid.innerHTML='';
   got.forEach(v=>{st.videos.push(v);if(home)seen.add(v.videoId);grid.appendChild(card(v,st.videos.length-1,st.videos))});
   if(!st.videos.length&&!home)grid.innerHTML='<div class="empty g">No songs found.</div>';
   st.page=last;st.query=query;status.textContent=st.videos.length+' Songs';
   if(!home){$('searchMore').hidden=end||!got.length;$('searchMore').disabled=false}
-  else{if(end||(!got.length&&!append))homeMore=false;else if(!got.length)homeMore=false;else homeMore=true;
-    LS.set('sf_home_seen_v1',[...seen].slice(-5000));LS.set('sf_home_cache_v2',{videos:st.videos.slice(-200),page:st.page,savedAt:Date.now()});watchSentinel()}
+  else{if(end||!got.length){qi=(qi+1)%HQ.length;st.query=HQ[qi];st.page=0}
+    LS.set('sf_home_seen_v1',[...seen].slice(-5000));LS.set('sf_home_cache_v2',{videos:st.videos.slice(-300),page:st.page,qi,savedAt:Date.now()});setTimeout(autoHome,400)}
 }
-/* home infinite scroll */
-let obs=null;
-function watchSentinel(){
-  if(!('IntersectionObserver' in window))return;
-  const s=$('sentinel');
-  if(!obs)obs=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&activeTab==='home'&&mode!=='full'&&homeMore&&!D.home.busy&&D.home.videos.length)loadSongs('home',D.home.query,D.home.page+1,true)},{rootMargin:'700px 0px'});
-  obs.unobserve(s);if(homeMore)requestAnimationFrame(()=>obs.observe(s));
-}
+/* home: endless auto-load */
+function autoHome(){if(D.home.busy)return;D.home.videos.length?loadSongs('home',D.home.query,D.home.page+1,true):loadSongs('home',D.home.query,1,false)}
+function watchSentinel(){}
 function restoreHome(){
   const c=LS.get('sf_home_cache_v2',null);
   if(!c||!Array.isArray(c.videos)||(c.savedAt&&Date.now()-c.savedAt>6048e5))return;
   const v=c.videos.filter(x=>x&&x.videoId);if(!v.length)return;
-  D.home.videos=v;D.home.page=+c.page||0;
+  D.home.videos=v;D.home.page=+c.page||0;qi=+c.qi||0;D.home.query=HQ[qi]||HQ[0];
   v.forEach((x,i)=>$('homeGrid').appendChild(card(x,i,D.home.videos)));$('homeStatus').textContent=v.length+' Songs';
 }
 
