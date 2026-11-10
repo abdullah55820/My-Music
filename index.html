@@ -94,7 +94,7 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* FIXED: iPhone Status Bar Glass */
+/* iPhone Status Bar Glass - Fixed */
 .sys-glass{
   position:fixed;
   z-index:11000;
@@ -103,14 +103,14 @@ svg{display:block}
   right:0;
   height:env(safe-area-inset-top);
   pointer-events:none;
-  background:color-mix(in srgb,var(--bg) 22%,transparent);
+  background:transparent;
   backdrop-filter:blur(35px) saturate(180%);
   -webkit-backdrop-filter:blur(35px) saturate(180%);
 }
 
-/* FIXED: Full Player Status Bar matches album tint */
+/* Full Player Status Bar - Fixed */
 body.fp .sys-glass{
-  background:color-mix(in srgb,var(--tint) 35%,transparent);
+  background:transparent;
   backdrop-filter:blur(35px) saturate(180%);
   -webkit-backdrop-filter:blur(35px) saturate(180%);
 }
@@ -1529,6 +1529,7 @@ function openProfile(){
 
 $('profBtn').onclick=openProfile;
 
+/* Profile close */
 $('spBack').onclick=$('spClose').onclick=()=>{
   history.back();
 };
@@ -2089,7 +2090,6 @@ async function loadHomeMore(){
     }
 
     if(added<20&&data.length>0){
-      /* Keep fetching on the next scroll instead of looping endlessly */
       break;
     }
   }
