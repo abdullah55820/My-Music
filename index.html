@@ -66,15 +66,13 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-html{background:var(--bg)}
-
-body{
+html, body{
+  background:var(--bg);
   margin:0;
   color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   min-height:100dvh;
   overscroll-behavior-x:none;
-  background:var(--bg);
 }
 
 button{
@@ -96,33 +94,13 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* ========== STATUS BAR - CLEAN FULL BLEED ========== */
-.sys-glass{
-  position:fixed;
-  z-index:11000;
-  top:0;
-  left:0;
-  right:0;
-  height:env(safe-area-inset-top, 47px);
-  pointer-events:none;
-  background:transparent;
-  backdrop-filter:blur(12px) saturate(160%);
-  -webkit-backdrop-filter:blur(12px) saturate(160%);
-}
-
-/* Full player - soft tint only */
-body.fp .sys-glass{
-  background:color-mix(in srgb, var(--tint) 18%, transparent);
-  backdrop-filter:blur(18px) saturate(160%);
-  -webkit-backdrop-filter:blur(18px) saturate(160%);
-}
-
+/* ========== BACKGROUND (blur reduced) ========== */
 #bg{
   position:fixed;
-  top: calc(-1 * env(safe-area-inset-top, 47px) - 80px);
-  left: -50px;
-  right: -50px;
-  bottom: -50px;
+  top: calc(-1 * env(safe-area-inset-top, 59px) - 40px);
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
   z-index:-2;
   background-color:var(--bg);
   background-position:center;
@@ -142,7 +120,7 @@ body.fp .sys-glass{
 .header{
   max-width:1050px;
   margin:auto;
-  padding:calc(env(safe-area-inset-top, 47px) + 14px) 16px 4px;
+  padding:calc(env(safe-area-inset-top, 59px) + 14px) 16px 4px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -435,7 +413,7 @@ body.fp .nav{
   pointer-events:none;
 }
 
-/* Full Player */
+/* ========== FULL PLAYER ========== */
 .player{
   position:fixed;
   inset:0;
@@ -443,7 +421,7 @@ body.fp .nav{
   display:flex;
   flex-direction:column;
   color:#fff;
-  padding:calc(env(safe-area-inset-top, 47px) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);
+  padding:calc(env(safe-area-inset-top, 59px) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);
   overflow:hidden;
   overscroll-behavior:none;
   background:var(--tint);
@@ -458,6 +436,19 @@ body.fp .nav{
   visibility:visible;
   opacity:1;
   pointer-events:auto;
+}
+
+/* Status bar cover for full player - forces dark/tint */
+.player::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:env(safe-area-inset-top, 59px);
+  background:var(--tint);
+  z-index:5;
+  pointer-events:none;
 }
 
 .pbg{
@@ -475,7 +466,7 @@ body.fp .nav{
   position:absolute;
   inset:0;
   z-index:1;
-  background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.14) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));
+  background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.25) 18%,rgba(0,0,0,.45) 45%,rgba(0,0,0,.7) 75%,rgba(0,0,0,.85));
   pointer-events:none;
 }
 
@@ -583,7 +574,6 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* FIXED: Full width progress bar */
 .player input.seek{
   width:100%;
   min-width:100%;
@@ -747,7 +737,7 @@ body.fp .nav{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:calc(env(safe-area-inset-top, 47px) + 10px) 12px 8px;
+  padding:calc(env(safe-area-inset-top, 59px) + 10px) 12px 8px;
 }
 
 .sph h2{
@@ -923,7 +913,6 @@ input[type=range]{
 </head>
 <body>
 
-<div class="sys-glass"></div>
 <div id="bg" aria-hidden="true"></div>
 <div id="bgOv" aria-hidden="true"></div>
 
@@ -1959,7 +1948,6 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
-/* Session-only seen list: resets after app reload */
 const seen=new Set();
 
 function card(v,i,list){
@@ -1998,7 +1986,6 @@ function card(v,i,list){
   return c;
 }
 
-/* Invidious request */
 async function fetchSongs(q,page,ctl){
   const requests=instances.map(base=>{
     return fetch(
@@ -2030,7 +2017,6 @@ async function fetchSongs(q,page,ctl){
   }
 }
 
-/* HOME LOADING */
 async function loadHomeMore(){
   const st=D.home;
 
@@ -2094,7 +2080,6 @@ async function loadHomeMore(){
     }
 
     if(added<20&&data.length>0){
-      /* Keep fetching on the next scroll instead of looping endlessly */
       break;
     }
   }
@@ -2133,7 +2118,6 @@ async function loadHomeMore(){
   status.textContent=st.videos.length+' Songs';
 }
 
-/* Infinite scroll */
 let homeObserver=null;
 
 function watchSentinel(){
@@ -2170,7 +2154,6 @@ function watchSentinel(){
   homeObserver.observe(target);
 }
 
-/* SEARCH */
 const q=$('q');
 
 async function doSearch(term){
@@ -2306,7 +2289,6 @@ $('searchMore').onclick=()=>{
   }
 };
 
-/* LIBRARY */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
 
 function openFolder(){
@@ -2418,7 +2400,6 @@ function renderLib(){
 
 $('libBack').onclick=()=>history.back();
 
-/* NAVIGATION */
 function setTab(t){
   if(activeTab===t)return;
 
@@ -2461,7 +2442,6 @@ document.querySelectorAll('.nb').forEach(b=>{
   };
 });
 
-/* INITIALIZE */
 buildSettingsUI();
 apply();
 icons();
@@ -2469,7 +2449,6 @@ setProg(0);
 renderLib();
 watchSentinel();
 
-/* Always start with a fresh home catalog after page reload */
 loadHomeMore();
 
 </script>
