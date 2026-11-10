@@ -65,7 +65,10 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-html{background:var(--bg)}
+html{
+  background:var(--bg);
+  min-height:100%;
+}
 
 body{
   margin:0;
@@ -73,6 +76,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   min-height:100dvh;
   overscroll-behavior-x:none;
+  isolation:isolate;
 }
 
 button{
@@ -94,36 +98,17 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* iPhone Status Bar Glass - Fixed */
-.sys-glass{
-  position:fixed;
-  z-index:11000;
-  top:0;
-  left:0;
-  right:0;
-  height:env(safe-area-inset-top);
-  pointer-events:none;
-  background:transparent;
-  backdrop-filter:blur(35px) saturate(180%);
-  -webkit-backdrop-filter:blur(35px) saturate(180%);
-}
-
-/* Full Player Status Bar - Fixed */
-body.fp .sys-glass{
-  background:transparent;
-  backdrop-filter:blur(35px) saturate(180%);
-  -webkit-backdrop-filter:blur(35px) saturate(180%);
-}
-
+/* FIXED BACKGROUND - iPhone SAFE AREA */
 #bg{
   position:fixed;
-  inset:-40px;
+  inset:-120px;
   z-index:-2;
   background-color:var(--bg);
   background-position:center;
   background-repeat:no-repeat;
   filter:brightness(var(--br)) blur(var(--bb));
   transition:filter .25s;
+  pointer-events:none;
 }
 
 #bgOv{
@@ -578,7 +563,7 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* FIXED: Full width progress bar */
+/* Full width progress bar */
 .player input.seek{
   width:100%;
   min-width:100%;
@@ -918,7 +903,7 @@ input[type=range]{
 </head>
 <body>
 
-<div class="sys-glass"></div>
+<!-- Background -->
 <div id="bg" aria-hidden="true"></div>
 <div id="bgOv" aria-hidden="true"></div>
 
@@ -1955,7 +1940,7 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
-/* Session-only seen list: resets after app reload */
+/* Session-only seen list */
 const seen=new Set();
 
 function card(v,i,list){
@@ -2464,7 +2449,7 @@ setProg(0);
 renderLib();
 watchSentinel();
 
-/* Always start with a fresh home catalog after page reload */
+/* Fresh home catalog after page reload */
 loadHomeMore();
 
 </script>
