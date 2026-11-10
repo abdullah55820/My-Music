@@ -94,7 +94,7 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* FIXED: iPhone Status Bar Glass */
+/* iPhone Status Bar Glass */
 .sys-glass{
   position:fixed;
   z-index:11000;
@@ -108,7 +108,6 @@ svg{display:block}
   -webkit-backdrop-filter:blur(35px) saturate(180%);
 }
 
-/* FIXED: Full Player Status Bar matches album tint */
 body.fp .sys-glass{
   background:color-mix(in srgb,var(--tint) 35%,transparent);
   backdrop-filter:blur(35px) saturate(180%);
@@ -178,6 +177,83 @@ body.fp .sys-glass{
   justify-content:space-between;
   gap:10px;
   margin:14px 0;
+}
+
+/* HOME STICKY HEADER */
+#homePage .section{
+  position:sticky;
+  top:0;
+  z-index:100;
+  margin:0 -16px 14px;
+  padding:14px 16px;
+  background:#1c1c1e;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  border-radius:0 0 18px 18px;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+
+:root[data-theme=light] #homePage .section{
+  background:#fff;
+  border-bottom:1px solid rgba(0,0,0,.08);
+  box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+
+@media(prefers-color-scheme:light){
+  :root:not([data-theme=dark]):not([data-theme=light])
+  #homePage .section{
+    background:#fff;
+    border-bottom:1px solid rgba(0,0,0,.08);
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+  }
+}
+
+#homePage .section .pill{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  padding:5px 0;
+  border-radius:0;
+}
+
+#homePage .section .pill h2{
+  color:#fff;
+  font-size:21px;
+  font-weight:800;
+}
+
+:root[data-theme=light] #homePage .section .pill h2{
+  color:#000;
+}
+
+@media(prefers-color-scheme:light){
+  :root:not([data-theme=dark]):not([data-theme=light])
+  #homePage .section .pill h2{
+    color:#000;
+  }
+}
+
+#homePage .section .status{
+  background:rgba(255,255,255,.08);
+  color:#aaa;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:none;
+}
+
+:root[data-theme=light] #homePage .section .status{
+  background:#f2f2f7;
+  color:#6c6c70;
+  border:1px solid rgba(0,0,0,.06);
+}
+
+@media(prefers-color-scheme:light){
+  :root:not([data-theme=dark]):not([data-theme=light])
+  #homePage .section .status{
+    background:#f2f2f7;
+    color:#6c6c70;
+    border:1px solid rgba(0,0,0,.06);
+  }
 }
 
 .pill{
@@ -578,7 +654,7 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* FIXED: Full width progress bar */
+/* Progress bar */
 .player input.seek{
   width:100%;
   min-width:100%;
@@ -1954,7 +2030,6 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
-/* Session-only seen list: resets after app reload */
 const seen=new Set();
 
 function card(v,i,list){
@@ -2089,7 +2164,6 @@ async function loadHomeMore(){
     }
 
     if(added<20&&data.length>0){
-      /* Keep fetching on the next scroll instead of looping endlessly */
       break;
     }
   }
@@ -2464,7 +2538,6 @@ setProg(0);
 renderLib();
 watchSentinel();
 
-/* Always start with a fresh home catalog after page reload */
 loadHomeMore();
 
 </script>
