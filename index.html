@@ -133,35 +133,6 @@ body.fp .sys-glass{
   pointer-events:none;
 }
 
-.header{
-  max-width:1050px;
-  margin:auto;
-  padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.brand{
-  font-size:25px;
-  font-weight:900;
-  letter-spacing:-1px;
-  text-shadow:0 1px 8px rgba(0,0,0,.35);
-}
-
-.brand span{color:var(--accent)}
-
-.ib{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-}
-
-.ib svg{width:21px;height:21px}
-.ib:active{transform:scale(.9)}
-
 .page{display:none}
 .page.active{display:block}
 
@@ -179,81 +150,60 @@ body.fp .sys-glass{
   margin:14px 0;
 }
 
-/* HOME STICKY HEADER */
-#homePage .section{
+/* HOME GLASS HEADER */
+#homePage .home-sticky{
   position:sticky;
   top:0;
   z-index:100;
-  margin:0 -16px 14px;
-  padding:14px 16px;
-  background:#1c1c1e;
-  border-bottom:1px solid rgba(255,255,255,.1);
-  border-radius:0 0 18px 18px;
-  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  margin:0 -16px 18px;
+  padding:8px 16px 10px;
+  background:color-mix(in srgb,var(--gbase) 38%,transparent);
+  border-bottom:1px solid var(--gborder);
+  border-radius:0 0 22px 22px;
+  backdrop-filter:blur(28px) saturate(190%);
+  -webkit-backdrop-filter:blur(28px) saturate(190%);
+  box-shadow:0 8px 24px rgba(0,0,0,.10);
 }
 
-:root[data-theme=light] #homePage .section{
-  background:#fff;
-  border-bottom:1px solid rgba(0,0,0,.08);
-  box-shadow:0 4px 14px rgba(0,0,0,.05);
+#homePage .home-glass-box{
+  height:42px;
+  width:100%;
+  border-radius:16px;
+  background:color-mix(in srgb,var(--gbase) 35%,transparent);
+  border:1px solid var(--gborder);
+  backdrop-filter:blur(25px) saturate(180%);
+  -webkit-backdrop-filter:blur(25px) saturate(180%);
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
 }
 
-@media(prefers-color-scheme:light){
-  :root:not([data-theme=dark]):not([data-theme=light])
-  #homePage .section{
-    background:#fff;
-    border-bottom:1px solid rgba(0,0,0,.08);
-    box-shadow:0 4px 14px rgba(0,0,0,.05);
-  }
+#homePage .section{
+  justify-content:center;
+  margin:7px 0 0;
+  padding:0;
+  background:transparent;
+  border:0;
+  box-shadow:none;
 }
 
 #homePage .section .pill{
+  justify-content:center;
   background:transparent;
   border:0;
   box-shadow:none;
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
-  padding:5px 0;
-  border-radius:0;
+  padding:3px 10px;
 }
 
 #homePage .section .pill h2{
-  color:#fff;
+  color:var(--text);
   font-size:21px;
-  font-weight:800;
-}
-
-:root[data-theme=light] #homePage .section .pill h2{
-  color:#000;
-}
-
-@media(prefers-color-scheme:light){
-  :root:not([data-theme=dark]):not([data-theme=light])
-  #homePage .section .pill h2{
-    color:#000;
-  }
+  font-weight:850;
+  text-align:center;
 }
 
 #homePage .section .status{
-  background:rgba(255,255,255,.08);
-  color:#aaa;
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:none;
-}
-
-:root[data-theme=light] #homePage .section .status{
-  background:#f2f2f7;
-  color:#6c6c70;
-  border:1px solid rgba(0,0,0,.06);
-}
-
-@media(prefers-color-scheme:light){
-  :root:not([data-theme=dark]):not([data-theme=light])
-  #homePage .section .status{
-    background:#f2f2f7;
-    color:#6c6c70;
-    border:1px solid rgba(0,0,0,.06);
-  }
+  display:none;
 }
 
 .pill{
@@ -498,6 +448,29 @@ body.fp .sys-glass{
 .nb.active{
   color:var(--accent);
   background:color-mix(in srgb,var(--accent) 16%,transparent);
+}
+
+/* Profile button inside navigation */
+.nav-profile{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:var(--muted);
+  transition:.2s;
+}
+
+.nav-profile svg{
+  width:24px;
+  height:24px;
+}
+
+.nav-profile:active{
+  transform:scale(.9);
+  background:color-mix(in srgb,var(--accent) 16%,transparent);
+  color:var(--accent);
 }
 
 body.fp .nav{
@@ -992,29 +965,28 @@ input[type=range]{
 }
 </style>
 </head>
+
 <body>
 
 <div class="sys-glass"></div>
 <div id="bg" aria-hidden="true"></div>
 <div id="bgOv" aria-hidden="true"></div>
 
-<header class="header">
-  <div class="brand">SOUND<span>FLOW</span></div>
-  <button class="ib g" id="profBtn" type="button" aria-label="Profile">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="8" r="3.5"/>
-      <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
-    </svg>
-  </button>
-</header>
-
 <!-- HOME -->
 <main class="page active" id="homePage">
   <div class="wrap">
-    <div class="section">
-      <span class="pill g"><h2>Home</h2></span>
-      <span class="status g" id="homeStatus">Discover music</span>
+
+    <div class="home-sticky">
+      <div class="home-glass-box"></div>
+
+      <div class="section">
+        <span class="pill">
+          <h2>Home</h2>
+        </span>
+        <span class="status" id="homeStatus">Discover music</span>
+      </div>
     </div>
+
     <div class="grid" id="homeGrid"></div>
     <div id="sentinel"></div>
   </div>
@@ -1028,7 +1000,9 @@ input[type=range]{
         <circle cx="10.8" cy="10.8" r="6.8"/>
         <path d="m16 16 5 5"/>
       </svg>
+
       <input id="q" type="search" placeholder="Songs, artists..." autocomplete="off" enterkeyhint="search">
+
       <button class="xbtn" id="clearQ" type="button" aria-label="Clear search" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
           <path d="M6 6l12 12M18 6 6 18"/>
@@ -1058,6 +1032,7 @@ input[type=range]{
         </button>
         <h2 id="libTitle">Library</h2>
       </span>
+
       <span class="status g" id="libStatus">1 Folder</span>
     </div>
 
@@ -1066,8 +1041,9 @@ input[type=range]{
   </div>
 </main>
 
-<!-- NAV -->
+<!-- NAVIGATION -->
 <nav class="nav g" id="nav">
+
   <button class="nb active" data-tab="home" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="m3 10 9-7 9 7"/>
@@ -1093,6 +1069,15 @@ input[type=range]{
     </svg>
     <span>Library</span>
   </button>
+
+  <!-- PROFILE ICON -->
+  <button class="nav-profile" id="profBtn" type="button" aria-label="Profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="3.5"/>
+      <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
+    </svg>
+  </button>
+
 </nav>
 
 <!-- FULL PLAYER -->
@@ -1203,6 +1188,7 @@ input[type=range]{
           <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
         </svg>
       </div>
+
       <div>
         <b>My SoundFlow</b>
         <small id="favCount">0 favourite songs</small>
@@ -1220,6 +1206,7 @@ input[type=range]{
       </div>
 
       <div class="row"><div><b>Accent Color</b></div></div>
+
       <div class="sw" id="accents">
         <label style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)">
           <input type="color" data-k="accent" id="accentPick" style="opacity:0">
@@ -1227,6 +1214,7 @@ input[type=range]{
       </div>
 
       <div class="row"><div><b>Songs per Row</b></div></div>
+
       <div class="seg" data-k="cols">
         <button data-v="1">1</button>
         <button data-v="2">2</button>
@@ -1251,6 +1239,7 @@ input[type=range]{
       <input type="file" id="imgFile" accept="image/*" hidden>
 
       <div class="row"><div><b>Image Fit</b></div></div>
+
       <div class="seg" data-k="fit">
         <button data-v="cover">Fill Screen</button>
         <button data-v="contain">Show Full</button>
@@ -1274,6 +1263,7 @@ input[type=range]{
 
     <div class="sec g">
       <h3>Glass Effect</h3>
+
       <div class="row">
         <div><b>Blur Strength</b><small>Blur of cards, nav and player</small></div>
         <input type="range" data-k="gb" min="0" max="40">
@@ -1605,6 +1595,7 @@ function openProfile(){
 
 $('profBtn').onclick=openProfile;
 
+/* Profile close */
 $('spBack').onclick=$('spClose').onclick=()=>{
   history.back();
 };
