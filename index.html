@@ -16,20 +16,15 @@
   --surface-2:#2c2c2e;
   --text:#fff;
   --muted:#a1a1a8;
-  --line:rgba(255,255,255,.14);
   --accent:#0a84ff;
   --gbase:#1c1c1e;
   --gb:20px;
   --ga:55%;
   --r:16px;
   --cols:2;
-  --br:1;
-  --bb:0px;
-  --ov:0;
   --glass:color-mix(in srgb,var(--gbase) var(--ga),transparent);
   --gborder:rgba(255,255,255,.16);
   --gshadow:rgba(0,0,0,.45);
-  --tint:#2a2a2c;
 }
 
 :root[data-theme=light]{
@@ -39,7 +34,6 @@
   --surface-2:#e5e5ea;
   --text:#000;
   --muted:#6c6c70;
-  --line:rgba(0,0,0,.1);
   --gbase:#fff;
   --gborder:rgba(255,255,255,.8);
   --gshadow:rgba(30,40,80,.18);
@@ -53,18 +47,13 @@
     --surface-2:#e5e5ea;
     --text:#000;
     --muted:#6c6c70;
-    --line:rgba(0,0,0,.1);
     --gbase:#fff;
     --gborder:rgba(255,255,255,.8);
     --gshadow:rgba(30,40,80,.18);
   }
 }
 
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
 
 body{
@@ -75,14 +64,7 @@ body{
   overscroll-behavior-x:none;
 }
 
-button{
-  font:inherit;
-  border:0;
-  cursor:pointer;
-  color:inherit;
-  background:none;
-}
-
+button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 [hidden]{display:none!important}
 svg{display:block}
 
@@ -94,48 +76,17 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* FIXED: iPhone status bar — pure soft blur only, NO black/colored tint */
-.sys-glass{
-  position:fixed;
-  z-index:11000;
-  top:-30px;
-  left:0;
-  right:0;
-  height:calc(env(safe-area-inset-top) + 30px);
-  pointer-events:none;
-  background:transparent;
-  backdrop-filter:blur(var(--gb));
-  -webkit-backdrop-filter:blur(var(--gb));
-  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 60%,transparent 100%);
-  mask-image:linear-gradient(to bottom,#000 0,#000 60%,transparent 100%);
-}
-
-/* FIXED: Full player — no overlay at all, player background shows seamlessly */
-body.fp .sys-glass{
-  background:transparent;
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-  -webkit-mask-image:none;
-  mask-image:none;
-}
-
+/* Page background (gradient only, extends under status bar and home bar) */
 #bg{
   position:fixed;
-  inset:-40px;
-  z-index:-2;
-  background-color:var(--bg);
-  background-position:center;
-  background-repeat:no-repeat;
-  filter:brightness(var(--br)) blur(var(--bb));
-  transition:filter .25s;
-}
-
-#bgOv{
-  position:fixed;
-  inset:0;
+  left:0;
+  right:0;
+  top:-120px;
+  bottom:-120px;
   z-index:-1;
-  background:rgba(0,0,0,var(--ov));
-  pointer-events:none;
+  background-color:var(--bg);
+  background-size:cover;
+  background-position:center;
 }
 
 .header{
@@ -156,25 +107,14 @@ body.fp .sys-glass{
 
 .brand span{color:var(--accent)}
 
-.ib{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-}
-
+.ib{width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
 .ib svg{width:21px;height:21px}
 .ib:active{transform:scale(.9)}
 
 .page{display:none}
 .page.active{display:block}
 
-.wrap{
-  max-width:1050px;
-  margin:auto;
-  padding:12px 16px 190px;
-}
+.wrap{max-width:1050px;margin:auto;padding:12px 16px 190px}
 
 .section{
   display:flex;
@@ -193,12 +133,7 @@ body.fp .sys-glass{
   min-width:0;
 }
 
-.pill h2{
-  margin:0;
-  font-size:17px;
-  font-weight:750;
-  white-space:nowrap;
-}
+.pill h2{margin:0;font-size:17px;font-weight:750;white-space:nowrap}
 
 .status{
   color:var(--muted);
@@ -231,13 +166,7 @@ body.fp .sys-glass{
 }
 
 .sbox:focus-within{border-color:var(--accent)}
-
-.sbox>svg{
-  width:20px;
-  height:20px;
-  color:var(--muted);
-  flex-shrink:0;
-}
+.sbox>svg{width:20px;height:20px;color:var(--muted);flex-shrink:0}
 
 .sbox input{
   flex:1;
@@ -266,17 +195,9 @@ body.fp .sys-glass{
 
 .xbtn svg{width:15px;height:15px}
 
-/* Grid */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-}
-
-#homeGrid{
-  grid-template-columns:repeat(var(--cols),minmax(0,1fr));
-  width:100%;
-}
+/* Grid + cards */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#homeGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
 
 .card{
   border-radius:var(--r);
@@ -327,16 +248,10 @@ body.fp .sys-glass{
   line-height:1.6;
 }
 
-.load{
-  display:block;
-  margin:20px auto;
-  padding:13px 24px;
-  border-radius:99px;
-  font-weight:650;
-}
-
+.load{display:block;margin:20px auto;padding:13px 24px;border-radius:99px;font-weight:650}
 .load:disabled{opacity:.5}
 
+/* Library folder cover */
 .fcover{
   position:relative;
   width:100%;
@@ -348,29 +263,10 @@ body.fp .sys-glass{
   background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 30%,var(--surface-2)),var(--surface-2));
 }
 
-.fcover[data-l=quad]{
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:1fr 1fr;
-  gap:2px;
-}
-
-.fcover img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.fcover[data-l=single] img{
-  position:absolute;
-  inset:0;
-}
-
-.fempty{
-  width:38%;
-  height:38%;
-  color:var(--accent);
-}
+.fcover[data-l=quad]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}
+.fcover img{width:100%;height:100%;object-fit:cover;display:block}
+.fcover[data-l=single] img{position:absolute;inset:0}
+.fempty{width:38%;height:38%;color:var(--accent)}
 
 .fbadge{
   position:absolute;
@@ -386,12 +282,9 @@ body.fp .sys-glass{
 
 .fbadge svg{width:16px;height:16px}
 
-#sentinel{
-  height:20px;
-  width:100%;
-}
+#sentinel{height:20px;width:100%}
 
-/* Navigation */
+/* Bottom navigation */
 .nav{
   position:fixed;
   z-index:9000;
@@ -422,19 +315,10 @@ body.fp .sys-glass{
 
 .nb svg{width:23px;height:23px}
 .nb span{font-size:10px;font-weight:650}
+.nb.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 
-.nb.active{
-  color:var(--accent);
-  background:color-mix(in srgb,var(--accent) 16%,transparent);
-}
-
-body.fp .nav{
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-}
-
-/* Full Player */
+/* Full player */
 .player{
   position:fixed;
   inset:0;
@@ -445,26 +329,25 @@ body.fp .nav{
   padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);
   overflow:hidden;
   overscroll-behavior:none;
-  background:var(--tint);
+  background:#161618;
   isolation:isolate;
   visibility:hidden;
   opacity:0;
   pointer-events:none;
-  transition:opacity .35s,visibility .35s,background-color .4s;
+  transition:opacity .35s,visibility .35s;
 }
 
-.player.active{
-  visibility:visible;
-  opacity:1;
-  pointer-events:auto;
-}
+.player.active{visibility:visible;opacity:1;pointer-events:auto}
 
+/* Blurred cover of the CURRENT song (an <img>, so it always repaints on song change) */
 .pbg{
   position:absolute;
-  inset:-150px;
+  left:-150px;
+  top:-150px;
+  width:calc(100% + 300px);
+  height:calc(100% + 300px);
   z-index:0;
-  background-size:cover;
-  background-position:center;
+  object-fit:cover;
   filter:blur(55px);
   transform:translateZ(0) scale(1.3);
   pointer-events:none;
@@ -474,26 +357,12 @@ body.fp .nav{
   position:absolute;
   inset:0;
   z-index:1;
-  background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.14) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));
+  background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));
   pointer-events:none;
 }
 
-.grab{
-  position:relative;
-  z-index:2;
-  width:100%;
-  height:30px;
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-}
-
-.grab span{
-  width:46px;
-  height:5px;
-  border-radius:3px;
-  background:rgba(255,255,255,.55);
-}
+.grab{position:relative;z-index:2;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
+.grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
 
 .pc{
   position:relative;
@@ -507,14 +376,7 @@ body.fp .nav{
   min-height:0;
 }
 
-.az{
-  flex:.82;
-  min-height:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  container-type:size;
-}
+.az{flex:.82;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
 
 .art{
   width:min(100cqw,100cqh,390px);
@@ -527,17 +389,8 @@ body.fp .nav{
   flex-shrink:0;
 }
 
-.art.paused{
-  transform:scale(.84);
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
-}
-
-.art img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
+.art.paused{transform:scale(.84);box-shadow:0 10px 28px rgba(0,0,0,.35)}
+.art img{width:100%;height:100%;object-fit:cover;display:block}
 
 .meta{
   width:100%;
@@ -569,29 +422,17 @@ body.fp .nav{
   text-overflow:ellipsis;
 }
 
-.like{
-  width:44px;
-  height:44px;
-  display:grid;
-  place-items:center;
-  color:rgba(255,255,255,.8);
-  flex-shrink:0;
-}
-
+.like{width:44px;height:44px;display:grid;place-items:center;color:rgba(255,255,255,.8);flex-shrink:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* Full width progress bar */
 .player input.seek{
   width:100%;
-  min-width:100%;
-  max-width:100%;
   height:28px;
   margin:4px 0 0;
   padding:0;
   display:block;
-  align-self:stretch;
   appearance:none;
   -webkit-appearance:none;
   outline:0;
@@ -609,13 +450,7 @@ body.fp .nav{
   box-shadow:0 1px 7px rgba(0,0,0,.4);
 }
 
-.seek::-moz-range-thumb{
-  width:13px;
-  height:13px;
-  border:0;
-  border-radius:50%;
-  background:#fff;
-}
+.seek::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:#fff}
 
 .trow{
   display:flex;
@@ -626,27 +461,14 @@ body.fp .nav{
   font-variant-numeric:tabular-nums;
 }
 
-.ctr{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:clamp(35px,12vw,55px);
-}
-
-.cb{
-  width:64px;
-  height:64px;
-  display:grid;
-  place-items:center;
-  color:#fff;
-}
-
+.ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
+.cb{width:64px;height:64px;display:grid;place-items:center;color:#fff}
 .cb svg{width:46px;height:46px}
 .cb.big{width:84px;height:84px}
 .cb.big svg{width:66px;height:66px}
 .cb:active{transform:scale(.88)}
 
-/* Mini Player */
+/* Mini player */
 .mini{
   position:fixed;
   z-index:9500;
@@ -668,61 +490,17 @@ body.fp .nav{
   transition:opacity .35s,transform .45s,visibility .35s;
 }
 
-.mini.visible{
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-  transform:none;
-}
-
-.mini img{
-  width:47px;
-  height:47px;
-  border-radius:10px;
-  object-fit:cover;
-  flex-shrink:0;
-}
-
+.mini.visible{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+.mini img{width:47px;height:47px;border-radius:10px;object-fit:cover;flex-shrink:0}
 .mi{flex:1;min-width:0;cursor:pointer}
-
-.mt{
-  font-size:13px;
-  font-weight:700;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.ma{
-  font-size:11px;
-  color:var(--muted);
-  margin-top:4px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.mc{
-  width:38px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-}
-
+.mt{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ma{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc{width:38px;height:42px;display:grid;place-items:center;flex-shrink:0}
 .mc svg{width:24px;height:24px}
 
-#yt{
-  position:fixed;
-  left:-1000px;
-  top:0;
-  width:200px;
-  height:200px;
-  opacity:.01;
-  pointer-events:none;
-}
+#yt{position:fixed;left:-1000px;top:0;width:200px;height:200px;opacity:.01;pointer-events:none}
 
-/* Profile / Settings */
+/* Profile / settings */
 .sp{
   position:fixed;
   inset:0;
@@ -737,10 +515,7 @@ body.fp .nav{
   transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;
 }
 
-.sp.open{
-  transform:none;
-  visibility:visible;
-}
+.sp.open{transform:none;visibility:visible}
 
 .sph{
   display:flex;
@@ -749,11 +524,7 @@ body.fp .nav{
   padding:calc(env(safe-area-inset-top) + 10px) 12px 8px;
 }
 
-.sph h2{
-  margin:0;
-  font-size:18px;
-  font-weight:800;
-}
+.sph h2{margin:0;font-size:18px;font-weight:800}
 
 .spb{
   flex:1;
@@ -765,14 +536,7 @@ body.fp .nav{
   margin:0 auto;
 }
 
-.prof{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:16px;
-  border-radius:22px;
-  margin-bottom:14px;
-}
+.prof{display:flex;align-items:center;gap:14px;padding:16px;border-radius:22px;margin-bottom:14px}
 
 .av{
   width:56px;
@@ -786,19 +550,9 @@ body.fp .nav{
 
 .av svg{width:28px;height:28px}
 .prof b{font-size:17px}
+.prof small{display:block;color:var(--muted);margin-top:3px;font-size:12px}
 
-.prof small{
-  display:block;
-  color:var(--muted);
-  margin-top:3px;
-  font-size:12px;
-}
-
-.sec{
-  padding:16px;
-  border-radius:22px;
-  margin-bottom:14px;
-}
+.sec{padding:16px;border-radius:22px;margin-bottom:14px}
 
 .sec h3{
   margin:0 0 12px;
@@ -808,22 +562,9 @@ body.fp .nav{
   letter-spacing:.8px;
 }
 
-.row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin:14px 0;
-}
-
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0}
 .row b{font-size:14px;font-weight:600}
-
-.row small{
-  display:block;
-  font-size:11px;
-  color:var(--muted);
-  margin-top:3px;
-}
+.row small{display:block;font-size:11px;color:var(--muted);margin-top:3px}
 
 .seg{
   display:grid;
@@ -836,49 +577,17 @@ body.fp .nav{
   margin:8px 0 4px;
 }
 
-.seg button{
-  padding:9px 4px;
-  border-radius:9px;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
-}
+.seg button{padding:9px 4px;border-radius:9px;color:var(--muted);font-size:12px;font-weight:700}
+.seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.15)}
 
-.seg button.on{
-  background:var(--surface);
-  color:var(--accent);
-  box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
+input[type=range]{width:140px;accent-color:var(--accent)}
 
-input[type=range]{
-  width:140px;
-  accent-color:var(--accent);
-}
-
-.sw{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-
-.sw button,.sw label{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:2px solid transparent;
-  flex-shrink:0;
-}
-
+.sw{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sw button,.sw label{width:34px;height:34px;border-radius:50%;border:2px solid transparent;flex-shrink:0}
 .sw button.on{border-color:var(--text)}
 .sw input{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:none}
 
-.pvs{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin:10px 0;
-}
+.pvs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
 
 .pv{
   aspect-ratio:3/4;
@@ -886,17 +595,9 @@ input[type=range]{
   border:2px solid transparent;
   background-size:cover;
   background-position:center;
-  display:grid;
-  place-items:center;
-  color:#fff;
-  font-size:11px;
-  font-weight:700;
 }
 
-.pv.on{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px var(--accent);
-}
+.pv.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 
 .sb{
   display:inline-flex;
@@ -912,19 +613,11 @@ input[type=range]{
 
 .sb.p{background:var(--accent);color:#fff}
 .sb.d{color:#ff453a}
-
-.acts{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
 </style>
 </head>
 <body>
 
-<div class="sys-glass"></div>
 <div id="bg" aria-hidden="true"></div>
-<div id="bgOv" aria-hidden="true"></div>
 
 <header class="header">
   <div class="brand">SOUND<span>FLOW</span></div>
@@ -1025,18 +718,14 @@ input[type=range]{
 
 <!-- FULL PLAYER -->
 <section class="player" id="player">
-  <div class="pbg" id="pBg"></div>
+  <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
 
-  <button class="grab" id="minBtn" type="button" aria-label="Minimize">
-    <span></span>
-  </button>
+  <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span></button>
 
   <div class="pc">
     <div class="az">
-      <div class="art" id="art">
-        <img id="pThumb" alt="">
-      </div>
+      <div class="art" id="art"><img id="pThumb" alt=""></div>
     </div>
 
     <div>
@@ -1063,21 +752,15 @@ input[type=range]{
 
     <div class="ctr">
       <button class="cb" id="prevBtn" type="button" aria-label="Previous">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11 6v12L2 12zM21 6v12l-9-6z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6v12L2 12zM21 6v12l-9-6z"/></svg>
       </button>
 
       <button class="cb big" id="playBtn" type="button" aria-label="Play or pause">
-        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M7 4v16l13-8z"/>
-        </svg>
+        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
       </button>
 
       <button class="cb" id="nextBtn" type="button" aria-label="Next">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 6v12l9-6zM13 6v12l9-6z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6v12l9-6zM13 6v12l9-6z"/></svg>
       </button>
     </div>
   </div>
@@ -1093,9 +776,7 @@ input[type=range]{
   </div>
 
   <button class="mc" id="mPlay" type="button" aria-label="Play or pause">
-    <svg id="mIcon" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M7 4v16l13-8z"/>
-    </svg>
+    <svg id="mIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
   </button>
 
   <button class="mc" id="mClose" type="button" aria-label="Close">
@@ -1170,34 +851,6 @@ input[type=range]{
     <div class="sec g">
       <h3>Background</h3>
       <div class="pvs" id="presets"></div>
-
-      <div class="acts">
-        <button class="sb p" id="pickImg" type="button">Choose Photo</button>
-        <button class="sb" id="rmImg" type="button">Remove Photo</button>
-      </div>
-
-      <input type="file" id="imgFile" accept="image/*" hidden>
-
-      <div class="row"><div><b>Image Fit</b></div></div>
-      <div class="seg" data-k="fit">
-        <button data-v="cover">Fill Screen</button>
-        <button data-v="contain">Show Full</button>
-      </div>
-
-      <div class="row">
-        <div><b>Background Blur</b><small>Slide right to blur, left to clear</small></div>
-        <input type="range" data-k="bb" min="0" max="30">
-      </div>
-
-      <div class="row">
-        <div><b>Brightness</b></div>
-        <input type="range" data-k="br" min="40" max="130">
-      </div>
-
-      <div class="row">
-        <div><b>Dark Overlay</b></div>
-        <input type="range" data-k="ov" min="0" max="70">
-      </div>
     </div>
 
     <div class="sec g">
@@ -1246,6 +899,9 @@ const LS={
   }
 };
 
+/* Old photo background is gone: free its storage */
+try{localStorage.removeItem('sf_bgimg')}catch(e){}
+
 /* BACK STACK */
 const layers=[];
 
@@ -1264,6 +920,7 @@ function goBack(){
   else if(activeTab!=='home')setTab('home');
 }
 
+/* Left-edge swipe = back */
 let ex=0,ey=0,edge=false;
 
 addEventListener('touchstart',e=>{
@@ -1278,10 +935,7 @@ addEventListener('touchend',e=>{
   edge=false;
 
   const t=e.changedTouches[0];
-
-  if(t.clientX-ex>70&&Math.abs(t.clientY-ey)<70){
-    goBack();
-  }
+  if(t.clientX-ex>70&&Math.abs(t.clientY-ey)<70)goBack();
 },{passive:true});
 
 addEventListener('keydown',e=>{
@@ -1293,11 +947,6 @@ const DEF={
   theme:'system',
   accent:'#0a84ff',
   preset:0,
-  custom:false,
-  fit:'cover',
-  bb:0,
-  br:100,
-  ov:0,
   gb:20,
   ga:55,
   r:16,
@@ -1311,17 +960,11 @@ const PRESETS=[
   'linear-gradient(160deg,#134e5e,#71b280)',
   'linear-gradient(160deg,#232526,#414345 60%,#6b7280)',
   'linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)',
-  'linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)'
+  'linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)',
+  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)'
 ];
 
-const ACCENTS=[
-  '#0a84ff',
-  '#ff2d55',
-  '#30d158',
-  '#ff9f0a',
-  '#bf5af2',
-  '#64d2ff'
-];
+const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
 let S={...DEF,...LS.get('sf_settings_v2',{})};
 
@@ -1336,27 +979,16 @@ function apply(){
     :d.dataset.theme=S.theme;
 
   st.setProperty('--accent',S.accent);
-  st.setProperty('--bb',S.bb+'px');
-  st.setProperty('--br',S.br/100);
-  st.setProperty('--ov',S.ov/100);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--ga',S.ga+'%');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols);
 
-  const img=S.custom?LS.get('sf_bgimg',''):'';
-  const grad=PRESETS[S.preset]||PRESETS[0];
-  const bg=$('bg');
-
-  bg.style.backgroundImage=img?`url("${img}"),${grad}`:grad;
-  bg.style.backgroundSize=img?`${S.fit},cover`:'cover';
+  $('bg').style.backgroundImage=PRESETS[S.preset]||PRESETS[0];
 
   document.querySelectorAll('.seg').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
-      b.classList.toggle(
-        'on',
-        String(S[g.dataset.k])===b.dataset.v
-      );
+      b.classList.toggle('on',String(S[g.dataset.k])===b.dataset.v);
     });
   });
 
@@ -1371,10 +1003,7 @@ function apply(){
   });
 
   document.querySelectorAll('#presets .pv').forEach(p=>{
-    p.classList.toggle(
-      'on',
-      S.custom?p.dataset.i==='c':p.dataset.i===String(S.preset)
-    );
+    p.classList.toggle('on',p.dataset.i===String(S.preset));
   });
 }
 
@@ -1386,11 +1015,7 @@ function buildSettingsUI(){
     b.type='button';
     b.dataset.c=c;
     b.style.background=c;
-    b.onclick=()=>{
-      S.accent=c;
-      save();
-      apply();
-    };
+    b.onclick=()=>{S.accent=c;save();apply()};
     a.prepend(b);
   });
 
@@ -1402,35 +1027,9 @@ function buildSettingsUI(){
     b.className='pv';
     b.dataset.i=i;
     b.style.backgroundImage=g;
-
-    b.onclick=()=>{
-      S.preset=i;
-      S.custom=false;
-      save();
-      apply();
-    };
-
+    b.onclick=()=>{S.preset=i;save();apply()};
     p.appendChild(b);
   });
-
-  const cb=document.createElement('button');
-  cb.type='button';
-  cb.className='pv';
-  cb.dataset.i='c';
-  cb.style.background='var(--surface-2)';
-  cb.textContent='Photo';
-
-  cb.onclick=()=>{
-    if(LS.get('sf_bgimg','')){
-      S.custom=true;
-      save();
-      apply();
-    }else{
-      $('imgFile').click();
-    }
-  };
-
-  p.appendChild(cb);
 
   document.querySelectorAll('input[data-k]').forEach(el=>{
     el.addEventListener('input',()=>{
@@ -1454,71 +1053,7 @@ function buildSettingsUI(){
   });
 }
 
-function compress(file){
-  return new Promise((res,rej)=>{
-    const fr=new FileReader();
-
-    fr.onerror=rej;
-
-    fr.onload=()=>{
-      const im=new Image();
-
-      im.onerror=rej;
-
-      im.onload=()=>{
-        const s=Math.min(1,1600/Math.max(im.width,im.height));
-        const c=document.createElement('canvas');
-
-        c.width=Math.round(im.width*s);
-        c.height=Math.round(im.height*s);
-
-        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-
-        try{
-          res(c.toDataURL('image/jpeg',.8));
-        }catch(e){
-          rej(e);
-        }
-      };
-
-      im.src=fr.result;
-    };
-
-    fr.readAsDataURL(file);
-  });
-}
-
-$('pickImg').onclick=()=>$('imgFile').click();
-
-$('imgFile').onchange=async e=>{
-  const f=e.target.files[0];
-  e.target.value='';
-
-  if(!f)return;
-
-  try{
-    const d=await compress(f);
-
-    if(!LS.set('sf_bgimg',d))throw 0;
-
-    S.custom=true;
-    save();
-    apply();
-
-  }catch(x){
-    alert('Could not use this image. Try a smaller one.');
-  }
-};
-
-$('rmImg').onclick=()=>{
-  try{localStorage.removeItem('sf_bgimg')}catch(e){}
-  S.custom=false;
-  save();
-  apply();
-};
-
 $('resetAll').onclick=()=>{
-  try{localStorage.removeItem('sf_bgimg')}catch(e){}
   S={...DEF};
   save();
   apply();
@@ -1527,15 +1062,11 @@ $('resetAll').onclick=()=>{
 function openProfile(){
   $('favCount').textContent=getLiked().length+' favourite songs';
   $('sp').classList.add('open');
-
   pushLayer(()=>$('sp').classList.remove('open'));
 }
 
 $('profBtn').onclick=openProfile;
-
-$('spBack').onclick=$('spClose').onclick=()=>{
-  history.back();
-};
+$('spBack').onclick=$('spClose').onclick=()=>history.back();
 
 /* PLAYER */
 let yt=null;
@@ -1546,10 +1077,8 @@ let idx=-1;
 let playing=false;
 let timer=null;
 let pending=null;
-let tint='#2a2a2c';
 
 const seek=$('seek');
-const tintCache={};
 
 const PLAY='<path d="M7 4v16l13-8z"/>';
 const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
@@ -1558,13 +1087,7 @@ window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     height:'200',
     width:'200',
-    playerVars:{
-      autoplay:0,
-      controls:0,
-      disablekb:1,
-      playsinline:1,
-      rel:0
-    },
+    playerVars:{autoplay:0,controls:0,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
         apiReady=true;
@@ -1591,16 +1114,12 @@ function onState(e){
     icons();
     $('art').classList.remove('paused');
     startT();
-  }
-
-  else if(e.data===YT.PlayerState.PAUSED){
+  }else if(e.data===YT.PlayerState.PAUSED){
     playing=false;
     icons();
     $('art').classList.add('paused');
     stopT();
-  }
-
-  else if(e.data===YT.PlayerState.ENDED){
+  }else if(e.data===YT.PlayerState.ENDED){
     playing=false;
     icons();
     stopT();
@@ -1619,7 +1138,6 @@ const fmt=s=>{
 
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
-
   seek.style.backgroundImage=
     `linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
 }
@@ -1664,7 +1182,6 @@ seek.addEventListener('change',()=>{
   if(!yt||!apiReady)return;
 
   const d=yt.getDuration()||0;
-
   if(d>0)yt.seekTo(d*seek.value/100,true);
 
   tick();
@@ -1692,80 +1209,39 @@ function thumbOf(v){
   ).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
 
-function loadTint(v){
+/* Player colour = blurred cover of the current song.
+   The new cover is preloaded first, then swapped in only if this song is still current. */
+function setPlayerBg(v){
   const id=v.videoId;
-
-  if(tintCache[id]){
-    tint=tintCache[id];
-    document.documentElement.style.setProperty('--tint',tint);
-    return;
-  }
-
-  tint='#2a2a2c';
-  document.documentElement.style.setProperty('--tint',tint);
+  const urls=[thumbOf(v),`https://i.ytimg.com/vi/${id}/hqdefault.jpg`];
+  let n=0;
 
   const im=new Image();
-  im.crossOrigin='anonymous';
 
   im.onload=()=>{
-    try{
-      const c=document.createElement('canvas');
-      c.width=c.height=16;
-
-      const x=c.getContext('2d',{willReadFrequently:true});
-
-      x.drawImage(
-        im,
-        im.naturalWidth*.3,
-        0,
-        im.naturalWidth*.4,
-        im.naturalHeight*.5,
-        0,0,16,16
-      );
-
-      const d=x.getImageData(0,0,16,16).data;
-
-      let r=0,g=0,b=0,n=0;
-
-      for(let i=0;i<d.length;i+=4){
-        r+=d[i];
-        g+=d[i+1];
-        b+=d[i+2];
-        n++;
-      }
-
-      const col=`rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
-
-      tintCache[id]=col;
-
-      if(queue[idx]&&queue[idx].videoId===id){
-        tint=col;
-        document.documentElement.style.setProperty('--tint',col);
-      }
-
-    }catch(e){}
+    if(queue[idx]&&queue[idx].videoId===id)$('pBg').src=im.src;
   };
 
-  im.src=`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+  im.onerror=()=>{
+    if(++n<urls.length)im.src=urls[n];
+  };
+
+  im.src=urls[0];
 }
 
 function setInfo(v){
   const t=thumbOf(v);
-  const ti=v.title||'Unknown Song';
-  const au=v.author||'YouTube';
 
   $('pThumb').src=$('mThumb').src=t;
-  $('pTitle').textContent=$('mTitle').textContent=ti;
-  $('pArtist').textContent=$('mArtist').textContent=au;
-
-  $('pBg').style.backgroundImage=`url("${t}")`;
+  $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
+  $('pArtist').textContent=$('mArtist').textContent=v.author||'YouTube';
 
   $('likeBtn').classList.toggle(
     'liked',
     getLiked().some(x=>x.videoId===v.videoId)
   );
 
-  loadTint(v);
+  setPlayerBg(v);
 }
 
 function showFull(){
@@ -1808,7 +1284,6 @@ function playAt(i,list){
   if(list)queue=list.slice();
 
   const v=queue[i];
-
   if(!v||!v.videoId)return;
 
   idx=i;
@@ -1829,15 +1304,11 @@ function playAt(i,list){
 }
 
 const next=()=>{
-  if(queue.length&&idx>=0){
-    playAt((idx+1)%queue.length);
-  }
+  if(queue.length&&idx>=0)playAt((idx+1)%queue.length);
 };
 
 const prev=()=>{
-  if(queue.length&&idx>=0){
-    playAt((idx-1+queue.length)%queue.length);
-  }
+  if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length);
 };
 
 const on=(id,fn)=>{
@@ -1854,11 +1325,9 @@ on('nextBtn',next);
 on('prevBtn',prev);
 on('minBtn',()=>history.back());
 on('mClose',closePlayer);
+on('mInfo',()=>{if(mode==='mini')showFull()});
 
-on('mInfo',()=>{
-  if(mode==='mini')showFull();
-});
-
+/* Swipe down on full player = minimize */
 let tx=0,ty=0,ts=false;
 const pl=$('player');
 
@@ -1884,9 +1353,7 @@ pl.addEventListener('touchend',e=>{
   const t=e.changedTouches[0];
   const dy=t.clientY-ty;
 
-  if(mode==='full'&&dy>90&&dy>Math.abs(t.clientX-tx)*1.5){
-    history.back();
-  }
+  if(mode==='full'&&dy>90&&dy>Math.abs(t.clientX-tx)*1.5)history.back();
 },{passive:true});
 
 /* FAVOURITES */
@@ -1899,17 +1366,13 @@ $('likeBtn').addEventListener('click',e=>{
   if(!v)return;
 
   let s=getLiked();
-
   const has=s.some(x=>x.videoId===v.videoId);
 
-  s=has
-    ?s.filter(x=>x.videoId!==v.videoId)
-    :[v,...s];
+  s=has?s.filter(x=>x.videoId!==v.videoId):[v,...s];
 
   LS.set('sf_liked_songs',s);
 
   $('likeBtn').classList.toggle('liked',!has);
-
   $('favCount').textContent=s.length+' favourite songs';
 
   if(activeTab==='library')renderLib();
@@ -1924,26 +1387,13 @@ const instances=[
 ];
 
 const D={
-  home:{
-    videos:[],
-    page:0,
-    query:'Top Bangla Hindi songs',
-    busy:false,
-    ctl:null
-  },
-  search:{
-    videos:[],
-    page:1,
-    query:'',
-    busy:false,
-    ctl:null
-  }
+  home:{videos:[],page:0,query:'Top Bangla Hindi songs',busy:false,ctl:null},
+  search:{videos:[],page:1,query:'',busy:false,ctl:null}
 };
 
 let activeTab='home';
 let libView='folders';
 let qi=0;
-let homeRetryTimer=null;
 
 const HQ=[
   'Top Bangla Hindi songs',
@@ -1958,12 +1408,11 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
-/* Session-only seen list: resets after app reload */
+/* Session-only seen list */
 const seen=new Set();
 
 function card(v,i,list){
   const c=document.createElement('article');
-
   c.className='card g';
   c.tabIndex=0;
 
@@ -1986,7 +1435,6 @@ function card(v,i,list){
   const go=()=>playAt(i,list);
 
   c.onclick=go;
-
   c.onkeydown=e=>{
     if(e.key==='Enter'||e.key===' '){
       e.preventDefault();
@@ -1997,34 +1445,24 @@ function card(v,i,list){
   return c;
 }
 
-/* Invidious request */
+/* Invidious request (fastest instance wins) */
 async function fetchSongs(q,page,ctl){
-  const requests=instances.map(base=>{
-    return fetch(
+  const requests=instances.map(base=>
+    fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
-      {
-        signal:ctl.signal,
-        headers:{Accept:'application/json'},
-        cache:'no-store'
-      }
+      {signal:ctl.signal,headers:{Accept:'application/json'},cache:'no-store'}
     ).then(r=>{
       if(!r.ok)throw new Error('Server error');
       return r.json();
     }).then(data=>{
       if(!Array.isArray(data))throw new Error('Invalid response');
-
-      return data.filter(v=>
-        v&&
-        v.type==='video'&&
-        v.videoId
-      );
-    });
-  });
+      return data.filter(v=>v&&v.type==='video'&&v.videoId);
+    })
+  );
 
   try{
     return await Promise.any(requests);
   }catch(e){
-    if(ctl.signal.aborted)return null;
     return null;
   }
 }
@@ -2049,17 +1487,11 @@ async function loadHomeMore(){
   let attempts=0;
   let failed=false;
 
-  while(
-    added<20&&
-    attempts<5&&
-    !ctl.signal.aborted
-  ){
+  while(added<20&&attempts<5&&!ctl.signal.aborted){
     attempts++;
 
-    let query=st.query;
-    let page=st.page+1;
-
-    const data=await fetchSongs(query,page,ctl);
+    const page=st.page+1;
+    const data=await fetchSongs(st.query,page,ctl);
 
     if(ctl.signal.aborted)break;
 
@@ -2082,49 +1514,36 @@ async function loadHomeMore(){
 
       seen.add(v.videoId);
       st.videos.push(v);
-
-      grid.appendChild(
-        card(v,st.videos.length-1,st.videos)
-      );
+      grid.appendChild(card(v,st.videos.length-1,st.videos));
 
       added++;
-
       if(added>=20)break;
     }
 
-    if(added<20&&data.length>0){
-      /* Keep fetching on the next scroll instead of looping endlessly */
-      break;
-    }
-  }
-
-  if(st.ctl!==ctl||ctl.signal.aborted){
-    st.busy=false;
-    return;
+    /* Keep fetching on the next scroll instead of looping endlessly */
+    if(added<20)break;
   }
 
   st.busy=false;
 
-  if(failed){
+  if(st.ctl!==ctl||ctl.signal.aborted)return;
+
+  if(failed&&!st.videos.length){
     status.textContent='Connection unavailable';
 
-    if(!st.videos.length){
-      grid.innerHTML=`
-        <div class="empty g">
-          Unable to load music.<br>
-          Check your internet connection and try again.
-          <br><br>
-          <button class="sb p" id="homeRetry" type="button">Retry</button>
-        </div>
-      `;
+    grid.innerHTML=`
+      <div class="empty g">
+        Unable to load music.<br>
+        Check your internet connection and try again.
+        <br><br>
+        <button class="sb p" id="homeRetry" type="button">Retry</button>
+      </div>
+    `;
 
-      $('homeRetry').onclick=()=>{
-        grid.innerHTML='';
-        loadHomeMore();
-      };
-    }else{
-      status.textContent=st.videos.length+' Songs';
-    }
+    $('homeRetry').onclick=()=>{
+      grid.innerHTML='';
+      loadHomeMore();
+    };
 
     return;
   }
@@ -2133,48 +1552,15 @@ async function loadHomeMore(){
 }
 
 /* Infinite scroll */
-let homeObserver=null;
-
-function watchSentinel(){
-  const target=$('sentinel');
-
-  if(!('IntersectionObserver' in window)){
-    addEventListener('scroll',()=>{
-      if(
-        activeTab==='home'&&
-        !D.home.busy&&
-        window.innerHeight+window.scrollY>=document.body.scrollHeight-700
-      ){
-        loadHomeMore();
-      }
-    },{passive:true});
-
-    return;
-  }
-
-  if(homeObserver)homeObserver.disconnect();
-
-  homeObserver=new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting&&activeTab==='home'){
-        loadHomeMore();
-      }
-    });
-  },{
-    root:null,
-    rootMargin:'900px 0px',
-    threshold:0
-  });
-
-  homeObserver.observe(target);
-}
+new IntersectionObserver(entries=>{
+  if(entries.some(e=>e.isIntersecting)&&activeTab==='home')loadHomeMore();
+},{rootMargin:'900px 0px'}).observe($('sentinel'));
 
 /* SEARCH */
 const q=$('q');
 
-async function doSearch(term){
+function doSearch(term){
   term=term.trim();
-
   if(!term)return;
 
   const st=D.search;
@@ -2200,12 +1586,10 @@ async function doSearch(term){
   loadSearch(term,1,false);
 }
 
-async function loadSearch(term,page=1,append=false){
+async function loadSearch(term,page,append){
   const st=D.search;
 
-  if(st.busy){
-    if(st.ctl)st.ctl.abort();
-  }
+  if(st.busy&&st.ctl)st.ctl.abort();
 
   st.busy=true;
 
@@ -2228,10 +1612,7 @@ async function loadSearch(term,page=1,append=false){
   st.busy=false;
 
   if(data===null){
-    if(!append){
-      grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
-    }
-
+    if(!append)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
     $('searchStatus').textContent='Connection error';
     return;
   }
@@ -2239,25 +1620,19 @@ async function loadSearch(term,page=1,append=false){
   if(!append)grid.innerHTML='';
 
   const ids=new Set(st.videos.map(v=>v.videoId));
-
   const fresh=data.filter(v=>!ids.has(v.videoId));
 
   fresh.forEach(v=>{
     st.videos.push(v);
-    grid.appendChild(
-      card(v,st.videos.length-1,st.videos)
-    );
+    grid.appendChild(card(v,st.videos.length-1,st.videos));
   });
 
   st.page=page;
   st.query=term;
 
-  if(!st.videos.length){
-    grid.innerHTML='<div class="empty g">No songs found.</div>';
-  }
+  if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
 
   $('searchStatus').textContent=st.videos.length+' Songs';
-
   $('searchMore').hidden=!data.length||!fresh.length;
   $('searchMore').disabled=false;
 }
@@ -2280,7 +1655,6 @@ function clearSearch(){
   $('searchGrid').hidden=true;
   $('searchGrid').innerHTML='';
   $('searchMore').hidden=true;
-
   $('searchStatus').textContent='Search songs';
 
   q.focus();
@@ -2291,18 +1665,12 @@ $('sForm').addEventListener('submit',e=>{
   doSearch(q.value);
 });
 
-q.addEventListener('input',()=>{
-  $('clearQ').hidden=!q.value;
-});
-
+q.addEventListener('input',()=>{$('clearQ').hidden=!q.value});
 $('clearQ').onclick=clearSearch;
 
 $('searchMore').onclick=()=>{
   const s=D.search;
-
-  if(s.query&&!s.busy){
-    loadSearch(s.query,s.page+1,true);
-  }
+  if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
 };
 
 /* LIBRARY */
@@ -2321,7 +1689,6 @@ function openFolder(){
 
 function folderCard(name,songs,open){
   const c=document.createElement('article');
-
   c.className='card g';
   c.tabIndex=0;
 
@@ -2345,7 +1712,6 @@ function folderCard(name,songs,open){
     b.className='fbadge g';
     b.innerHTML=HEART;
     cv.appendChild(b);
-
   }else{
     const i=document.createElement('div');
     i.className='fempty';
@@ -2364,7 +1730,6 @@ function folderCard(name,songs,open){
   c.append(cv,t,n);
 
   c.onclick=open;
-
   c.onkeydown=e=>{
     if(e.key==='Enter'||e.key===' '){
       e.preventDefault();
@@ -2388,11 +1753,7 @@ function renderLib(){
 
   if(!fav){
     $('libFolders').innerHTML='';
-
-    $('libFolders').appendChild(
-      folderCard('Favourites',songs,openFolder)
-    );
-
+    $('libFolders').appendChild(folderCard('Favourites',songs,openFolder));
     return;
   }
 
@@ -2406,13 +1767,10 @@ function renderLib(){
         Tap the heart while listening to a song.
       </div>
     `;
-
     return;
   }
 
-  songs.forEach((v,i)=>{
-    g.appendChild(card(v,i,songs));
-  });
+  songs.forEach((v,i)=>g.appendChild(card(v,i,songs)));
 }
 
 $('libBack').onclick=()=>history.back();
@@ -2438,20 +1796,12 @@ function setTab(t){
     renderLib();
   }
 
-  if(t==='home'){
-    if(!D.home.videos.length){
-      loadHomeMore();
-    }
-  }
+  if(t==='home'&&!D.home.videos.length)loadHomeMore();
 }
 
 document.querySelectorAll('.nb').forEach(b=>{
   b.onclick=()=>{
-    if(
-      b.dataset.tab==='library'&&
-      activeTab==='library'&&
-      libView!=='folders'
-    ){
+    if(b.dataset.tab==='library'&&activeTab==='library'&&libView!=='folders'){
       history.back();
       return;
     }
@@ -2466,11 +1816,7 @@ apply();
 icons();
 setProg(0);
 renderLib();
-watchSentinel();
-
-/* Always start with a fresh home catalog after page reload */
 loadHomeMore();
-
 </script>
 </body>
 </html>
