@@ -1276,7 +1276,17 @@ function paintTint(col){
   $('player').style.backgroundColor=col;
   $('player').style.setProperty('--pt',col);
 
-  /* nudge Safari to re-read the status bar colour */
+  /* Safari re-reads the top colour only when a fixed element at the top appears:
+     swap in a brand-new top strip (same thing that happens on minimize + reopen) */
+  const oldTop=$('player').querySelector('.ptop');
+  const newTop=document.createElement('div');
+
+  newTop.className='ptop';
+  newTop.style.setProperty('--pt',col);
+
+  oldTop.after(newTop);
+  requestAnimationFrame(()=>oldTop.remove());
+
   void document.body.offsetHeight;
 
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
