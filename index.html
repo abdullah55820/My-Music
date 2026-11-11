@@ -335,7 +335,7 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   visibility:hidden;
   opacity:0;
   pointer-events:none;
-  transition:opacity .35s,visibility .35s;
+  transition:opacity .35s,visibility .35s,background-color .5s;
 }
 
 .player.active{visibility:visible;opacity:1;pointer-events:auto}
@@ -1240,6 +1240,77 @@ function setPlayerBg(v){
   im.src=urls[0];
 }
 
+/* Top colour of the current song's cover -> status bar + player background.
+   Tries several image hosts, because canvas needs a CORS-enabled one. */
+const tintCache={};
+
+function paintTint(col){
+  if(mode!=='full')return;
+
+  const st=document.documentElement.style;
+  st.backgroundImage='none';
+  st.backgroundColor=col;
+  $('tc').content=col;
+  $('player').style.backgroundColor=col;
+}
+
+function setTint(v){
+  const id=v.videoId;
+
+  if(tintCache[id]){
+    paintTint(tintCache[id]);
+    return;
+  }
+
+  const urls=[
+    `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+    ...instances.map(b=>`${b}/vi/${id}/mqdefault.jpg`)
+  ];
+
+  let n=0;
+
+  const tryNext=()=>{
+    if(n>=urls.length)return;
+
+    const im=new Image();
+    im.crossOrigin='anonymous';
+    im.onerror=tryNext;
+
+    im.onload=()=>{
+      try{
+        const c=document.createElement('canvas');
+        c.width=16;
+        c.height=8;
+
+        const x=c.getContext('2d',{willReadFrequently:true});
+        x.drawImage(im,0,0,im.naturalWidth,im.naturalHeight*.3,0,0,16,8);
+
+        const d=x.getImageData(0,0,16,8).data;
+        let r=0,g=0,b=0,k=0;
+
+        for(let i=0;i<d.length;i+=4){
+          r+=d[i];
+          g+=d[i+1];
+          b+=d[i+2];
+          k++;
+        }
+
+        const col=`rgb(${Math.round(r/k)},${Math.round(g/k)},${Math.round(b/k)})`;
+
+        tintCache[id]=col;
+
+        if(queue[idx]&&queue[idx].videoId===id)paintTint(col);
+      }catch(e){
+        tryNext();
+      }
+    };
+
+    im.src=urls[n++];
+  };
+
+  tryNext();
+}
+
 function setInfo(v){
   const t=thumbOf(v);
 
@@ -1253,6 +1324,7 @@ function setInfo(v){
   );
 
   setPlayerBg(v);
+  setTint(v);
 }
 
 function showFull(){
@@ -1262,11 +1334,14 @@ function showFull(){
   $('mini').classList.remove('visible');
   $('player').classList.add('active');
 
+  if(queue[idx])setTint(queue[idx]);
+
   pushLayer(()=>{
     mode='mini';
     document.body.classList.remove('fp');
     $('player').classList.remove('active');
     $('mini').classList.add('visible');
+    apply();
   });
 }
 
@@ -1278,6 +1353,7 @@ function closePlayer(){
   $('mini').classList.remove('visible');
 
   stopT();
+  apply();
 
   if(yt&&apiReady)yt.stopVideo();
 
