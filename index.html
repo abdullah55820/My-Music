@@ -62,7 +62,7 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* Page background (gradient, extends under status bar and home bar) */
+/* Page background (gradient / solid / photo, extends under status bar and home bar) */
 #bg{
   position:fixed;
   left:0;
@@ -73,6 +73,7 @@ svg{display:block}
   background-color:var(--bg);
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 .header{
@@ -506,6 +507,12 @@ body.dragging #topfade{opacity:0}
 .mc{width:38px;height:42px;display:grid;place-items:center;flex-shrink:0}
 .mc svg{width:24px;height:24px}
 
+/* Island (nav + mini player): blur stays inside the island only, no big soft shadow spilling below it */
+.nav.g,.mini.g{
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
+  contain:paint;
+}
+
 /* YouTube host: kept inside the viewport (behind the page) so browsers don't pause it */
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
 
@@ -601,9 +608,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .pv{
   aspect-ratio:3/4;
   border-radius:12px;
-  border:2px solid transparent;
+  border:2px solid rgba(128,128,128,.35);
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 .pv.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
@@ -622,6 +630,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 .sb.p{background:var(--accent);color:#fff}
 .sb.d{color:#ff453a}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 
 /* Pull to refresh */
 #ptr{
@@ -879,6 +888,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div class="sec g">
       <h3>Background</h3>
       <div class="pvs" id="presets"></div>
+
+      <div class="btnrow">
+        <button class="sb p" id="photoPick" type="button">Use my photo</button>
+        <button class="sb d" id="photoDel" type="button" hidden>Remove photo</button>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
+        Solid Black / White select korle theme auto dark / light hoye jabe.
+      </div>
+      <input type="file" id="photoIn" accept="image/*" hidden>
     </div>
 
     <div class="sec g">
@@ -946,6 +965,9 @@ const LS={
       localStorage.setItem(k,JSON.stringify(v));
       return true;
     }catch(e){return false}
+  },
+  del(k){
+    try{localStorage.removeItem(k)}catch(e){}
   }
 };
 
@@ -972,8 +994,9 @@ addEventListener('keydown',e=>{
 });
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:''};
 
+/* 0-7 gradients, 8 = solid black, 9 = solid white */
 const PRESETS=[
   'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
   'linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)',
@@ -982,12 +1005,16 @@ const PRESETS=[
   'linear-gradient(160deg,#232526,#414345 60%,#6b7280)',
   'linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)',
   'linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)',
-  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)'
+  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)',
+  '#000000',
+  '#ffffff'
 ];
 
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
 let S={...DEF,...LS.get('sf_settings_v2',{})};
+let PHOTO=LS.get('sf_bg_photo',null);   /* user's own background photo (data URL) */
+
 const save=()=>LS.set('sf_settings_v2',S);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
 const darkMQ=matchMedia('(prefers-color-scheme: dark)');
@@ -995,7 +1022,16 @@ const darkMQ=matchMedia('(prefers-color-scheme: dark)');
 function apply(){
   const d=document.documentElement;
   const st=d.style;
-  const dark=S.theme==='dark'||(S.theme==='system'&&darkMQ.matches);
+
+  if(S.preset==='photo'&&!PHOTO)S.preset=0;
+
+  const isPhoto=S.preset==='photo';
+  const pr=isPhoto?null:(PRESETS[S.preset]||PRESETS[0]);
+  const solid=(pr&&pr[0]==='#')?pr:null;
+
+  let dark=S.theme==='dark'||(S.theme==='system'&&darkMQ.matches);
+  if(solid==='#000000')dark=true;      /* black bg -> dark theme */
+  else if(solid==='#ffffff')dark=false; /* white bg -> light theme */
 
   d.dataset.theme=dark?'dark':'light';
 
@@ -1008,16 +1044,29 @@ function apply(){
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols);
 
-  const grad=PRESETS[S.preset]||PRESETS[0];
-  $('bg').style.backgroundImage=grad;
+  let bgImg,top;
+
+  if(isPhoto){
+    bgImg=`url("${PHOTO}")`;
+    top=S.photoTop||'#222222';
+  }else if(solid){
+    bgImg=`linear-gradient(${solid},${solid})`;
+    top=solid;
+  }else{
+    bgImg=pr;
+    top=pr.match(/#[0-9a-f]{6}/i)[0];
+  }
+
+  $('bg').style.backgroundImage=bgImg;
 
   /* status bar colour follows the page, except while the full player owns it */
   if(mode!=='full'){
-    const top=grad.match(/#[0-9a-f]{6}/i)[0];
     st.backgroundColor=top;
-    st.backgroundImage=grad;
+    st.backgroundImage=bgImg;
     st.backgroundAttachment='fixed';
     st.backgroundSize='cover';
+    st.backgroundPosition='center';
+    st.backgroundRepeat='no-repeat';
     setThemeColor(top);
   }
 
@@ -1037,6 +1086,14 @@ function apply(){
   document.querySelectorAll('#presets .pv').forEach(p=>{
     p.classList.toggle('on',p.dataset.i===String(S.preset));
   });
+
+  /* photo tile + buttons */
+  const pt=$('photoTile');
+  pt.hidden=!PHOTO;
+  if(PHOTO)pt.style.backgroundImage=`url("${PHOTO}")`;
+
+  $('photoDel').hidden=!PHOTO;
+  $('photoPick').textContent=PHOTO?'Change my photo':'Use my photo';
 }
 
 darkMQ.addEventListener('change',()=>{if(S.theme==='system')apply()});
@@ -1060,10 +1117,20 @@ function buildSettingsUI(){
     b.type='button';
     b.className='pv';
     b.dataset.i=i;
-    b.style.backgroundImage=g;
+    b.style.background=g;
     b.onclick=()=>{S.preset=i;save();apply()};
     p.appendChild(b);
   });
+
+  /* my photo tile */
+  const pt=document.createElement('button');
+  pt.type='button';
+  pt.className='pv';
+  pt.id='photoTile';
+  pt.dataset.i='photo';
+  pt.hidden=true;
+  pt.onclick=()=>{S.preset='photo';save();apply()};
+  p.appendChild(pt);
 
   document.querySelectorAll('input[data-k]').forEach(el=>{
     el.addEventListener('input',()=>{
@@ -1087,7 +1154,80 @@ function buildSettingsUI(){
   });
 }
 
+/* ---------- OWN PHOTO BACKGROUND ---------- */
+$('photoPick').onclick=()=>$('photoIn').click();
+
+$('photoDel').onclick=()=>{
+  PHOTO=null;
+  LS.del('sf_bg_photo');
+  if(S.preset==='photo')S.preset=0;
+  S.photoTop='';
+  save();
+  apply();
+};
+
+$('photoIn').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value='';
+  if(!f)return;
+
+  const url=URL.createObjectURL(f);
+  const im=new Image();
+
+  im.onload=()=>{
+    /* shrink big phone photos so they fit in storage */
+    const M=1600;
+    const k=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));
+    const w=Math.max(1,Math.round(im.naturalWidth*k));
+    const h=Math.max(1,Math.round(im.naturalHeight*k));
+
+    const c=document.createElement('canvas');
+    c.width=w;
+    c.height=h;
+    c.getContext('2d').drawImage(im,0,0,w,h);
+
+    let data;
+    try{data=c.toDataURL('image/jpeg',.85)}catch(err){data=null}
+
+    /* average colour of the top strip -> status bar */
+    let top='#222222';
+    try{
+      const c2=document.createElement('canvas');
+      c2.width=8;
+      c2.height=2;
+      const x=c2.getContext('2d',{willReadFrequently:true});
+      x.drawImage(c,0,0,w,Math.max(1,h*.08),0,0,8,2);
+      const px=x.getImageData(0,0,8,2).data;
+      let r=0,g=0,b=0,n=0;
+      for(let i=0;i<px.length;i+=4){r+=px[i];g+=px[i+1];b+=px[i+2];n++}
+      top=`rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
+    }catch(err){}
+
+    URL.revokeObjectURL(url);
+
+    if(!data||!LS.set('sf_bg_photo',data)){
+      alert('Photo save kora gelo na. Ekta choto photo try koro.');
+      return;
+    }
+
+    PHOTO=data;
+    S.preset='photo';
+    S.photoTop=top;
+    save();
+    apply();
+  };
+
+  im.onerror=()=>{
+    URL.revokeObjectURL(url);
+    alert('Ei photo ta khola gelo na.');
+  };
+
+  im.src=url;
+});
+
 $('resetAll').onclick=()=>{
+  PHOTO=null;
+  LS.del('sf_bg_photo');
   S={...DEF};
   save();
   apply();
@@ -1613,6 +1753,9 @@ const instances=[
   'https://invidious.tiekoetter.com'
 ];
 
+/* Only songs uploaded on/after 1 Jan 2010 (unix seconds) */
+const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
+
 const D={
   home:{videos:[],busy:false,ctl:null},
   search:{videos:[],page:1,query:'',busy:false,ctl:null}
@@ -1658,7 +1801,7 @@ function card(v,i,list){
   return c;
 }
 
-/* Invidious request (fastest instance wins) */
+/* Invidious request (fastest instance wins). Videos older than 2010 are dropped. */
 async function fetchSongs(q,page,ctl,list=instances){
   const requests=list.map(base=>
     fetch(
@@ -1669,7 +1812,10 @@ async function fetchSongs(q,page,ctl,list=instances){
       return r.json();
     }).then(data=>{
       if(!Array.isArray(data))throw new Error('Invalid response');
-      return data.filter(v=>v&&v.type==='video'&&v.videoId);
+      return data.filter(v=>
+        v&&v.type==='video'&&v.videoId&&
+        (!v.published||v.published>=MIN_TS)
+      );
     })
   );
 
@@ -1690,14 +1836,14 @@ const shuffle=a=>{
 };
 
 const GROUPS=[
-  ['Hindi songs','Bollywood hits','Arijit Singh songs','Hindi romantic songs','Hindi lofi songs','Kishore Kumar songs','Latest Hindi songs','Old Hindi songs','Lata Mangeshkar songs'],
-  ['Bangla new songs','Old Bangla hits','Bengali modern songs','Anupam Roy songs','Kolkata Bangla songs','Rabindra Sangeet','Bengali movie songs'],
+  ['Hindi songs 2025','Bollywood hits','Arijit Singh songs','Hindi romantic songs','Hindi lofi songs','Latest Hindi songs','Bollywood songs 2024','Hindi songs 2023'],
+  ['Bangla new songs','Bengali modern songs','Anupam Roy songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025'],
   ['Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs','Latest Punjabi songs','Punjabi romantic songs'],
-  ['Tamil songs','Anirudh songs','AR Rahman Tamil songs','Tamil hit songs','Ilaiyaraaja songs'],
+  ['Tamil songs 2025','Anirudh songs','AR Rahman Tamil songs','Tamil hit songs','Tamil movie songs'],
   ['Telugu songs','Telugu hit songs','Telugu melody songs','Telugu movie songs'],
-  ['Malayalam songs','Kannada songs','Marathi songs','Gujarati songs','Bhojpuri songs','Rajasthani songs','Odia songs','Assamese songs'],
+  ['Malayalam songs','Kannada songs','Marathi songs','Gujarati songs','Odia songs','Assamese songs'],
   ['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026'],
-  ['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs','Nusrat Fateh Ali Khan songs']
+  ['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']
 ].map(qs=>({qs,buf:[],pg:{}}));
 
 async function fillGroup(g,ctl){
@@ -1890,7 +2036,8 @@ async function loadSearch(term,page,append){
   if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
 
   $('searchStatus').textContent=st.videos.length+' Songs';
-  $('searchMore').hidden=!fresh.length;
+  /* page may be fully filtered (old songs) -> still allow Load More if the server returned something */
+  $('searchMore').hidden=!data.length&&!fresh.length;
   $('searchMore').disabled=false;
 }
 
