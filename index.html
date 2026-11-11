@@ -1263,7 +1263,8 @@ function setPlayerBg(v){
 }
 
 /* Top colour of the current song's cover -> status bar + player background.
-   Tries several image hosts, because canvas needs a CORS-enabled one. */
+   Canvas needs a CORS-enabled image, so all sources are tried AT THE SAME TIME
+   and the first one that works wins (fast, no waiting on slow/blocked hosts). */
 const tintCache={};
 
 function paintTint(col){
@@ -1277,38 +1278,41 @@ function paintTint(col){
   $('player').style.setProperty('--pt',col);
 }
 
-function setTint(v){
+function sampleTint(v,done){
   const id=v.videoId;
 
   if(tintCache[id]){
-    paintTint(tintCache[id]);
+    done(tintCache[id]);
     return;
   }
 
+  const yt=`i.ytimg.com/vi/${id}/mqdefault.jpg`;
+
   const urls=[
-    `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
-    `https://images.weserv.nl/?url=i.ytimg.com/vi/${id}/mqdefault.jpg&w=32&h=18&fit=fill&output=jpg`,
+    `https://images.weserv.nl/?url=${yt}&w=32&h=18&fit=fill&output=jpg`,
+    `https://wsrv.nl/?url=${yt}&w=32&h=18&fit=fill&output=jpg`,
+    `https://${yt}`,
+    thumbOf(v),
     ...instances.map(b=>`${b}/vi/${id}/mqdefault.jpg`)
   ];
 
-  let n=0;
+  let finished=false;
 
-  const tryNext=()=>{
-    if(n>=urls.length){
-      return;
-    }
-
+  urls.forEach(u=>{
     const im=new Image();
     im.crossOrigin='anonymous';
-    im.onerror=tryNext;
 
     im.onload=()=>{
+      if(finished)return;
+
       try{
         const c=document.createElement('canvas');
         c.width=16;
         c.height=8;
 
         const x=c.getContext('2d',{willReadFrequently:true});
+
+        /* the part of the cover that is visible at the very top of the blurred background */
         x.drawImage(im,im.naturalWidth*.32,im.naturalHeight*.06,im.naturalWidth*.36,im.naturalHeight*.16,0,0,16,8);
 
         const d=x.getImageData(0,0,16,8).data;
@@ -1321,20 +1325,30 @@ function setTint(v){
           k++;
         }
 
+        finished=true;
+
         const col=`rgb(${Math.round(r/k)},${Math.round(g/k)},${Math.round(b/k)})`;
-
         tintCache[id]=col;
-
-        if(queue[idx]&&queue[idx].videoId===id)paintTint(col);
-      }catch(e){
-        tryNext();
-      }
+        done(col);
+      }catch(e){}
     };
 
-    im.src=urls[n++];
-  };
+    im.src=u;
+  });
+}
 
-  tryNext();
+function setTint(v){
+  const id=v.videoId;
+
+  sampleTint(v,col=>{
+    if(queue[idx]&&queue[idx].videoId===id)paintTint(col);
+  });
+
+  /* warm up the next song so its colour is ready instantly */
+  if(queue.length>1){
+    const nv=queue[(idx+1)%queue.length];
+    if(nv&&nv.videoId)sampleTint(nv,()=>{});
+  }
 }
 
 function setInfo(v){
