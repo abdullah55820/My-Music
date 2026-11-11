@@ -634,6 +634,27 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 .sb.p{background:var(--accent);color:#fff}
 .sb.d{color:#ff453a}
+
+/* Pull to refresh */
+#ptr{
+  position:fixed;
+  left:50%;
+  top:env(safe-area-inset-top);
+  width:40px;
+  height:40px;
+  margin-left:-20px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  z-index:50;
+  pointer-events:none;
+  opacity:0;
+  color:var(--accent);
+}
+
+#ptr svg{width:20px;height:20px}
+#ptr.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -642,12 +663,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 <header class="header">
   <div class="brand">SOUND<span>FLOW</span></div>
-  <button class="ib g" id="profBtn" type="button" aria-label="Profile">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="8" r="3.5"/>
-      <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
-    </svg>
-  </button>
 </header>
 
 <!-- HOME -->
@@ -735,6 +750,14 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </svg>
     <span>Library</span>
   </button>
+
+  <button class="nb" data-tab="profile" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="3.5"/>
+      <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/>
+    </svg>
+    <span>Profile</span>
+  </button>
 </nav>
 
 <!-- FULL PLAYER -->
@@ -818,11 +841,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
     <h2>Profile</h2>
 
-    <button class="ib g" id="spClose" type="button" aria-label="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <path d="M6 6l12 12M18 6 6 18"/>
-      </svg>
-    </button>
+    <div style="width:42px;height:42px"></div>
   </div>
 
   <div class="spb">
@@ -899,6 +918,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 </section>
 
 <div id="topfade"></div>
+
+<div id="ptr" class="g" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 11a8 8 0 1 0-2.3 5.7"/>
+    <path d="M20 4v7h-7"/>
+  </svg>
+</div>
 
 <div id="yt"><div id="ytp"></div></div>
 
@@ -1107,8 +1133,7 @@ function openProfile(){
   pushLayer(()=>$('sp').classList.remove('open'));
 }
 
-$('profBtn').onclick=openProfile;
-$('spBack').onclick=$('spClose').onclick=()=>history.back();
+$('spBack').onclick=()=>history.back();
 
 /* PLAYER */
 let yt=null;
@@ -1714,11 +1739,11 @@ async function loadHomeMore(){
       if(added>=20)break;
     }
 
-    /* Keep fetching on the next scroll instead of looping endlessly */
-    if(added<20)break;
+    /* got some new songs: wait for the next scroll. Nothing new: try the next page */
+    if(added>0)break;
   }
 
-  st.busy=false;
+  if(st.ctl===ctl)st.busy=false;
 
   if(st.ctl!==ctl||ctl.signal.aborted)return;
 
@@ -1743,6 +1768,9 @@ async function loadHomeMore(){
   }
 
   status.textContent=st.videos.length+' Songs';
+
+  /* screen not filled yet (e.g. after refresh): load more */
+  if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900)loadHomeMore();
 }
 
 /* Infinite scroll */
@@ -1995,6 +2023,20 @@ function setTab(t){
 
 document.querySelectorAll('.nb').forEach(b=>{
   b.onclick=()=>{
+    const tab=b.dataset.tab;
+
+    if(tab==='profile'){
+      openProfile();
+      return;
+    }
+
+    /* Home tapped while already on Home: scrolled down -> go to top, at top -> refresh */
+    if(tab==='home'&&activeTab==='home'){
+      if(window.scrollY>5)window.scrollTo({top:0,behavior:'smooth'});
+      else doRefresh();
+      return;
+    }
+
     if(b.dataset.tab==='library'&&activeTab==='library'&&libView!=='folders'){
       history.back();
       return;
@@ -2003,6 +2045,107 @@ document.querySelectorAll('.nb').forEach(b=>{
     setTab(b.dataset.tab);
   };
 });
+
+/* HOME REFRESH + PULL TO REFRESH */
+function refreshHome(){
+  const st=D.home;
+
+  if(st.ctl)st.ctl.abort();
+
+  st.busy=false;
+  st.videos=[];
+  $('homeGrid').innerHTML='';
+
+  /* pick a different search so the new songs are not the same ones (seen songs are also skipped) */
+  let n;
+  do{n=Math.floor(Math.random()*HQ.length)}while(n===qi&&HQ.length>1);
+
+  qi=n;
+  st.query=HQ[qi];
+  st.page=Math.floor(Math.random()*3);
+
+  return loadHomeMore();
+}
+
+const ptr=$('ptr'),homeEl=$('homePage'),hdrEl=document.querySelector('.header');
+const EASE='transform .3s cubic-bezier(.3,.8,.3,1)';
+
+let refreshing=false,pulling=false,py=0,pdy=0;
+
+function ptrMove(d,anim){
+  const t=d>0?`translateY(${d}px)`:'';
+
+  homeEl.style.transition=hdrEl.style.transition=anim?EASE:'';
+  homeEl.style.transform=hdrEl.style.transform=t;
+
+  ptr.style.transition=anim?'top .3s,opacity .3s':'';
+  ptr.style.top=`calc(env(safe-area-inset-top) + ${d*.5-20}px)`;
+  ptr.style.opacity=Math.min(d/40,1);
+
+  if(!refreshing)ptr.firstElementChild.style.transform=`rotate(${d*4}deg)`;
+}
+
+async function doRefresh(){
+  if(refreshing)return;
+
+  refreshing=true;
+  ptr.firstElementChild.style.transform='';
+  ptr.classList.add('spin');
+  ptrMove(60,true);
+
+  await Promise.all([refreshHome(),new Promise(r=>setTimeout(r,700))]);
+
+  ptr.classList.remove('spin');
+  refreshing=false;
+  ptrMove(0,true);
+}
+
+addEventListener('touchstart',e=>{
+  pulling=false;
+
+  if(
+    activeTab!=='home'||mode==='full'||refreshing||
+    $('sp').classList.contains('open')||
+    window.scrollY>0||e.touches.length!==1
+  )return;
+
+  py=e.touches[0].clientY;
+  pdy=0;
+  pulling=true;
+},{passive:true});
+
+addEventListener('touchmove',e=>{
+  if(!pulling)return;
+
+  const dy=e.touches[0].clientY-py;
+
+  if(dy<=0)return;
+
+  if(window.scrollY>0){
+    pulling=false;
+    return;
+  }
+
+  /* stop the browser's own rubber-band (blank area) and show our refresh icon instead */
+  if(e.cancelable)e.preventDefault();
+
+  pdy=Math.min(dy*.6,100);
+  ptrMove(pdy,false);
+},{passive:false});
+
+function endPull(){
+  if(!pulling)return;
+
+  pulling=false;
+
+  if(pdy>=55)doRefresh();
+  else ptrMove(0,true);
+
+  pdy=0;
+}
+
+addEventListener('touchend',endPull,{passive:true});
+addEventListener('touchcancel',endPull,{passive:true});
 
 /* INITIALIZE */
 buildSettingsUI();
