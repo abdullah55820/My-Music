@@ -362,16 +362,25 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   pointer-events:none;
 }
 
-.ptop{
-  position:absolute;
+#topfade{
+  position:fixed;
   left:0;
   right:0;
   top:0;
-  height:calc(env(safe-area-inset-top) + 10px);
-  z-index:1;
+  height:calc(env(safe-area-inset-top) + 120px);
+  z-index:10000;
   pointer-events:none;
-  background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%);
+  opacity:0;
+  visibility:hidden;
+  background:linear-gradient(to bottom,
+    var(--pt,#161618) 0,
+    var(--pt,#161618) env(safe-area-inset-top),
+    color-mix(in srgb,var(--pt,#161618) 85%,transparent) calc(env(safe-area-inset-top) + 18px),
+    color-mix(in srgb,var(--pt,#161618) 55%,transparent) calc(env(safe-area-inset-top) + 45px),
+    color-mix(in srgb,var(--pt,#161618) 22%,transparent) calc(env(safe-area-inset-top) + 80px),
+    transparent 100%);
 }
+body.fp #topfade{opacity:1;visibility:visible}
 
 .grab{position:relative;z-index:2;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
@@ -732,7 +741,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <section class="player" id="player">
   <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
-  <div class="ptop"></div>
 
   <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span></button>
 
@@ -889,6 +897,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
   </div>
 </section>
+
+<div id="topfade"></div>
 
 <div id="yt"><div id="ytp"></div></div>
 
@@ -1274,18 +1284,17 @@ function paintTint(col){
   st.backgroundColor=col;
   setThemeColor(col);
   $('player').style.backgroundColor=col;
-  $('player').style.setProperty('--pt',col);
 
-  /* Safari re-reads the top colour only when a fixed element at the top appears:
-     swap in a brand-new top strip (same thing that happens on minimize + reopen) */
-  const oldTop=$('player').querySelector('.ptop');
-  const newTop=document.createElement('div');
+  /* Safari re-reads the top colour when a fixed element at the top appears:
+     swap in a brand-new top strip each time the colour changes */
+  const old=$('topfade');
+  const nw=document.createElement('div');
 
-  newTop.className='ptop';
-  newTop.style.setProperty('--pt',col);
+  nw.id='topfade';
+  nw.style.setProperty('--pt',col);
 
-  oldTop.after(newTop);
-  requestAnimationFrame(()=>oldTop.remove());
+  old.after(nw);
+  old.remove();
 
   void document.body.offsetHeight;
 
@@ -1396,6 +1405,11 @@ function setTint(v){
   sampleTint(v,col=>{
     if(queue[idx]&&queue[idx].videoId===id)paintTint(col);
   });
+
+  /* if the cover colour cannot be read, still never leave the old blue bar */
+  setTimeout(()=>{
+    if(!tintCache[id]&&queue[idx]&&queue[idx].videoId===id)paintTint('#2a2a2e');
+  },2500);
 
   /* warm up the next song so its colour is ready instantly */
   if(queue.length>1){
