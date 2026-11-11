@@ -62,7 +62,6 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* Page background (gradient / solid / photo, extends under status bar and home bar) */
 #bg{
   position:fixed;
   left:0;
@@ -138,7 +137,6 @@ svg{display:block}
 
 .back svg{width:22px;height:22px}
 
-/* Search */
 .sbox{
   display:flex;
   align-items:center;
@@ -179,7 +177,6 @@ svg{display:block}
 
 .xbtn svg{width:15px;height:15px}
 
-/* Grid + cards */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #homeGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
 
@@ -235,7 +232,6 @@ svg{display:block}
 .load{display:block;margin:20px auto;padding:13px 24px;border-radius:99px;font-weight:650}
 .load:disabled{opacity:.5}
 
-/* Library folder cover */
 .fcover{
   position:relative;
   width:100%;
@@ -268,7 +264,6 @@ svg{display:block}
 
 #sentinel{height:20px;width:100%}
 
-/* Bottom navigation */
 .nav{
   position:fixed;
   z-index:9000;
@@ -302,7 +297,6 @@ svg{display:block}
 .nb.active{color:var(--accent);background:var(--accent-soft)}
 body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 
-/* Full player */
 .player{
   position:fixed;
   inset:0;
@@ -330,7 +324,6 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s;
 }
 
-/* Blurred cover of the CURRENT song */
 .pbg{
   position:absolute;
   left:-150px;
@@ -447,6 +440,8 @@ body.dragging #topfade{opacity:0}
   outline:0;
   border:0;
   background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;
+  touch-action:none;
+  cursor:pointer;
 }
 
 .seek::-webkit-slider-thumb{
@@ -477,7 +472,6 @@ body.dragging #topfade{opacity:0}
 .cb.big svg{width:66px;height:66px}
 .cb:active{transform:scale(.88)}
 
-/* Mini player */
 .mini{
   position:fixed;
   z-index:9500;
@@ -507,16 +501,13 @@ body.dragging #topfade{opacity:0}
 .mc{width:38px;height:42px;display:grid;place-items:center;flex-shrink:0}
 .mc svg{width:24px;height:24px}
 
-/* Island (nav + mini player): blur stays inside the island only, no big soft shadow spilling below it */
 .nav.g,.mini.g{
   box-shadow:0 1px 4px rgba(0,0,0,.18);
   contain:paint;
 }
 
-/* YouTube host: kept inside the viewport (behind the page) so browsers don't pause it */
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
 
-/* Profile / settings */
 .sp{
   position:fixed;
   inset:0;
@@ -529,6 +520,7 @@ body.dragging #topfade{opacity:0}
   transform:translateX(100%);
   visibility:hidden;
   transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;
+  will-change:transform;
 }
 
 .sp.open{transform:none;visibility:visible}
@@ -632,7 +624,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .sb.d{color:#ff453a}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 
-/* Pull to refresh */
 #ptr{
   position:fixed;
   left:50%;
@@ -662,7 +653,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <div class="brand">SOUND<span>FLOW</span></div>
 </header>
 
-<!-- HOME -->
 <main class="page active" id="homePage">
   <div class="wrap">
     <div class="section">
@@ -674,7 +664,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </main>
 
-<!-- SEARCH -->
 <main class="page" id="searchPage">
   <div class="wrap">
     <form class="sbox g" id="sForm">
@@ -700,7 +689,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </main>
 
-<!-- LIBRARY -->
 <main class="page" id="libraryPage">
   <div class="wrap">
     <div class="section">
@@ -720,7 +708,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </main>
 
-<!-- NAV -->
 <nav class="nav g" id="nav">
   <button class="nb active" data-tab="home" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -757,7 +744,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </button>
 </nav>
 
-<!-- FULL PLAYER -->
 <section class="player" id="player">
   <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
@@ -807,7 +793,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </section>
 
-<!-- MINI PLAYER -->
 <div class="mini g" id="mini">
   <img id="mThumb" alt="">
 
@@ -827,7 +812,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </button>
 </div>
 
-<!-- PROFILE / SETTINGS -->
 <section class="sp" id="sp" role="dialog" aria-modal="true">
   <div class="sph">
     <button class="ib g" id="spBack" type="button" aria-label="Back">
@@ -950,7 +934,6 @@ function setThemeColor(col,paintBody=true){
   m.name='theme-color';
   m.content=col;
   document.head.appendChild(m);
-  /* body colour only while the full player is open; otherwise it would hide the background */
   document.body.style.backgroundColor=paintBody?col:'';
 }
 
@@ -997,7 +980,6 @@ addEventListener('keydown',e=>{
 /* ---------- SETTINGS ---------- */
 const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:''};
 
-/* 0-7 gradients, 8 = solid black, 9 = solid white */
 const PRESETS=[
   'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
   'linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)',
@@ -1014,7 +996,7 @@ const PRESETS=[
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
 let S={...DEF,...LS.get('sf_settings_v2',{})};
-let PHOTO=LS.get('sf_bg_photo',null);   /* user's own background photo (data URL) */
+let PHOTO=LS.get('sf_bg_photo',null);
 
 const save=()=>LS.set('sf_settings_v2',S);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
@@ -1031,12 +1013,11 @@ function apply(){
   const solid=(pr&&pr[0]==='#')?pr:null;
 
   let dark=S.theme==='dark'||(S.theme==='system'&&darkMQ.matches);
-  if(solid==='#000000')dark=true;      /* black bg -> dark theme */
-  else if(solid==='#ffffff')dark=false; /* white bg -> light theme */
+  if(solid==='#000000')dark=true;
+  else if(solid==='#ffffff')dark=false;
 
   d.dataset.theme=dark?'dark':'light';
 
-  /* computed here (no color-mix) so older browsers work too */
   st.setProperty('--accent',S.accent);
   st.setProperty('--accent-soft',`rgba(${hexRgb(S.accent)},.16)`);
   st.setProperty('--glass',`rgba(${dark?'28,28,30':'255,255,255'},${S.ga/100})`);
@@ -1060,7 +1041,6 @@ function apply(){
 
   $('bg').style.backgroundImage=bgImg;
 
-  /* status bar colour follows the page, except while the full player owns it */
   if(mode!=='full'){
     st.backgroundColor=top;
     st.backgroundImage=bgImg;
@@ -1088,7 +1068,6 @@ function apply(){
     p.classList.toggle('on',p.dataset.i===String(S.preset));
   });
 
-  /* photo tile + buttons */
   const pt=$('photoTile');
   pt.hidden=!PHOTO;
   if(PHOTO)pt.style.backgroundImage=`url("${PHOTO}")`;
@@ -1123,7 +1102,6 @@ function buildSettingsUI(){
     p.appendChild(b);
   });
 
-  /* my photo tile */
   const pt=document.createElement('button');
   pt.type='button';
   pt.className='pv';
@@ -1176,7 +1154,6 @@ $('photoIn').addEventListener('change',e=>{
   const im=new Image();
 
   im.onload=()=>{
-    /* shrink big phone photos so they fit in storage */
     const M=1600;
     const k=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));
     const w=Math.max(1,Math.round(im.naturalWidth*k));
@@ -1190,7 +1167,6 @@ $('photoIn').addEventListener('change',e=>{
     let data;
     try{data=c.toDataURL('image/jpeg',.85)}catch(err){data=null}
 
-    /* average colour of the top strip -> status bar */
     let top='#222222';
     try{
       const c2=document.createElement('canvas');
@@ -1245,7 +1221,7 @@ $('spBack').onclick=()=>history.back();
 /* ---------- PLAYER ---------- */
 let yt=null;
 let apiReady=false;
-let mode='closed';          /* closed | full | mini */
+let mode='closed';
 let queue=[];
 let idx=-1;
 let playing=false;
@@ -1279,7 +1255,6 @@ window.onYouTubeIframeAPIReady=()=>{
   });
 };
 
-/* Load the YouTube API only after the callback above exists, without blocking the page */
 (function(){
   const s=document.createElement('script');
   s.src='https://www.youtube.com/iframe_api';
@@ -1309,7 +1284,6 @@ function onState(e){
   }
 }
 
-/* Unplayable video: skip to the next one (stop if everything fails) */
 function onYtError(){
   playing=false;
   icons();
@@ -1361,30 +1335,121 @@ function stopT(){
   timer=null;
 }
 
-/* seeking flag (more reliable than :active on touch screens) */
-seek.addEventListener('pointerdown',()=>{seeking=true});
-['pointerup','pointercancel'].forEach(t=>addEventListener(t,()=>{
-  if(seeking)setTimeout(()=>{seeking=false},50);
-}));
+/* ---------- SMOOTH SEEK BAR ---------- */
+/* Drag follows the finger smoothly; a simple tap seeks directly. */
+let seekPointer=null;
+let seekStartX=0;
+let seekLastX=0;
+let seekMoved=false;
+let seekTarget=0;
+let seekFrame=0;
 
-seek.addEventListener('input',()=>{
-  seeking=true;
-  setProg(+seek.value);
+function seekPercentAt(x){
+  const r=seek.getBoundingClientRect();
+  return Math.max(0,Math.min(100,(x-r.left)/r.width*100));
+}
 
-  if(apiReady)$('cur').textContent=fmt((yt.getDuration()||0)*seek.value/100);
-});
+function stopSeekAnimation(){
+  if(seekFrame){
+    cancelAnimationFrame(seekFrame);
+    seekFrame=0;
+  }
+}
 
-seek.addEventListener('change',()=>{
-  if(!apiReady)return;
+function finishSeek(){
+  stopSeekAnimation();
 
-  const d=yt.getDuration()||0;
-  if(d>0)yt.seekTo(d*seek.value/100,true);
+  if(apiReady){
+    const d=yt.getDuration()||0;
+    if(d>0)yt.seekTo(d*seekTarget/100,true);
+  }
+
+  seek.value=seekTarget;
+  setProg(seekTarget);
 
   seeking=false;
+  seekPointer=null;
   tick();
+}
+
+function animateSeek(){
+  const current=Number(seek.value)||0;
+  const diff=seekTarget-current;
+
+  if(Math.abs(diff)<0.12){
+    seek.value=seekTarget;
+    setProg(seekTarget);
+    seekFrame=0;
+    finishSeek();
+    return;
+  }
+
+  /* Smaller steps create a gentle, progressive movement */
+  seek.value=current+diff*.20;
+  setProg(seek.value);
+
+  const duration=apiReady?yt.getDuration()||0:0;
+  if(duration>0)$('cur').textContent=fmt(duration*seek.value/100);
+
+  seekFrame=requestAnimationFrame(animateSeek);
+}
+
+seek.addEventListener('pointerdown',e=>{
+  if(!apiReady)return;
+
+  e.preventDefault();
+
+  stopSeekAnimation();
+
+  seekPointer=e.pointerId;
+  seekStartX=e.clientX;
+  seekLastX=e.clientX;
+  seekMoved=false;
+
+  seekTarget=Number(seek.value)||0;
+  seeking=true;
+
+  try{seek.setPointerCapture(e.pointerId)}catch(err){}
 });
 
+seek.addEventListener('pointermove',e=>{
+  if(seekPointer!==e.pointerId)return;
+
+  const movement=Math.abs(e.clientX-seekStartX);
+
+  if(movement>4)seekMoved=true;
+
+  seekLastX=e.clientX;
+  seekTarget=seekPercentAt(e.clientX);
+
+  if(seekMoved&&!seekFrame){
+    seekFrame=requestAnimationFrame(animateSeek);
+  }
+});
+
+function seekPointerEnd(e){
+  if(seekPointer!==e.pointerId)return;
+
+  if(!seekMoved){
+    /* Tap: jump directly to the selected point */
+    seekTarget=seekPercentAt(e.clientX);
+    seek.value=seekTarget;
+    setProg(seekTarget);
+    finishSeek();
+  }else{
+    /* Drag: continue smoothly until the target is reached */
+    seekTarget=seekPercentAt(e.clientX);
+    if(!seekFrame)seekFrame=requestAnimationFrame(animateSeek);
+  }
+}
+
+seek.addEventListener('pointerup',seekPointerEnd);
+seek.addEventListener('pointercancel',seekPointerEnd);
+
 function resetProg(){
+  stopSeekAnimation();
+  seekPointer=null;
+  seeking=false;
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
@@ -1406,7 +1471,6 @@ function thumbOf(v){
   ).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
 
-/* Blurred cover of the current song (preloaded, swapped in only if still current) */
 function setPlayerBg(v){
   const id=v.videoId;
   const urls=[thumbOf(v),`https://i.ytimg.com/vi/${id}/hqdefault.jpg`];
@@ -1437,8 +1501,6 @@ function paintTint(col){
   setThemeColor(col);
   $('player').style.backgroundColor=col;
 
-  /* Safari re-reads the top colour when a fixed element at the top appears:
-     swap in a brand-new top strip each time the colour changes */
   const old=$('topfade');
   const nw=document.createElement('div');
 
@@ -1458,8 +1520,6 @@ function paintTint(col){
   }));
 }
 
-/* Average colour of the exact part of the cover that shows at the top of the screen
-   (.pbg = screen + 150px on each side, object-fit:cover, scale 1.3). */
 function avgColor(src,w,h){
   const W=innerWidth,H=innerHeight;
   const Wb=W+300,Hb=H+300;
@@ -1510,7 +1570,6 @@ function loadCorsImg(url){
   });
 }
 
-/* Tries sources one after another: direct first, CORS proxy as fallback */
 async function sampleTint(v){
   const id=v.videoId;
   if(tintCache[id])return tintCache[id];
@@ -1541,12 +1600,10 @@ function setTint(v){
     if(isCurrent())paintTint(col||'#2a2a2e');
   });
 
-  /* never leave the old colour for long if the cover can't be read */
   setTimeout(()=>{
     if(!tintCache[id]&&isCurrent())paintTint('#2a2a2e');
   },2500);
 
-  /* warm up the next song */
   if(queue.length>1){
     const nv=queue[(idx+1)%queue.length];
     if(nv&&nv.videoId)sampleTint(nv);
@@ -1593,7 +1650,6 @@ function showFull(){
 }
 
 function closePlayer(){
-  /* if the full player is still open, drop its history layer so no ghost "back" step is left */
   if(mode==='full'){
     layers.pop();
     history.back();
@@ -1606,6 +1662,7 @@ function closePlayer(){
   $('mini').classList.remove('visible');
 
   stopT();
+
   apply();
 
   if(apiReady)yt.stopVideo();
@@ -1657,7 +1714,6 @@ on('minBtn',()=>history.back());
 on('mClose',closePlayer);
 on('mInfo',()=>{if(mode==='mini')showFull()});
 
-/* Swipe down on full player: the card follows the finger, then minimizes */
 let tx=0,ty=0,tt=0,ts=false,drag=false;
 const pl=$('player');
 
@@ -1723,8 +1779,6 @@ pl.addEventListener('touchcancel',endDrag,{passive:true});
 
 /* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
-
-/* only the fields we need are stored */
 const slim=v=>({videoId:v.videoId,title:v.title,author:v.author});
 
 $('likeBtn').addEventListener('click',e=>{
@@ -1754,7 +1808,6 @@ const instances=[
   'https://invidious.tiekoetter.com'
 ];
 
-/* Only songs uploaded on/after 1 Jan 2010 (unix seconds) */
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 
 const D={
@@ -1764,8 +1817,6 @@ const D={
 
 let activeTab='home';
 let libView='folders';
-
-/* Session-only seen list */
 const seen=new Set();
 
 function card(v,i,list){
@@ -1802,7 +1853,6 @@ function card(v,i,list){
   return c;
 }
 
-/* Invidious request (fastest instance wins). Videos older than 2010 are dropped. */
 async function fetchSongs(q,page,ctl,list=instances){
   const requests=list.map(base=>
     fetch(
@@ -1827,7 +1877,6 @@ async function fetchSongs(q,page,ctl,list=instances){
   }
 }
 
-/* HOME: every language / region is mixed together */
 const shuffle=a=>{
   for(let i=a.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -1894,7 +1943,6 @@ async function loadHomeMore(){
       ok=res.filter(Boolean).length;
     }
 
-    /* round robin over all groups -> Hindi, Bangla, Punjabi, Tamil... all mixed */
     let progress=true;
 
     while(added<24&&progress){
@@ -1950,11 +1998,9 @@ async function loadHomeMore(){
 
   stat.textContent=st.videos.length+' Songs';
 
-  /* screen not filled yet (e.g. after refresh): load more */
   if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900)loadHomeMore();
 }
 
-/* Infinite scroll */
 new IntersectionObserver(entries=>{
   if(entries.some(e=>e.isIntersecting)&&activeTab==='home')loadHomeMore();
 },{rootMargin:'900px 0px'}).observe($('sentinel'));
@@ -2016,7 +2062,6 @@ async function loadSearch(term,page,append){
   if(data===null){
     if(!append)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
     $('searchStatus').textContent='Connection error';
-    /* keep "Load More" so the person can retry a failed page */
     $('searchMore').hidden=!append;
     $('searchMore').disabled=false;
     return;
@@ -2037,7 +2082,6 @@ async function loadSearch(term,page,append){
   if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
 
   $('searchStatus').textContent=st.videos.length+' Songs';
-  /* page may be fully filtered (old songs) -> still allow Load More if the server returned something */
   $('searchMore').hidden=!data.length&&!fresh.length;
   $('searchMore').disabled=false;
 }
@@ -2213,7 +2257,6 @@ document.querySelectorAll('.nb').forEach(b=>{
       return;
     }
 
-    /* Home tapped while on Home: scrolled down -> go to top, at top -> refresh */
     if(tab==='home'&&activeTab==='home'){
       if(window.scrollY>5)window.scrollTo({top:0,behavior:'smooth'});
       else doRefresh();
@@ -2239,7 +2282,6 @@ function refreshHome(){
   st.videos=[];
   $('homeGrid').innerHTML='';
 
-  /* fresh random mix (songs already shown are never repeated) */
   GROUPS.forEach(g=>{g.buf=[]});
 
   return loadHomeMore();
@@ -2278,7 +2320,7 @@ async function doRefresh(){
   ptrMove(0,true);
 }
 
-/* ---------- TOUCH: edge-swipe back, pull-to-refresh, no blank bounce (one set of listeners) ---------- */
+/* ---------- TOUCH: edge-swipe back, pull-to-refresh ---------- */
 let sx=0,sy=0,edge=false,pulling=false,pdy=0;
 const spOpen=()=>$('sp').classList.contains('open');
 
@@ -2287,7 +2329,12 @@ addEventListener('touchstart',e=>{
 
   sx=t.clientX;
   sy=t.clientY;
-  edge=sx<24;
+
+  /* IMPORTANT:
+     Profile page uses the native browser history swipe.
+     Do not trigger a second custom history.back() for the same gesture. */
+  edge=sx<24&&!spOpen();
+
   pdy=0;
 
   pulling=
@@ -2300,7 +2347,6 @@ addEventListener('touchmove',e=>{
 
   const dy=e.touches[0].clientY-sy;
 
-  /* pull to refresh (Home, at top) */
   if(pulling&&dy>0){
     if(window.scrollY>0){
       pulling=false;
@@ -2312,7 +2358,6 @@ addEventListener('touchmove',e=>{
     return;
   }
 
-  /* stop the blank rubber-band area: top of Search/Library and bottom of every page */
   const atTop=window.scrollY<=0;
   const atBottom=window.scrollY+innerHeight>=document.documentElement.scrollHeight-1;
 
@@ -2320,11 +2365,13 @@ addEventListener('touchmove',e=>{
 },{passive:false});
 
 function touchDone(e){
-  /* left-edge swipe = back */
-  if(edge&&e.type==='touchend'){
+  /* Custom edge-back remains available outside Profile.
+     Profile relies on the native iOS history gesture to avoid double-back. */
+  if(edge&&e.type==='touchend'&&!spOpen()){
     const t=e.changedTouches[0];
     if(t.clientX-sx>70&&Math.abs(t.clientY-sy)<70)goBack();
   }
+
   edge=false;
 
   if(pulling){
