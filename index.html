@@ -55,14 +55,14 @@
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg)}
+html{background:var(--bg);overscroll-behavior-y:none}
 
 body{
   margin:0;
   color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   min-height:100dvh;
-  overscroll-behavior-x:none;
+  overscroll-behavior:none;
 }
 
 button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
@@ -333,12 +333,19 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   background:#161618;
   isolation:isolate;
   visibility:hidden;
-  opacity:0;
   pointer-events:none;
-  transition:opacity .35s,visibility .35s;
+  transform:translateY(100%);
+  transform-origin:50% 100%;
+  will-change:transform;
+  transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s;
 }
 
-.player.active{visibility:visible;opacity:1;pointer-events:auto}
+.player.active{
+  visibility:visible;
+  pointer-events:auto;
+  transform:none;
+  transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s;
+}
 
 /* Blurred cover of the CURRENT song (an <img>, so it always repaints on song change) */
 .pbg{
@@ -380,7 +387,8 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
     color-mix(in srgb,var(--pt,#161618) 22%,transparent) calc(env(safe-area-inset-top) + 80px),
     transparent 100%);
 }
-body.fp #topfade{opacity:1;visibility:visible}
+body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
+body.dragging #topfade{opacity:0}
 
 .grab{position:relative;z-index:2;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
@@ -1470,7 +1478,9 @@ function showFull(){
 
   pushLayer(()=>{
     mode='mini';
-    document.body.classList.remove('fp');
+    document.body.classList.remove('fp','dragging');
+    $('player').style.transform='';
+    $('player').style.borderRadius='';
     $('player').classList.remove('active');
     $('mini').classList.add('visible');
     apply();
@@ -1546,34 +1556,70 @@ on('minBtn',()=>history.back());
 on('mClose',closePlayer);
 on('mInfo',()=>{if(mode==='mini')showFull()});
 
-/* Swipe down on full player = minimize */
-let tx=0,ty=0,ts=false;
+/* Swipe down on full player: the card follows the finger, then minimizes */
+let tx=0,ty=0,tt=0,ts=false,drag=false;
 const pl=$('player');
 
 pl.addEventListener('touchstart',e=>{
   ts=false;
+  drag=false;
 
   if(mode!=='full'||e.target.closest('button:not(.grab),input'))return;
 
   tx=e.touches[0].clientX;
   ty=e.touches[0].clientY;
+  tt=Date.now();
   ts=true;
 },{passive:true});
 
 pl.addEventListener('touchmove',e=>{
-  if(mode==='full'&&ts&&e.cancelable)e.preventDefault();
-},{passive:false});
-
-pl.addEventListener('touchend',e=>{
+  if(mode!=='full')return;
+  if(e.cancelable)e.preventDefault();
   if(!ts)return;
 
+  const t=e.touches[0];
+  const dy=t.clientY-ty;
+  const dx=t.clientX-tx;
+
+  if(!drag){
+    if(dy>8&&dy>Math.abs(dx)){
+      drag=true;
+      document.body.classList.add('dragging');
+      pl.style.transition='none';
+    }else return;
+  }
+
+  const d=Math.max(0,dy);
+  pl.style.transform=`translateY(${d}px) scale(${1-Math.min(d/1600,.07)})`;
+  pl.style.borderRadius=Math.min(d/3,38)+'px';
+},{passive:false});
+
+function endDrag(e){
+  if(!ts)return;
   ts=false;
+
+  if(!drag)return;
+  drag=false;
 
   const t=e.changedTouches[0];
   const dy=t.clientY-ty;
+  const v=dy/Math.max(1,Date.now()-tt);
 
-  if(mode==='full'&&dy>90&&dy>Math.abs(t.clientX-tx)*1.5)history.back();
-},{passive:true});
+  pl.style.transition='';
+
+  if(mode==='full'&&(dy>120||(v>.6&&dy>40))){
+    /* slide the card down into the mini player */
+    pl.style.transform='translateY(100%)';
+    history.back();
+  }else{
+    pl.style.transform='';
+    pl.style.borderRadius='';
+    document.body.classList.remove('dragging');
+  }
+}
+
+pl.addEventListener('touchend',endDrag,{passive:true});
+pl.addEventListener('touchcancel',endDrag,{passive:true});
 
 /* FAVOURITES */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
@@ -1612,20 +1658,8 @@ const D={
 
 let activeTab='home';
 let libView='folders';
-let qi=0;
 
-const HQ=[
-  'Top Bangla Hindi songs',
-  'Bangla new songs',
-  'Hindi romantic songs',
-  'Arijit Singh songs',
-  'Old Bangla hits',
-  'Bollywood hits',
-  'Bengali modern songs',
-  'Hindi lofi songs',
-  'Kishore Kumar songs',
-  'Anupam Roy songs'
-];
+
 
 /* Session-only seen list */
 const seen=new Set();
@@ -1665,8 +1699,8 @@ function card(v,i,list){
 }
 
 /* Invidious request (fastest instance wins) */
-async function fetchSongs(q,page,ctl){
-  const requests=instances.map(base=>
+async function fetchSongs(q,page,ctl,list=instances){
+  const requests=list.map(base=>
     fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
       {signal:ctl.signal,headers:{Accept:'application/json'},cache:'no-store'}
@@ -1686,7 +1720,48 @@ async function fetchSongs(q,page,ctl){
   }
 }
 
-/* HOME LOADING */
+/* HOME LOADING: every language / region is mixed together */
+const shuffle=a=>{
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+};
+
+const GROUPS=[
+  /* India */
+  {qs:['Hindi songs','Bollywood hits','Arijit Singh songs','Hindi romantic songs','Hindi lofi songs','Kishore Kumar songs','Latest Hindi songs','Old Hindi songs','Lata Mangeshkar songs']},
+  {qs:['Bangla new songs','Old Bangla hits','Bengali modern songs','Anupam Roy songs','Kolkata Bangla songs','Rabindra Sangeet','Bengali movie songs']},
+  {qs:['Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs','Latest Punjabi songs','Punjabi romantic songs']},
+  {qs:['Tamil songs','Anirudh songs','AR Rahman Tamil songs','Tamil hit songs','Ilaiyaraaja songs']},
+  {qs:['Telugu songs','Telugu hit songs','Telugu melody songs','Telugu movie songs']},
+  {qs:['Malayalam songs','Kannada songs','Marathi songs','Gujarati songs','Bhojpuri songs','Rajasthani songs','Odia songs','Assamese songs']},
+  /* Bangladesh */
+  {qs:['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']},
+  /* Pakistan */
+  {qs:['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs','Nusrat Fateh Ali Khan songs']}
+].map(g=>({qs:g.qs,buf:[],pg:{}}));
+
+async function fillGroup(g,ctl){
+  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
+  const page=(g.pg[q]||0)+1;
+  const two=shuffle(instances.slice()).slice(0,2);
+  const data=await fetchSongs(q,page,ctl,two);
+
+  if(data===null)return false;
+
+  g.pg[q]=page;
+
+  data.forEach(v=>{
+    if(seen.has(v.videoId))return;
+    if(g.buf.some(b=>b.videoId===v.videoId))return;
+    g.buf.push(v);
+  });
+
+  return true;
+}
+
 async function loadHomeMore(){
   const st=D.home;
 
@@ -1703,44 +1778,46 @@ async function loadHomeMore(){
   status.textContent='Loading music…';
 
   let added=0;
-  let attempts=0;
   let failed=false;
 
-  while(added<20&&attempts<5&&!ctl.signal.aborted){
-    attempts++;
+  for(let attempt=0;attempt<3&&added<24&&!ctl.signal.aborted;attempt++){
+    const need=GROUPS.filter(g=>g.buf.length<4);
+    let ok=0;
 
-    const page=st.page+1;
-    const data=await fetchSongs(st.query,page,ctl);
+    if(need.length){
+      const res=await Promise.all(need.map(g=>fillGroup(g,ctl)));
+      if(ctl.signal.aborted)break;
+      ok=res.filter(Boolean).length;
+    }
 
-    if(ctl.signal.aborted)break;
+    /* round robin over all groups -> Hindi, Bangla, Punjabi, Tamil... all mixed */
+    let progress=true;
 
-    if(data===null){
+    while(added<24&&progress){
+      progress=false;
+
+      for(const g of shuffle(GROUPS.slice())){
+        while(g.buf.length){
+          const v=g.buf.shift();
+          if(seen.has(v.videoId))continue;
+
+          seen.add(v.videoId);
+          st.videos.push(v);
+          grid.appendChild(card(v,st.videos.length-1,st.videos));
+
+          added++;
+          progress=true;
+          break;
+        }
+
+        if(added>=24)break;
+      }
+    }
+
+    if(!ok&&!added){
       failed=true;
       break;
     }
-
-    st.page=page;
-
-    if(!data.length){
-      qi=(qi+1)%HQ.length;
-      st.query=HQ[qi];
-      st.page=0;
-      continue;
-    }
-
-    for(const v of data){
-      if(seen.has(v.videoId))continue;
-
-      seen.add(v.videoId);
-      st.videos.push(v);
-      grid.appendChild(card(v,st.videos.length-1,st.videos));
-
-      added++;
-      if(added>=20)break;
-    }
-
-    /* got some new songs: wait for the next scroll. Nothing new: try the next page */
-    if(added>0)break;
   }
 
   if(st.ctl===ctl)st.busy=false;
@@ -2056,13 +2133,8 @@ function refreshHome(){
   st.videos=[];
   $('homeGrid').innerHTML='';
 
-  /* pick a different search so the new songs are not the same ones (seen songs are also skipped) */
-  let n;
-  do{n=Math.floor(Math.random()*HQ.length)}while(n===qi&&HQ.length>1);
-
-  qi=n;
-  st.query=HQ[qi];
-  st.page=Math.floor(Math.random()*3);
+  /* fresh random mix (songs already shown are never repeated) */
+  GROUPS.forEach(g=>{g.buf=[]});
 
   return loadHomeMore();
 }
@@ -2146,6 +2218,22 @@ function endPull(){
 
 addEventListener('touchend',endPull,{passive:true});
 addEventListener('touchcancel',endPull,{passive:true});
+
+/* No blank bounce area: Search, Library (and the bottom of Home) */
+let by=0;
+
+addEventListener('touchstart',e=>{by=e.touches[0].clientY},{passive:true});
+
+addEventListener('touchmove',e=>{
+  if(mode==='full'||!e.cancelable||$('sp').classList.contains('open'))return;
+
+  const dy=e.touches[0].clientY-by;
+  const atTop=window.scrollY<=0;
+  const atBottom=window.scrollY+innerHeight>=document.documentElement.scrollHeight-1;
+  const home=activeTab==='home';
+
+  if((!home&&atTop&&dy>0)||(atBottom&&dy<0))e.preventDefault();
+},{passive:false});
 
 /* INITIALIZE */
 buildSettingsUI();
