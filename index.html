@@ -1278,6 +1278,31 @@ function paintTint(col){
   $('player').style.setProperty('--pt',col);
 }
 
+const keep=[];
+
+function avgColor(src,w,h){
+  const c=document.createElement('canvas');
+  c.width=16;
+  c.height=8;
+
+  const x=c.getContext('2d',{willReadFrequently:true});
+
+  /* the part of the cover that is visible at the very top of the blurred background */
+  x.drawImage(src,w*.32,h*.06,w*.36,h*.16,0,0,16,8);
+
+  const d=x.getImageData(0,0,16,8).data;
+  let r=0,g=0,b=0,k=0;
+
+  for(let i=0;i<d.length;i+=4){
+    r+=d[i];
+    g+=d[i+1];
+    b+=d[i+2];
+    k++;
+  }
+
+  return `rgb(${Math.round(r/k)},${Math.round(g/k)},${Math.round(b/k)})`;
+}
+
 function sampleTint(v,done){
   const id=v.videoId;
 
@@ -1286,55 +1311,45 @@ function sampleTint(v,done){
     return;
   }
 
-  const yt=`i.ytimg.com/vi/${id}/mqdefault.jpg`;
+  const ytu=`i.ytimg.com/vi/${id}/mqdefault.jpg`;
 
   const urls=[
-    `https://images.weserv.nl/?url=${yt}&w=32&h=18&fit=fill&output=jpg`,
-    `https://wsrv.nl/?url=${yt}&w=32&h=18&fit=fill&output=jpg`,
-    `https://${yt}`,
-    thumbOf(v),
+    `https://i.ytimg.com/vi/${id}/mqdefault.jpg?c=${Date.now()}`,
+    `https://images.weserv.nl/?url=${ytu}&w=32&h=18&fit=fill&output=jpg`,
+    `https://wsrv.nl/?url=${ytu}&w=32&h=18&fit=fill&output=jpg`,
     ...instances.map(b=>`${b}/vi/${id}/mqdefault.jpg`)
   ];
 
   let finished=false;
 
+  const win=col=>{
+    if(finished)return;
+    finished=true;
+    tintCache[id]=col;
+    done(col);
+  };
+
   urls.forEach(u=>{
+    /* route 1: <img crossOrigin> (kept referenced so it is not garbage collected) */
     const im=new Image();
+    keep.push(im);
     im.crossOrigin='anonymous';
 
     im.onload=()=>{
-      if(finished)return;
-
-      try{
-        const c=document.createElement('canvas');
-        c.width=16;
-        c.height=8;
-
-        const x=c.getContext('2d',{willReadFrequently:true});
-
-        /* the part of the cover that is visible at the very top of the blurred background */
-        x.drawImage(im,im.naturalWidth*.32,im.naturalHeight*.06,im.naturalWidth*.36,im.naturalHeight*.16,0,0,16,8);
-
-        const d=x.getImageData(0,0,16,8).data;
-        let r=0,g=0,b=0,k=0;
-
-        for(let i=0;i<d.length;i+=4){
-          r+=d[i];
-          g+=d[i+1];
-          b+=d[i+2];
-          k++;
-        }
-
-        finished=true;
-
-        const col=`rgb(${Math.round(r/k)},${Math.round(g/k)},${Math.round(b/k)})`;
-        tintCache[id]=col;
-        done(col);
-      }catch(e){}
+      try{win(avgColor(im,im.naturalWidth,im.naturalHeight))}catch(e){}
     };
 
     im.src=u;
+
+    /* route 2: fetch -> bitmap (immune to the browser's non-CORS image cache) */
+    fetch(u,{mode:'cors'})
+      .then(r=>r.blob())
+      .then(bl=>createImageBitmap(bl))
+      .then(bm=>win(avgColor(bm,bm.width,bm.height)))
+      .catch(()=>{});
   });
+
+  setTimeout(()=>{keep.length=0},15000);
 }
 
 function setTint(v){
