@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" id="tc" content="#1e3a8a">
+<meta name="theme-color" content="#1e3a8a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SoundFlow — Music</title>
@@ -360,6 +360,18 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   z-index:1;
   background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));
   pointer-events:none;
+}
+
+.ptop{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:calc(env(safe-area-inset-top) + 60px);
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) calc(env(safe-area-inset-top) + 4px),transparent 100%);
+  transition:background .5s;
 }
 
 .grab{position:relative;z-index:2;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
@@ -721,6 +733,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <section class="player" id="player">
   <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
+  <div class="ptop"></div>
 
   <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span></button>
 
@@ -885,6 +898,15 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <script>
 const $=id=>document.getElementById(id);
 
+function setThemeColor(col){
+  document.querySelectorAll('meta[name=theme-color]').forEach(m=>m.remove());
+  const m=document.createElement('meta');
+  m.name='theme-color';
+  m.content=col;
+  document.head.appendChild(m);
+  document.body.style.backgroundColor=col;
+}
+
 const LS={
   get(k,d){
     try{
@@ -995,7 +1017,7 @@ function apply(){
   st.backgroundImage=grad;
   st.backgroundAttachment='fixed';
   st.backgroundSize='cover';
-  $('tc').content=top;
+  setThemeColor(top);
 
   document.querySelectorAll('.seg').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
@@ -1250,8 +1272,9 @@ function paintTint(col){
   const st=document.documentElement.style;
   st.backgroundImage='none';
   st.backgroundColor=col;
-  $('tc').content=col;
+  setThemeColor(col);
   $('player').style.backgroundColor=col;
+  $('player').style.setProperty('--pt',col);
 }
 
 function setTint(v){
