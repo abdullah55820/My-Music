@@ -355,11 +355,9 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
   pointer-events:none;
   opacity:0;
   visibility:hidden;
-  background:linear-gradient(to bottom,
-    var(--pt,#161618) 0,
-    var(--pt,#161618) env(safe-area-inset-top),
-    transparent 100%);
+  background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%);
 }
+
 body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
 body.dragging #topfade{opacity:0}
 
@@ -442,6 +440,8 @@ body.dragging #topfade{opacity:0}
   background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;
   touch-action:none;
   cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 .seek::-webkit-slider-thumb{
@@ -508,6 +508,7 @@ body.dragging #topfade{opacity:0}
 
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
 
+/* PROFILE */
 .sp{
   position:fixed;
   inset:0;
@@ -517,13 +518,23 @@ body.dragging #topfade{opacity:0}
   background:var(--spbg);
   backdrop-filter:blur(34px) saturate(170%);
   -webkit-backdrop-filter:blur(34px) saturate(170%);
-  transform:translateX(100%);
+  transform:translate3d(100%,0,0);
   visibility:hidden;
   transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;
   will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
 
-.sp.open{transform:none;visibility:visible}
+.sp.open{
+  transform:translate3d(0,0,0);
+  visibility:visible;
+}
+
+/* Native iOS back gesture: do not add another CSS slide */
+.sp.no-transition{
+  transition:none!important;
+}
 
 .sph{
   display:flex;
@@ -538,6 +549,7 @@ body.dragging #topfade{opacity:0}
   flex:1;
   overflow-y:auto;
   overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
   padding:6px 16px calc(env(safe-area-inset-bottom) + 40px);
   max-width:560px;
   width:100%;
@@ -645,6 +657,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
+
 <body>
 
 <div id="bg" aria-hidden="true"></div>
@@ -821,7 +834,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </button>
 
     <h2>Profile</h2>
-
     <div style="width:42px;height:42px"></div>
   </div>
 
@@ -1210,13 +1222,45 @@ $('resetAll').onclick=()=>{
   apply();
 };
 
-function openProfile(){
-  $('favCount').textContent=getLiked().length+' favourite songs';
-  $('sp').classList.add('open');
-  pushLayer(()=>$('sp').classList.remove('open'));
+/* ---------- PROFILE ---------- */
+let profileClosingByButton=false;
+
+function closeProfileNative(){
+  const sp=$('sp');
+
+  sp.classList.add('no-transition');
+  sp.classList.remove('open');
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      sp.classList.remove('no-transition');
+    });
+  });
 }
 
-$('spBack').onclick=()=>history.back();
+function openProfile(){
+  if(spOpen())return;
+
+  $('favCount').textContent=getLiked().length+' favourite songs';
+
+  profileClosingByButton=false;
+  $('sp').classList.remove('no-transition');
+  $('sp').classList.add('open');
+
+  pushLayer(()=>{
+    if(!profileClosingByButton)closeProfileNative();
+    profileClosingByButton=false;
+  });
+}
+
+$('spBack').onclick=()=>{
+  if(!spOpen())return;
+
+  profileClosingByButton=true;
+  $('sp').classList.remove('open');
+
+  history.back();
+};
 
 /* ---------- PLAYER ---------- */
 let yt=null;
@@ -1303,12 +1347,14 @@ const fmt=s=>{
 
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
+
   seek.style.backgroundImage=
     `linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
 }
 
+/* Smooth playback progress */
 function tick(){
-  if(!apiReady)return;
+  if(!apiReady||seeking)return;
 
   try{
     const c=yt.getCurrentTime()||0;
@@ -1317,9 +1363,10 @@ function tick(){
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
 
-    if(d>0&&!seeking){
-      seek.value=c/d*100;
-      setProg(c/d*100);
+    if(d>0){
+      const p=c/d*100;
+      seek.value=p;
+      setProg(p);
     }
   }catch(e){}
 }
@@ -1327,7 +1374,7 @@ function tick(){
 function startT(){
   stopT();
   tick();
-  timer=setInterval(tick,400);
+  timer=setInterval(tick,100);
 }
 
 function stopT(){
@@ -1335,121 +1382,94 @@ function stopT(){
   timer=null;
 }
 
-/* ---------- SMOOTH SEEK BAR ---------- */
-/* Drag follows the finger smoothly; a simple tap seeks directly. */
+/* ---------- DIRECT, SMOOTH SEEK BAR ---------- */
+/* The thumb and progress fill follow the finger immediately. */
 let seekPointer=null;
-let seekStartX=0;
-let seekLastX=0;
-let seekMoved=false;
 let seekTarget=0;
-let seekFrame=0;
 
 function seekPercentAt(x){
   const r=seek.getBoundingClientRect();
+  if(!r.width)return 0;
+
   return Math.max(0,Math.min(100,(x-r.left)/r.width*100));
 }
 
-function stopSeekAnimation(){
-  if(seekFrame){
-    cancelAnimationFrame(seekFrame);
-    seekFrame=0;
+function updateSeekFromX(x){
+  seekTarget=seekPercentAt(x);
+  seek.value=seekTarget;
+  setProg(seekTarget);
+
+  const duration=apiReady?(yt.getDuration()||0):0;
+  if(duration>0){
+    $('cur').textContent=fmt(duration*seekTarget/100);
   }
 }
 
 function finishSeek(){
-  stopSeekAnimation();
+  if(!seeking)return;
 
-  if(apiReady){
-    const d=yt.getDuration()||0;
-    if(d>0)yt.seekTo(d*seekTarget/100,true);
-  }
-
-  seek.value=seekTarget;
-  setProg(seekTarget);
-
+  const target=seekTarget;
   seeking=false;
   seekPointer=null;
-  tick();
-}
 
-function animateSeek(){
-  const current=Number(seek.value)||0;
-  const diff=seekTarget-current;
-
-  if(Math.abs(diff)<0.12){
-    seek.value=seekTarget;
-    setProg(seekTarget);
-    seekFrame=0;
-    finishSeek();
-    return;
+  if(apiReady){
+    const duration=yt.getDuration()||0;
+    if(duration>0){
+      yt.seekTo(duration*target/100,true);
+    }
   }
 
-  /* Smaller steps create a gentle, progressive movement */
-  seek.value=current+diff*.20;
-  setProg(seek.value);
+  seek.value=target;
+  setProg(target);
 
-  const duration=apiReady?yt.getDuration()||0:0;
-  if(duration>0)$('cur').textContent=fmt(duration*seek.value/100);
-
-  seekFrame=requestAnimationFrame(animateSeek);
+  const duration=apiReady?(yt.getDuration()||0):0;
+  if(duration>0)$('cur').textContent=fmt(duration*target/100);
 }
 
 seek.addEventListener('pointerdown',e=>{
   if(!apiReady)return;
 
   e.preventDefault();
+  e.stopPropagation();
 
-  stopSeekAnimation();
-
-  seekPointer=e.pointerId;
-  seekStartX=e.clientX;
-  seekLastX=e.clientX;
-  seekMoved=false;
-
-  seekTarget=Number(seek.value)||0;
   seeking=true;
+  seekPointer=e.pointerId;
 
   try{seek.setPointerCapture(e.pointerId)}catch(err){}
+
+  updateSeekFromX(e.clientX);
 });
 
 seek.addEventListener('pointermove',e=>{
-  if(seekPointer!==e.pointerId)return;
+  if(!seeking||seekPointer!==e.pointerId)return;
 
-  const movement=Math.abs(e.clientX-seekStartX);
-
-  if(movement>4)seekMoved=true;
-
-  seekLastX=e.clientX;
-  seekTarget=seekPercentAt(e.clientX);
-
-  if(seekMoved&&!seekFrame){
-    seekFrame=requestAnimationFrame(animateSeek);
-  }
+  e.preventDefault();
+  updateSeekFromX(e.clientX);
 });
 
-function seekPointerEnd(e){
-  if(seekPointer!==e.pointerId)return;
+seek.addEventListener('pointerup',e=>{
+  if(!seeking||seekPointer!==e.pointerId)return;
 
-  if(!seekMoved){
-    /* Tap: jump directly to the selected point */
-    seekTarget=seekPercentAt(e.clientX);
-    seek.value=seekTarget;
-    setProg(seekTarget);
-    finishSeek();
-  }else{
-    /* Drag: continue smoothly until the target is reached */
-    seekTarget=seekPercentAt(e.clientX);
-    if(!seekFrame)seekFrame=requestAnimationFrame(animateSeek);
-  }
-}
+  e.preventDefault();
+  updateSeekFromX(e.clientX);
+  finishSeek();
+});
 
-seek.addEventListener('pointerup',seekPointerEnd);
-seek.addEventListener('pointercancel',seekPointerEnd);
+seek.addEventListener('pointercancel',e=>{
+  if(!seeking||seekPointer!==e.pointerId)return;
+
+  updateSeekFromX(e.clientX);
+  finishSeek();
+});
+
+seek.addEventListener('lostpointercapture',()=>{
+  if(seeking)finishSeek();
+});
 
 function resetProg(){
-  stopSeekAnimation();
-  seekPointer=null;
   seeking=false;
+  seekPointer=null;
+  seekTarget=0;
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
@@ -1489,7 +1509,7 @@ function setPlayerBg(v){
   im.src=urls[0];
 }
 
-/* ---------- Cover colour -> status bar + player background ---------- */
+/* ---------- COVER COLOUR ---------- */
 const tintCache={};
 
 function paintTint(col){
@@ -1885,15 +1905,64 @@ const shuffle=a=>{
   return a;
 };
 
+/*
+  Tamil, Telugu, Malayalam broad categories removed.
+  Replaced with searches for the 13 requested artists only.
+*/
 const GROUPS=[
-  ['Hindi songs 2025','Bollywood hits','Arijit Singh songs','Hindi romantic songs','Hindi lofi songs','Latest Hindi songs','Bollywood songs 2024','Hindi songs 2023'],
-  ['Bangla new songs','Bengali modern songs','Anupam Roy songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025'],
-  ['Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs','Latest Punjabi songs','Punjabi romantic songs'],
-  ['Tamil songs 2025','Anirudh songs','AR Rahman Tamil songs','Tamil hit songs','Tamil movie songs'],
-  ['Telugu songs','Telugu hit songs','Telugu melody songs','Telugu movie songs'],
-  ['Malayalam songs','Kannada songs','Marathi songs','Gujarati songs','Odia songs','Assamese songs'],
-  ['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026'],
-  ['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']
+  [
+    'Hindi songs 2025','Bollywood hits','Arijit Singh songs',
+    'Hindi romantic songs','Hindi lofi songs','Latest Hindi songs',
+    'Bollywood songs 2024','Hindi songs 2023'
+  ],
+  [
+    'Bangla new songs','Bengali modern songs','Anupam Roy songs',
+    'Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025'
+  ],
+  [
+    'Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs',
+    'Latest Punjabi songs','Punjabi romantic songs'
+  ],
+
+  [
+    'Dhanush songs',
+    'Dhanush movie songs',
+    'Allu Arjun movie songs',
+    'Allu Arjun songs',
+    'Thalapathy Vijay movie songs',
+    'Vijay songs',
+    'Suriya movie songs',
+    'Surya songs',
+    'Anirudh Ravichander songs',
+    'Anirudh songs',
+    'Sai Abhyankkar songs',
+    'Sai Abhayankar songs',
+    'Sai Pallavi movie songs',
+    'Sai Pallavi songs',
+    'Ram Charan movie songs',
+    'Ram Charan songs',
+    'Nivin Pauly movie songs',
+    'Nivin Pauly songs',
+    'Jr NTR movie songs',
+    'Jr NTR songs',
+    'Kalyani Priyadarshan movie songs',
+    'Kalyani Priyadarshan songs',
+    'Pooja Hegde movie songs',
+    'Pooja Hegde songs',
+    'Tamannaah movie songs',
+    'Tamanna songs'
+  ],
+
+  [
+    'Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla',
+    'Habib Wahid songs','Tahsan songs','Bangla natok song',
+    'Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026'
+  ],
+  [
+    'Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan',
+    'Atif Aslam songs','Rahat Fateh Ali Khan songs',
+    'Pakistani drama OST','Urdu songs'
+  ]
 ].map(qs=>({qs,buf:[],pg:{}}));
 
 async function fillGroup(g,ctl){
@@ -2282,7 +2351,12 @@ function refreshHome(){
   st.videos=[];
   $('homeGrid').innerHTML='';
 
-  GROUPS.forEach(g=>{g.buf=[]});
+  seen.clear();
+
+  GROUPS.forEach(g=>{
+    g.buf=[];
+    g.pg={};
+  });
 
   return loadHomeMore();
 }
@@ -2320,7 +2394,7 @@ async function doRefresh(){
   ptrMove(0,true);
 }
 
-/* ---------- TOUCH: edge-swipe back, pull-to-refresh ---------- */
+/* ---------- TOUCH: EDGE SWIPE + PULL TO REFRESH ---------- */
 let sx=0,sy=0,edge=false,pulling=false,pdy=0;
 const spOpen=()=>$('sp').classList.contains('open');
 
@@ -2330,9 +2404,8 @@ addEventListener('touchstart',e=>{
   sx=t.clientX;
   sy=t.clientY;
 
-  /* IMPORTANT:
-     Profile page uses the native browser history swipe.
-     Do not trigger a second custom history.back() for the same gesture. */
+  /* Profile uses native iOS back gesture.
+     Do not run a second custom back action here. */
   edge=sx<24&&!spOpen();
 
   pdy=0;
@@ -2365,8 +2438,6 @@ addEventListener('touchmove',e=>{
 },{passive:false});
 
 function touchDone(e){
-  /* Custom edge-back remains available outside Profile.
-     Profile relies on the native iOS history gesture to avoid double-back. */
   if(edge&&e.type==='touchend'&&!spOpen()){
     const t=e.changedTouches[0];
     if(t.clientX-sx>70&&Math.abs(t.clientY-sy)<70)goBack();
