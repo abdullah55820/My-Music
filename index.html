@@ -531,9 +531,7 @@ body.dragging #topfade{opacity:0}
   visibility:visible;
 }
 
-.sp.no-transition{
-  transition:none!important;
-}
+.sp.no-transition{transition:none!important}
 
 .sph{
   display:flex;
@@ -1351,7 +1349,6 @@ function setProg(p){
     `linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
 }
 
-/* Smooth playback progress */
 function tick(){
   if(!apiReady||seeking)return;
 
@@ -1904,107 +1901,140 @@ const shuffle=a=>{
 };
 
 /* ---------- MUSIC GROUPS ---------- */
-/* 5 original groups + 13 separate artist groups = 18 groups */
+
+/*
+  Feed priority:
+  Hindi       = 6
+  Bangla      = 6
+  Punjabi     = 2.5
+  Bangladeshi = 2
+  Pakistani   = 1.5
+  Artist/movie groups = 0.25 each
+
+  Higher weight means more songs in Home Feed.
+*/
 
 const GROUPS=[
   /* 1. Hindi */
   [
-    'Hindi songs 2025','Bollywood hits','Arijit Singh songs',
-    'Hindi romantic songs','Hindi lofi songs','Latest Hindi songs',
-    'Bollywood songs 2024','Hindi songs 2023'
+    'Hindi songs 2025',
+    'Bollywood hits',
+    'Latest Hindi songs',
+    'Hindi romantic songs',
+    'Hindi lofi songs',
+    'Bollywood songs 2024',
+    'Hindi songs 2023',
+    'Hindi hit songs'
   ],
 
   /* 2. Bangla */
   [
-    'Bangla new songs','Bengali modern songs','Anupam Roy songs',
-    'Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025'
+    'Bangla new songs',
+    'Bengali modern songs',
+    'Kolkata Bangla songs',
+    'Bengali movie songs',
+    'Bangla songs 2025',
+    'Latest Bangla songs',
+    'Bangla romantic songs',
+    'Bangla lofi songs'
   ],
 
   /* 3. Punjabi */
   [
-    'Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs',
-    'Latest Punjabi songs','Punjabi romantic songs'
+    'Punjabi songs',
+    'Latest Punjabi songs',
+    'Punjabi romantic songs',
+    'Punjabi hit songs',
+    'Punjabi lofi songs'
   ],
 
   /* 4. Dhanush */
-  [
-    'Dhanush movie songs'
-  ],
+  ['Dhanush movie songs'],
 
   /* 5. Allu Arjun */
-  [
-    'Allu Arjun movie songs'
-  ],
+  ['Allu Arjun movie songs'],
 
   /* 6. Thalapathy Vijay */
-  [
-    'Thalapathy Vijay movie songs'
-  ],
+  ['Thalapathy Vijay movie songs'],
 
   /* 7. Suriya */
-  [
-    'Suriya movie songs'
-  ],
+  ['Suriya movie songs'],
 
   /* 8. Anirudh */
-  [
-    'Anirudh Ravichander songs'
-  ],
+  ['Anirudh Ravichander songs'],
 
   /* 9. Sai Abhyankkar */
-  [
-    'Sai Abhyankkar songs'
-  ],
+  ['Sai Abhyankkar songs'],
 
   /* 10. Sai Pallavi */
-  [
-    'Sai Pallavi movie songs'
-  ],
+  ['Sai Pallavi movie songs'],
 
   /* 11. Ram Charan */
-  [
-    'Ram Charan movie songs'
-  ],
+  ['Ram Charan movie songs'],
 
   /* 12. Nivin Pauly */
-  [
-    'Nivin Pauly movie songs'
-  ],
+  ['Nivin Pauly movie songs'],
 
   /* 13. Jr NTR */
-  [
-    'Jr NTR movie songs'
-  ],
+  ['Jr NTR movie songs'],
 
   /* 14. Kalyani Priyadarshan */
-  [
-    'Kalyani Priyadarshan movie songs'
-  ],
+  ['Kalyani Priyadarshan movie songs'],
 
   /* 15. Pooja Hegde */
-  [
-    'Pooja Hegde movie songs'
-  ],
+  ['Pooja Hegde movie songs'],
 
   /* 16. Tamannaah */
-  [
-    'Tamannaah movie songs'
-  ],
+  ['Tamannaah movie songs'],
 
   /* 17. Bangladeshi */
   [
-    'Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla',
-    'Habib Wahid songs','Tahsan songs','Bangla natok song',
-    'Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026'
+    'Bangladeshi songs',
+    'Bangladesh band songs',
+    'Coke Studio Bangla',
+    'Habib Wahid songs',
+    'Tahsan songs',
+    'Bangla natok song',
+    'Dhallywood songs',
+    'Bangladeshi folk songs',
+    'Bangla new song 2026'
   ],
 
   /* 18. Pakistani */
   [
-    'Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan',
-    'Atif Aslam songs','Rahat Fateh Ali Khan songs',
-    'Pakistani drama OST','Urdu songs'
+    'Pakistani Punjabi songs',
+    'Pakistani songs',
+    'Coke Studio Pakistan',
+    'Atif Aslam songs',
+    'Rahat Fateh Ali Khan songs',
+    'Pakistani drama OST',
+    'Urdu songs'
   ]
-].map(qs=>({qs,buf:[],pg:{}}));
+].map((qs,i)=>({
+  qs,
+  buf:[],
+  pg:{},
+  weight:[
+    6,     // Hindi
+    6,     // Bangla
+    2.5,   // Punjabi
+    .25,   // Dhanush
+    .25,   // Allu Arjun
+    .25,   // Vijay
+    .25,   // Suriya
+    .25,   // Anirudh
+    .25,   // Sai Abhyankkar
+    .25,   // Sai Pallavi
+    .25,   // Ram Charan
+    .25,   // Nivin Pauly
+    .25,   // Jr NTR
+    .25,   // Kalyani
+    .25,   // Pooja Hegde
+    .25,   // Tamannaah
+    2,     // Bangladeshi
+    1.5    // Pakistani
+  ][i]
+}));
 
 async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
@@ -2023,6 +2053,23 @@ async function fillGroup(g,ctl){
   });
 
   return true;
+}
+
+/* Weighted random group selection */
+function pickWeightedGroup(){
+  const available=GROUPS.filter(g=>g.buf.length>0);
+
+  if(!available.length)return null;
+
+  const total=available.reduce((sum,g)=>sum+g.weight,0);
+  let random=Math.random()*total;
+
+  for(const g of available){
+    random-=g.weight;
+    if(random<=0)return g;
+  }
+
+  return available[available.length-1];
 }
 
 async function loadHomeMore(){
@@ -2044,35 +2091,51 @@ async function loadHomeMore(){
   let failed=false;
 
   for(let attempt=0;attempt<3&&added<24&&!ctl.signal.aborted;attempt++){
+
+    /*
+      Fetch more songs for groups that have fewer
+      than 4 buffered songs.
+    */
     const need=GROUPS.filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
       const res=await Promise.all(need.map(g=>fillGroup(g,ctl)));
+
       if(ctl.signal.aborted)break;
+
       ok=res.filter(Boolean).length;
     }
 
+    /*
+      Main change:
+      Instead of giving every group equal priority,
+      songs are now selected using category weights.
+    */
     let progress=true;
 
     while(added<24&&progress){
       progress=false;
 
-      for(const g of shuffle(GROUPS.slice())){
+      const g=pickWeightedGroup();
+
+      if(g){
         while(g.buf.length){
           const v=g.buf.shift();
+
           if(seen.has(v.videoId))continue;
 
           seen.add(v.videoId);
           st.videos.push(v);
-          grid.appendChild(card(v,st.videos.length-1,st.videos));
+
+          grid.appendChild(
+            card(v,st.videos.length-1,st.videos)
+          );
 
           added++;
           progress=true;
           break;
         }
-
-        if(added>=24)break;
       }
     }
 
@@ -2108,7 +2171,9 @@ async function loadHomeMore(){
 
   stat.textContent=st.videos.length+' Songs';
 
-  if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900)loadHomeMore();
+  if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900){
+    loadHomeMore();
+  }
 }
 
 new IntersectionObserver(entries=>{
@@ -2445,8 +2510,6 @@ addEventListener('touchstart',e=>{
   sx=t.clientX;
   sy=t.clientY;
 
-  /* Profile uses native iOS back gesture.
-     Do not run a second custom back action here. */
   edge=sx<24&&!spOpen();
 
   pdy=0;
