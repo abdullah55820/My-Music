@@ -1661,8 +1661,31 @@ let libView='folders';
 
 
 
-/* Session-only seen list */
-const seen=new Set();
+/* No-repeat memory: remembered on this device (last 1500 songs) */
+const seen=new Set(LS.get('sf_seen',[]));
+const seenKeys=new Set(LS.get('sf_seenk',[]));
+
+const titleKey=t=>String(t||'').toLowerCase()
+  .replace(/\(.*?\)|\[.*?\]/g,'')
+  .replace(/official|video|lyrical|lyrics|audio|song|full|hd|4k|music/g,'')
+  .replace(/[^\p{L}\p{N}]+/gu,'')
+  .slice(0,36);
+
+const isSeen=v=>{
+  const k=titleKey(v.title);
+  return seen.has(v.videoId)||(k.length>=4&&seenKeys.has(k));
+};
+
+function markSeen(v){
+  seen.add(v.videoId);
+  const k=titleKey(v.title);
+  if(k.length>=4)seenKeys.add(k);
+}
+
+function persistSeen(){
+  LS.set('sf_seen',[...seen].slice(-1500));
+  LS.set('sf_seenk',[...seenKeys].slice(-1500));
+}
 
 function card(v,i,list){
   const c=document.createElement('article');
@@ -1729,19 +1752,27 @@ const shuffle=a=>{
   return a;
 };
 
+/* quality: only real songs from official / verified channels (loose groups skip the channel check) */
+const BAD=/jukebox|non-?stop|mashup|reaction|karaoke|tutorial|ringtone|whatsapp|status video|full album|full movie|compilation|\bhours?\b|reels|cover by|bhojpuri|bhojpori|khesari|pawan singh|nirahua|pramod premi|samar singh/i;
+const OFFICIAL=/t-?\s?series|zee music|sony music|saregama|tips|yrf|yash raj|eros|venus|speed records|white hill|times music|lahari|aditya music|mango|think music|sun tv|shemaroo|coke studio|nescafe|vevo|- topic|official|records|music|films|entertainment|studios|svf|eskay|atlantic|republic|universal|warner|columbia|interscope|capitol|rca|hybe|sm town|jyp|yg entertainment/i;
+
 const GROUPS=[
   /* India */
-  {qs:['Hindi songs','Bollywood hits','Arijit Singh songs','Hindi romantic songs','Hindi lofi songs','Kishore Kumar songs','Latest Hindi songs','Old Hindi songs','Lata Mangeshkar songs']},
-  {qs:['Bangla new songs','Old Bangla hits','Bengali modern songs','Anupam Roy songs','Kolkata Bangla songs','Rabindra Sangeet','Bengali movie songs']},
-  {qs:['Punjabi songs','Diljit Dosanjh songs','AP Dhillon songs','Latest Punjabi songs','Punjabi romantic songs']},
-  {qs:['Tamil songs','Anirudh songs','AR Rahman Tamil songs','Tamil hit songs','Ilaiyaraaja songs']},
-  {qs:['Telugu songs','Telugu hit songs','Telugu melody songs','Telugu movie songs']},
-  {qs:['Malayalam songs','Kannada songs','Marathi songs','Gujarati songs','Bhojpuri songs','Rajasthani songs','Odia songs','Assamese songs']},
+  {qs:['Hindi songs official video','Bollywood hits official','T-Series Hindi songs','Arijit Singh official song','Latest Hindi songs 2026','Old Hindi songs Kishore Kumar','Lata Mangeshkar songs','Zee Music Company songs','Sony Music India songs','YRF songs','Tips Official songs','Saregama songs']},
+  {qs:['Bangla song official video','Anupam Roy official song','Rabindra Sangeet official','Kolkata Bangla new song','SVF Music songs','Eskay Movies Bengali songs','Bengali movie songs official','Old Bangla hits']},
+  {qs:['Punjabi songs official video','Diljit Dosanjh official','AP Dhillon official','Latest Punjabi songs 2026','Speed Records Punjabi','Punjabi romantic song official']},
+  {qs:['Tamil songs official video','Anirudh official song','AR Rahman Tamil official','Sony Music South Tamil','Think Music songs','Ilaiyaraaja songs','Tamil hit songs']},
+  {qs:['Telugu songs official video','Aditya Music Telugu songs','Lahari Music Telugu','Telugu movie songs official','Telugu melody songs','Devi Sri Prasad official']},
+  {qs:['Malayalam songs official','Kannada songs official','Marathi songs official','Gujarati songs official','Rajasthani songs official','Odia songs official','Assamese songs official']},
   /* Bangladesh */
-  {qs:['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']},
+  {qs:['Bangladeshi song official','Coke Studio Bangla','Habib Wahid official','Tahsan official song','Bangla band song official','Bangla natok song official','Bangladeshi folk song official','Bangla new song 2026','Dhallywood songs official']},
   /* Pakistan */
-  {qs:['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs','Nusrat Fateh Ali Khan songs']}
-].map(g=>({qs:g.qs,buf:[],pg:{}}));
+  {qs:['Pakistani songs official video','Pakistani Punjabi songs official','Coke Studio Pakistan','Nescafe Basement','Atif Aslam official','Rahat Fateh Ali Khan official','Pakistani drama OST official','Nusrat Fateh Ali Khan official','Urdu songs official']},
+  /* World viral */
+  {qs:['viral songs 2026 official video','top global songs official music video','TikTok viral songs official','trending songs 2026 official video','English pop hits official video','K-pop official MV','Latin hits official video','Billboard hot 100 official video']},
+  /* Lofi / chill / acoustic / sufi (quality but not only official channels) */
+  {loose:true,qs:['Hindi lofi songs','Bangla lofi songs','Punjabi lofi songs','Bollywood lofi chill','lofi chill songs','Hindi acoustic cover unplugged','Sufi songs','Ghazal songs','Arijit Singh lofi']}
+].map(g=>({qs:g.qs,loose:!!g.loose,buf:[],pg:{}}));
 
 async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
@@ -1753,9 +1784,17 @@ async function fillGroup(g,ctl){
 
   g.pg[q]=page;
 
+  const hasV=data.some(v=>typeof v.authorVerified==='boolean');
+
   data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
+    const len=v.lengthSeconds||0;
+
+    if(len<60||len>600)return;
+    if(BAD.test((v.title||'')+' '+(v.author||'')))return;
+    if(!g.loose&&hasV&&!v.authorVerified&&!OFFICIAL.test(v.author||''))return;
+    if(isSeen(v))return;
+    if(g.buf.some(b=>b.videoId===v.videoId||titleKey(b.title)===titleKey(v.title)))return;
+
     g.buf.push(v);
   });
 
@@ -1780,8 +1819,8 @@ async function loadHomeMore(){
   let added=0;
   let failed=false;
 
-  for(let attempt=0;attempt<3&&added<24&&!ctl.signal.aborted;attempt++){
-    const need=GROUPS.filter(g=>g.buf.length<4);
+  for(let attempt=0;attempt<8&&added<24&&!ctl.signal.aborted;attempt++){
+    const need=shuffle(GROUPS.filter(g=>g.buf.length<4)).slice(0,6);
     let ok=0;
 
     if(need.length){
@@ -1799,9 +1838,9 @@ async function loadHomeMore(){
       for(const g of shuffle(GROUPS.slice())){
         while(g.buf.length){
           const v=g.buf.shift();
-          if(seen.has(v.videoId))continue;
+          if(isSeen(v))continue;
 
-          seen.add(v.videoId);
+          markSeen(v);
           st.videos.push(v);
           grid.appendChild(card(v,st.videos.length-1,st.videos));
 
@@ -1819,6 +1858,8 @@ async function loadHomeMore(){
       break;
     }
   }
+
+  persistSeen();
 
   if(st.ctl===ctl)st.busy=false;
 
@@ -1847,7 +1888,13 @@ async function loadHomeMore(){
   status.textContent=st.videos.length+' Songs';
 
   /* screen not filled yet (e.g. after refresh): load more */
-  if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900)loadHomeMore();
+  if(added>0){
+    st.empty=0;
+    if(activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900)loadHomeMore();
+  }else if(!failed&&(st.empty=(st.empty||0)+1)<=6){
+    /* filters removed everything this round: keep trying */
+    setTimeout(loadHomeMore,600);
+  }
 }
 
 /* Infinite scroll */
@@ -2234,6 +2281,13 @@ addEventListener('touchmove',e=>{
 
   if((!home&&atTop&&dy>0)||(atBottom&&dy<0))e.preventDefault();
 },{passive:false});
+
+/* Keep loading while scrolling down (backup for the observer) */
+addEventListener('scroll',()=>{
+  if(activeTab!=='home'||D.home.busy)return;
+
+  if(window.scrollY+innerHeight>document.documentElement.scrollHeight-1400)loadHomeMore();
+},{passive:true});
 
 /* INITIALIZE */
 buildSettingsUI();
