@@ -734,6 +734,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
   <div class="ptop"></div>
+  <div id="dbg" style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 6px);text-align:center;font-size:11px;color:#fff;opacity:.75;z-index:5;pointer-events:none"></div>
 
   <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span></button>
 
@@ -1280,8 +1281,11 @@ function paintTint(col){
 function setTint(v){
   const id=v.videoId;
 
+  $('dbg').textContent='colour: sampling…';
+
   if(tintCache[id]){
     paintTint(tintCache[id]);
+    $('dbg').textContent='colour: cached '+tintCache[id];
     return;
   }
 
@@ -1294,7 +1298,10 @@ function setTint(v){
   let n=0;
 
   const tryNext=()=>{
-    if(n>=urls.length)return;
+    if(n>=urls.length){
+      if(queue[idx]&&queue[idx].videoId===id)$('dbg').textContent='colour: FAILED (all sources blocked)';
+      return;
+    }
 
     const im=new Image();
     im.crossOrigin='anonymous';
@@ -1323,7 +1330,10 @@ function setTint(v){
 
         tintCache[id]=col;
 
-        if(queue[idx]&&queue[idx].videoId===id)paintTint(col);
+        if(queue[idx]&&queue[idx].videoId===id){
+          paintTint(col);
+          $('dbg').textContent='colour: ok source '+n+' '+col;
+        }
       }catch(e){
         tryNext();
       }
