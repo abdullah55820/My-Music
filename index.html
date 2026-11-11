@@ -6,7 +6,6 @@
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000" id="themeColor">
 <title>SoundFlow — Music</title>
 
 <style>
@@ -66,10 +65,7 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-html{
-  background:var(--bg);
-  min-height:100%;
-}
+html{background:var(--bg)}
 
 body{
   margin:0;
@@ -77,8 +73,6 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   min-height:100dvh;
   overscroll-behavior-x:none;
-  isolation:isolate;
-  background:transparent;
 }
 
 button{
@@ -100,36 +94,51 @@ svg{display:block}
   box-shadow:0 8px 24px var(--gshadow);
 }
 
-/* iPHONE FULL SCREEN BACKGROUND FIX - improved for status bar */
+/* FIXED: iPhone status bar — pure soft blur only, NO black/colored tint */
+.sys-glass{
+  position:fixed;
+  z-index:11000;
+  top:-30px;
+  left:0;
+  right:0;
+  height:calc(env(safe-area-inset-top) + 30px);
+  pointer-events:none;
+  background:transparent;
+  backdrop-filter:blur(var(--gb));
+  -webkit-backdrop-filter:blur(var(--gb));
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 60%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0,#000 60%,transparent 100%);
+}
+
+/* FIXED: Full player — no overlay at all, player background shows seamlessly */
+body.fp .sys-glass{
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+
 #bg{
   position:fixed;
-  top: calc(-1 * env(safe-area-inset-top, 0px) - 120px);
-  left: 0;
-  right: 0;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 0px) - 120px);
-  z-index:0;
+  inset:-40px;
+  z-index:-2;
   background-color:var(--bg);
-  background-position:center center;
+  background-position:center;
   background-repeat:no-repeat;
-  background-attachment:scroll;
   filter:brightness(var(--br)) blur(var(--bb));
-  transform:translateZ(0);
   transition:filter .25s;
-  pointer-events:none;
 }
 
 #bgOv{
   position:fixed;
   inset:0;
-  z-index:1;
+  z-index:-1;
   background:rgba(0,0,0,var(--ov));
   pointer-events:none;
 }
 
-/* Header */
 .header{
-  position:relative;
-  z-index:2;
   max-width:1050px;
   margin:auto;
   padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;
@@ -158,13 +167,7 @@ svg{display:block}
 .ib svg{width:21px;height:21px}
 .ib:active{transform:scale(.9)}
 
-/* Pages */
-.page{
-  display:none;
-  position:relative;
-  z-index:2;
-}
-
+.page{display:none}
 .page.active{display:block}
 
 .wrap{
@@ -579,6 +582,7 @@ body.fp .nav{
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
+/* Full width progress bar */
 .player input.seek{
   width:100%;
   min-width:100%;
@@ -916,9 +920,9 @@ input[type=range]{
 }
 </style>
 </head>
-
 <body>
 
+<div class="sys-glass"></div>
 <div id="bg" aria-hidden="true"></div>
 <div id="bgOv" aria-hidden="true"></div>
 
@@ -1301,9 +1305,9 @@ const DEF={
 };
 
 const PRESETS=[
-  'linear-gradient(160deg, #000000 0%, #000000 20%, #000000 40%, #000000 60%, #000000 80%, #000000 100%)',
-  'linear-gradient(160deg, #ffffff 0%, #ffffff 20%, #ffffff 40%, #ffffff 60%, #ffffff 80%, #ffffff 100%)',
-  'linear-gradient(160deg, #ff0000 0%, #ff0000 20%, #ff0000 40%, #ff0000 60%, #ff0000 80%, #ff0000 100%)',
+  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
+  'linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)',
+  'linear-gradient(160deg,#42275a,#734b6d 55%,#f7971e)',
   'linear-gradient(160deg,#134e5e,#71b280)',
   'linear-gradient(160deg,#232526,#414345 60%,#6b7280)',
   'linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)',
@@ -1311,8 +1315,12 @@ const PRESETS=[
 ];
 
 const ACCENTS=[
-  '#0a84ff','#ff2d55','#30d158',
-  '#ff9f0a','#bf5af2','#64d2ff'
+  '#0a84ff',
+  '#ff2d55',
+  '#30d158',
+  '#ff9f0a',
+  '#bf5af2',
+  '#64d2ff'
 ];
 
 let S={...DEF,...LS.get('sf_settings_v2',{})};
@@ -1340,24 +1348,8 @@ function apply(){
   const grad=PRESETS[S.preset]||PRESETS[0];
   const bg=$('bg');
 
-  /* UPDATED BACKGROUND IMAGE HANDLING */
-  bg.style.backgroundImage=img
-    ?`url("${img}"),${grad}`
-    :grad;
-
-  bg.style.backgroundSize=img
-    ?`${S.fit},cover`
-    :'cover';
-
-  bg.style.backgroundPosition='center center';
-  bg.style.backgroundRepeat='no-repeat';
-
-  // Update theme-color for better system integration
-  const themeMeta = document.getElementById('themeColor');
-  if(themeMeta){
-    if(S.theme === 'light') themeMeta.content = '#f2f2f7';
-    else themeMeta.content = '#000000';
-  }
+  bg.style.backgroundImage=img?`url("${img}"),${grad}`:grad;
+  bg.style.backgroundSize=img?`${S.fit},cover`:'cover';
 
   document.querySelectorAll('.seg').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
@@ -1600,12 +1592,14 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }
+
   else if(e.data===YT.PlayerState.PAUSED){
     playing=false;
     icons();
     $('art').classList.add('paused');
     stopT();
   }
+
   else if(e.data===YT.PlayerState.ENDED){
     playing=false;
     icons();
@@ -1949,6 +1943,7 @@ const D={
 let activeTab='home';
 let libView='folders';
 let qi=0;
+let homeRetryTimer=null;
 
 const HQ=[
   'Top Bangla Hindi songs',
@@ -1963,6 +1958,7 @@ const HQ=[
   'Anupam Roy songs'
 ];
 
+/* Session-only seen list: resets after app reload */
 const seen=new Set();
 
 function card(v,i,list){
@@ -2097,6 +2093,7 @@ async function loadHomeMore(){
     }
 
     if(added<20&&data.length>0){
+      /* Keep fetching on the next scroll instead of looping endlessly */
       break;
     }
   }
@@ -2381,3 +2378,99 @@ function folderCard(name,songs,open){
 function renderLib(){
   const songs=getLiked();
   const fav=libView==='fav';
+
+  $('libFolders').hidden=fav;
+  $('libGrid').hidden=!fav;
+  $('libBack').hidden=!fav;
+
+  $('libTitle').textContent=fav?'Favourites':'Library';
+  $('libStatus').textContent=fav?songs.length+' Songs':'1 Folder';
+
+  if(!fav){
+    $('libFolders').innerHTML='';
+
+    $('libFolders').appendChild(
+      folderCard('Favourites',songs,openFolder)
+    );
+
+    return;
+  }
+
+  const g=$('libGrid');
+  g.innerHTML='';
+
+  if(!songs.length){
+    g.innerHTML=`
+      <div class="empty g">
+        No favourite songs yet.<br><br>
+        Tap the heart while listening to a song.
+      </div>
+    `;
+
+    return;
+  }
+
+  songs.forEach((v,i)=>{
+    g.appendChild(card(v,i,songs));
+  });
+}
+
+$('libBack').onclick=()=>history.back();
+
+/* NAVIGATION */
+function setTab(t){
+  if(activeTab===t)return;
+
+  activeTab=t;
+
+  ['home','search','library'].forEach(n=>{
+    $(n+'Page').classList.toggle('active',n===t);
+  });
+
+  document.querySelectorAll('.nb').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tab===t);
+  });
+
+  window.scrollTo(0,0);
+
+  if(t==='library'){
+    libView='folders';
+    renderLib();
+  }
+
+  if(t==='home'){
+    if(!D.home.videos.length){
+      loadHomeMore();
+    }
+  }
+}
+
+document.querySelectorAll('.nb').forEach(b=>{
+  b.onclick=()=>{
+    if(
+      b.dataset.tab==='library'&&
+      activeTab==='library'&&
+      libView!=='folders'
+    ){
+      history.back();
+      return;
+    }
+
+    setTab(b.dataset.tab);
+  };
+});
+
+/* INITIALIZE */
+buildSettingsUI();
+apply();
+icons();
+setProg(0);
+renderLib();
+watchSentinel();
+
+/* Always start with a fresh home catalog after page reload */
+loadHomeMore();
+
+</script>
+</body>
+</html>
