@@ -2477,6 +2477,13 @@ function buildForYou(){
 }
 
 async function fillGroup(g,ctl){
+  if(g.busy)return true;
+  g.busy=true;
+  try{return await fillGroupRaw(g,ctl)}
+  finally{g.busy=false}
+}
+
+async function fillGroupRaw(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const two=activeGroups().length<6?instances.slice():shuffle(instances.slice()).slice(0,2);
@@ -2566,11 +2573,19 @@ async function loadHomeMore(){
 
     if(need.length){
       const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
-      const res=await Promise.race([all,new Promise(r=>setTimeout(()=>r(null),4000))]);
+      let poll;
+      const enough=new Promise(r=>{
+        poll=setInterval(()=>{
+          const n=activeGroups().reduce((a,g)=>a+g.buf.length,0);
+          if(ctl.signal.aborted||n>=10)r('enough');
+        },80);
+      });
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
+      clearInterval(poll);
 
       if(ctl.signal.aborted)break;
 
-      ok=res?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
+      ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
     let progress=true;
@@ -2599,6 +2614,8 @@ async function loadHomeMore(){
         }
       }
     }
+
+    if(added>=8)break;
 
     if(!ok&&!added){
       if(attempt>=5)failed=true;
@@ -3028,6 +3045,7 @@ function refreshHome(){
   GROUPS.forEach(g=>{
     g.buf=[];
     g.pg={};
+    g.busy=false;
   });
 
   return loadHomeMore();
