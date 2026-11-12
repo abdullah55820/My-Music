@@ -1018,6 +1018,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h12M3 12h8M3 18h8M18 13v8M14 17h8"/></svg>
         <svg class="i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>
       </button>
+      <button class="opt" id="shareBtn" type="button" aria-label="Share">
+        <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+        <svg class="i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>
+      </button>
     </div>
   </div>
 </section>
@@ -2091,6 +2095,29 @@ function openSheet(){
 $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
+
+/* ---------- SHARE ---------- */
+on('shareBtn',async()=>{
+  const v=queue[idx];
+  if(!v)return;
+
+  const url='https://youtu.be/'+v.videoId;
+  const btn=$('shareBtn');
+
+  try{
+    if(navigator.share){
+      await navigator.share({
+        title:v.title||'SoundFlow',
+        text:(v.title||'Song')+' - '+(v.author||''),
+        url
+      });
+    }else{
+      await navigator.clipboard.writeText(url);
+      btn.classList.add('ok');
+      setTimeout(()=>btn.classList.remove('ok'),1200);
+    }
+  }catch(e){}
+});
 
 on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
 on('rpBtn',()=>{
