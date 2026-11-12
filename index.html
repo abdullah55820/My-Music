@@ -196,6 +196,31 @@ svg{display:block}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #homeGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
 
+/* List view (Songs per Row = 4) */
+:root[data-list=on] #homeGrid .card{
+  display:grid;
+  grid-template-columns:68px minmax(0,1fr);
+  grid-template-rows:1fr 1fr;
+  column-gap:12px;
+  align-items:center;
+  padding:8px;
+}
+:root[data-list=on] #homeGrid .thumb{
+  grid-row:1/3;
+  width:68px;
+  height:68px;
+}
+:root[data-list=on] #homeGrid .title{
+  align-self:end;
+  margin:0 2px 2px;
+  font-size:14px;
+}
+:root[data-list=on] #homeGrid .artist{
+  align-self:start;
+  margin:2px 2px 0;
+  font-size:12px;
+}
+
 .card{
   border-radius:var(--r);
   padding:9px;
@@ -887,6 +912,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <button data-v="1">1</button>
         <button data-v="2">2</button>
         <button data-v="3">3</button>
+        <button data-v="4">4</button>
       </div>
 
       <div class="row">
@@ -914,9 +940,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <input type="range" data-k="bgDim" min="0" max="80">
       </div>
 
-      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
-        Solid Black / White select korle theme auto dark / light hoye jabe.
-      </div>
       <input type="file" id="photoIn" accept="image/*" hidden>
     </div>
 
@@ -1084,7 +1107,8 @@ function apply(){
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
-  st.setProperty('--cols',S.cols);
+  st.setProperty('--cols',S.cols===4?1:S.cols);
+  d.dataset.list=S.cols===4?'on':'off';
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
