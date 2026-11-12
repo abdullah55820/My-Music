@@ -2944,12 +2944,21 @@ async function loadHomeMore(){
       const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
       let poll;
       /* Wait for all categories (not just the fastest ones) so the mix stays balanced */
+      /* First screen: show songs as soon as a few categories have answered
+         (fast start). After that, wait for all categories to keep the mix balanced. */
+      const first=!st.videos.length;
+      const t0=Date.now();
+      const minGroups=Math.min(3,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
-          if(ctl.signal.aborted)r('abort');
-        },80);
+          if(ctl.signal.aborted){r('abort');return}
+          if(!first)return;
+          const gs=activeGroups().filter(g=>g.buf.length);
+          const n=gs.reduce((a,g)=>a+g.buf.length,0);
+          if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
+        },60);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),5000))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
