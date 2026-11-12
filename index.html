@@ -611,11 +611,11 @@ body.dragging #topfade{opacity:0}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
-.lyadj{position:absolute;left:0;right:0;bottom:0;z-index:3;height:38px;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
+.lyadj{position:absolute;left:0;right:0;bottom:0;z-index:3;height:38px;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
 .lyadj.show{visibility:visible}
-.lyadj button{width:64px;height:36px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:20px;font-weight:800;line-height:1}
+.lyadj button{width:42px;height:36px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:20px;font-weight:800;line-height:1}
 .lyadj button:active{transform:scale(.92)}
-.lyadj span{min-width:84px;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lyadj span{min-width:0;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lyadj input{width:42px;height:28px;padding:0;margin:0 1px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums;outline:0;-webkit-appearance:none;appearance:none;user-select:text;-webkit-user-select:text}
 .lyadj input:focus{background:rgba(255,255,255,.18)}
 
@@ -1703,7 +1703,7 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(rep===0&&!shuf&&idx>=queue.length-1)return;
+    if(rep===0&&!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
     next();
   }
 }
@@ -2252,7 +2252,7 @@ function closePlayer(){
 }
 
 function playAt(i,list){
-  if(list)queue=list.slice();
+  if(list)queue=(list===D.home.videos||list===D.search.videos)?list:list.slice();
 
   const v=queue[i];
   if(!v||!v.videoId)return;
@@ -2275,13 +2275,38 @@ function playAt(i,list){
 const SPEEDS=[1,1.25,1.5,.75],SLEEPS=[0,15,30,60];
 let spIdx=0,shuf=false,rep=0,slIdx=0,slT=null;
 
-const next=()=>{
+const next=async()=>{
   if(!queue.length||idx<0)return;
   if(shuf&&queue.length>1){
     let j;
     do{j=Math.floor(Math.random()*queue.length)}while(j===idx);
     playAt(j);
-  }else playAt((idx+1)%queue.length);
+    return;
+  }
+
+  /* Home / search lists keep growing. At the end, load more songs
+     and continue instead of jumping back to the first song. */
+  const live=queue===D.home.videos||queue===D.search.videos;
+  if(live&&idx>=queue.length-1){
+    const q0=queue,i0=idx,len=q0.length;
+
+    if(q0===D.home.videos)keepFilling();
+    else{
+      const s=D.search;
+      if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
+    }
+
+    for(let k=0;k<40&&q0.length<=len;k++){
+      await new Promise(r=>setTimeout(r,250));
+      if(queue!==q0||idx!==i0)return;
+    }
+
+    if(queue!==q0||idx!==i0)return;
+    playAt(q0.length>len?i0+1:0);
+    return;
+  }
+
+  playAt((idx+1)%queue.length);
 };
 
 const getHist=()=>LS.get('sf_history',[]);
