@@ -196,6 +196,18 @@ svg{display:block}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #homeGrid,#searchGrid,#libFolders,#libGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
 
+/* chips, player options, style toggles */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:8px 14px;border-radius:99px;font-size:13px;font-weight:650;color:var(--muted)}
+.chip.on{color:var(--accent);background:var(--accent-soft)}
+.opts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.opt{padding:8px 12px;border-radius:99px;background:rgba(255,255,255,.14);font-size:12px;font-weight:700;color:#fff}
+.opt.on{background:#fff;color:#000}
+:root[data-anim=off] *{transition:none!important;animation:none!important}
+:root[data-thumb=square] .thumb,:root[data-thumb=square] .fcover{border-radius:0!important}
+:root[data-labels=off] .nb span{display:none}
+
 /* YouTube style (Songs per Row = 1) */
 :root[data-cols="1"] .grid .card{padding:0;overflow:hidden}
 :root[data-cols="1"] .grid .thumb,
@@ -719,6 +731,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <span class="pill g"><h2>Home</h2></span>
       <span class="status g" id="homeStatus">Discover music</span>
     </div>
+    <div class="chips" id="chips"></div>
     <div class="grid" id="homeGrid"></div>
     <div id="sentinel"></div>
   </div>
@@ -738,6 +751,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         </svg>
       </button>
     </form>
+    <div class="chips" id="recent" hidden></div>
 
     <div class="section" id="searchHeading" hidden>
       <span class="pill g"><h2>Results</h2></span>
@@ -850,6 +864,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6v12l9-6zM13 6v12l9-6z"/></svg>
       </button>
     </div>
+
+    <div class="opts">
+      <button class="opt" id="shBtn" type="button">Shuffle</button>
+      <button class="opt" id="rpBtn" type="button">Repeat: Off</button>
+      <button class="opt" id="spBtn" type="button">1x</button>
+      <button class="opt" id="slBtn" type="button">Sleep: Off</button>
+    </div>
   </div>
 </section>
 
@@ -927,6 +948,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <div><b>Corner Roundness</b></div>
         <input type="range" data-k="r" min="6" max="30">
       </div>
+    </div>
+
+    <div class="sec g">
+      <h3>Style</h3>
+      <div class="row"><div><b>Thumbnail Shape</b></div></div>
+      <div class="seg" data-k="thumb"><button data-v="round">Rounded</button><button data-v="square">Square</button></div>
+      <div class="row"><div><b>Animations</b></div></div>
+      <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
+      <div class="row"><div><b>Tab Bar</b></div></div>
+      <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
     </div>
 
     <div class="sec g">
@@ -1045,7 +1076,7 @@ addEventListener('keydown',e=>{
 });
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on'};
 
 /* Only 4 presets now: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
@@ -1118,6 +1149,9 @@ function apply(){
   st.setProperty('--cols',S.cols===4?1:S.cols);
   d.dataset.list=S.cols===4?'on':'off';
   d.dataset.cols=S.cols;
+  d.dataset.thumb=S.thumb;
+  d.dataset.anim=S.anim;
+  d.dataset.labels=S.labels;
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
@@ -1397,6 +1431,7 @@ function onState(e){
 
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
+    try{yt.setPlaybackRate(SPEEDS[spIdx])}catch(e){}
     playing=true;
     icons();
     $('art').classList.remove('paused');
@@ -1410,6 +1445,8 @@ function onState(e){
     playing=false;
     icons();
     stopT();
+    if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
+    if(rep===0&&!shuf&&idx>=queue.length-1)return;
     next();
   }
 }
@@ -1789,6 +1826,7 @@ function playAt(i,list){
   if(!v||!v.videoId)return;
 
   idx=i;
+  addHist(v);
 
   if(mode==='closed')showFull();
 
@@ -1802,9 +1840,50 @@ function playAt(i,list){
   else pending=v.videoId;
 }
 
+const SPEEDS=[1,1.25,1.5,.75],SLEEPS=[0,15,30,60];
+let spIdx=0,shuf=false,rep=0,slIdx=0,slT=null;
+
 const next=()=>{
-  if(queue.length&&idx>=0)playAt((idx+1)%queue.length);
+  if(!queue.length||idx<0)return;
+  if(shuf&&queue.length>1){
+    let j;
+    do{j=Math.floor(Math.random()*queue.length)}while(j===idx);
+    playAt(j);
+  }else playAt((idx+1)%queue.length);
 };
+
+const getHist=()=>LS.get('sf_history',[]);
+function addHist(v){
+  const h=getHist().filter(x=>x.videoId!==v.videoId);
+  h.unshift({videoId:v.videoId,title:v.title,author:v.author});
+  LS.set('sf_history',h.slice(0,50));
+}
+
+on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
+on('rpBtn',()=>{
+  rep=(rep+1)%3;
+  $('rpBtn').textContent=['Repeat: Off','Repeat: All','Repeat: One'][rep];
+  $('rpBtn').classList.toggle('on',rep>0);
+});
+on('spBtn',()=>{
+  spIdx=(spIdx+1)%SPEEDS.length;
+  $('spBtn').textContent=SPEEDS[spIdx]+'x';
+  $('spBtn').classList.toggle('on',spIdx>0);
+  if(apiReady)yt.setPlaybackRate(SPEEDS[spIdx]);
+});
+on('slBtn',()=>{
+  slIdx=(slIdx+1)%SLEEPS.length;
+  clearTimeout(slT);
+  const m=SLEEPS[slIdx];
+  $('slBtn').textContent=m?'Sleep: '+m+'m':'Sleep: Off';
+  $('slBtn').classList.toggle('on',!!m);
+  if(m)slT=setTimeout(()=>{
+    if(apiReady)yt.pauseVideo();
+    slIdx=0;
+    $('slBtn').textContent='Sleep: Off';
+    $('slBtn').classList.remove('on');
+  },m*60000);
+});
 
 const prev=()=>{
   if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length);
@@ -2150,9 +2229,32 @@ async function fillGroup(g,ctl){
   return true;
 }
 
+/* Language chips */
+const CHIPS=[
+  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
+  ['Bangladeshi',[16]],['Pakistani',[17]],
+  ['South Indian',[3,4,5,6,7,8,9,10,11,12,13,14,15]]
+];
+let chip=0;
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
+
+CHIPS.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.type='button';
+  b.className='chip g'+(i===0?' on':'');
+  b.textContent=c[0];
+  b.onclick=()=>{
+    if(chip===i)return;
+    chip=i;
+    document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
+    refreshHome();
+  };
+  $('chips').appendChild(b);
+});
+
 /* Weighted random group selection */
 function pickWeightedGroup(){
-  const available=GROUPS.filter(g=>g.buf.length>0);
+  const available=activeGroups().filter(g=>g.buf.length>0);
 
   if(!available.length)return null;
 
@@ -2191,7 +2293,7 @@ async function loadHomeMore(){
       Fetch more songs for groups that have fewer
       than 4 buffered songs.
     */
-    const need=GROUPS.filter(g=>g.buf.length<4);
+    const need=activeGroups().filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
@@ -2273,6 +2375,31 @@ new IntersectionObserver(entries=>{
 /* ---------- SEARCH ---------- */
 const q=$('q');
 
+const getRecent=()=>LS.get('sf_recent',[]);
+const saveRecent=t=>LS.set('sf_recent',[t,...getRecent().filter(x=>x!==t)].slice(0,8));
+
+function renderRecent(){
+  const r=getRecent(),box=$('recent');
+  box.innerHTML='';
+  box.hidden=!r.length||!$('searchGrid').hidden;
+  r.forEach(t=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='chip g';
+    b.textContent=t;
+    b.onclick=()=>doSearch(t);
+    box.appendChild(b);
+  });
+  if(r.length){
+    const c=document.createElement('button');
+    c.type='button';
+    c.className='chip g';
+    c.textContent='Clear';
+    c.onclick=()=>{LS.del('sf_recent');renderRecent()};
+    box.appendChild(c);
+  }
+}
+
 function doSearch(term){
   term=term.trim();
   if(!term)return;
@@ -2296,6 +2423,8 @@ function doSearch(term){
   $('searchStatus').textContent='Searching…';
   $('searchMore').hidden=true;
 
+  saveRecent(term);
+  renderRecent();
   loadSearch(term,1,false);
 }
 
@@ -2371,6 +2500,7 @@ function clearSearch(){
   $('searchMore').hidden=true;
   $('searchStatus').textContent='Search songs';
 
+  renderRecent();
   q.focus();
 }
 
@@ -2390,8 +2520,8 @@ $('searchMore').onclick=()=>{
 /* ---------- LIBRARY ---------- */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
 
-function openFolder(){
-  libView='fav';
+function openFolder(kind){
+  libView=kind;
   renderLib();
   window.scrollTo(0,0);
 
@@ -2401,7 +2531,9 @@ function openFolder(){
   });
 }
 
-function folderCard(name,songs,open){
+const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
+
+function folderCard(name,songs,open,icon){
   const c=document.createElement('article');
   c.className='card g';
   c.tabIndex=0;
@@ -2424,12 +2556,12 @@ function folderCard(name,songs,open){
 
     const b=document.createElement('div');
     b.className='fbadge g';
-    b.innerHTML=HEART;
+    b.innerHTML=icon;
     cv.appendChild(b);
   }else{
     const i=document.createElement('div');
     i.className='fempty';
-    i.innerHTML=HEART;
+    i.innerHTML=icon;
     cv.appendChild(i);
   }
 
@@ -2455,19 +2587,21 @@ function folderCard(name,songs,open){
 }
 
 function renderLib(){
-  const songs=getLiked();
-  const fav=libView==='fav';
+  const fav=libView==='fav',hist=libView==='hist',inner=fav||hist;
+  const songs=fav?getLiked():hist?getHist():[];
 
-  $('libFolders').hidden=fav;
-  $('libGrid').hidden=!fav;
-  $('libBack').hidden=!fav;
+  $('libFolders').hidden=inner;
+  $('libGrid').hidden=!inner;
+  $('libBack').hidden=!inner;
 
-  $('libTitle').textContent=fav?'Favourites':'Library';
-  $('libStatus').textContent=fav?songs.length+' Songs':'1 Folder';
+  $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':'Library';
+  $('libStatus').textContent=inner?songs.length+' Songs':'2 Folders';
 
-  if(!fav){
-    $('libFolders').innerHTML='';
-    $('libFolders').appendChild(folderCard('Favourites',songs,openFolder));
+  if(!inner){
+    const F=$('libFolders');
+    F.innerHTML='';
+    F.appendChild(folderCard('Favourites',getLiked(),()=>openFolder('fav'),HEART));
+    F.appendChild(folderCard('Recently Played',getHist(),()=>openFolder('hist'),CLOCK));
     return;
   }
 
@@ -2475,12 +2609,7 @@ function renderLib(){
   g.innerHTML='';
 
   if(!songs.length){
-    g.innerHTML=`
-      <div class="empty g">
-        No favourite songs yet.<br><br>
-        Tap the heart while listening to a song.
-      </div>
-    `;
+    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':'Nothing played yet.'}</div>`;
     return;
   }
 
@@ -2657,6 +2786,7 @@ apply();
 icons();
 setProg(0);
 renderLib();
+renderRecent();
 loadHomeMore();
 </script>
 </body>
