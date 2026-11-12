@@ -583,12 +583,13 @@ body.dragging #topfade{opacity:0}
 
 /* LYRICS */
 .lyr{flex:.82;min-height:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);margin:calc(-1*(env(safe-area-inset-top) + 42px)) -24px 0;padding:calc(env(safe-area-inset-top) + 56px) 28px 40px;position:relative;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
-body.lyon #topfade{opacity:0!important}
+body.lyon #topfade{opacity:0!important;display:none!important}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
-.lyadj{display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
-.lyadj button{min-width:44px;height:34px;padding:0 12px;border-radius:17px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:13px;font-weight:800}
+.lyadj{height:38px;flex-shrink:0;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
+.lyadj.show{visibility:visible}
+.lyadj button{width:64px;height:36px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:20px;font-weight:800;line-height:1}
 .lyadj button:active{transform:scale(.92)}
 .lyadj span{min-width:84px;text-align:center;font-variant-numeric:tabular-nums}
 
@@ -1037,10 +1038,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </button>
     </div>
 
-    <div class="lyadj" id="lyAdj" hidden>
-      <button id="lyMinus" type="button" aria-label="Lyrics piche">Piche &minus;0.5</button>
+    <div class="lyadj" id="lyAdj">
+      <button id="lyMinus" type="button" aria-label="Lyrics delay">&minus;</button>
       <span id="lyOffTx">Sync 0s</span>
-      <button id="lyPlus" type="button" aria-label="Lyrics age">Age +0.5</button>
+      <button id="lyPlus" type="button" aria-label="Lyrics earlier">+</button>
     </div>
   </div>
 </section>
@@ -2054,7 +2055,7 @@ on('lyPlus',()=>nudgeLy(.5));
 on('lyMinus',()=>nudgeLy(-.5));
 
 function syncLy(c){
-  c+=curOff()+.25;
+  c+=curOff();
   let k=-1;
   for(let i=0;i<lyLines.length;i++){if(lyLines[i].t<=c)k=i;else break}
   if(k===lyCur)return;
@@ -2066,7 +2067,7 @@ function syncLy(c){
 on('lyBtn',()=>{
   lyOn=!lyOn;
   $('lyr').hidden=!lyOn;
-  $('lyAdj').hidden=!lyOn;
+  $('lyAdj').classList.toggle('show',lyOn);
   showOff();
   document.querySelector('.az').hidden=lyOn;
   $('lyBtn').classList.toggle('on',lyOn);
@@ -2655,7 +2656,7 @@ function buildForYou(){
   const c={};
   [...getLiked(),...getHist()].forEach(v=>{if(v.author)c[v.author]=(c[v.author]||0)+1});
   const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
-  const g=GROUPS[18];
+  const g=GROUPS[19];
   g.qs=a.length?a.map(x=>x+' songs'):['Trending songs'];
   g.buf=[];
   g.pg={};
@@ -2684,6 +2685,8 @@ async function fillGroupRaw(g,ctl){
     g.buf.push(v);
   });
 
+  shuffle(g.buf);
+
   return true;
 }
 
@@ -2692,7 +2695,7 @@ const CHIPS=[
   ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
   ['Bangladeshi',[16]],['Pakistani',[17]],
   ['South Indian',[3,4,5,6,7,8,9,10,11,12,13,14,15]],
-  ['Trending',[17]],['For You',[18]]
+  ['Trending',[18]],['For You',[19]]
 ];
 let chip=0;
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,18);
@@ -2749,21 +2752,37 @@ CHIPS.forEach((c,i)=>{
   $('chips').appendChild(b);
 });
 
-/* Weighted random group selection */
-function pickWeightedGroup(){
-  const available=activeGroups().filter(g=>g.buf.length>0);
+/* Weighted pick across categories, never the same artist close together */
+const authKey=v=>((v&&v.author)||'').toLowerCase().trim();
 
-  if(!available.length)return null;
+function takeSong(){
+  const st=D.home;
+  const gs=activeGroups().filter(g=>g.buf.length);
+  if(!gs.length)return null;
 
-  const total=available.reduce((sum,g)=>sum+g.weight,0);
-  let random=Math.random()*total;
+  const last=st.videos.slice(-8).map(authKey).reverse();
 
-  for(const g of available){
-    random-=g.weight;
-    if(random<=0)return g;
+  for(const w of [8,4,2,0]){
+    const ban=new Set(last.slice(0,w));
+    const pool=[];
+
+    gs.forEach(g=>{
+      for(let i=0;i<g.buf.length;i++){
+        const v=g.buf[i];
+        if(seen.has(v.videoId)){g.buf.splice(i,1);i--;continue}
+        if(!ban.has(authKey(v))){pool.push({g,i});break}
+      }
+    });
+
+    if(pool.length){
+      const total=pool.reduce((a,p)=>a+p.g.weight,0);
+      let r=Math.random()*total,pick=pool[pool.length-1];
+      for(const p of pool){r-=p.g.weight;if(r<=0){pick=p;break}}
+      return pick.g.buf.splice(pick.i,1)[0];
+    }
   }
 
-  return available[available.length-1];
+  return null;
 }
 
 async function loadHomeMore(){
@@ -2810,31 +2829,14 @@ async function loadHomeMore(){
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
-    let progress=true;
+    while(added<24){
+      const v=takeSong();
+      if(!v)break;
 
-    while(added<24&&progress){
-      progress=false;
-
-      const g=pickWeightedGroup();
-
-      if(g){
-        while(g.buf.length){
-          const v=g.buf.shift();
-
-          if(seen.has(v.videoId))continue;
-
-          seen.add(v.videoId);
-          st.videos.push(v);
-
-          grid.appendChild(
-            card(v,st.videos.length-1,st.videos)
-          );
-
-          added++;
-          progress=true;
-          break;
-        }
-      }
+      seen.add(v.videoId);
+      st.videos.push(v);
+      grid.appendChild(card(v,st.videos.length-1,st.videos));
+      added++;
     }
 
     if(added>=8)break;
