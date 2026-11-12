@@ -26,6 +26,8 @@
   --cols:2;
   --gborder:rgba(255,255,255,.16);
   --gshadow:rgba(0,0,0,.45);
+  --bgblur:0px;
+  --bgdim:0;
 }
 
 :root[data-theme=light]{
@@ -64,8 +66,8 @@ svg{display:block}
 
 #bg{
   position:fixed;
-  left:0;
-  right:0;
+  left:-60px;
+  right:-60px;
   top:-120px;
   bottom:-120px;
   z-index:-1;
@@ -73,6 +75,20 @@ svg{display:block}
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+  filter:blur(var(--bgblur));
+  -webkit-filter:blur(var(--bgblur));
+  transform:translateZ(0);
+}
+
+#bgDim{
+  position:fixed;
+  left:-60px;
+  right:-60px;
+  top:-120px;
+  bottom:-120px;
+  z-index:-1;
+  background:rgba(0,0,0,var(--bgdim));
+  pointer-events:none;
 }
 
 .header{
@@ -658,6 +674,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <body>
 
 <div id="bg" aria-hidden="true"></div>
+<div id="bgDim" aria-hidden="true"></div>
 
 <header class="header">
   <div class="brand">SOUND<span>FLOW</span></div>
@@ -887,6 +904,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <button class="sb d" id="photoDel" type="button" hidden>Remove photo</button>
       </div>
 
+      <div class="row">
+        <div><b>Background Blur</b><small>Background ke blur korbe</small></div>
+        <input type="range" data-k="bgBlur" min="0" max="30">
+      </div>
+
+      <div class="row">
+        <div><b>Background Darkness</b><small>Background ke dark korbe</small></div>
+        <input type="range" data-k="bgDim" min="0" max="80">
+      </div>
+
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
         Solid Black / White select korle theme auto dark / light hoye jabe.
       </div>
@@ -987,35 +1014,59 @@ addEventListener('keydown',e=>{
 });
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:''};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0};
 
+/* Only 4 presets now: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
-  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
-  'linear-gradient(160deg,#0f2027,#2c5364 55%,#00c6a7)',
-  'linear-gradient(160deg,#42275a,#734b6d 55%,#f7971e)',
-  'linear-gradient(160deg,#134e5e,#71b280)',
-  'linear-gradient(160deg,#232526,#414345 60%,#6b7280)',
-  'linear-gradient(160deg,#ff9a9e,#fad0c4 50%,#a18cd1)',
-  'linear-gradient(160deg,#0b132b,#1c2541 50%,#3a506b)',
-  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)',
-  '#000000',
-  '#ffffff'
+  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)', /* 0 Blue (default) */
+  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)', /* 1 Dark + Red */
+  '#000000',                                              /* 2 Solid Black */
+  '#ffffff'                                               /* 3 Solid White */
 ];
 
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
-let S={...DEF,...LS.get('sf_settings_v2',{})};
+/* Old saved settings theke migrate (purano preset number -> notun number) */
+function loadSettings(){
+  const cur=LS.get('sf_settings_v3',null);
+  if(cur)return cur;
+
+  const old=LS.get('sf_settings_v2',null);
+  if(!old)return {};
+
+  const map={0:0,7:1,8:2,9:3};
+  if(old.preset!=='photo')old.preset=map[old.preset]!==undefined?map[old.preset]:0;
+  return old;
+}
+
+let S={...DEF,...loadSettings()};
 let PHOTO=LS.get('sf_bg_photo',null);
 
-const save=()=>LS.set('sf_settings_v2',S);
+const save=()=>LS.set('sf_settings_v3',S);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
 const darkMQ=matchMedia('(prefers-color-scheme: dark)');
+
+/* Top color ke dim onujayi dark kore (status bar er jonno) */
+function shade(col,a){
+  let r,g,b;
+  if(col[0]==='#'){
+    const h=col.length===4?'#'+col[1]+col[1]+col[2]+col[2]+col[3]+col[3]:col;
+    [r,g,b]=[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+  }else{
+    const m=col.match(/\d+/g);
+    if(!m)return col;
+    [r,g,b]=m.map(Number);
+  }
+  const k=1-a;
+  return `rgb(${Math.round(r*k)},${Math.round(g*k)},${Math.round(b*k)})`;
+}
 
 function apply(){
   const d=document.documentElement;
   const st=d.style;
 
   if(S.preset==='photo'&&!PHOTO)S.preset=0;
+  if(S.preset!=='photo'&&!PRESETS[S.preset])S.preset=0;
 
   const isPhoto=S.preset==='photo';
   const pr=isPhoto?null:(PRESETS[S.preset]||PRESETS[0]);
@@ -1035,6 +1086,10 @@ function apply(){
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols);
 
+  /* Background blur + darkness */
+  st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
+  st.setProperty('--bgdim',((+S.bgDim||0)/100).toString());
+
   let bgImg,top;
 
   if(isPhoto){
@@ -1051,13 +1106,14 @@ function apply(){
   $('bg').style.backgroundImage=bgImg;
 
   if(mode!=='full'){
-    st.backgroundColor=top;
+    const topDim=shade(top,(+S.bgDim||0)/100);
+    st.backgroundColor=topDim;
     st.backgroundImage=bgImg;
     st.backgroundAttachment='fixed';
     st.backgroundSize='cover';
     st.backgroundPosition='center';
     st.backgroundRepeat='no-repeat';
-    setThemeColor(top,false);
+    setThemeColor(topDim,false);
   }
 
   document.querySelectorAll('.seg').forEach(g=>{
@@ -2113,11 +2169,6 @@ async function loadHomeMore(){
       ok=res.filter(Boolean).length;
     }
 
-    /*
-      Main change:
-      Instead of giving every group equal priority,
-      songs are now selected using category weights.
-    */
     let progress=true;
 
     while(added<24&&progress){
