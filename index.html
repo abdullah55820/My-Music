@@ -2146,6 +2146,28 @@ function showOff(){
     if(e.key==='Enter'){e.preventDefault();i.blur()}
   });
   i.addEventListener('click',e=>e.stopPropagation());
+
+  /* When the keyboard opens, iOS shifts the page and the home page peeks out
+     under the player. Keep the player glued to the visible area instead. */
+  const vv=window.visualViewport;
+  const p=$('player');
+  const fit=()=>{
+    if(vv&&mode==='full'&&document.activeElement===i){
+      p.style.top=vv.offsetTop+'px';
+      p.style.height=vv.height+'px';
+      p.style.bottom='auto';
+    }else{
+      p.style.top='';
+      p.style.height='';
+      p.style.bottom='';
+    }
+  };
+  if(vv){
+    vv.addEventListener('resize',fit);
+    vv.addEventListener('scroll',fit);
+  }
+  i.addEventListener('focus',()=>{fit();setTimeout(fit,100);setTimeout(fit,350)});
+  i.addEventListener('blur',()=>setTimeout(fit,50));
 })();
 function setOff(n){
   const v=queue[idx];
