@@ -550,7 +550,7 @@ body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
 body.dragging #topfade{opacity:0}
 
-.grab{position:relative;z-index:2;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
+.grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
 
 .pc{
@@ -582,7 +582,8 @@ body.dragging #topfade{opacity:0}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* LYRICS */
-.lyr{flex:.82;min-height:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:20px 4px;position:relative;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.lyr{flex:.82;min-height:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);margin:calc(-1*(env(safe-area-inset-top) + 42px)) -24px 0;padding:calc(env(safe-area-inset-top) + 56px) 28px 40px;position:relative;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
+body.lyon #topfade{opacity:0!important}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
@@ -625,7 +626,6 @@ body.dragging #topfade{opacity:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
-#lyBtn svg{width:24px;height:24px}
 
 .player input.seek{
   width:100%;
@@ -977,22 +977,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="art" id="art"><img id="pThumb" alt=""></div>
     </div>
     <div class="lyr" id="lyr" hidden></div>
-    <div class="lyadj" id="lyAdj" hidden>
-      <button id="lyMinus" type="button" aria-label="Lyrics delay">&minus;0.5</button>
-      <span id="lyOffTx">Sync 0s</span>
-      <button id="lyPlus" type="button" aria-label="Lyrics earlier">+0.5</button>
-    </div>
-
     <div>
       <div class="meta">
         <div>
           <h3 id="pTitle">Song</h3>
           <p id="pArtist">Artist</p>
         </div>
-
-        <button class="like" id="lyBtn" type="button" aria-label="Lyrics">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
-        </button>
 
         <button class="like" id="likeBtn" type="button" aria-label="Favourite">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1030,7 +1020,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <button class="opt" id="rpBtn" type="button" aria-label="Repeat">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
       </button>
-      <button class="opt" id="spBtn" type="button" aria-label="Speed"><span id="spTx">1x</span></button>
+      <button class="opt" id="lyBtn" type="button" aria-label="Lyrics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.6-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10h7M8.5 13.5h4.5"/></svg>
+      </button>
       <button class="opt" id="slBtn" type="button" aria-label="Sleep timer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <i class="bd" id="slBd" hidden></i>
@@ -1043,6 +1035,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
         <svg class="i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>
       </button>
+    </div>
+
+    <div class="lyadj" id="lyAdj" hidden>
+      <button id="lyMinus" type="button" aria-label="Lyrics piche">Piche &minus;0.5</button>
+      <span id="lyOffTx">Sync 0s</span>
+      <button id="lyPlus" type="button" aria-label="Lyrics age">Age +0.5</button>
     </div>
   </div>
 </section>
@@ -1972,7 +1970,7 @@ function bestLyric(list,v,dur){
       if(diff>lim)return;
       ds=1-diff/lim;
     }
-    const sc=hit+ah*.6+ds+(c.syncedLyrics?.3:0);
+    const sc=hit+ah*.6+ds*2+(c.syncedLyrics?.3:0);
     if(sc>bs){bs=sc;best=c}
   });
   return best;
@@ -1980,8 +1978,14 @@ function bestLyric(list,v,dur){
 
 async function getDur(v){
   if(v.lengthSeconds>0)return v.lengthSeconds;
-  for(let i=0;i<12;i++){
-    try{const d=yt&&yt.getDuration&&yt.getDuration();if(d>0)return d}catch(e){}
+  for(let i=0;i<24;i++){
+    try{
+      const vd=yt&&yt.getVideoData&&yt.getVideoData();
+      if(vd&&vd.video_id===v.videoId){
+        const d=yt.getDuration();
+        if(d>0)return d;
+      }
+    }catch(e){}
     await new Promise(r=>setTimeout(r,250));
   }
   return 0;
@@ -2050,13 +2054,13 @@ on('lyPlus',()=>nudgeLy(.5));
 on('lyMinus',()=>nudgeLy(-.5));
 
 function syncLy(c){
-  c+=curOff();
+  c+=curOff()+.25;
   let k=-1;
   for(let i=0;i<lyLines.length;i++){if(lyLines[i].t<=c)k=i;else break}
   if(k===lyCur)return;
   lyCur=k;
   lyLines.forEach((x,i)=>x.el.classList.toggle('now',i===k));
-  if(k>=0){const b=$('lyr');b.scrollTo({top:lyLines[k].el.offsetTop-b.clientHeight/2,behavior:'smooth'})}
+  if(k>=0){const b=$('lyr');b.scrollTo({top:lyLines[k].el.offsetTop-b.clientHeight*.4,behavior:'smooth'})}
 }
 
 on('lyBtn',()=>{
@@ -2065,7 +2069,8 @@ on('lyBtn',()=>{
   $('lyAdj').hidden=!lyOn;
   showOff();
   document.querySelector('.az').hidden=lyOn;
-  $('lyBtn').style.color=lyOn?'var(--accent)':'';
+  $('lyBtn').classList.toggle('on',lyOn);
+  document.body.classList.toggle('lyon',lyOn);
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
@@ -2174,7 +2179,7 @@ const next=()=>{
 const getHist=()=>LS.get('sf_history',[]);
 function addHist(v){
   const h=getHist().filter(x=>x.videoId!==v.videoId);
-  h.unshift({videoId:v.videoId,title:v.title,author:v.author});
+  h.unshift({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds});
   LS.set('sf_history',h.slice(0,50));
 }
 
@@ -2282,12 +2287,6 @@ on('rpBtn',()=>{
   rep=rep?0:2;
   $('rpBtn').classList.toggle('on',rep>0);
 });
-on('spBtn',()=>{
-  spIdx=(spIdx+1)%SPEEDS.length;
-  $('spTx').textContent=SPEEDS[spIdx]+'x';
-  $('spBtn').classList.toggle('on',spIdx>0);
-  if(apiReady)yt.setPlaybackRate(SPEEDS[spIdx]);
-});
 on('slBtn',()=>{
   slIdx=(slIdx+1)%SLEEPS.length;
   clearTimeout(slT);
@@ -2381,7 +2380,7 @@ pl.addEventListener('touchcancel',endDrag,{passive:true});
 
 /* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
-const slim=v=>({videoId:v.videoId,title:v.title,author:v.author});
+const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds});
 
 $('likeBtn').addEventListener('click',e=>{
   e.stopPropagation();
