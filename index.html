@@ -28,6 +28,7 @@
   --gshadow:rgba(0,0,0,.45);
   --bgblur:0px;
   --bgdim:0;
+  --tbbg:rgba(0,0,0,.38);
 }
 
 :root[data-theme=light]{
@@ -39,6 +40,7 @@
   --muted:#6c6c70;
   --gborder:rgba(255,255,255,.8);
   --gshadow:rgba(30,40,80,.18);
+  --tbbg:rgba(255,255,255,.5);
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -90,6 +92,23 @@ svg{display:block}
   background:rgba(0,0,0,var(--bgdim));
   pointer-events:none;
 }
+
+#topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  background:var(--tbbg);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-radius:0 0 22px 22px;
+  transition:transform .3s cubic-bezier(.3,.8,.3,1);
+}
+#topbar.hide{transform:translateY(-110%)}
+.hb{max-width:1050px;margin:auto;padding:0 16px}
+.hb .section{margin:8px 0 10px}
+.hb .chips{padding-bottom:12px}
 
 .header{
   max-width:1050px;
@@ -736,17 +755,22 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div id="bg" aria-hidden="true"></div>
 <div id="bgDim" aria-hidden="true"></div>
 
-<header class="header">
-  <div class="brand">SOUND<span>FLOW</span></div>
-</header>
+<div id="topbar">
+  <header class="header">
+    <div class="brand">SOUND<span>FLOW</span></div>
+  </header>
 
-<main class="page active" id="homePage">
-  <div class="wrap">
+  <div class="hb" id="homeBar">
     <div class="section">
       <span class="pill g"><h2>Home</h2></span>
       <span class="status g" id="homeStatus">Discover music</span>
     </div>
     <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<main class="page active" id="homePage">
+  <div class="wrap">
     <div class="grid" id="homeGrid"></div>
     <div id="sentinel"></div>
   </div>
@@ -2845,6 +2869,8 @@ function setTab(t){
   });
 
   window.scrollTo(0,0);
+  $('homeBar').hidden=t!=='home';
+  $('topbar').classList.remove('hide');
 
   if(t==='library'){
     libView='folders';
@@ -2898,7 +2924,7 @@ function refreshHome(){
   return loadHomeMore();
 }
 
-const ptr=$('ptr'),homeEl=$('homePage'),hdrEl=document.querySelector('.header');
+const ptr=$('ptr'),homeEl=$('homePage'),hdrEl=$('topbar');
 const EASE='transform .3s cubic-bezier(.3,.8,.3,1)';
 
 let refreshing=false;
@@ -2906,7 +2932,7 @@ let refreshing=false;
 function ptrMove(d,anim){
   const t=d>0?`translateY(${d}px)`:'';
 
-  homeEl.style.transition=hdrEl.style.transition=anim?EASE:'';
+  homeEl.style.transition=hdrEl.style.transition=anim?EASE:'none';
   homeEl.style.transform=hdrEl.style.transform=t;
 
   ptr.style.transition=anim?'top .3s,opacity .3s':'';
@@ -3021,6 +3047,30 @@ $('impIn').onchange=async e=>{
     location.reload();
   }catch(err){alert('Backup file ta thik na.')}
 };
+
+/* ---------- HIDE TOPBAR ON SCROLL DOWN, SHOW ON SCROLL UP ---------- */
+const tb=$('topbar');
+new ResizeObserver(()=>{document.body.style.paddingTop=tb.offsetHeight+'px'}).observe(tb);
+
+let lastY=0,turnY=0,goingUp=true;
+
+addEventListener('scroll',()=>{
+  const y=Math.max(0,scrollY);
+
+  if(y<10){
+    tb.classList.remove('hide');
+    goingUp=true;
+    turnY=y;
+  }else if(y>lastY){
+    if(goingUp){goingUp=false;turnY=lastY}
+    if(y-turnY>12&&y>90)tb.classList.add('hide');
+  }else if(y<lastY){
+    if(!goingUp){goingUp=true;turnY=lastY}
+    if(turnY-y>12)tb.classList.remove('hide');
+  }
+
+  lastY=y;
+},{passive:true});
 
 /* ---------- INIT ---------- */
 buildSettingsUI();
