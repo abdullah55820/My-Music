@@ -194,10 +194,17 @@ svg{display:block}
 .xbtn svg{width:15px;height:15px}
 
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-#homeGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
+#homeGrid,#searchGrid,#libFolders,#libGrid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));width:100%}
+
+/* YouTube style (Songs per Row = 1) */
+:root[data-cols="1"] .grid .card{padding:0;overflow:hidden}
+:root[data-cols="1"] .grid .thumb,
+:root[data-cols="1"] .grid .fcover{aspect-ratio:16/9;border-radius:0}
+:root[data-cols="1"] .grid .title{margin:12px 14px 4px;font-size:15px;line-height:1.35}
+:root[data-cols="1"] .grid .artist{margin:0 14px 13px;font-size:12px}
 
 /* List view (Songs per Row = 4) */
-:root[data-list=on] #homeGrid .card{
+:root[data-list=on] .grid .card{
   display:grid;
   grid-template-columns:68px minmax(0,1fr);
   grid-template-rows:1fr 1fr;
@@ -205,17 +212,18 @@ svg{display:block}
   align-items:center;
   padding:8px;
 }
-:root[data-list=on] #homeGrid .thumb{
+:root[data-list=on] .grid .thumb,
+:root[data-list=on] .grid .fcover{
   grid-row:1/3;
   width:68px;
   height:68px;
 }
-:root[data-list=on] #homeGrid .title{
+:root[data-list=on] .grid .title{
   align-self:end;
   margin:0 2px 2px;
   font-size:14px;
 }
-:root[data-list=on] #homeGrid .artist{
+:root[data-list=on] .grid .artist{
   align-self:start;
   margin:2px 2px 0;
   font-size:12px;
@@ -1109,6 +1117,7 @@ function apply(){
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols===4?1:S.cols);
   d.dataset.list=S.cols===4?'on':'off';
+  d.dataset.cols=S.cols;
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
