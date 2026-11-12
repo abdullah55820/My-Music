@@ -581,6 +581,12 @@ body.dragging #topfade{opacity:0}
 .art.paused{transform:scale(.84);box-shadow:0 10px 28px rgba(0,0,0,.35)}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
 
+/* LYRICS */
+.lyr{flex:.82;min-height:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:20px 4px;position:relative;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.lyr::-webkit-scrollbar{display:none}
+.lyr div{margin:12px 0;transition:color .25s}
+.lyr .now{color:#fff;font-size:23px}
+
 .meta{
   width:100%;
   min-width:0;
@@ -615,6 +621,7 @@ body.dragging #topfade{opacity:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
+#lyBtn svg{width:24px;height:24px}
 
 .player input.seek{
   width:100%;
@@ -965,6 +972,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div class="az">
       <div class="art" id="art"><img id="pThumb" alt=""></div>
     </div>
+    <div class="lyr" id="lyr" hidden></div>
 
     <div>
       <div class="meta">
@@ -972,6 +980,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
           <h3 id="pTitle">Song</h3>
           <p id="pArtist">Artist</p>
         </div>
+
+        <button class="like" id="lyBtn" type="button" aria-label="Lyrics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+        </button>
 
         <button class="like" id="likeBtn" type="button" aria-label="Favourite">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1653,6 +1665,7 @@ function tick(){
 
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
+    if(lyOn&&lyLines)syncLy(c);
 
     if(d>0){
       const p=c/d*100;
@@ -1920,6 +1933,61 @@ function setTint(v){
   }
 }
 
+/* ---------- LYRICS (LRCLIB) ---------- */
+let lyOn=false,lyLines=null,lyCur=-1;
+const LY={};
+const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
+
+async function lrcSearch(q){
+  const r=await fetch('https://lrclib.net/api/search?q='+encodeURIComponent(q));
+  const d=await r.json();
+  return Array.isArray(d)?d.find(x=>x.syncedLyrics||x.plainLyrics)||null:null;
+}
+
+async function loadLyrics(v){
+  const box=$('lyr'),id=v.videoId;
+  lyLines=null;lyCur=-1;
+  box.style.whiteSpace='';
+  box.textContent='Loading lyrics…';
+  if(LY[id]===undefined){
+    try{
+      const t=cleanTitle(v.title);
+      LY[id]=(await lrcSearch(t))||(await lrcSearch(t+' '+(v.author||'')));
+    }catch(e){LY[id]=null}
+  }
+  if(!queue[idx]||queue[idx].videoId!==id)return;
+  const l=LY[id];
+  if(!l){box.textContent='Lyrics paoa jayni';return}
+  if(l.syncedLyrics){
+    lyLines=l.syncedLyrics.split('\n').map(s=>{
+      const m=s.match(/^\[(\d+):(\d+\.?\d*)\](.*)/);
+      return m?{t:+m[1]*60+ +m[2],s:m[3].trim()||'♪'}:null;
+    }).filter(Boolean);
+    box.innerHTML='';
+    lyLines.forEach(x=>{const p=document.createElement('div');p.textContent=x.s;x.el=p;box.appendChild(p)});
+  }else{
+    box.style.whiteSpace='pre-wrap';
+    box.textContent=l.plainLyrics;
+  }
+}
+
+function syncLy(c){
+  let k=-1;
+  for(let i=0;i<lyLines.length;i++){if(lyLines[i].t<=c)k=i;else break}
+  if(k===lyCur)return;
+  lyCur=k;
+  lyLines.forEach((x,i)=>x.el.classList.toggle('now',i===k));
+  if(k>=0){const b=$('lyr');b.scrollTo({top:lyLines[k].el.offsetTop-b.clientHeight/2,behavior:'smooth'})}
+}
+
+on('lyBtn',()=>{
+  lyOn=!lyOn;
+  $('lyr').hidden=!lyOn;
+  document.querySelector('.az').hidden=lyOn;
+  $('lyBtn').style.color=lyOn?'var(--accent)':'';
+  if(lyOn&&queue[idx])loadLyrics(queue[idx]);
+});
+
 function setInfo(v){
   const t=thumbOf(v);
 
@@ -1931,6 +1999,7 @@ function setInfo(v){
 
   setPlayerBg(v);
   setTint(v);
+  if(lyOn)loadLyrics(v);
 }
 
 function resetPlayerStyles(){
@@ -2172,7 +2241,7 @@ pl.addEventListener('touchstart',e=>{
   ts=false;
   drag=false;
 
-  if(mode!=='full'||e.target.closest('button:not(.grab),input'))return;
+  if(mode!=='full'||e.target.closest('button:not(.grab),input,.lyr'))return;
 
   tx=e.touches[0].clientX;
   ty=e.touches[0].clientY;
@@ -2182,6 +2251,7 @@ pl.addEventListener('touchstart',e=>{
 
 pl.addEventListener('touchmove',e=>{
   if(mode!=='full')return;
+  if(e.target.closest('.lyr'))return;
   if(e.cancelable)e.preventDefault();
   if(!ts)return;
 
