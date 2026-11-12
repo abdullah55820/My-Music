@@ -2096,13 +2096,19 @@ $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
 
-/* ---------- SHARE (copy link only) ---------- */
+/* ---------- SHARE (native share sheet, link only) ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
   if(!v)return;
 
   const url='https://youtu.be/'+v.videoId;
   const btn=$('shareBtn');
+
+  /* Only url is passed (no title/text) so Copy gives just the link */
+  if(navigator.share){
+    try{await navigator.share({url})}catch(e){}
+    return;
+  }
 
   try{
     await navigator.clipboard.writeText(url);
