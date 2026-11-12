@@ -586,6 +586,10 @@ body.dragging #topfade{opacity:0}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
+.lyadj{display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
+.lyadj button{min-width:44px;height:34px;padding:0 12px;border-radius:17px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:13px;font-weight:800}
+.lyadj button:active{transform:scale(.92)}
+.lyadj span{min-width:84px;text-align:center;font-variant-numeric:tabular-nums}
 
 .meta{
   width:100%;
@@ -973,6 +977,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="art" id="art"><img id="pThumb" alt=""></div>
     </div>
     <div class="lyr" id="lyr" hidden></div>
+    <div class="lyadj" id="lyAdj" hidden>
+      <button id="lyMinus" type="button" aria-label="Lyrics delay">&minus;0.5</button>
+      <span id="lyOffTx">Sync 0s</span>
+      <button id="lyPlus" type="button" aria-label="Lyrics earlier">+0.5</button>
+    </div>
 
     <div>
       <div class="meta">
@@ -1938,21 +1947,63 @@ let lyOn=false,lyLines=null,lyCur=-1;
 const LY={};
 const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
 
-async function lrcSearch(q){
+const wordsOf=t=>(t||'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(w=>w.length>1);
+
+async function lrcQuery(q){
   const r=await fetch('https://lrclib.net/api/search?q='+encodeURIComponent(q));
   const d=await r.json();
-  return Array.isArray(d)?d.find(x=>x.syncedLyrics||x.plainLyrics)||null:null;
+  return Array.isArray(d)?d.filter(x=>x.syncedLyrics||x.plainLyrics):[];
+}
+
+function bestLyric(list,v,dur){
+  const hay=new Set(wordsOf((v.title||'')+' '+(v.author||'')));
+  let best=null,bs=0;
+  list.forEach(c=>{
+    const tw=wordsOf(c.trackName);
+    if(!tw.length)return;
+    const hit=tw.filter(w=>hay.has(w)).length/tw.length;
+    if(hit<.8)return;
+    const aw=wordsOf(c.artistName);
+    const ah=aw.length?aw.filter(w=>hay.has(w)).length/aw.length:0;
+    let ds=0.5;
+    if(dur>0&&c.duration>0){
+      const diff=Math.abs(c.duration-dur);
+      if(diff>8)return;
+      ds=1-diff/8;
+    }
+    const sc=hit+ah*.6+ds+(c.syncedLyrics?.3:0);
+    if(sc>bs){bs=sc;best=c}
+  });
+  return best;
+}
+
+async function getDur(v){
+  if(v.lengthSeconds>0)return v.lengthSeconds;
+  for(let i=0;i<12;i++){
+    try{const d=yt&&yt.getDuration&&yt.getDuration();if(d>0)return d}catch(e){}
+    await new Promise(r=>setTimeout(r,250));
+  }
+  return 0;
 }
 
 async function loadLyrics(v){
   const box=$('lyr'),id=v.videoId;
   lyLines=null;lyCur=-1;
+  showOff();
   box.style.whiteSpace='';
   box.textContent='Loading lyrics…';
   if(LY[id]===undefined){
     try{
+      const dur=await getDur(v);
       const t=cleanTitle(v.title);
-      LY[id]=(await lrcSearch(t))||(await lrcSearch(t+' '+(v.author||'')));
+      const parts=t.split(/\s[-–—]\s/).map(x=>x.trim()).filter(Boolean);
+      const qs=[t,...parts,t+' '+(v.author||'')].filter((x,i,a)=>x&&a.indexOf(x)===i);
+      let found=null;
+      for(const q of qs){
+        found=bestLyric(await lrcQuery(q),v,dur);
+        if(found)break;
+      }
+      LY[id]=found;
     }catch(e){LY[id]=null}
   }
   if(!queue[idx]||queue[idx].videoId!==id)return;
@@ -1971,7 +2022,25 @@ async function loadLyrics(v){
   }
 }
 
+const getOffs=()=>LS.get('sf_lyoff',{});
+const curOff=()=>{const v=queue[idx];return v?(getOffs()[v.videoId]||0):0};
+function showOff(){const o=curOff();$('lyOffTx').textContent='Sync '+(o>0?'+':'')+o.toFixed(1)+'s'}
+function nudgeLy(d){
+  const v=queue[idx];
+  if(!v)return;
+  const o=getOffs();
+  const n=Math.round(((o[v.videoId]||0)+d)*10)/10;
+  if(n===0)delete o[v.videoId];else o[v.videoId]=n;
+  LS.set('sf_lyoff',o);
+  showOff();
+  lyCur=-2;
+  try{if(lyLines)syncLy(yt.getCurrentTime()||0)}catch(e){}
+}
+on('lyPlus',()=>nudgeLy(.5));
+on('lyMinus',()=>nudgeLy(-.5));
+
 function syncLy(c){
+  c+=curOff();
   let k=-1;
   for(let i=0;i<lyLines.length;i++){if(lyLines[i].t<=c)k=i;else break}
   if(k===lyCur)return;
@@ -1983,6 +2052,8 @@ function syncLy(c){
 on('lyBtn',()=>{
   lyOn=!lyOn;
   $('lyr').hidden=!lyOn;
+  $('lyAdj').hidden=!lyOn;
+  showOff();
   document.querySelector('.az').hidden=lyOn;
   $('lyBtn').style.color=lyOn?'var(--accent)':'';
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
