@@ -90,8 +90,8 @@ svg{display:block}
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  filter:blur(var(--bgblur));
-  -webkit-filter:blur(var(--bgblur));
+  filter:var(--bgfilter,none);
+  -webkit-filter:var(--bgfilter,none);
   transform:translateZ(0);
 }
 
@@ -386,6 +386,17 @@ svg{display:block}
 
 .card:active{transform:scale(.97)}
 
+/* Hundreds of cards each running backdrop-filter overloads the GPU and makes the
+   glass flicker/vanish while scrolling. Cards use a plain translucent surface
+   instead; blur stays on the few fixed elements (nav, mini player, pills). */
+.grid .g{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  box-shadow:none;
+}
+.card{contain:layout paint style}
+.nav.g{transform:translateZ(0)}
+
 .thumb{
   width:100%;
   aspect-ratio:1;
@@ -598,14 +609,15 @@ body.dragging #topfade{opacity:0}
 .lyprev{margin:6px 0 10px;padding:14px;border-radius:14px;background:var(--surface-2);text-align:center;font-size:19px;font-weight:700;line-height:1.5}
 .seg.wrap{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
 .lyr::-webkit-scrollbar{display:none}
-.lyr div{margin:12px 0;transition:color .25s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.lyr div.lpd{color:var(--accent)}
+.lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
 .lyadj{position:absolute;left:0;right:0;bottom:0;z-index:3;height:38px;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
 .lyadj.show{visibility:visible}
 .lyadj button{width:64px;height:36px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:20px;font-weight:800;line-height:1}
 .lyadj button:active{transform:scale(.92)}
-.lyadj span{min-width:84px;text-align:center;font-variant-numeric:tabular-nums}
+.lyadj span{text-align:center}
+.lyadj input{width:84px;height:36px;padding:0;border-radius:18px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums;outline:0;-webkit-appearance:none;appearance:none;user-select:text;-webkit-user-select:text}
+.lyadj input:focus{border-color:#fff;background:rgba(255,255,255,.2)}
 
 .meta{
   width:100%;
@@ -1054,7 +1066,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
     <div class="lyadj" id="lyAdj">
       <button id="lyMinus" type="button" aria-label="Lyrics delay">&minus;</button>
-      <span id="lyOffTx">Sync 0s</span>
+      <span>Sync</span>
+      <input id="lyOffIn" type="text" value="0.0" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Lyrics sync seconds">
+      <span>s</span>
       <button id="lyPlus" type="button" aria-label="Lyrics earlier">+</button>
     </div>
   </div>
@@ -1398,6 +1412,8 @@ function apply(){
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
+  /* blur(0px) still forces a heavy GPU layer, so only filter when really needed */
+  st.setProperty('--bgfilter',(+S.bgBlur>0)?`blur(${+S.bgBlur}px)`:'none');
   st.setProperty('--bgdim',((+S.bgDim||0)/100).toString());
 
   let bgImg,top;
@@ -2093,35 +2109,7 @@ async function loadLyrics(v){
       const p=document.createElement('div');
       p.textContent=x.s;
       x.el=p;
-      /* Long-press a line = "this line is being sung right now" (fixes sync in one go) */
-      let lpT=null,fired=false,px=0,py=0;
-      const lpStart=e=>{
-        const pt=(e.touches&&e.touches[0])||e;
-        px=pt.clientX;py=pt.clientY;
-        fired=false;
-        clearTimeout(lpT);
-        lpT=setTimeout(()=>{
-          fired=true;
-          p.classList.add('lpd');
-          setTimeout(()=>p.classList.remove('lpd'),350);
-          try{setOff(x.t-(yt.getCurrentTime()||0))}catch(err){}
-          if(navigator.vibrate)navigator.vibrate(30);
-        },500);
-      };
-      const lpStop=()=>clearTimeout(lpT);
-      /* cancel only if the finger really moved (scrolling), not on tiny jitter */
-      const lpMove=e=>{
-        const pt=(e.touches&&e.touches[0])||e;
-        if(Math.abs(pt.clientX-px)>12||Math.abs(pt.clientY-py)>12)lpStop();
-      };
-      p.addEventListener('touchstart',lpStart,{passive:true});
-      p.addEventListener('touchmove',lpMove,{passive:true});
-      ['touchend','touchcancel'].forEach(ev=>p.addEventListener(ev,lpStop,{passive:true}));
-      p.addEventListener('mousedown',lpStart);
-      ['mouseup','mouseleave'].forEach(ev=>p.addEventListener(ev,lpStop));
-      p.addEventListener('contextmenu',e=>e.preventDefault());
       p.onclick=()=>{
-        if(fired){fired=false;return}
         /* Tap a line to jump the song to that exact line */
         try{
           yt.seekTo(Math.max(0,x.t-curOff()+.05),true);
@@ -2140,7 +2128,27 @@ async function loadLyrics(v){
 
 const getOffs=()=>LS.get('sf_lyoff',{});
 const curOff=()=>{const v=queue[idx];return v?(getOffs()[v.videoId]||0):0};
-function showOff(){const o=curOff();$('lyOffTx').textContent='Sync '+(o>0?'+':'')+o.toFixed(1)+'s'}
+const fmtOff=o=>(o>0?'+':'')+o.toFixed(1);
+function showOff(){
+  const i=$('lyOffIn');
+  if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
+}
+
+/* Tap the number to type the sync value yourself (e.g. -2.5 or 3) */
+(function(){
+  const i=$('lyOffIn');
+  const commit=()=>{
+    const n=parseFloat(i.value.replace(/[−–—]/g,'-').replace(/[^\d.\-+]/g,''));
+    if(Number.isFinite(n))setOff(Math.max(-120,Math.min(120,n)));
+    i.value=fmtOff(curOff());
+  };
+  i.addEventListener('focus',()=>setTimeout(()=>{try{i.select()}catch(e){}},0));
+  i.addEventListener('blur',commit);
+  i.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();i.blur()}
+  });
+  i.addEventListener('click',e=>e.stopPropagation());
+})();
 function setOff(n){
   const v=queue[idx];
   if(!v)return;
@@ -2153,22 +2161,8 @@ function setOff(n){
   try{if(lyLines)syncLy(yt.getCurrentTime()||0)}catch(e){}
 }
 const nudgeLy=d=>setOff(curOff()+d);
-/* Hold the − / + buttons to keep adjusting quickly */
-function holdBtn(id,d){
-  const b=$(id);
-  let t=null,iv=null;
-  const stop=()=>{clearTimeout(t);clearInterval(iv)};
-  b.addEventListener('pointerdown',e=>{
-    e.preventDefault();
-    e.stopPropagation();
-    nudgeLy(d);
-    t=setTimeout(()=>{iv=setInterval(()=>nudgeLy(d),90)},400);
-  });
-  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
-  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
-}
-holdBtn('lyPlus',.5);
-holdBtn('lyMinus',-.5);
+on('lyPlus',()=>nudgeLy(.5));
+on('lyMinus',()=>nudgeLy(-.5));
 
 function syncLy(c){
   c+=curOff();
