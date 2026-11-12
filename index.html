@@ -2284,7 +2284,7 @@ async function fetchSongs(q,page,ctl,list=instances,strict=false){
     const c=new AbortController();
     const onAb=()=>c.abort();
     ctl.signal.addEventListener('abort',onAb);
-    const tm=setTimeout(()=>c.abort(),8000);
+    const tm=setTimeout(()=>c.abort(),6000);
 
     return fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
@@ -2480,7 +2480,7 @@ async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const two=activeGroups().length<6?instances.slice():shuffle(instances.slice()).slice(0,2);
-  const data=await fetchSongs(q,page,ctl,two,true);
+  const data=await fetchSongs(q,page,ctl,two,activeGroups().length<6);
 
   if(data===null)return false;
 
@@ -2565,11 +2565,12 @@ async function loadHomeMore(){
     let ok=0;
 
     if(need.length){
-      const res=await Promise.all(need.map(g=>fillGroup(g,ctl)));
+      const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
+      const res=await Promise.race([all,new Promise(r=>setTimeout(()=>r(null),4000))]);
 
       if(ctl.signal.aborted)break;
 
-      ok=res.filter(Boolean).length;
+      ok=res?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
     let progress=true;
