@@ -213,6 +213,16 @@ svg{display:block}
 .lbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
 .lbar .seg{flex:1;margin:0}
 
+.chips{touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.psheet{position:fixed;inset:0;z-index:13000;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.pcard{width:min(100%,520px);max-height:70dvh;overflow:auto;background:var(--surface);color:var(--text);border-radius:22px 22px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px)}
+.pcard h3{margin:0 0 12px;font-size:16px}
+.pitem{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 14px;border-radius:12px;background:var(--surface-2);margin-bottom:8px;font-weight:650;font-size:14px;text-align:left}
+.pitem small{color:var(--muted);font-weight:500;font-size:12px}
+.pitem.new{color:var(--accent)}
+.pnew{display:flex;gap:8px;margin-top:4px}
+.pnew input{flex:1;min-width:0;height:44px;border-radius:12px;border:0;outline:0;padding:0 14px;background:var(--surface-2);color:var(--text);font-size:16px}
+
 /* YouTube style (Songs per Row = 1) */
 :root[data-cols="1"] .grid .card{padding:0;overflow:hidden}
 :root[data-cols="1"] .grid .thumb,
@@ -1025,6 +1035,17 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
   </div>
 </section>
+
+<div class="psheet" id="psheet" hidden>
+  <div class="pcard">
+    <h3>Add to playlist</h3>
+    <div id="plist"></div>
+    <div class="pnew" id="pnew" hidden>
+      <input id="pName" placeholder="Playlist name" maxlength="40">
+      <button class="sb p" id="pOk" type="button">OK</button>
+    </div>
+  </div>
+</div>
 
 <div id="topfade"></div>
 
@@ -1883,27 +1904,70 @@ function addHist(v){
 const getPL=()=>LS.get('sf_playlists',[]);
 const setPL=v=>LS.set('sf_playlists',v);
 
-on('plBtn',()=>{
-  const v=queue[idx];
-  if(!v)return;
-  const P=getPL();
-  const n=prompt('Add to playlist:\n'+P.map((x,k)=>(k+1)+'. '+x.name).join('\n')+'\n0. New playlist','0');
-  if(n===null)return;
-  let pl;
-  if(+n===0){
-    const name=prompt('Playlist name?');
-    if(!name||!name.trim())return;
-    pl={id:Date.now().toString(36),name:name.trim(),songs:[]};
-    P.push(pl);
-  }else{
-    pl=P[+n-1];
-    if(!pl)return;
-  }
+let plWas=false;
+
+function closeSheet(){
+  $('psheet').hidden=true;
+  if(plWas&&apiReady&&!playing)setTimeout(()=>{try{yt.playVideo()}catch(e){}},150);
+}
+
+function addToPl(P,pl,v){
   if(!pl.songs.some(x=>x.videoId===v.videoId))pl.songs.unshift(slim(v));
   setPL(P);
+  closeSheet();
   $('plBtn').textContent='Added ✓';
   setTimeout(()=>{$('plBtn').textContent='+ Playlist'},1200);
-});
+}
+
+function openSheet(){
+  const v=queue[idx];
+  if(!v)return;
+
+  plWas=playing;
+
+  const P=getPL(),box=$('plist');
+  box.innerHTML='';
+  $('pnew').hidden=true;
+  $('pName').value='';
+
+  P.forEach(pl=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='pitem';
+    const n=document.createElement('span');
+    n.textContent=pl.name;
+    const c=document.createElement('small');
+    c.textContent=pl.songs.some(x=>x.videoId===v.videoId)?'Added':pl.songs.length+' songs';
+    b.append(n,c);
+    b.onclick=()=>addToPl(P,pl,v);
+    box.appendChild(b);
+  });
+
+  const nb=document.createElement('button');
+  nb.type='button';
+  nb.className='pitem new';
+  nb.textContent='+ New Playlist';
+  nb.onclick=()=>{
+    nb.hidden=true;
+    $('pnew').hidden=false;
+    $('pName').focus();
+  };
+  box.appendChild(nb);
+
+  $('pOk').onclick=()=>{
+    const name=$('pName').value.trim();
+    if(!name)return;
+    const pl={id:Date.now().toString(36),name,songs:[]};
+    P.push(pl);
+    addToPl(P,pl,v);
+  };
+
+  $('psheet').hidden=false;
+}
+
+$('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
+$('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
+on('plBtn',openSheet);
 
 on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
 on('rpBtn',()=>{
@@ -2868,7 +2932,7 @@ async function doRefresh(){
 }
 
 /* ---------- TOUCH: EDGE SWIPE + PULL TO REFRESH ---------- */
-let sx=0,sy=0,edge=false,pulling=false,pdy=0;
+let sx=0,sy=0,edge=false,pulling=false,pdy=0,inChips=false;
 const spOpen=()=>$('sp').classList.contains('open');
 
 addEventListener('touchstart',e=>{
@@ -2878,16 +2942,17 @@ addEventListener('touchstart',e=>{
   sy=t.clientY;
 
   edge=sx<24&&!spOpen();
+  inChips=!!(e.target.closest&&e.target.closest('.chips'));
 
   pdy=0;
 
   pulling=
     activeTab==='home'&&mode!=='full'&&!refreshing&&!spOpen()&&
-    window.scrollY<=0&&e.touches.length===1;
+    !inChips&&window.scrollY<=0&&e.touches.length===1;
 },{passive:true});
 
 addEventListener('touchmove',e=>{
-  if(mode==='full'||spOpen())return;
+  if(mode==='full'||spOpen()||inChips)return;
 
   const dy=e.touches[0].clientY-sy;
 
