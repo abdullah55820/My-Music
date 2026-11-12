@@ -2279,22 +2279,32 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances){
-  const requests=list.map(base=>
-    fetch(
+async function fetchSongs(q,page,ctl,list=instances,strict=false){
+  const requests=list.map(base=>{
+    const c=new AbortController();
+    const onAb=()=>c.abort();
+    ctl.signal.addEventListener('abort',onAb);
+    const tm=setTimeout(()=>c.abort(),8000);
+
+    return fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
-      {signal:ctl.signal,headers:{Accept:'application/json'},cache:'no-store'}
+      {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
     ).then(r=>{
       if(!r.ok)throw new Error('Server error');
       return r.json();
     }).then(data=>{
       if(!Array.isArray(data))throw new Error('Invalid response');
-      return data.filter(v=>
+      const out=data.filter(v=>
         v&&v.type==='video'&&v.videoId&&
         (!v.published||v.published>=MIN_TS)
       );
-    })
-  );
+      if(strict&&!out.length)throw new Error('Empty');
+      return out;
+    }).finally(()=>{
+      clearTimeout(tm);
+      ctl.signal.removeEventListener('abort',onAb);
+    });
+  });
 
   try{
     return await Promise.any(requests);
@@ -2470,7 +2480,7 @@ async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const two=activeGroups().length<6?instances.slice():shuffle(instances.slice()).slice(0,2);
-  const data=await fetchSongs(q,page,ctl,two);
+  const data=await fetchSongs(q,page,ctl,two,true);
 
   if(data===null)return false;
 
@@ -2545,7 +2555,7 @@ async function loadHomeMore(){
   let added=0;
   let failed=false;
 
-  for(let attempt=0;attempt<3&&added<24&&!ctl.signal.aborted;attempt++){
+  for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
 
     /*
       Fetch more songs for groups that have fewer
@@ -2590,8 +2600,8 @@ async function loadHomeMore(){
     }
 
     if(!ok&&!added){
-      if(attempt>=2)failed=true;
-      else await new Promise(r=>setTimeout(r,400));
+      if(attempt>=5)failed=true;
+      else await new Promise(r=>setTimeout(r,500*(attempt+1)));
     }
   }
 
