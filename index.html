@@ -2469,7 +2469,7 @@ function buildForYou(){
 async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
-  const two=shuffle(instances.slice()).slice(0,2);
+  const two=activeGroups().length<6?instances.slice():shuffle(instances.slice()).slice(0,2);
   const data=await fetchSongs(q,page,ctl,two);
 
   if(data===null)return false;
@@ -2590,8 +2590,8 @@ async function loadHomeMore(){
     }
 
     if(!ok&&!added){
-      failed=true;
-      break;
+      if(attempt>=2)failed=true;
+      else await new Promise(r=>setTimeout(r,400));
     }
   }
 
