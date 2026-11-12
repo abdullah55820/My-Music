@@ -9,8 +9,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SoundFlow — Music</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@700&family=Hind+Siliguri:wght@600;700&family=Noto+Serif+Bengali:wght@600;700&family=Baloo+Da+2:wght@600;700&family=Galada&family=Atma:wght@600;700&display=swap" rel="stylesheet">
+
 <style>
 :root{
+  --lyen:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  --lybn:"Bangla Sangam MN","Noto Sans Bengali",sans-serif;
   color-scheme:dark;
   --bg:#000;
   --surface:#1c1c1e;
@@ -588,6 +594,9 @@ body.dragging #topfade{opacity:0}
 /* LYRICS */
 .lyr{position:absolute;left:-24px;right:-24px;top:calc(-1*(env(safe-area-inset-top) + 42px + var(--pcpad)));bottom:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:calc(env(safe-area-inset-top) + 56px + var(--pcpad)) 28px 40px;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
 .az.lyon .art{visibility:hidden}
+.lyr,.lyprev{font-family:var(--lyen),var(--lybn),sans-serif}
+.lyprev{margin:6px 0 10px;padding:14px;border-radius:14px;background:var(--surface-2);text-align:center;font-size:19px;font-weight:700;line-height:1.5}
+.seg.wrap{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
@@ -1141,6 +1150,28 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
 
     <div class="sec g">
+      <h3>Lyrics Style</h3>
+      <div class="lyprev">Sample lyrics line<br>আমি তোমায় ভালোবাসি</div>
+      <div class="row"><div><b>English Font</b></div></div>
+      <div class="seg wrap" data-k="lyEn">
+        <button data-v="system">System</button>
+        <button data-v="serif">Serif</button>
+        <button data-v="mono">Mono</button>
+        <button data-v="rounded">Rounded</button>
+        <button data-v="script">Script</button>
+      </div>
+      <div class="row"><div><b>Bangla Font</b></div></div>
+      <div class="seg wrap" data-k="lyBn">
+        <button data-v="system">System</button>
+        <button data-v="hind">Hind</button>
+        <button data-v="serif">Serif</button>
+        <button data-v="baloo">Baloo</button>
+        <button data-v="galada">Galada</button>
+        <button data-v="atma">Atma</button>
+      </div>
+    </div>
+
+    <div class="sec g">
       <h3>Background</h3>
       <div class="pvs" id="presets"></div>
 
@@ -1268,7 +1299,23 @@ addEventListener('keydown',e=>{
 });
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off'};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',lyEn:'system',lyBn:'system'};
+
+const LYEN={
+  system:'-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif',
+  serif:'Georgia,"Times New Roman",serif',
+  mono:'ui-monospace,Menlo,Consolas,monospace',
+  rounded:'"Nunito",ui-rounded,sans-serif',
+  script:'"Caveat","Segoe Script",cursive'
+};
+const LYBN={
+  system:'"Bangla Sangam MN","Noto Sans Bengali",sans-serif',
+  hind:'"Hind Siliguri","Noto Sans Bengali",sans-serif',
+  serif:'"Noto Serif Bengali","Noto Sans Bengali",serif',
+  baloo:'"Baloo Da 2","Noto Sans Bengali",sans-serif',
+  galada:'"Galada","Noto Sans Bengali",cursive',
+  atma:'"Atma","Noto Sans Bengali",cursive'
+};
 
 /* Only 4 presets: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
@@ -1345,6 +1392,8 @@ function apply(){
   d.dataset.anim=S.anim;
   d.dataset.labels=S.labels;
   d.dataset.font=S.font;
+  st.setProperty('--lyen',LYEN[S.lyEn]||LYEN.system);
+  st.setProperty('--lybn',LYBN[S.lyBn]||LYBN.system);
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
