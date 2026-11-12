@@ -2044,7 +2044,13 @@ async function loadLyrics(v){
       p.textContent=x.s;
       x.el=p;
       p.onclick=()=>{
-        try{setOff(x.t-(yt.getCurrentTime()||0)+.2)}catch(e){}
+        /* Tap a line to jump the song to that exact line */
+        try{
+          yt.seekTo(Math.max(0,x.t-curOff()+.05),true);
+          if(!playing)yt.playVideo();
+          lyCur=-2;
+          syncLy(x.t-curOff()+.05);
+        }catch(e){}
       };
       box.appendChild(p);
     });
