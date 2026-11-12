@@ -29,6 +29,8 @@
   --bgblur:0px;
   --bgdim:0;
   --tbbg:rgba(0,0,0,.38);
+  --chipbg:rgba(255,255,255,.14);
+  --chipbd:rgba(255,255,255,.22);
 }
 
 :root[data-theme=light]{
@@ -41,6 +43,8 @@
   --gborder:rgba(255,255,255,.8);
   --gshadow:rgba(30,40,80,.18);
   --tbbg:rgba(255,255,255,.5);
+  --chipbg:rgba(255,255,255,.6);
+  --chipbd:rgba(255,255,255,.9);
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -207,7 +211,42 @@ svg{display:block}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;padding:8px 14px;border-radius:99px;font-size:13px;font-weight:650;color:var(--muted)}
-.chip.on{color:var(--accent);background:var(--accent-soft)}
+.chips .chip{
+  background:var(--chipbg);
+  border:1px solid var(--chipbd);
+  box-shadow:none;
+  color:var(--text);
+  opacity:.85;
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  transition:background .25s,color .25s,opacity .25s;
+}
+.chips .chip.on{
+  background:var(--accent);
+  border-color:transparent;
+  color:#fff;
+  opacity:1;
+}
+.chips{
+  padding:4px 16px 12px;
+  margin:0 -16px;
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 20px),transparent 100%);
+  mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 20px),transparent 100%);
+}
+.chips{padding:2px 2px 6px}
+.chip.g{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:none;
+  color:rgba(255,255,255,.88);
+  transition:background .25s,color .25s;
+}
+:root[data-theme=light] .chip.g{
+  background:rgba(255,255,255,.6);
+  border-color:rgba(255,255,255,.85);
+  color:#2b2b2e;
+}
+.chip.g.on{background:var(--accent);border-color:transparent;color:#fff}
 .opts{
   display:flex;
   justify-content:space-between;
@@ -943,7 +982,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </button>
       <button class="opt" id="rpBtn" type="button" aria-label="Repeat">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-        <i class="bd" id="rpBd" hidden>1</i>
       </button>
       <button class="opt" id="spBtn" type="button" aria-label="Speed"><span id="spTx">1x</span></button>
       <button class="opt" id="slBtn" type="button" aria-label="Sleep timer">
@@ -1042,7 +1080,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
       <div class="row"><div><b>Font</b></div></div>
       <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
-      <div class="row"><div><b>Data Saver</b><small>Choto thumbnail, kom data</small></div></div>
+      <div class="row"><div><b>Data Saver</b></div></div>
       <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
       <div class="row"><div><b>Tab Bar</b></div></div>
       <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
@@ -1058,12 +1096,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </div>
 
       <div class="row">
-        <div><b>Background Blur</b><small>Background ke blur korbe</small></div>
+        <div><b>Background Blur</b></div>
         <input type="range" data-k="bgBlur" min="0" max="30">
       </div>
 
       <div class="row">
-        <div><b>Background Darkness</b><small>Background ke dark korbe</small></div>
+        <div><b>Background Darkness</b></div>
         <input type="range" data-k="bgDim" min="0" max="80">
       </div>
 
@@ -1073,12 +1111,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div class="sec g">
       <h3>Glass Effect</h3>
       <div class="row">
-        <div><b>Blur Strength</b><small>Blur of cards, nav and player</small></div>
+        <div><b>Blur Strength</b></div>
         <input type="range" data-k="gb" min="0" max="40">
       </div>
 
       <div class="row">
-        <div><b>Transparency</b><small>Lower = see more background</small></div>
+        <div><b>Transparency</b></div>
         <input type="range" data-k="ga" min="10" max="90">
       </div>
     </div>
@@ -1091,10 +1129,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </div>
       <input type="file" id="impIn" accept="application/json,.json" hidden>
       <button class="sb d" id="resetAll" type="button">Reset Customization</button>
-
-      <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">
-        Settings are saved automatically on this device.
-      </div>
     </div>
   </div>
 </section>
@@ -2034,8 +2068,7 @@ on('plBtn',openSheet);
 
 on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
 on('rpBtn',()=>{
-  rep=(rep+1)%3;
-  $('rpBd').hidden=rep!==2;
+  rep=rep?0:2;
   $('rpBtn').classList.toggle('on',rep>0);
 });
 on('spBtn',()=>{
@@ -2439,7 +2472,7 @@ const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.sl
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
   b.type='button';
-  b.className='chip g'+(i===0?' on':'');
+  b.className='chip'+(i===0?' on':'');
   b.textContent=c[0];
   b.onclick=()=>{
     if(chip===i)return;
@@ -2584,7 +2617,7 @@ function renderRecent(){
   r.forEach(t=>{
     const b=document.createElement('button');
     b.type='button';
-    b.className='chip g';
+    b.className='chip';
     b.textContent=t;
     b.onclick=()=>doSearch(t);
     box.appendChild(b);
@@ -2592,7 +2625,7 @@ function renderRecent(){
   if(r.length){
     const c=document.createElement('button');
     c.type='button';
-    c.className='chip g';
+    c.className='chip';
     c.textContent='Clear';
     c.onclick=()=>{LS.del('sf_recent');renderRecent()};
     box.appendChild(c);
@@ -2733,7 +2766,7 @@ async function showSug(t){
     list.slice(0,8).forEach(x=>{
       const b=document.createElement('button');
       b.type='button';
-      b.className='chip g';
+      b.className='chip';
       b.textContent=x;
       b.onclick=()=>doSearch(x);
       box.appendChild(b);
