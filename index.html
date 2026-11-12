@@ -2233,7 +2233,7 @@ const D={
 
 let activeTab='home';
 let libView='folders';
-const seen=new Set();
+let seen=new Set();
 
 function card(v,i,list,rm){
   const c=document.createElement('article');
@@ -2512,6 +2512,42 @@ const CHIPS=[
 let chip=0;
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,18);
 
+/* Each chip keeps its own songs, so switching back doesn't reload */
+const CACHE={};
+
+function saveChip(){
+  CACHE[chip]={
+    videos:D.home.videos,
+    nodes:[...$('homeGrid').children],
+    seen,
+    scroll:window.scrollY
+  };
+}
+
+/* returns true if the chip has nothing cached and needs a fresh load */
+function restoreChip(i){
+  const st=D.home,grid=$('homeGrid'),c=CACHE[i];
+
+  if(st.ctl)st.ctl.abort();
+  st.busy=false;
+  grid.replaceChildren();
+
+  if(c&&c.videos.length){
+    st.videos=c.videos;
+    seen=c.seen;
+    grid.append(...c.nodes);
+    $('homeStatus').textContent=c.videos.length+' Songs';
+    window.scrollTo(0,c.scroll);
+    return false;
+  }
+
+  st.videos=[];
+  seen=new Set();
+  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
+  window.scrollTo(0,0);
+  return true;
+}
+
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
   b.type='button';
@@ -2519,10 +2555,11 @@ CHIPS.forEach((c,i)=>{
   b.textContent=c[0];
   b.onclick=()=>{
     if(chip===i)return;
+    saveChip();
     chip=i;
     if(CHIPS[i][0]==='For You')buildForYou();
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
-    refreshHome();
+    if(restoreChip(i))loadHomeMore();
   };
   $('chips').appendChild(b);
 });
