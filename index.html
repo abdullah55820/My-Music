@@ -386,6 +386,9 @@ svg{display:block}
 
 .card:active{transform:scale(.97)}
 
+/* Hundreds of cards each running backdrop-filter overloads the GPU and makes the
+   glass flicker/vanish while scrolling. Cards use a plain translucent surface
+   instead; blur stays on the few fixed elements (nav, mini player, pills). */
 .grid .g{
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
@@ -568,6 +571,7 @@ body.dragging #topfade{opacity:0}
 .grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
 
+/* padding-top pushes everything in the full player further down */
 .pc{
   position:relative;
   z-index:2;
@@ -584,52 +588,28 @@ body.dragging #topfade{opacity:0}
 
 .az{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
 
-/* Enhanced Album Art with Spring Animation & Deep Shadow */
 .art{
   width:min(100cqw,100cqh,520px);
   aspect-ratio:1;
   overflow:hidden;
-  border-radius:16px;
+  border-radius:14px;
   background:#222;
-  box-shadow:0 24px 60px rgba(0,0,0,.58),0 4px 16px rgba(0,0,0,.3);
-  transition:transform .55s cubic-bezier(.34,1.56,.64,1),box-shadow .5s ease;
+  box-shadow:0 20px 55px rgba(0,0,0,.5);
+  transition:transform .5s,box-shadow .5s;
   flex-shrink:0;
 }
 
-.art.paused{
-  transform:scale(.85);
-  box-shadow:0 12px 30px rgba(0,0,0,.38);
-  transition:transform .4s cubic-bezier(.25,.8,.25,1),box-shadow .4s ease;
-}
+.art.paused{transform:scale(.84);box-shadow:0 10px 28px rgba(0,0,0,.35)}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* LYRICS with Top & Bottom Gradient Fade-Out Mask */
-.lyr{
-  position:absolute;
-  left:-24px;
-  right:-24px;
-  top:calc(-1*(env(safe-area-inset-top) + 42px + var(--pcpad)));
-  bottom:0;
-  overflow-y:auto;
-  text-align:center;
-  font-size:20px;
-  font-weight:700;
-  line-height:1.5;
-  color:rgba(255,255,255,.5);
-  padding:calc(env(safe-area-inset-top) + 64px + var(--pcpad)) 28px 44px;
-  z-index:1;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 calc(env(safe-area-inset-top) + 52px),#000 calc(100% - 40px),transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0,#000 calc(env(safe-area-inset-top) + 52px),#000 calc(100% - 40px),transparent 100%);
-}
+/* LYRICS */
+.lyr{position:absolute;left:-24px;right:-24px;top:calc(-1*(env(safe-area-inset-top) + 42px + var(--pcpad)));bottom:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:calc(env(safe-area-inset-top) + 56px + var(--pcpad)) 28px 40px;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
 .az.lyon .art{visibility:hidden}
 .lyr,.lyprev{font-family:var(--lyen),var(--lybn),sans-serif}
 .lyprev{margin:6px 0 10px;padding:14px;border-radius:14px;background:var(--surface-2);text-align:center;font-size:19px;font-weight:700;line-height:1.5}
 .seg.wrap{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
 .lyr::-webkit-scrollbar{display:none}
-.lyr div{margin:12px 0;transition:color .25s,transform .25s}
+.lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
 .lyadj{position:absolute;left:0;right:0;bottom:0;z-index:3;height:38px;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
 .lyadj.show{visibility:visible}
@@ -649,36 +629,15 @@ body.dragging #topfade{opacity:0}
   margin-bottom:14px;
 }
 
-.meta > div{flex:1;min-width:0}
-
-/* Smart Marquee for long song titles */
-.title-wrap{
-  width:100%;
-  overflow:hidden;
-  margin:0 0 5px;
-}
-
-.title-wrap.scroll{
-  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 10px,#000 calc(100% - 14px),transparent 100%);
-  mask-image:linear-gradient(to right,transparent 0,#000 10px,#000 calc(100% - 14px),transparent 100%);
-}
+.meta div{flex:1;min-width:0}
 
 .meta h3{
-  margin:0;
+  margin:0 0 5px;
   font-size:22px;
   font-weight:750;
   white-space:nowrap;
-  display:inline-block;
-}
-
-.title-wrap.scroll h3{
-  padding-left:6px;
-  animation:titleMarquee var(--mdur,12s) ease-in-out infinite alternate;
-}
-
-@keyframes titleMarquee{
-  0%,18%{transform:translateX(0)}
-  82%,100%{transform:translateX(var(--mshift,0px))}
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .meta p{
@@ -1048,9 +1007,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div>
       <div class="meta">
         <div>
-          <div class="title-wrap" id="pTitleWrap">
-            <h3 id="pTitle">Song</h3>
-          </div>
+          <h3 id="pTitle">Song</h3>
           <p id="pArtist">Artist</p>
         </div>
 
@@ -1373,15 +1330,17 @@ const LYBN={
   atma:'"Atma","Noto Sans Bengali",cursive'
 };
 
+/* Only 4 presets: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
-  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)',
-  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)',
-  '#000000',
-  '#ffffff'
+  'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)', /* 0 Blue (default) */
+  'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)', /* 1 Dark + Red */
+  '#000000',                                              /* 2 Solid Black */
+  '#ffffff'                                               /* 3 Solid White */
 ];
 
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
+/* Migrate old saved settings (old preset numbers -> new numbers) */
 function loadSettings(){
   const cur=LS.get('sf_settings_v3',null);
   if(cur)return cur;
@@ -1401,6 +1360,7 @@ const save=()=>LS.set('sf_settings_v3',S);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
 const darkMQ=matchMedia('(prefers-color-scheme: dark)');
 
+/* Darken the top colour by the dim amount (for the status bar) */
 function shade(col,a){
   let r,g,b;
   if(col[0]==='#'){
@@ -1448,7 +1408,9 @@ function apply(){
   st.setProperty('--lyen',LYEN[S.lyEn]||LYEN.system);
   st.setProperty('--lybn',LYBN[S.lyBn]||LYBN.system);
 
+  /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
+  /* blur(0px) still forces a heavy GPU layer, so only filter when really needed */
   st.setProperty('--bgfilter',(+S.bgBlur>0)?`blur(${+S.bgBlur}px)`:'none');
   st.setProperty('--bgdim',((+S.bgDim||0)/100).toString());
 
@@ -1908,6 +1870,7 @@ function thumbOf(v){
   ).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
 
+/* Thumbnail fallback: if an image fails (e.g. maxres 404), try smaller ones */
 function fbThumb(im,id){
   const list=[
     `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
@@ -2124,6 +2087,8 @@ async function loadLyrics(v){
       const t=cleanTitle(v.title);
       const parts=t.split(/\s[-–—]\s/).map(x=>x.trim()).filter(Boolean);
       const qs=[t,...parts,t+' '+(v.author||'')].filter((x,i,a)=>x&&a.indexOf(x)===i);
+      /* Prefer lyrics that have timestamps (they follow the song). Plain text
+         lyrics cannot scroll with the song, so use them only as a last resort. */
       let sync=null,plain=null;
       for(const q of qs){
         const list=await lrcQuery(q);
@@ -2149,6 +2114,7 @@ async function loadLyrics(v){
       p.textContent=x.s;
       x.el=p;
       p.onclick=()=>{
+        /* Tap a line to jump the song to that exact line */
         try{
           yt.seekTo(Math.max(0,x.t-curOff()+.05),true);
           if(!playing)yt.playVideo();
@@ -2172,6 +2138,7 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
+/* Tap the number to type the sync value yourself (e.g. -2.5 or 3) */
 (function(){
   const i=$('lyOffIn');
   const commit=()=>{
@@ -2186,10 +2153,16 @@ function showOff(){
   });
   i.addEventListener('click',e=>e.stopPropagation());
 
+  /* When the keyboard opens, iOS shifts the page and the home page peeks out
+     under the player. Keep the player glued to the visible area instead. */
   const vv=window.visualViewport;
   const p=$('player');
   const fit=()=>{
     if(vv&&mode==='full'&&document.activeElement===i){
+      /* The iOS keyboard toolbar (↑ ↓ ✓) sits above the keyboard but is not
+         counted in the visual viewport. Extend the player under it (EXTRA) so
+         no home-page cards show through, and add the same amount as bottom
+         padding so the controls stay visible above it. */
       const EXTRA=110;
       p.style.top=vv.offsetTop+'px';
       p.style.height=(vv.height+EXTRA)+'px';
@@ -2245,28 +2218,6 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
-/* ---------- SMART MARQUEE UPDATER ---------- */
-function updateTitleMarquee(){
-  const wrap=$('pTitleWrap');
-  const h3=$('pTitle');
-  if(!wrap||!h3)return;
-
-  wrap.classList.remove('scroll');
-  h3.style.removeProperty('--mshift');
-  h3.style.removeProperty('--mdur');
-
-  requestAnimationFrame(()=>{
-    const diff=h3.scrollWidth-wrap.clientWidth;
-    if(diff>4){
-      h3.style.setProperty('--mshift',`-${diff+16}px`);
-      h3.style.setProperty('--mdur',`${Math.max(8,Math.min(20,diff/14+5))}s`);
-      wrap.classList.add('scroll');
-    }
-  });
-}
-
-window.addEventListener('resize',()=>{if(mode==='full')updateTitleMarquee()});
-
 function setInfo(v){
   const t=thumbOf(v);
 
@@ -2275,8 +2226,6 @@ function setInfo(v){
   $('pThumb').src=$('mThumb').src=t;
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||'YouTube';
-
-  updateTitleMarquee();
 
   $('likeBtn').classList.toggle('liked',getLiked().some(x=>x.videoId===v.videoId));
 
@@ -2301,7 +2250,6 @@ function showFull(){
   $('player').classList.add('active');
 
   if(queue[idx])setTint(queue[idx]);
-  updateTitleMarquee();
 
   pushLayer(()=>{
     mode='mini';
@@ -2313,6 +2261,8 @@ function showFull(){
 }
 
 function closePlayer(){
+  /* Player is only closable from the mini bar, so the full-player layer
+     is already gone; never pop another layer (folder/profile) by mistake. */
   mode='closed';
 
   resetPlayerStyles();
@@ -2369,6 +2319,8 @@ const next=async()=>{
     return;
   }
 
+  /* Home / search lists keep growing. At the end, load more songs
+     and continue instead of jumping back to the first song. */
   const live=queue===D.home.videos||queue===D.search.videos;
   if(live&&idx>=queue.length-1){
     const q0=queue,i0=idx,len=q0.length;
@@ -2475,6 +2427,7 @@ on('shareBtn',async()=>{
   const url='https://youtu.be/'+v.videoId;
   const btn=$('shareBtn');
 
+  /* Only url is passed (no title/text) so Copy gives just the link */
   if(navigator.share){
     try{await navigator.share({url})}catch(e){}
     return;
@@ -2723,7 +2676,21 @@ const shuffle=a=>{
 };
 
 /* ---------- MUSIC GROUPS ---------- */
+
+/*
+  Feed priority:
+  Hindi       = 6
+  Bangla      = 6
+  Punjabi     = 2.5
+  Bangladeshi = 2
+  Pakistani   = 1.5
+  Artist/movie groups = 0.25 each
+
+  Higher weight means more songs in Home Feed.
+*/
+
 const GROUPS=[
+  /* 0. Hindi */
   [
     'Hindi songs 2026',
     'Bollywood hits',
@@ -2735,6 +2702,8 @@ const GROUPS=[
     'Hindi hit songs',
     'Shah Rukh Khan songs',
   ],
+
+  /* 1. Bangla */
   [
     'Bangla new songs',
     'Bengali modern songs',
@@ -2745,9 +2714,13 @@ const GROUPS=[
     'Bangla romantic songs',
     'Bangla lofi songs',
     'Bangladesh band songs',
+
+    // Bengali Singers
     'Habib Wahid songs',
     'Habib Wahid new songs',
   ],
+
+  /* 2. Punjabi */
   [
     'Punjabi songs',
     'Latest Punjabi songs',
@@ -2755,19 +2728,47 @@ const GROUPS=[
     'Punjabi hit songs',
     'Punjabi lofi songs'
   ],
+
+  /* 3. Dhanush */
   ['Dhanush movie songs'],
+
+  /* 4. Allu Arjun */
   ['Allu Arjun movie songs'],
+
+  /* 5. Thalapathy Vijay */
   ['Thalapathy Vijay movie songs'],
+
+  /* 6. Suriya */
   ['Suriya movie songs'],
+
+  /* 7. Anirudh */
   ['Anirudh Ravichander songs'],
+
+  /* 8. Sai Abhyankkar */
   ['Sai Abhyankkar songs'],
+
+  /* 9. Sai Pallavi */
   ['Sai Pallavi movie songs'],
+
+  /* 10. Ram Charan */
   ['Ram Charan movie songs'],
+
+  /* 11. Nivin Pauly */
   ['Nivin Pauly movie songs'],
+
+  /* 12. Jr NTR */
   ['Jr NTR movie songs'],
+
+  /* 13. Kalyani Priyadarshan */
   ['Kalyani Priyadarshan movie songs'],
+
+  /* 14. Pooja Hegde */
   ['Pooja Hegde movie songs'],
+
+  /* 15. Tamannaah */
   ['Tamannaah movie songs'],
+
+  /* 16. Bangladeshi */
   [
     'Bangladeshi songs',
     'Bangladesh band songs',
@@ -2779,6 +2780,8 @@ const GROUPS=[
     'Bangladeshi folk songs',
     'Bangla new song 2026'
   ],
+
+  /* 17. Pakistani */
   [
     'Pakistani Punjabi songs',
     'Pakistani songs',
@@ -2793,14 +2796,29 @@ const GROUPS=[
   buf:[],
   pg:{},
   weight:[
-    6,6,2.5,
-    .25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,.25,
-    2,1.5
+    6,     // Hindi
+    6,     // Bangla
+    2.5,   // Punjabi
+    .25,   // Dhanush
+    .25,   // Allu Arjun
+    .25,   // Vijay
+    .25,   // Suriya
+    .25,   // Anirudh
+    .25,   // Sai Abhyankkar
+    .25,   // Sai Pallavi
+    .25,   // Ram Charan
+    .25,   // Nivin Pauly
+    .25,   // Jr NTR
+    .25,   // Kalyani
+    .25,   // Pooja Hegde
+    .25,   // Tamannaah
+    2,     // Bangladeshi
+    1.5    // Pakistani
   ][i]
 }));
 
-GROUPS.push({qs:['Trending songs','Top songs this week','Viral songs','New songs this week'],buf:[],pg:{},weight:1});
-GROUPS.push({qs:['Trending songs'],buf:[],pg:{},weight:3});
+GROUPS.push({qs:['Trending songs','Top songs this week','Viral songs','New songs this week'],buf:[],pg:{},weight:1}); /* 18 Trending */
+GROUPS.push({qs:['Trending songs'],buf:[],pg:{},weight:3}); /* 19 For You */
 
 function buildForYou(){
   const c={};
@@ -2840,6 +2858,7 @@ async function fillGroupRaw(g,ctl){
   return true;
 }
 
+/* Language chips */
 const CHIPS=[
   ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
   ['Bangladeshi',[16]],['Pakistani',[17]],
@@ -2849,6 +2868,7 @@ const CHIPS=[
 let chip=0;
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,18);
 
+/* Each chip keeps its own songs, so switching back doesn't reload */
 const CACHE={};
 
 function saveChip(){
@@ -2860,6 +2880,7 @@ function saveChip(){
   };
 }
 
+/* returns true if the chip has nothing cached and needs a fresh load */
 function restoreChip(i){
   const st=D.home,grid=$('homeGrid'),c=CACHE[i];
 
@@ -2892,6 +2913,7 @@ CHIPS.forEach((c,i)=>{
     if(chip===i)return;
     saveChip();
     chip=i;
+    /* "For You" is always rebuilt from the latest favourites + history */
     if(CHIPS[i][0]==='For You'){
       delete CACHE[i];
       buildForYou();
@@ -2903,6 +2925,7 @@ CHIPS.forEach((c,i)=>{
   $('chips').appendChild(b);
 });
 
+/* Weighted pick across categories, never the same artist close together */
 const authKey=v=>((v&&v.author)||'').toLowerCase().trim();
 
 function takeSong(){
@@ -2925,6 +2948,8 @@ function takeSong(){
     });
 
     if(pool.length){
+      /* Smooth weighted round-robin: same weights as before, but categories
+         are spread evenly instead of random bursts of one category */
       const total=pool.reduce((a,p)=>a+p.g.weight,0);
       let pick=pool[0];
       pool.forEach(p=>{
@@ -2939,8 +2964,11 @@ function takeSong(){
   return null;
 }
 
+/* How far below the screen we keep songs ready (px). Big value = songs are
+   always already loaded before you scroll to them. */
 const AHEAD=6000;
 
+/* Always keep loading, no matter where the user is scrolled */
 function keepFilling(){
   if(!D.home.busy)loadHomeMore();
 }
@@ -2964,12 +2992,20 @@ async function loadHomeMore(){
   let failed=false;
 
   for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
+
+    /*
+      Fetch more songs for groups that have fewer
+      than 4 buffered songs.
+    */
     const need=activeGroups().filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
       const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
       let poll;
+      /* Wait for all categories (not just the fastest ones) so the mix stays balanced */
+      /* First screen: show songs as soon as a few categories have answered
+         (fast start). After that, wait for all categories to keep the mix balanced. */
       const first=!st.videos.length;
       const t0=Date.now();
       const minGroups=Math.min(3,activeGroups().length);
@@ -3034,13 +3070,17 @@ async function loadHomeMore(){
 
   stat.textContent=st.videos.length+' Songs';
 
+  /* No song limit: keep going while there is not enough content below */
   if(added>0)keepFilling();
 }
 
+/* Start loading well before the user reaches the bottom */
 new IntersectionObserver(entries=>{
   if(entries.some(e=>e.isIntersecting)&&activeTab==='home')loadHomeMore();
 },{rootMargin:AHEAD+'px 0px'}).observe($('sentinel'));
 
+/* Safety net: every second, top up songs if we are running low
+   (covers failed requests, tab switches, slow networks) */
 setInterval(()=>{
   if(!D.home.busy&&D.home.videos.length)loadHomeMore();
 },800);
@@ -3433,6 +3473,7 @@ function refreshHome(){
 
   seen.clear();
 
+  /* Clear all per-chip caches so old songs never come back after a refresh */
   Object.keys(CACHE).forEach(k=>delete CACHE[k]);
   if(CHIPS[chip][0]==='For You')buildForYou();
 
