@@ -208,6 +208,11 @@ svg{display:block}
 :root[data-thumb=square] .thumb,:root[data-thumb=square] .fcover{border-radius:0!important}
 :root[data-labels=off] .nb span{display:none}
 
+:root[data-font=serif] body{font-family:Georgia,"Times New Roman",serif}
+:root[data-font=mono] body{font-family:ui-monospace,Menlo,Consolas,monospace}
+.lbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.lbar .seg{flex:1;margin:0}
+
 /* YouTube style (Songs per Row = 1) */
 :root[data-cols="1"] .grid .card{padding:0;overflow:hidden}
 :root[data-cols="1"] .grid .thumb,
@@ -777,8 +782,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <span class="status g" id="libStatus">1 Folder</span>
     </div>
 
+    <div class="lbar" id="lbar" hidden>
+      <div class="seg" id="libSort"><button data-v="new" class="on">Newest</button><button data-v="az">A–Z</button></div>
+      <button class="sb d" id="plDel" type="button" hidden>Delete</button>
+    </div>
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
+    <button class="sb p" id="newPl" type="button" style="margin-top:16px">+ New Playlist</button>
   </div>
 </main>
 
@@ -870,6 +880,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <button class="opt" id="rpBtn" type="button">Repeat: Off</button>
       <button class="opt" id="spBtn" type="button">1x</button>
       <button class="opt" id="slBtn" type="button">Sleep: Off</button>
+      <button class="opt" id="plBtn" type="button">+ Playlist</button>
     </div>
   </div>
 </section>
@@ -956,6 +967,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="thumb"><button data-v="round">Rounded</button><button data-v="square">Square</button></div>
       <div class="row"><div><b>Animations</b></div></div>
       <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
+      <div class="row"><div><b>Font</b></div></div>
+      <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
+      <div class="row"><div><b>Data Saver</b><small>Choto thumbnail, kom data</small></div></div>
+      <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
       <div class="row"><div><b>Tab Bar</b></div></div>
       <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
     </div>
@@ -997,6 +1012,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
     <div class="sec g">
       <h3>Reset</h3>
+      <div class="btnrow" style="margin-bottom:14px">
+        <button class="sb" id="expBtn" type="button">Export backup</button>
+        <button class="sb" id="impBtn" type="button">Import backup</button>
+      </div>
+      <input type="file" id="impIn" accept="application/json,.json" hidden>
       <button class="sb d" id="resetAll" type="button">Reset Customization</button>
 
       <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">
@@ -1076,7 +1096,7 @@ addEventListener('keydown',e=>{
 });
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on'};
+const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off'};
 
 /* Only 4 presets now: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
@@ -1152,6 +1172,7 @@ function apply(){
   d.dataset.thumb=S.thumb;
   d.dataset.anim=S.anim;
   d.dataset.labels=S.labels;
+  d.dataset.font=S.font;
 
   /* Background blur + darkness */
   st.setProperty('--bgblur',(+S.bgBlur||0)+'px');
@@ -1183,7 +1204,7 @@ function apply(){
     setThemeColor(topDim,false);
   }
 
-  document.querySelectorAll('.seg').forEach(g=>{
+  document.querySelectorAll('.seg[data-k]').forEach(g=>{
     g.querySelectorAll('button').forEach(b=>{
       b.classList.toggle('on',String(S[g.dataset.k])===b.dataset.v);
     });
@@ -1251,7 +1272,7 @@ function buildSettingsUI(){
     });
   });
 
-  document.querySelectorAll('.seg').forEach(g=>{
+  document.querySelectorAll('.seg[data-k]').forEach(g=>{
     g.addEventListener('click',e=>{
       const b=e.target.closest('button');
       if(!b)return;
@@ -1859,6 +1880,31 @@ function addHist(v){
   LS.set('sf_history',h.slice(0,50));
 }
 
+const getPL=()=>LS.get('sf_playlists',[]);
+const setPL=v=>LS.set('sf_playlists',v);
+
+on('plBtn',()=>{
+  const v=queue[idx];
+  if(!v)return;
+  const P=getPL();
+  const n=prompt('Add to playlist:\n'+P.map((x,k)=>(k+1)+'. '+x.name).join('\n')+'\n0. New playlist','0');
+  if(n===null)return;
+  let pl;
+  if(+n===0){
+    const name=prompt('Playlist name?');
+    if(!name||!name.trim())return;
+    pl={id:Date.now().toString(36),name:name.trim(),songs:[]};
+    P.push(pl);
+  }else{
+    pl=P[+n-1];
+    if(!pl)return;
+  }
+  if(!pl.songs.some(x=>x.videoId===v.videoId))pl.songs.unshift(slim(v));
+  setPL(P);
+  $('plBtn').textContent='Added ✓';
+  setTimeout(()=>{$('plBtn').textContent='+ Playlist'},1200);
+});
+
 on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
 on('rpBtn',()=>{
   rep=(rep+1)%3;
@@ -2002,7 +2048,7 @@ let activeTab='home';
 let libView='folders';
 const seen=new Set();
 
-function card(v,i,list){
+function card(v,i,list,rm){
   const c=document.createElement('article');
   c.className='card g';
   c.tabIndex=0;
@@ -2010,7 +2056,7 @@ function card(v,i,list){
   const im=document.createElement('img');
   im.className='thumb';
   im.loading='lazy';
-  im.src=thumbOf(v);
+  im.src=S.saver==='on'?`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`:thumbOf(v);
   im.alt='';
 
   const t=document.createElement('div');
@@ -2023,7 +2069,17 @@ function card(v,i,list){
 
   c.append(im,t,a);
 
-  const go=()=>playAt(i,list);
+  const go=()=>{
+    if(c._lp){c._lp=0;return}
+    playAt(i,list);
+  };
+
+  if(rm){
+    let t=null;
+    c.addEventListener('touchstart',()=>{t=setTimeout(()=>{c._lp=1;rm(v)},650)},{passive:true});
+    ['touchend','touchmove','touchcancel'].forEach(ev=>c.addEventListener(ev,()=>clearTimeout(t),{passive:true}));
+    c.oncontextmenu=e=>{e.preventDefault();c._lp=1;rm(v)};
+  }
 
   c.onclick=go;
   c.onkeydown=e=>{
@@ -2210,6 +2266,19 @@ const GROUPS=[
   ][i]
 }));
 
+GROUPS.push({qs:['Trending songs','Top songs this week','Viral songs','New songs this week'],buf:[],pg:{},weight:1}); /* 17 */
+GROUPS.push({qs:['Trending songs'],buf:[],pg:{},weight:3}); /* 18 For You */
+
+function buildForYou(){
+  const c={};
+  [...getLiked(),...getHist()].forEach(v=>{if(v.author)c[v.author]=(c[v.author]||0)+1});
+  const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
+  const g=GROUPS[18];
+  g.qs=a.length?a.map(x=>x+' songs'):['Trending songs'];
+  g.buf=[];
+  g.pg={};
+}
+
 async function fillGroup(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
@@ -2233,10 +2302,11 @@ async function fillGroup(g,ctl){
 const CHIPS=[
   ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
   ['Bangladeshi',[16]],['Pakistani',[17]],
-  ['South Indian',[3,4,5,6,7,8,9,10,11,12,13,14,15]]
+  ['South Indian',[3,4,5,6,7,8,9,10,11,12,13,14,15]],
+  ['Trending',[17]],['For You',[18]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,18);
 
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
@@ -2246,6 +2316,7 @@ CHIPS.forEach((c,i)=>{
   b.onclick=()=>{
     if(chip===i)return;
     chip=i;
+    if(CHIPS[i][0]==='For You')buildForYou();
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
     refreshHome();
   };
@@ -2509,7 +2580,38 @@ $('sForm').addEventListener('submit',e=>{
   doSearch(q.value);
 });
 
-q.addEventListener('input',()=>{$('clearQ').hidden=!q.value});
+let sugT=null;
+q.addEventListener('input',()=>{
+  $('clearQ').hidden=!q.value;
+  clearTimeout(sugT);
+  const t=q.value.trim();
+  if(t.length<2){renderRecent();return}
+  sugT=setTimeout(()=>showSug(t),250);
+});
+
+async function showSug(t){
+  const ctl=new AbortController();
+  setTimeout(()=>ctl.abort(),3000);
+  try{
+    const list=await Promise.any(instances.map(b=>
+      fetch(`${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}`,{signal:ctl.signal})
+        .then(r=>{if(!r.ok)throw 0;return r.json()})
+        .then(d=>d.suggestions||[])
+    ));
+    if(q.value.trim()!==t)return;
+    const box=$('recent');
+    box.innerHTML='';
+    box.hidden=!list.length;
+    list.slice(0,8).forEach(x=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='chip g';
+      b.textContent=x;
+      b.onclick=()=>doSearch(x);
+      box.appendChild(b);
+    });
+  }catch(e){}
+}
 $('clearQ').onclick=clearSearch;
 
 $('searchMore').onclick=()=>{
@@ -2532,6 +2634,9 @@ function openFolder(kind){
 }
 
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
+
+const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
+let libSort='new';
 
 function folderCard(name,songs,open,icon){
   const c=document.createElement('article');
@@ -2587,21 +2692,33 @@ function folderCard(name,songs,open,icon){
 }
 
 function renderLib(){
-  const fav=libView==='fav',hist=libView==='hist',inner=fav||hist;
-  const songs=fav?getLiked():hist?getHist():[];
+  const PL=getPL();
+  const pid=libView.startsWith('pl:')?libView.slice(3):null;
+  const pl=pid?PL.find(x=>x.id===pid):null;
+
+  if(pid&&!pl){libView='folders';return renderLib()}
+
+  const fav=libView==='fav',hist=libView==='hist',inner=fav||hist||!!pl;
+  let songs=fav?getLiked():hist?getHist():pl?pl.songs:[];
+
+  if(libSort==='az'&&!hist)songs=[...songs].sort((a,b)=>(a.title||'').localeCompare(b.title||''));
 
   $('libFolders').hidden=inner;
   $('libGrid').hidden=!inner;
   $('libBack').hidden=!inner;
+  $('newPl').hidden=inner;
+  $('lbar').hidden=!inner||hist;
+  $('plDel').hidden=!pl;
 
-  $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':'Library';
-  $('libStatus').textContent=inner?songs.length+' Songs':'2 Folders';
+  $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':pl?pl.name:'Library';
+  $('libStatus').textContent=inner?songs.length+' Songs':(2+PL.length)+' Folders';
 
   if(!inner){
     const F=$('libFolders');
     F.innerHTML='';
     F.appendChild(folderCard('Favourites',getLiked(),()=>openFolder('fav'),HEART));
     F.appendChild(folderCard('Recently Played',getHist(),()=>openFolder('hist'),CLOCK));
+    PL.forEach(x=>F.appendChild(folderCard(x.name,x.songs,()=>openFolder('pl:'+x.id),LISTI)));
     return;
   }
 
@@ -2609,12 +2726,43 @@ function renderLib(){
   g.innerHTML='';
 
   if(!songs.length){
-    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':'Nothing played yet.'}</div>`;
+    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':'Playlist empty. Player theke "+ Playlist" diye song add koro.'}</div>`;
     return;
   }
 
-  songs.forEach((v,i)=>g.appendChild(card(v,i,songs)));
+  const rm=hist?null:v=>{
+    if(!confirm('Remove "'+(v.title||'song')+'"?'))return;
+    if(fav)LS.set('sf_liked_songs',getLiked().filter(x=>x.videoId!==v.videoId));
+    else{pl.songs=pl.songs.filter(x=>x.videoId!==v.videoId);setPL(PL)}
+    renderLib();
+  };
+
+  songs.forEach((v,i)=>g.appendChild(card(v,i,songs,rm)));
 }
+
+$('libSort').addEventListener('click',e=>{
+  const b=e.target.closest('button');
+  if(!b)return;
+  libSort=b.dataset.v;
+  document.querySelectorAll('#libSort button').forEach(x=>x.classList.toggle('on',x===b));
+  renderLib();
+});
+
+$('newPl').onclick=()=>{
+  const name=prompt('Playlist name?');
+  if(!name||!name.trim())return;
+  const P=getPL();
+  P.push({id:Date.now().toString(36),name:name.trim(),songs:[]});
+  setPL(P);
+  renderLib();
+};
+
+$('plDel').onclick=()=>{
+  if(!libView.startsWith('pl:')||!confirm('Delete this playlist?'))return;
+  const id=libView.slice(3);
+  setPL(getPL().filter(x=>x.id!==id));
+  history.back();
+};
 
 $('libBack').onclick=()=>history.back();
 
@@ -2779,6 +2927,35 @@ function touchDone(e){
 
 addEventListener('touchend',touchDone,{passive:true});
 addEventListener('touchcancel',touchDone,{passive:true});
+
+/* ---------- BACKUP ---------- */
+$('expBtn').onclick=()=>{
+  const d={liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),settings:S};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:'application/json'}));
+  a.download='soundflow-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+
+$('impBtn').onclick=()=>$('impIn').click();
+
+$('impIn').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value='';
+  if(!f)return;
+  try{
+    const d=JSON.parse(await f.text());
+    if(d.liked)LS.set('sf_liked_songs',d.liked);
+    if(d.hist)LS.set('sf_history',d.hist);
+    if(d.pl)setPL(d.pl);
+    if(d.recent)LS.set('sf_recent',d.recent);
+    if(d.settings){S={...DEF,...d.settings};save()}
+    location.reload();
+  }catch(err){alert('Backup file ta thik na.')}
+};
 
 /* ---------- INIT ---------- */
 buildSettingsUI();
