@@ -32,7 +32,7 @@
   --pop:rgba(36,36,42,.72);
   --chipbg:rgba(255,255,255,.14);
   --chipbd:rgba(255,255,255,.22);
-  --pcpad:clamp(36px,9vh,90px);
+  --pcpad:clamp(28px,6vh,64px);
 }
 
 :root[data-theme=light]{
@@ -568,10 +568,10 @@ body.dragging #topfade{opacity:0}
   padding-top:var(--pcpad);
 }
 
-.az{position:relative;flex:.82;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
+.az{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
 
 .art{
-  width:min(100cqw,100cqh,390px);
+  width:min(100cqw,100cqh,520px);
   aspect-ratio:1;
   overflow:hidden;
   border-radius:14px;
@@ -590,8 +590,8 @@ body.dragging #topfade{opacity:0}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
 .lyr .now{color:#fff;font-size:23px}
-.lyadj{height:38px;flex-shrink:0;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
-.lyadj.show{visibility:visible}
+.lyadj{height:38px;flex-shrink:0;visibility:hidden;display:none;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
+.lyadj.show{visibility:visible;display:flex}
 .lyadj button{width:64px;height:36px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:20px;font-weight:800;line-height:1}
 .lyadj button:active{transform:scale(.92)}
 .lyadj span{min-width:84px;text-align:center;font-variant-numeric:tabular-nums}
@@ -2811,19 +2811,15 @@ function takeSong(){
    always already loaded before you scroll to them. */
 const AHEAD=6000;
 
-const needMore=()=>
-  activeTab==='home'&&
-  $('sentinel').getBoundingClientRect().top<innerHeight+AHEAD;
-
-/* Keep loading in the background until enough songs exist below the screen */
+/* Always keep loading, no matter where the user is scrolled */
 function keepFilling(){
-  if(needMore()&&!D.home.busy)loadHomeMore();
+  if(!D.home.busy)loadHomeMore();
 }
 
 async function loadHomeMore(){
   const st=D.home;
 
-  if(activeTab!=='home'||st.busy)return;
+  if(st.busy)return;
 
   st.busy=true;
 
@@ -2920,9 +2916,8 @@ new IntersectionObserver(entries=>{
 /* Safety net: every second, top up songs if we are running low
    (covers failed requests, tab switches, slow networks) */
 setInterval(()=>{
-  if(document.hidden)return;
-  if(activeTab==='home'&&!D.home.busy&&D.home.videos.length&&needMore())loadHomeMore();
-},1000);
+  if(!D.home.busy&&D.home.videos.length)loadHomeMore();
+},800);
 
 /* ---------- SEARCH ---------- */
 const q=$('q');
