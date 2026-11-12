@@ -29,6 +29,7 @@
   --bgblur:0px;
   --bgdim:0;
   --tbbg:rgba(0,0,0,.38);
+  --pop:rgba(36,36,42,.72);
   --chipbg:rgba(255,255,255,.14);
   --chipbd:rgba(255,255,255,.22);
 }
@@ -43,6 +44,7 @@
   --gborder:rgba(255,255,255,.8);
   --gshadow:rgba(30,40,80,.18);
   --tbbg:rgba(255,255,255,.5);
+  --pop:rgba(255,255,255,.75);
   --chipbg:rgba(255,255,255,.6);
   --chipbd:rgba(255,255,255,.9);
 }
@@ -217,10 +219,10 @@ svg{display:block}
   box-shadow:none;
   color:var(--text);
   opacity:.85;
-  backdrop-filter:blur(14px) saturate(150%);
-  -webkit-backdrop-filter:blur(14px) saturate(150%);
   transition:background .25s,color .25s,opacity .25s;
 }
+.chip .x{margin-left:8px;opacity:.7;font-size:15px;line-height:1}
+#topbar .g{box-shadow:none}
 .chips .chip.on{
   background:var(--accent);
   border-color:transparent;
@@ -230,8 +232,6 @@ svg{display:block}
 .chips{
   padding:4px 16px 12px;
   margin:0 -16px;
-  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 20px),transparent 100%);
-  mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 20px),transparent 100%);
 }
 .chips{padding:2px 2px 6px}
 .chip.g{
@@ -300,14 +300,42 @@ svg{display:block}
 .lbar .seg{flex:1;margin:0}
 
 .chips{touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
-.psheet{position:fixed;inset:0;z-index:13000;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
-.pcard{width:min(100%,520px);max-height:70dvh;overflow:auto;background:var(--surface);color:var(--text);border-radius:22px 22px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px)}
-.pcard h3{margin:0 0 12px;font-size:16px}
-.pitem{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 14px;border-radius:12px;background:var(--surface-2);margin-bottom:8px;font-weight:650;font-size:14px;text-align:left}
+.psheet{
+  position:fixed;
+  inset:0;
+  z-index:13000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  animation:fadeIn .2s;
+}
+.pcard{
+  width:min(100%,360px);
+  max-height:70dvh;
+  overflow:auto;
+  color:var(--text);
+  background:var(--pop);
+  border:1px solid var(--gborder);
+  border-radius:28px;
+  padding:20px 16px 16px;
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  animation:popIn .28s cubic-bezier(.3,1.2,.4,1);
+}
+.pcard h3{margin:0 0 14px;font-size:17px;font-weight:800;text-align:center}
+.pitem{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px;border-radius:16px;background:rgba(128,128,128,.16);margin-bottom:8px;font-weight:650;font-size:14px;text-align:left}
+.pitem:active{transform:scale(.98)}
 .pitem small{color:var(--muted);font-weight:500;font-size:12px}
-.pitem.new{color:var(--accent)}
+.pitem.new{color:var(--accent);justify-content:center}
 .pnew{display:flex;gap:8px;margin-top:4px}
-.pnew input{flex:1;min-width:0;height:44px;border-radius:12px;border:0;outline:0;padding:0 14px;background:var(--surface-2);color:var(--text);font-size:16px}
+.pnew input{flex:1;min-width:0;height:46px;border-radius:14px;border:0;outline:0;padding:0 14px;background:rgba(128,128,128,.16);color:var(--text);font-size:16px}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}}
 
 /* YouTube style (Songs per Row = 1) */
 :root[data-cols="1"] .grid .card{padding:0;overflow:hidden}
@@ -889,7 +917,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
-    <button class="sb p" id="newPl" type="button" style="margin-top:16px">+ New Playlist</button>
   </div>
 </main>
 
@@ -2619,6 +2646,15 @@ function renderRecent(){
     b.type='button';
     b.className='chip';
     b.textContent=t;
+    const x=document.createElement('span');
+    x.className='x';
+    x.textContent='×';
+    x.onclick=e=>{
+      e.stopPropagation();
+      LS.set('sf_recent',getRecent().filter(y=>y!==t));
+      renderRecent();
+    };
+    b.appendChild(x);
     b.onclick=()=>doSearch(t);
     box.appendChild(b);
   });
@@ -2867,7 +2903,6 @@ function renderLib(){
   $('libFolders').hidden=inner;
   $('libGrid').hidden=!inner;
   $('libBack').hidden=!inner;
-  $('newPl').hidden=inner;
   $('lbar').hidden=!inner||hist;
   $('plDel').hidden=!pl;
 
@@ -2908,15 +2943,6 @@ $('libSort').addEventListener('click',e=>{
   document.querySelectorAll('#libSort button').forEach(x=>x.classList.toggle('on',x===b));
   renderLib();
 });
-
-$('newPl').onclick=()=>{
-  const name=prompt('Playlist name?');
-  if(!name||!name.trim())return;
-  const P=getPL();
-  P.push({id:Date.now().toString(36),name:name.trim(),songs:[]});
-  setPL(P);
-  renderLib();
-};
 
 $('plDel').onclick=()=>{
   if(!libView.startsWith('pl:')||!confirm('Delete this playlist?'))return;
