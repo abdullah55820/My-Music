@@ -2036,10 +2036,11 @@ async function lrcQuery(q){
   return Array.isArray(d)?d.filter(x=>x.syncedLyrics||x.plainLyrics):[];
 }
 
-function bestLyric(list,v,dur){
+function bestLyric(list,v,dur,onlySynced){
   const hay=new Set(wordsOf((v.title||'')+' '+(v.author||'')));
   let best=null,bs=0;
   list.forEach(c=>{
+    if(onlySynced&&!c.syncedLyrics)return;
     const tw=wordsOf(c.trackName);
     if(!tw.length)return;
     const hit=tw.filter(w=>hay.has(w)).length/tw.length;
@@ -2049,7 +2050,7 @@ function bestLyric(list,v,dur){
     let ds=0.5;
     if(dur>0&&c.duration>0){
       const diff=Math.abs(c.duration-dur);
-      const lim=c.syncedLyrics?4:8;
+      const lim=c.syncedLyrics?8:12;
       if(diff>lim)return;
       ds=1-diff/lim;
     }
@@ -2086,11 +2087,16 @@ async function loadLyrics(v){
       const t=cleanTitle(v.title);
       const parts=t.split(/\s[-–—]\s/).map(x=>x.trim()).filter(Boolean);
       const qs=[t,...parts,t+' '+(v.author||'')].filter((x,i,a)=>x&&a.indexOf(x)===i);
-      let found=null;
+      /* Prefer lyrics that have timestamps (they follow the song). Plain text
+         lyrics cannot scroll with the song, so use them only as a last resort. */
+      let sync=null,plain=null;
       for(const q of qs){
-        found=bestLyric(await lrcQuery(q),v,dur);
-        if(found)break;
+        const list=await lrcQuery(q);
+        sync=bestLyric(list,v,dur,true);
+        if(sync)break;
+        if(!plain)plain=bestLyric(list,v,dur,false);
       }
+      const found=sync||plain;
       LY[id]=found;
     }catch(e){LY[id]=null}
   }
