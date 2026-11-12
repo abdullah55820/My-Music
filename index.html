@@ -2096,7 +2096,7 @@ $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
 
-/* ---------- SHARE ---------- */
+/* ---------- SHARE (copy link only) ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
   if(!v)return;
@@ -2105,18 +2105,20 @@ on('shareBtn',async()=>{
   const btn=$('shareBtn');
 
   try{
-    if(navigator.share){
-      await navigator.share({
-        title:v.title||'SoundFlow',
-        text:(v.title||'Song')+' - '+(v.author||''),
-        url
-      });
-    }else{
-      await navigator.clipboard.writeText(url);
-      btn.classList.add('ok');
-      setTimeout(()=>btn.classList.remove('ok'),1200);
-    }
-  }catch(e){}
+    await navigator.clipboard.writeText(url);
+  }catch(e){
+    const t=document.createElement('textarea');
+    t.value=url;
+    t.style.position='fixed';
+    t.style.opacity='0';
+    document.body.appendChild(t);
+    t.select();
+    try{document.execCommand('copy')}catch(err){}
+    t.remove();
+  }
+
+  btn.classList.add('ok');
+  setTimeout(()=>btn.classList.remove('ok'),1200);
 });
 
 on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf)});
