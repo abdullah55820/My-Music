@@ -32,6 +32,7 @@
   --pop:rgba(36,36,42,.72);
   --chipbg:rgba(255,255,255,.14);
   --chipbd:rgba(255,255,255,.22);
+  --pcpad:clamp(36px,9vh,90px);
 }
 
 :root[data-theme=light]{
@@ -553,6 +554,7 @@ body.dragging #topfade{opacity:0}
 .grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
 
+/* padding-top pushes everything in the full player further down */
 .pc{
   position:relative;
   z-index:2;
@@ -563,6 +565,7 @@ body.dragging #topfade{opacity:0}
   gap:clamp(8px,1.5vh,16px);
   flex:1;
   min-height:0;
+  padding-top:var(--pcpad);
 }
 
 .az{position:relative;flex:.82;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
@@ -582,7 +585,7 @@ body.dragging #topfade{opacity:0}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* LYRICS */
-.lyr{position:absolute;left:-24px;right:-24px;top:calc(-1*(env(safe-area-inset-top) + 42px));bottom:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:calc(env(safe-area-inset-top) + 56px) 28px 40px;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
+.lyr{position:absolute;left:-24px;right:-24px;top:calc(-1*(env(safe-area-inset-top) + 42px + var(--pcpad)));bottom:0;overflow-y:auto;text-align:center;font-size:20px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.5);padding:calc(env(safe-area-inset-top) + 56px + var(--pcpad)) 28px 40px;z-index:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 36px),transparent 100%)}
 .az.lyon .art{visibility:hidden}
 .lyr::-webkit-scrollbar{display:none}
 .lyr div{margin:12px 0;transition:color .25s}
@@ -1266,7 +1269,7 @@ addEventListener('keydown',e=>{
 /* ---------- SETTINGS ---------- */
 const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off'};
 
-/* Only 4 presets now: Blue, Dark Red, Solid Black, Solid White */
+/* Only 4 presets: Blue, Dark Red, Solid Black, Solid White */
 const PRESETS=[
   'linear-gradient(160deg,#1e3a8a,#7c3aed 55%,#db2777)', /* 0 Blue (default) */
   'linear-gradient(160deg,#7f1d1d,#dc2626 55%,#fb923c)', /* 1 Dark + Red */
@@ -1276,7 +1279,7 @@ const PRESETS=[
 
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
-/* Old saved settings theke migrate (purano preset number -> notun number) */
+/* Migrate old saved settings (old preset numbers -> new numbers) */
 function loadSettings(){
   const cur=LS.get('sf_settings_v3',null);
   if(cur)return cur;
@@ -1296,7 +1299,7 @@ const save=()=>LS.set('sf_settings_v3',S);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
 const darkMQ=matchMedia('(prefers-color-scheme: dark)');
 
-/* Top color ke dim onujayi dark kore (status bar er jonno) */
+/* Darken the top colour by the dim amount (for the status bar) */
 function shade(col,a){
   let r,g,b;
   if(col[0]==='#'){
@@ -1504,7 +1507,7 @@ $('photoIn').addEventListener('change',e=>{
     URL.revokeObjectURL(url);
 
     if(!data||!LS.set('sf_bg_photo',data)){
-      alert('Photo save kora gelo na. Ekta choto photo try koro.');
+      alert('Could not save the photo. Please try a smaller one.');
       return;
     }
 
@@ -1517,7 +1520,7 @@ $('photoIn').addEventListener('change',e=>{
 
   im.onerror=()=>{
     URL.revokeObjectURL(url);
-    alert('Ei photo ta khola gelo na.');
+    alert('Could not open this photo.');
   };
 
   im.src=url;
@@ -1802,6 +1805,20 @@ function thumbOf(v){
   ).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
 
+/* Thumbnail fallback: if an image fails (e.g. maxres 404), try smaller ones */
+function fbThumb(im,id){
+  const list=[
+    `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/default.jpg`
+  ];
+  let n=0;
+  im.onerror=()=>{
+    if(n<list.length)im.src=list[n++];
+    else im.onerror=null;
+  };
+}
+
 function setPlayerBg(v){
   const id=v.videoId;
   const urls=[thumbOf(v),`https://i.ytimg.com/vi/${id}/hqdefault.jpg`];
@@ -2014,7 +2031,7 @@ async function loadLyrics(v){
   }
   if(!queue[idx]||queue[idx].videoId!==id)return;
   const l=LY[id];
-  if(!l){box.textContent='Lyrics paoa jayni';return}
+  if(!l){box.textContent='Lyrics not found';return}
   if(l.syncedLyrics){
     lyLines=l.syncedLyrics.split('\n').map(s=>{
       const m=s.match(/^\[(\d+):(\d+\.?\d*)\](.*)/);
@@ -2078,6 +2095,8 @@ on('lyBtn',()=>{
 function setInfo(v){
   const t=thumbOf(v);
 
+  fbThumb($('pThumb'),v.videoId);
+  fbThumb($('mThumb'),v.videoId);
   $('pThumb').src=$('mThumb').src=t;
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||'YouTube';
@@ -2116,11 +2135,8 @@ function showFull(){
 }
 
 function closePlayer(){
-  if(mode==='full'){
-    layers.pop();
-    history.back();
-  }
-
+  /* Player is only closable from the mini bar, so the full-player layer
+     is already gone; never pop another layer (folder/profile) by mistake. */
   mode='closed';
 
   resetPlayerStyles();
@@ -2429,6 +2445,7 @@ function card(v,i,list,rm){
   const im=document.createElement('img');
   im.className='thumb';
   im.loading='lazy';
+  fbThumb(im,v.videoId);
   im.src=S.saver==='on'?`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`:thumbOf(v);
   im.alt='';
 
@@ -2522,7 +2539,7 @@ const shuffle=a=>{
 */
 
 const GROUPS=[
-  /* 1. Hindi */
+  /* 0. Hindi */
   [
     'Hindi songs 2026',
     'Bollywood hits',
@@ -2535,7 +2552,7 @@ const GROUPS=[
     'Shah Rukh Khan songs',
   ],
 
-  /* 2. Bangla */
+  /* 1. Bangla */
   [
     'Bangla new songs',
     'Bengali modern songs',
@@ -2546,13 +2563,13 @@ const GROUPS=[
     'Bangla romantic songs',
     'Bangla lofi songs',
     'Bangladesh band songs',
-    
+
     // Bengali Singers
     'Habib Wahid songs',
     'Habib Wahid new songs',
   ],
 
-  /* 3. Punjabi */
+  /* 2. Punjabi */
   [
     'Punjabi songs',
     'Latest Punjabi songs',
@@ -2561,46 +2578,46 @@ const GROUPS=[
     'Punjabi lofi songs'
   ],
 
-  /* 4. Dhanush */
+  /* 3. Dhanush */
   ['Dhanush movie songs'],
 
-  /* 5. Allu Arjun */
+  /* 4. Allu Arjun */
   ['Allu Arjun movie songs'],
 
-  /* 6. Thalapathy Vijay */
+  /* 5. Thalapathy Vijay */
   ['Thalapathy Vijay movie songs'],
 
-  /* 7. Suriya */
+  /* 6. Suriya */
   ['Suriya movie songs'],
 
-  /* 8. Anirudh */
+  /* 7. Anirudh */
   ['Anirudh Ravichander songs'],
 
-  /* 9. Sai Abhyankkar */
+  /* 8. Sai Abhyankkar */
   ['Sai Abhyankkar songs'],
 
-  /* 10. Sai Pallavi */
+  /* 9. Sai Pallavi */
   ['Sai Pallavi movie songs'],
 
-  /* 11. Ram Charan */
+  /* 10. Ram Charan */
   ['Ram Charan movie songs'],
 
-  /* 12. Nivin Pauly */
+  /* 11. Nivin Pauly */
   ['Nivin Pauly movie songs'],
 
-  /* 13. Jr NTR */
+  /* 12. Jr NTR */
   ['Jr NTR movie songs'],
 
-  /* 14. Kalyani Priyadarshan */
+  /* 13. Kalyani Priyadarshan */
   ['Kalyani Priyadarshan movie songs'],
 
-  /* 15. Pooja Hegde */
+  /* 14. Pooja Hegde */
   ['Pooja Hegde movie songs'],
 
-  /* 16. Tamannaah */
+  /* 15. Tamannaah */
   ['Tamannaah movie songs'],
 
-  /* 17. Bangladeshi */
+  /* 16. Bangladeshi */
   [
     'Bangladeshi songs',
     'Bangladesh band songs',
@@ -2613,7 +2630,7 @@ const GROUPS=[
     'Bangla new song 2026'
   ],
 
-  /* 18. Pakistani */
+  /* 17. Pakistani */
   [
     'Pakistani Punjabi songs',
     'Pakistani songs',
@@ -2649,8 +2666,8 @@ const GROUPS=[
   ][i]
 }));
 
-GROUPS.push({qs:['Trending songs','Top songs this week','Viral songs','New songs this week'],buf:[],pg:{},weight:1}); /* 17 */
-GROUPS.push({qs:['Trending songs'],buf:[],pg:{},weight:3}); /* 18 For You */
+GROUPS.push({qs:['Trending songs','Top songs this week','Viral songs','New songs this week'],buf:[],pg:{},weight:1}); /* 18 Trending */
+GROUPS.push({qs:['Trending songs'],buf:[],pg:{},weight:3}); /* 19 For You */
 
 function buildForYou(){
   const c={};
@@ -2745,9 +2762,14 @@ CHIPS.forEach((c,i)=>{
     if(chip===i)return;
     saveChip();
     chip=i;
-    if(CHIPS[i][0]==='For You')buildForYou();
+    /* "For You" is always rebuilt from the latest favourites + history */
+    if(CHIPS[i][0]==='For You'){
+      delete CACHE[i];
+      buildForYou();
+    }
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
     if(restoreChip(i))loadHomeMore();
+    else keepFilling();
   };
   $('chips').appendChild(b);
 });
@@ -2785,6 +2807,19 @@ function takeSong(){
   return null;
 }
 
+/* How far below the screen we keep songs ready (px). Big value = songs are
+   always already loaded before you scroll to them. */
+const AHEAD=6000;
+
+const needMore=()=>
+  activeTab==='home'&&
+  $('sentinel').getBoundingClientRect().top<innerHeight+AHEAD;
+
+/* Keep loading in the background until enough songs exist below the screen */
+function keepFilling(){
+  if(needMore()&&!D.home.busy)loadHomeMore();
+}
+
 async function loadHomeMore(){
   const st=D.home;
 
@@ -2798,7 +2833,7 @@ async function loadHomeMore(){
   const stat=$('homeStatus');
   const grid=$('homeGrid');
 
-  stat.textContent='Loading music…';
+  if(!st.videos.length)stat.textContent='Loading music…';
 
   let added=0;
   let failed=false;
@@ -2873,14 +2908,21 @@ async function loadHomeMore(){
 
   stat.textContent=st.videos.length+' Songs';
 
-  if(added>0&&activeTab==='home'&&st.videos.length<300&&$('sentinel').getBoundingClientRect().top<innerHeight+900){
-    loadHomeMore();
-  }
+  /* No song limit: keep going while there is not enough content below */
+  if(added>0)keepFilling();
 }
 
+/* Start loading well before the user reaches the bottom */
 new IntersectionObserver(entries=>{
   if(entries.some(e=>e.isIntersecting)&&activeTab==='home')loadHomeMore();
-},{rootMargin:'900px 0px'}).observe($('sentinel'));
+},{rootMargin:AHEAD+'px 0px'}).observe($('sentinel'));
+
+/* Safety net: every second, top up songs if we are running low
+   (covers failed requests, tab switches, slow networks) */
+setInterval(()=>{
+  if(document.hidden)return;
+  if(activeTab==='home'&&!D.home.busy&&D.home.videos.length&&needMore())loadHomeMore();
+},1000);
 
 /* ---------- SEARCH ---------- */
 const q=$('q');
@@ -3103,6 +3145,7 @@ function folderCard(name,songs,open,icon){
       const i=document.createElement('img');
       i.loading='lazy';
       i.alt='';
+      fbThumb(i,v.videoId);
       i.src=thumbOf(v);
       cv.appendChild(i);
     });
@@ -3173,7 +3216,7 @@ function renderLib(){
   g.innerHTML='';
 
   if(!songs.length){
-    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':'Playlist empty. Player theke "+ Playlist" diye song add koro.'}</div>`;
+    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':'This playlist is empty.<br><br>Add songs using the playlist button in the player.'}</div>`;
     return;
   }
 
@@ -3227,7 +3270,10 @@ function setTab(t){
     renderLib();
   }
 
-  if(t==='home'&&!D.home.videos.length)loadHomeMore();
+  if(t==='home'){
+    if(!D.home.videos.length)loadHomeMore();
+    else keepFilling();
+  }
 }
 
 document.querySelectorAll('.nb').forEach(b=>{
@@ -3266,9 +3312,12 @@ function refreshHome(){
 
   seen.clear();
 
+  /* Clear all per-chip caches so old songs never come back after a refresh */
+  Object.keys(CACHE).forEach(k=>delete CACHE[k]);
+  if(CHIPS[chip][0]==='For You')buildForYou();
+
   GROUPS.forEach(g=>{
-    g.buf=[];
-    g.pg={};
+    if(g!==GROUPS[19]){g.buf=[];g.pg={}}
     g.busy=false;
   });
 
@@ -3396,7 +3445,7 @@ $('impIn').onchange=async e=>{
     if(d.recent)LS.set('sf_recent',d.recent);
     if(d.settings){S={...DEF,...d.settings};save()}
     location.reload();
-  }catch(err){alert('Backup file ta thik na.')}
+  }catch(err){alert('Invalid backup file.')}
 };
 
 /* ---------- INIT ---------- */
