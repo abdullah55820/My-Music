@@ -1968,8 +1968,9 @@ function bestLyric(list,v,dur){
     let ds=0.5;
     if(dur>0&&c.duration>0){
       const diff=Math.abs(c.duration-dur);
-      if(diff>8)return;
-      ds=1-diff/8;
+      const lim=c.syncedLyrics?4:8;
+      if(diff>lim)return;
+      ds=1-diff/lim;
     }
     const sc=hit+ah*.6+ds+(c.syncedLyrics?.3:0);
     if(sc>bs){bs=sc;best=c}
@@ -2015,7 +2016,15 @@ async function loadLyrics(v){
       return m?{t:+m[1]*60+ +m[2],s:m[3].trim()||'♪'}:null;
     }).filter(Boolean);
     box.innerHTML='';
-    lyLines.forEach(x=>{const p=document.createElement('div');p.textContent=x.s;x.el=p;box.appendChild(p)});
+    lyLines.forEach(x=>{
+      const p=document.createElement('div');
+      p.textContent=x.s;
+      x.el=p;
+      p.onclick=()=>{
+        try{setOff(x.t-(yt.getCurrentTime()||0)+.2)}catch(e){}
+      };
+      box.appendChild(p);
+    });
   }else{
     box.style.whiteSpace='pre-wrap';
     box.textContent=l.plainLyrics;
@@ -2025,17 +2034,18 @@ async function loadLyrics(v){
 const getOffs=()=>LS.get('sf_lyoff',{});
 const curOff=()=>{const v=queue[idx];return v?(getOffs()[v.videoId]||0):0};
 function showOff(){const o=curOff();$('lyOffTx').textContent='Sync '+(o>0?'+':'')+o.toFixed(1)+'s'}
-function nudgeLy(d){
+function setOff(n){
   const v=queue[idx];
   if(!v)return;
   const o=getOffs();
-  const n=Math.round(((o[v.videoId]||0)+d)*10)/10;
+  n=Math.round(n*10)/10;
   if(n===0)delete o[v.videoId];else o[v.videoId]=n;
   LS.set('sf_lyoff',o);
   showOff();
   lyCur=-2;
   try{if(lyLines)syncLy(yt.getCurrentTime()||0)}catch(e){}
 }
+const nudgeLy=d=>setOff(curOff()+d);
 on('lyPlus',()=>nudgeLy(.5));
 on('lyMinus',()=>nudgeLy(-.5));
 
