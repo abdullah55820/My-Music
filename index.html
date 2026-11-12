@@ -2153,13 +2153,20 @@ function showOff(){
   const p=$('player');
   const fit=()=>{
     if(vv&&mode==='full'&&document.activeElement===i){
+      /* The iOS keyboard toolbar (↑ ↓ ✓) sits above the keyboard but is not
+         counted in the visual viewport. Extend the player under it (EXTRA) so
+         no home-page cards show through, and add the same amount as bottom
+         padding so the controls stay visible above it. */
+      const EXTRA=110;
       p.style.top=vv.offsetTop+'px';
-      p.style.height=vv.height+'px';
+      p.style.height=(vv.height+EXTRA)+'px';
       p.style.bottom='auto';
+      p.style.paddingBottom=`calc(env(safe-area-inset-bottom) + 18px + ${EXTRA}px)`;
     }else{
       p.style.top='';
       p.style.height='';
       p.style.bottom='';
+      p.style.paddingBottom='';
     }
   };
   if(vv){
