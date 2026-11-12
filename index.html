@@ -598,7 +598,8 @@ body.dragging #topfade{opacity:0}
 .lyprev{margin:6px 0 10px;padding:14px;border-radius:14px;background:var(--surface-2);text-align:center;font-size:19px;font-weight:700;line-height:1.5}
 .seg.wrap{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
 .lyr::-webkit-scrollbar{display:none}
-.lyr div{margin:12px 0;transition:color .25s}
+.lyr div{margin:12px 0;transition:color .25s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.lyr div.lpd{color:var(--accent)}
 .lyr .now{color:#fff;font-size:23px}
 .lyadj{position:absolute;left:0;right:0;bottom:0;z-index:3;height:38px;visibility:hidden;display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
 .lyadj.show{visibility:visible}
@@ -2092,7 +2093,35 @@ async function loadLyrics(v){
       const p=document.createElement('div');
       p.textContent=x.s;
       x.el=p;
+      /* Long-press a line = "this line is being sung right now" (fixes sync in one go) */
+      let lpT=null,fired=false,px=0,py=0;
+      const lpStart=e=>{
+        const pt=(e.touches&&e.touches[0])||e;
+        px=pt.clientX;py=pt.clientY;
+        fired=false;
+        clearTimeout(lpT);
+        lpT=setTimeout(()=>{
+          fired=true;
+          p.classList.add('lpd');
+          setTimeout(()=>p.classList.remove('lpd'),350);
+          try{setOff(x.t-(yt.getCurrentTime()||0))}catch(err){}
+          if(navigator.vibrate)navigator.vibrate(30);
+        },500);
+      };
+      const lpStop=()=>clearTimeout(lpT);
+      /* cancel only if the finger really moved (scrolling), not on tiny jitter */
+      const lpMove=e=>{
+        const pt=(e.touches&&e.touches[0])||e;
+        if(Math.abs(pt.clientX-px)>12||Math.abs(pt.clientY-py)>12)lpStop();
+      };
+      p.addEventListener('touchstart',lpStart,{passive:true});
+      p.addEventListener('touchmove',lpMove,{passive:true});
+      ['touchend','touchcancel'].forEach(ev=>p.addEventListener(ev,lpStop,{passive:true}));
+      p.addEventListener('mousedown',lpStart);
+      ['mouseup','mouseleave'].forEach(ev=>p.addEventListener(ev,lpStop));
+      p.addEventListener('contextmenu',e=>e.preventDefault());
       p.onclick=()=>{
+        if(fired){fired=false;return}
         /* Tap a line to jump the song to that exact line */
         try{
           yt.seekTo(Math.max(0,x.t-curOff()+.05),true);
@@ -2124,8 +2153,22 @@ function setOff(n){
   try{if(lyLines)syncLy(yt.getCurrentTime()||0)}catch(e){}
 }
 const nudgeLy=d=>setOff(curOff()+d);
-on('lyPlus',()=>nudgeLy(.5));
-on('lyMinus',()=>nudgeLy(-.5));
+/* Hold the − / + buttons to keep adjusting quickly */
+function holdBtn(id,d){
+  const b=$(id);
+  let t=null,iv=null;
+  const stop=()=>{clearTimeout(t);clearInterval(iv)};
+  b.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    nudgeLy(d);
+    t=setTimeout(()=>{iv=setInterval(()=>nudgeLy(d),90)},400);
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
+}
+holdBtn('lyPlus',.5);
+holdBtn('lyMinus',-.5);
 
 function syncLy(c){
   c+=curOff();
