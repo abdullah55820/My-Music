@@ -438,8 +438,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 </div>
 <div id="yt"><div id="ytp"></div></div>
 <script>
-const ￼
-￼(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
+const =id=>document.getElementById(id);
+const on=(id,fn)=>(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
 function setThemeColor(col,paintBody=true){
 document.querySelectorAll('meta[name=theme-color]').forEach(m=>m.remove());
 const m=document.createElement('meta');
@@ -596,7 +596,7 @@ save();apply();
 });
 }
 /* ---------- OWN PHOTO BACKGROUND ---------- */
-￼('photoIn').click();
+('photoPick').onclick=()=>('photoIn').click();
 $('photoDel').onclick=()=>{
 PHOTO=null;
 LS.del('sf_bg_photo');
@@ -728,7 +728,7 @@ icons();
 stopT();
 if(++errCount<queue.length)setTimeout(next,600);
 }
-function icons(){￼('mIcon').innerHTML=playing?PAUSE:PLAY}
+function icons(){('playIcon').innerHTML=('mIcon').innerHTML=playing?PAUSE:PLAY}
 const fmt=s=>{
 if(!Number.isFinite(s)||s<0)return '0:00';
 return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
@@ -805,7 +805,7 @@ function resetProg(){
 seeking=false;seekPointer=null;seekTarget=0;
 seek.value=0;
 setProg(0);
-￼('dur').textContent='0:00';
+('cur').textContent=('dur').textContent='0:00';
 }
 function toggle(){
 if(!apiReady)return;
@@ -1024,7 +1024,7 @@ const i=$('lyOffIn');
 if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 (function(){
-const i=￼('lyAdj'),vv=window.visualViewport;
+const i=('lyOffIn'),bar=('lyAdj'),vv=window.visualViewport;
 const commit=()=>{
 const n=parseFloat(i.value.replace(/[−–—]/g,'-').replace(/[^\d.-+]/g,''));
 if(Number.isFinite(n))setOff(Math.max(-120,Math.min(120,n)));
@@ -1083,11 +1083,11 @@ $('lyBtn').classList.toggle('on',lyOn);
 if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 function setInfo(v){
-fbThumb(￼
-￼('mThumb'),v.videoId);
-￼('mThumb').src=thumbOf(v);
-￼('mTitle').textContent=v.title||'Unknown Song';
-￼('mArtist').textContent=v.author||'YouTube';
+fbThumb(('pThumb'),v.videoId);
+fbThumb(('mThumb'),v.videoId);
+('pThumb').src=('mThumb').src=thumbOf(v);
+('pTitle').textContent=('mTitle').textContent=v.title||'Unknown Song';
+('pArtist').textContent=('mArtist').textContent=v.author||'YouTube';
 $('likeBtn').classList.toggle('liked',getLiked().some(x=>x.videoId===v.videoId));
 setPlayerBg(v);
 setTint(v);
@@ -1186,8 +1186,8 @@ function addToPl(P,pl,v){
 if(!pl.songs.some(x=>x.videoId===v.videoId))pl.songs.unshift(slim(v));
 setPL(P);
 closeSheet();
-￼
-￼('plBtn').classList.remove('ok'),1200);
+('plBtn').classList.add('ok');
+setTimeout(()=>('plBtn').classList.remove('ok'),1200);
 }
 function openSheet(){
 const v=queue[idx];
@@ -1213,10 +1213,10 @@ const nb=document.createElement('button');
 nb.type='button';
 nb.className='pitem new';
 nb.textContent='+ New Playlist';
-nb.onclick=()=>{nb.hidden=true;￼('pName').focus()};
+nb.onclick=()=>{nb.hidden=true;('pnew').hidden=false;('pName').focus()};
 box.appendChild(nb);
 ('pOk').onclick=()=>{
-￼('pName').value.trim();
+const name=('pName').value.trim();
 if(!name)return;
 const pl={id:Date.now().toString(36),name,songs:[]};
 P.push(pl);
@@ -1598,7 +1598,7 @@ if(st.busy)return;
 st.busy=true;
 const ctl=new AbortController();
 st.ctl=ctl;
-const stat=￼('homeGrid');
+const stat=('homeStatus'),grid=('homeGrid');
 if(!st.videos.length)stat.textContent='Loading music…';
 let added=0,failed=false;
 for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
@@ -1666,9 +1666,9 @@ const q=$('q');
 const getRecent=()=>LS.get('sf_recent',[]);
 const saveRecent=t=>LS.set('sf_recent',[t,...getRecent().filter(x=>x!==t)].slice(0,8));
 function renderRecent(){
-const r=getRecent(),box=￼
-￼
-￼('searchGrid').hidden;
+const r=getRecent(),box=('recent');
+box.innerHTML='';
+box.hidden=!r.length||!('searchGrid').hidden;
 r.forEach(t=>{
 const b=document.createElement('button');
 b.type='button';
@@ -1944,7 +1944,7 @@ g.busy=false;
 });
 return loadHomeMore();
 }
-const ptr=￼('homePage'),hdrEl=$('topbar');
+const ptr=('ptr'),homeEl=('homePage'),hdrEl=$('topbar');
 const EASE='transform .3s cubic-bezier(.3,.8,.3,1)';
 let refreshing=false;
 function ptrMove(d,anim){
@@ -2020,7 +2020,7 @@ a.click();
 a.remove();
 setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
-￼('impIn').click();
+('impBtn').onclick=()=>('impIn').click();
 $('impIn').onchange=async e=>{
 const f=e.target.files&&e.target.files[0];
 e.target.value='';
