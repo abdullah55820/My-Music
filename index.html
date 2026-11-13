@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1592,31 +1591,25 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS (Updated with Shunno & Working Queries) ---------- */
+/* ---------- MUSIC GROUPS (All, Shunno, Language & Mood Categories Fixed) ---------- */
 const GROUPS=[
-  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song']],
-  [7,['Shunno band songs','Shunno Behula','Shunno Bedona','Shunno Sritir Chera Pata','Shunno Rajahin Rajjo','Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Habib Wahid songs']],
-  [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
-  [.25,['Dhanush movie songs']],
-  [.25,['Allu Arjun movie songs']],
-  [.25,['Thalapathy Vijay movie songs']],
-  [.25,['Anirudh Ravichander songs']],
-  [.25,['Sai Abhyankkar songs']],
-  [.25,['Sai Pallavi movie songs']],
-  [.25,['Kalyani Priyadarshan movie songs']],
-  [.25,['Pooja Hegde movie songs']],
-  [.25,['Tamannaah movie songs']],
-  [3,['Shunno band','Shunno Behula','Shunno Rajahin Rajjo','Artcell songs','Warfaze songs','Miles songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangladeshi band songs']],
-  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Urdu songs']],
-  [1,['t series music','Top songs this year','shunno','new song']],
-  [3,['t series music']],
-  [4,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats','Slowed and reverb Hindi songs','Bengali lofi chill','Shunno lofi']],
-  [4,['Workout music Hindi','Gym motivation songs Punjabi','High energy Bollywood workout songs','Workout phonk music']],
-  [4,['Sad Hindi songs','Emotional Bangla songs','Heartbreak songs Bollywood','Arijit Singh sad songs','Bangla sad songs']],
-  [4,['Bollywood party songs','Punjabi dance hits','Party anthem Hindi','Bangla party songs','Club dance hits']]
+  [5,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Bollywood songs 2024']],
+  [5,['Shunno band songs','Shunno Behula','Shunno Bedona','Shunno Sritir Chera Pata','Shunno Rajahin Rajjo','Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Habib Wahid songs']],
+  [4,['Punjabi songs','Latest Punjabi songs','Punjabi hit songs','Punjabi lofi songs']],
+  [3,['Dhanush movie songs','Allu Arjun movie songs','Thalapathy Vijay movie songs','Anirudh Ravichander songs','Sai Abhyankkar songs']],
+  [4,['Shunno band','Artcell songs','Warfaze songs','Miles songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangladeshi band songs']],
+  [3,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Urdu songs']],
+  [3,['t series music','Top songs this year','shunno','new song','coke studio']],
+  [4,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats','Slowed and reverb Hindi songs','Bengali lofi chill','Shunno lofi','lofi chill remix']],
+  [4,['Workout music Hindi','Gym motivation songs Punjabi','High energy Bollywood workout songs','Workout phonk music','workout remix']],
+  [4,['Sad Hindi songs','Emotional Bangla songs','Heartbreak songs Bollywood','Arijit Singh sad songs','Bangla sad songs','sad lofi']],
+  [4,['Bollywood party songs','Punjabi dance hits','Party anthem Hindi','Bangla party songs','Club dance hits','party mix']]
 ].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 
-const FORYOU=15;
+const FORYOU=11;
+
+// Adding For You group dynamically
+GROUPS.push([5,['Shunno band songs','Trending songs']]);
 
 function buildForYou(){
   const c={};
@@ -1636,11 +1629,10 @@ async function fillGroup(g,ctl){
 }
 
 async function fillGroupRaw(g,ctl){
-  // Shuffle or pick queries so it fetches reliably
-  const shuffledQueries = shuffle([...g.qs]);
+  const shuffledQueries=shuffle([...g.qs]);
   for(const q of shuffledQueries){
     const page=(g.pg[q]||0)+1;
-    if(page > 3) continue; // prevent infinite dead loops on bad query
+    if(page>3)continue;
     const few=activeGroups().length<6;
     const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),false);
 
@@ -1654,22 +1646,29 @@ async function fillGroupRaw(g,ctl){
         addedCount++;
       });
       shuffle(g.buf);
-      if(addedCount > 0) return true;
+      if(addedCount>0)return true;
     }
   }
   return false;
 }
 
 const CHIPS=[
-  ['All',null],['For You',[FORYOU]],
-  ['Lofi / Chill',[16]],['Workout',[17]],['Sad',[18]],['Party',[19]],
-  ['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['Bangladeshi',[12]],['Pakistani',[13]],
-  ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[14]]
+  ['All',[0,1,2,3,4,5,6]], // All chips mixes all group categories completely randomly!
+  ['For You',[FORYOU]],
+  ['Lofi / Chill',[7]],
+  ['Workout',[8]],
+  ['Sad',[9]],
+  ['Party',[10]],
+  ['Hindi',[0]],
+  ['Bangla',[1,4]],
+  ['Punjabi',[2]],
+  ['Bangladeshi',[4]],
+  ['Pakistani',[5]],
+  ['South Indian',[3]],
+  ['Trending',[6]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,16);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,7);
 
 const CACHE={};
 
