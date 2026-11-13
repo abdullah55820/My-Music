@@ -212,7 +212,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #ptr svg{width:20px;height:20px}
 #ptr.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Custom Dialog & Toast */
 .dlg-msg{margin:0 0 20px;font-size:15px;line-height:1.5;text-align:center;color:var(--muted)}
 .dlg-btns{display:flex;gap:10px}
 .dlg-btns button{flex:1;height:46px;border-radius:16px;font-size:15px;font-weight:700}
@@ -439,7 +438,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </div>
 
-<!-- Custom Modal Dialog (replaces alert/confirm) -->
 <div class="psheet" id="dlgSheet" style="z-index:14000" hidden>
   <div class="pcard">
     <h3 id="dlgTitle">Notice</h3>
@@ -463,7 +461,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 const $=id=>document.getElementById(id);
 const on=(id,fn)=>$(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
 
-/* ---------- CUSTOM DIALOG (NO ALERT / CONFIRM) ---------- */
 function showModal(msg,isConfirm=false,danger=false){
   return new Promise(res=>{
     $('dlgTitle').textContent=isConfirm?'Confirm':'Notice';
@@ -1620,9 +1617,11 @@ const shuffle=a=>{
 };
 
 /* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
+   Original weights preserved!
    Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Shunno Band, 15 Trending, 16 For You */
+          12 Bangladeshi, 13 Pakistani, 14 Shunno Band,
+          15 Lofi, 16 Chill, 17 T-Series, 18 Sony Music,
+          19 Trending, 20 For You */
 const GROUPS=[
   [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
@@ -1639,11 +1638,15 @@ const GROUPS=[
   [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
   [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
   [1.5,['Shunno band songs','Shunno official','Shunno Godhuli Opare','Shunno Shoto Asha','Shunno Behula']],
+  [2,['Hindi lofi songs','Bangla lofi songs','Bollywood lofi remix','Lofi songs slow reverb','Indian lofi beats']],
+  [2,['Chill Hindi songs','Chill Bangla songs','Acoustic Bollywood songs','Relaxing Indian songs','Late night chill songs']],
+  [2,['T-Series songs','T-Series latest songs','T-Series hit songs','T-Series romantic songs']],
+  [2,['Sony Music India songs','Sony Music India latest','Sony Music hit songs','Sony Music South songs']],
   [1,['t series music','Top songs this year','new song']],
   [3,['t series music']]
 ].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 
-const FORYOU=16;
+const FORYOU=20;
 
 function buildForYou(){
   const c={};
@@ -1681,13 +1684,25 @@ async function fillGroupRaw(g,ctl){
 }
 
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['Bangladeshi',[12,14]],['Shunno',[14]],['Pakistani',[13]],
+  ['All',null],
+  ['Hindi',[0]],
+  ['Bangla',[1]],
+  ['Punjabi',[2]],
+  ['Bangladeshi',[12,14]],
+  ['Shunno',[14]],
+  ['Pakistani',[13]],
   ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[15]],['For You',[FORYOU]]
+  ['Lofi',[15]],
+  ['Chill',[16]],
+  ['T-Series',[17]],
+  ['Sony Music',[18]],
+  ['Trending',[19]],
+  ['For You',[FORYOU]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,15);
+/* For 'All' (chip 0), include representative groups across all categories */
+const ALL_GROUPS=[0,1,2,12,13,14,15,16,17,18,3,6];
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):ALL_GROUPS.map(i=>GROUPS[i]);
 
 const CACHE={};
 
@@ -1713,7 +1728,7 @@ function restoreChip(i){
 
   st.videos=[];
   seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
+  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false;g.cr=0});
   window.scrollTo(0,0);
   return true;
 }
@@ -1743,6 +1758,7 @@ function takeSong(){
   if(!gs.length)return null;
 
   const last=st.videos.slice(-14).map(authKey).reverse();
+  const isAll=(chip===0);
 
   for(const w of [14,8,4,2,0]){
     const ban=new Set(last.slice(0,w));
@@ -1757,10 +1773,11 @@ function takeSong(){
     });
 
     if(pool.length){
-      const total=pool.reduce((a,p)=>a+p.g.weight,0);
+      /* In 'All' tab, use equal weight (1) so every category gets 2-3 songs evenly per 20 songs without altering g.weight */
+      const total=pool.reduce((a,p)=>a+(isAll?1:p.g.weight),0);
       let pick=pool[0];
       pool.forEach(p=>{
-        p.g.cr=(p.g.cr||0)+p.g.weight;
+        p.g.cr=(p.g.cr||0)+(isAll?1:p.g.weight);
         if(p.g.cr>pick.g.cr)pick=p;
       });
       pick.g.cr-=total;
@@ -1796,14 +1813,14 @@ async function loadHomeMore(){
       let poll;
       const first=!st.videos.length;
       const t0=Date.now();
-      const minGroups=Math.min(3,activeGroups().length);
+      const minGroups=Math.min(chip===0?6:3,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
           if(ctl.signal.aborted){r('abort');return}
           if(!first)return;
           const gs=activeGroups().filter(g=>g.buf.length);
           const n=gs.reduce((a,g)=>a+g.buf.length,0);
-          if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
+          if((n>=16&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1800))r('fast');
         },60);
       });
       const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
@@ -1823,7 +1840,7 @@ async function loadHomeMore(){
       added++;
     }
 
-    if(added>=8)break;
+    if(added>=12)break;
 
     if(!ok&&!added){
       if(attempt>=5)failed=true;
@@ -2193,7 +2210,7 @@ function refreshHome(){
 
   GROUPS.forEach((g,i)=>{
     if(i!==FORYOU){g.buf=[];g.pg={}}
-    g.busy=false;
+    g.busy=false;g.cr=0;
   });
 
   return loadHomeMore();
