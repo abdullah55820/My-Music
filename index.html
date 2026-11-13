@@ -761,8 +761,9 @@ $('spBack').onclick=()=>{
   history.back();
 };
 
-/* ---------- PLAYER ---------- */
+/* ---------- PLAYER & SIMILAR SONG RADIO ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
+let simQueue=[],simSeedId='',simFetching=false,simCtl=null;
 
 const seek=$('seek');
 const PLAY='<path d="M7 4v16l13-8z"/>';
@@ -808,7 +809,6 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
     next();
   }
 }
@@ -817,7 +817,7 @@ function onYtError(){
   playing=false;
   icons();
   stopT();
-  if(++errCount<queue.length)setTimeout(next,600);
+  if(++errCount<6)setTimeout(next,600);
 }
 
 function icons(){$('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY}
@@ -1152,7 +1152,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1261,13 +1260,56 @@ function closePlayer(){
   apply();
   if(apiReady)yt.stopVideo();
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
+  simQueue=[];simSeedId='';
+  if(simCtl)simCtl.abort();
   icons();
   $('art').classList.remove('paused');
   resetProg();
 }
 
-function playAt(i,list){
-  if(list)queue=(list===D.home.videos||list===D.search.videos)?list:list.slice();
+/* Fetch similar songs automatically whenever a song plays */
+async function fetchSimilar(v){
+  if(!v||!v.videoId)return;
+  if(simCtl)simCtl.abort();
+  const ctl=new AbortController();
+  simCtl=ctl;
+  simFetching=true;
+  simSeedId=v.videoId;
+
+  const titleClean=cleanTitle(v.title);
+  const authorClean=(v.author||'').replace(/\s*-\s*Topic$/i,'').trim();
+  const q1=(titleClean+' '+authorClean+' song').trim();
+  const q2=authorClean?(authorClean+' hit songs'):(titleClean+' mix');
+
+  try{
+    let res=await fetchSongs(q1,1,ctl,instances,true);
+    if((!res||res.length<4)&&!ctl.signal.aborted){
+      const res2=await fetchSongs(q2,1,ctl,instances,true);
+      if(res2)res=[...(res||[]),...res2];
+    }
+    if(ctl.signal.aborted)return;
+    if(res&&res.length){
+      const playedIds=new Set(queue.slice(0,idx+1).map(x=>x.videoId));
+      const unique=[];
+      const localSeen=new Set();
+      res.forEach(item=>{
+        if(item&&item.videoId&&!playedIds.has(item.videoId)&&!localSeen.has(item.videoId)){
+          localSeen.add(item.videoId);
+          unique.push(item);
+        }
+      });
+      simQueue=unique;
+    }
+  }catch(e){}finally{
+    if(simCtl===ctl)simFetching=false;
+  }
+}
+
+function playAt(i,list,isSimilarTransition=false){
+  if(list){
+    queue=list.slice();
+    simQueue=[];
+  }
   const v=queue[i];
   if(!v||!v.videoId)return;
 
@@ -1281,6 +1323,11 @@ function playAt(i,list){
 
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
   else pending=v.videoId;
+
+  /* Always prefetch similar songs based on the currently playing song if simQueue is low */
+  if(!isSimilarTransition||simQueue.length<3){
+    fetchSimilar(v);
+  }
 }
 
 const SLEEPS=[0,15,30,60];
@@ -1288,6 +1335,7 @@ let shuf=false,rep=0,slIdx=0,slT=null;
 
 const next=async()=>{
   if(!queue.length||idx<0)return;
+
   if(shuf&&queue.length>1){
     let j;
     do{j=Math.floor(Math.random()*queue.length)}while(j===idx);
@@ -1295,27 +1343,27 @@ const next=async()=>{
     return;
   }
 
-  const live=queue===D.home.videos||queue===D.search.videos;
-  if(live&&idx>=queue.length-1){
-    const q0=queue,i0=idx,len=q0.length;
-
-    if(q0===D.home.videos)keepFilling();
-    else{
-      const s=D.search;
-      if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
+  /* Wait briefly if similar songs are still being fetched for the current track */
+  if(!simQueue.length&&simFetching){
+    for(let k=0;k<12&&simFetching&&!simQueue.length;k++){
+      await new Promise(r=>setTimeout(r,200));
     }
+  }
 
-    for(let k=0;k<40&&q0.length<=len;k++){
-      await new Promise(r=>setTimeout(r,250));
-      if(queue!==q0||idx!==i0)return;
-    }
-
-    if(queue!==q0||idx!==i0)return;
-    playAt(q0.length>len?i0+1:0);
+  /* Play similar song next (both on Next click and when song ends) */
+  if(simQueue.length){
+    const nextSim=simQueue.shift();
+    queue.splice(idx+1,0,nextSim);
+    playAt(idx+1,null,true);
     return;
   }
 
-  playAt((idx+1)%queue.length);
+  /* Fallback to next item in existing list */
+  if(idx+1<queue.length){
+    playAt(idx+1);
+  }else{
+    playAt(0);
+  }
 };
 
 const getHist=()=>LS.get('sf_history',[]);
@@ -1616,12 +1664,7 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Original weights preserved!
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Shunno Band,
-          15 Lofi, 16 Chill, 17 T-Series, 18 Sony Music,
-          19 Trending, 20 For You */
+/* ---------- MUSIC GROUPS: [weight, queries] ---------- */
 const GROUPS=[
   [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
@@ -1700,7 +1743,6 @@ const CHIPS=[
   ['For You',[FORYOU]]
 ];
 let chip=0;
-/* For 'All' (chip 0), include representative groups across all categories */
 const ALL_GROUPS=[0,1,2,12,13,14,15,16,17,18,3,6];
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):ALL_GROUPS.map(i=>GROUPS[i]);
 
@@ -1751,14 +1793,31 @@ CHIPS.forEach((c,i)=>{
 });
 
 const authKey=v=>((v&&v.author)||'').toLowerCase().trim();
+let rrIdx=0;
 
 function takeSong(){
   const st=D.home;
-  const gs=activeGroups().filter(g=>g.buf.length);
+  const allGs=activeGroups();
+  const gs=allGs.filter(g=>g.buf.length);
   if(!gs.length)return null;
 
-  const last=st.videos.slice(-14).map(authKey).reverse();
   const isAll=(chip===0);
+
+  /* Strict Round-Robin for 'All' tab so songs always mix evenly across categories even after refresh */
+  if(isAll){
+    for(let step=0;step<allGs.length;step++){
+      const idxG=(rrIdx+step)%allGs.length;
+      const g=allGs[idxG];
+      while(g.buf.length&&seen.has(g.buf[0].videoId))g.buf.shift();
+      if(g.buf.length){
+        rrIdx=(idxG+1)%allGs.length;
+        return g.buf.shift();
+      }
+    }
+    return null;
+  }
+
+  const last=st.videos.slice(-14).map(authKey).reverse();
 
   for(const w of [14,8,4,2,0]){
     const ban=new Set(last.slice(0,w));
@@ -1773,11 +1832,10 @@ function takeSong(){
     });
 
     if(pool.length){
-      /* In 'All' tab, use equal weight (1) so every category gets 2-3 songs evenly per 20 songs without altering g.weight */
-      const total=pool.reduce((a,p)=>a+(isAll?1:p.g.weight),0);
+      const total=pool.reduce((a,p)=>a+p.g.weight,0);
       let pick=pool[0];
       pool.forEach(p=>{
-        p.g.cr=(p.g.cr||0)+(isAll?1:p.g.weight);
+        p.g.cr=(p.g.cr||0)+p.g.weight;
         if(p.g.cr>pick.g.cr)pick=p;
       });
       pick.g.cr-=total;
@@ -1803,6 +1861,7 @@ async function loadHomeMore(){
   if(!st.videos.length)stat.textContent='Loading music…';
 
   let added=0,failed=false;
+  const isAll=(chip===0);
 
   for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
     const need=activeGroups().filter(g=>g.buf.length<4);
@@ -1813,17 +1872,21 @@ async function loadHomeMore(){
       let poll;
       const first=!st.videos.length;
       const t0=Date.now();
-      const minGroups=Math.min(chip===0?6:3,activeGroups().length);
+      const minGroups=Math.min(isAll?6:3,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
           if(ctl.signal.aborted){r('abort');return}
-          if(!first)return;
           const gs=activeGroups().filter(g=>g.buf.length);
           const n=gs.reduce((a,g)=>a+g.buf.length,0);
-          if((n>=16&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1800))r('fast');
+          if(isAll){
+            /* Wait until multiple diverse categories have loaded before rendering so refresh never dumps one language */
+            if((gs.length>=minGroups&&n>=12)||(gs.length>=3&&Date.now()-t0>2200)||(n>0&&Date.now()-t0>3500))r('fast');
+          }else{
+            if(!first||(n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
+          }
         },60);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4200))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
@@ -1831,13 +1894,17 @@ async function loadHomeMore(){
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
-    while(added<24){
-      const v=takeSong();
-      if(!v)break;
-      seen.add(v.videoId);
-      st.videos.push(v);
-      grid.appendChild(card(v,st.videos.length-1,st.videos));
-      added++;
+    /* In 'All' tab, only dispense when at least 3 different categories have songs buffered (or on last attempt) */
+    const readyCategories=activeGroups().filter(g=>g.buf.length).length;
+    if(!isAll||readyCategories>=3||attempt>=3){
+      while(added<24){
+        const v=takeSong();
+        if(!v)break;
+        seen.add(v.videoId);
+        st.videos.push(v);
+        grid.appendChild(card(v,st.videos.length-1,st.videos));
+        added++;
+      }
     }
 
     if(added>=12)break;
@@ -2204,6 +2271,7 @@ function refreshHome(){
   st.videos=[];
   $('homeGrid').innerHTML='';
   seen.clear();
+  rrIdx=Math.floor(Math.random()*ALL_GROUPS.length);
 
   Object.keys(CACHE).forEach(k=>delete CACHE[k]);
   if(CHIPS[chip][0]==='For You')buildForYou();
