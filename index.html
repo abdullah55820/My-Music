@@ -1129,7 +1129,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1593,14 +1592,10 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You,
-          16 Lofi/Chill, 17 Workout, 18 Sad/Heartbreak, 19 Party */
+/* ---------- MUSIC GROUPS (Updated with Shunno & Working Queries) ---------- */
 const GROUPS=[
-  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
-  [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
+  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song']],
+  [7,['Shunno band songs','Shunno Behula','Shunno Bedona','Shunno Sritir Chera Pata','Shunno Rajahin Rajjo','Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Habib Wahid songs']],
   [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
   [.25,['Dhanush movie songs']],
   [.25,['Allu Arjun movie songs']],
@@ -1611,14 +1606,14 @@ const GROUPS=[
   [.25,['Kalyani Priyadarshan movie songs']],
   [.25,['Pooja Hegde movie songs']],
   [.25,['Tamannaah movie songs']],
-  [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
-  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
+  [3,['Shunno band','Shunno Behula','Shunno Rajahin Rajjo','Artcell songs','Warfaze songs','Miles songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangladeshi band songs']],
+  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Urdu songs']],
   [1,['t series music','Top songs this year','shunno','new song']],
   [3,['t series music']],
-  [3,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats','Slowed and reverb Hindi songs','Bengali lofi chill']],
-  [3,['Workout music Hindi','Gym motivation songs Punjabi','High energy Bollywood workout songs','Workout phonk music']],
-  [3,['Sad Hindi songs','Emotional Bangla songs','Heartbreak songs Bollywood','Arijit Singh sad songs','Bangla sad songs']],
-  [3,['Bollywood party songs','Punjabi dance hits','Party anthem Hindi','Bangla party songs','Club dance hits']]
+  [4,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats','Slowed and reverb Hindi songs','Bengali lofi chill','Shunno lofi']],
+  [4,['Workout music Hindi','Gym motivation songs Punjabi','High energy Bollywood workout songs','Workout phonk music']],
+  [4,['Sad Hindi songs','Emotional Bangla songs','Heartbreak songs Bollywood','Arijit Singh sad songs','Bangla sad songs']],
+  [4,['Bollywood party songs','Punjabi dance hits','Party anthem Hindi','Bangla party songs','Club dance hits']]
 ].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 
 const FORYOU=15;
@@ -1628,7 +1623,7 @@ function buildForYou(){
   [...getLiked(),...getHist()].forEach(v=>{if(v.author)c[v.author]=(c[v.author]||0)+1});
   const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
   const g=GROUPS[FORYOU];
-  g.qs=a.length?a.map(x=>x+' songs'):['Trending songs'];
+  g.qs=a.length?a.map(x=>x+' songs'):['Shunno band songs'];
   g.buf=[];
   g.pg={};
 }
@@ -1641,21 +1636,28 @@ async function fillGroup(g,ctl){
 }
 
 async function fillGroupRaw(g,ctl){
-  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
-  const page=(g.pg[q]||0)+1;
-  const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+  // Shuffle or pick queries so it fetches reliably
+  const shuffledQueries = shuffle([...g.qs]);
+  for(const q of shuffledQueries){
+    const page=(g.pg[q]||0)+1;
+    if(page > 3) continue; // prevent infinite dead loops on bad query
+    const few=activeGroups().length<6;
+    const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),false);
 
-  if(data===null)return false;
-
-  g.pg[q]=page;
-  data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
-    g.buf.push(v);
-  });
-  shuffle(g.buf);
-  return true;
+    if(data&&data.length>0){
+      g.pg[q]=page;
+      let addedCount=0;
+      data.forEach(v=>{
+        if(seen.has(v.videoId))return;
+        if(g.buf.some(b=>b.videoId===v.videoId))return;
+        g.buf.push(v);
+        addedCount++;
+      });
+      shuffle(g.buf);
+      if(addedCount > 0) return true;
+    }
+  }
+  return false;
 }
 
 const CHIPS=[
@@ -1667,7 +1669,7 @@ const CHIPS=[
   ['Trending',[14]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,16);
 
 const CACHE={};
 
