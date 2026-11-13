@@ -439,7 +439,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div id="yt"><div id="ytp"></div></div>
 <script>
 const ￼
-const on=(id,fn)=>(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
+￼(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
 function setThemeColor(col,paintBody=true){
 document.querySelectorAll('meta[name=theme-color]').forEach(m=>m.remove());
 const m=document.createElement('meta');
@@ -1340,10 +1340,11 @@ if(activeTab==='library')renderLib();
 });
 /* ---------- SONGS ---------- */
 const instances=[
-'https://inv.nadeko.net',
 'https://invidious.nerdvpn.de',
 'https://yt.chocolatemoo53.com',
-'https://invidious.tiekoetter.com'
+'https://invidious.tiekoetter.com',
+'https://inv.nadeko.net',
+'https://invidious.privacydev.net'
 ];
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 const D={
@@ -1384,29 +1385,44 @@ c.onclick=go;
 c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};
 return c;
 }
-async function fetchSongs(q,page,ctl,list=instances,strict=false){
-const requests=list.map(base=>{
+async function fetchSongs(q,page,ctl,list=instances){
+for(const base of list){
+if(ctl.signal.aborted)return null;
+try{
 const c=new AbortController();
 const onAb=()=>c.abort();
 ctl.signal.addEventListener('abort',onAb);
-const tm=setTimeout(()=>c.abort(),6000);
-return fetch(
+const tm=setTimeout(()=>c.abort(),5000);
+const res=await fetch(
 ⁠${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}⁠,
 {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
-).then(r=>{
-if(!r.ok)throw new Error('Server error');
-return r.json();
-}).then(data=>{
-if(!Array.isArray(data))throw new Error('Invalid response');
-const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
-if(strict&&!out.length)throw new Error('Empty');
-return out;
-}).finally(()=>{
+);
 clearTimeout(tm);
 ctl.signal.removeEventListener('abort',onAb);
-});
-});
-try{return await Promise.any(requests)}catch(e){return null}
+if(!res.ok)continue;
+const data=await res.json();
+if(Array.isArray(data)){
+const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
+if(out.length)return out;
+}
+}catch(e){}
+}
+try{
+const res=await fetch(⁠https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(q)}&filter=videos⁠,{signal:ctl.signal});
+if(res.ok){
+const data=await res.json();
+const items=data.items||data;
+if(Array.isArray(items)){
+return items.map(x=>({
+videoId:x.videoId||(x.url&&x.url.split('v=')[1]),
+title:x.title,
+author:x.uploaderName||x.author,
+videoThumbnails:x.thumbnail?([{url:x.thumbnail,quality:'high'}]):[]
+})).filter(x=>x.videoId);
+}
+}
+}catch(e){}
+return null;
 }
 const shuffle=a=>{
 for(let i=a.length-1;i>0;i--){
@@ -1415,7 +1431,6 @@ const j=Math.floor(Math.random()*(i+1));
 }
 return a;
 };
-/* ---------- MUSIC GROUPS (Strict Equal Weights) ---------- */
 const GROUPS=[
 [1,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs']],
 [1,['Shunno Official','Shunno band songs','Shunno Behula']],
@@ -1451,8 +1466,7 @@ const shuffledQueries=shuffle([...g.qs]);
 for(const q of shuffledQueries){
 const page=(g.pg[q]||0)+1;
 if(page>3)continue;
-const few=activeGroups().length<6;
-const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),false);
+const data=await fetchSongs(q,page,ctl);
 if(data&&data.length>0){
 g.pg[q]=page;
 let addedCount=0;
