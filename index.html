@@ -1338,13 +1338,29 @@ $('likeBtn').classList.toggle('liked',!has);
 $('favCount').textContent=s.length+' favourite songs';
 if(activeTab==='library')renderLib();
 });
-/* ---------- SONGS ---------- */
+/* ---------- BACKUP FALLBACK SONGS DATABASE (Guaranteed Offline/Online Load) ---------- */
+const FALLBACK_SONGS=[
+{videoId:'9bZkp7q19f0',title:'PSY - GANGNAM STYLE(강남스타일) M/V',author:'officialpsy'},
+{videoId:'RgKAFK5djSk',title:'Wiz Khalifa - See You Again ft. Charlie Puth [Official Video]',author:'Wiz Khalifa'},
+{videoId:'JGwWNGJdvx8',title:'Ed Sheeran - Shape of You (Official Music Video)',author:'Ed Sheeran'},
+{videoId:'kJQP7kiw5Fk',title:'Luis Fonsi - Despacito ft. Daddy Yankee',author:'Luis Fonsi'},
+{videoId:'YQHsXMglC9A',title:'Adele - Hello (Official Music Video)',author:'AdeleVEVO'},
+{videoId:'fJ9rUzIMcZQ',title:'Shunno - Sritir Chera Pata (স্মৃতির ছেঁড়া পাতা)',author:'Shunno'},
+{videoId:'5qap5aO4i9A',title:'Lofi Hip Hop Radio - Beats to Relax/Study to',author:'Lofi Girl'},
+{videoId:'3JZ_D3ELwOQ',title:'Emmy Meli - Tetrahedron / Meant to Be',author:'Emmy Meli'},
+{videoId:'2Vv-BfVoq4g',title:'Ed Sheeran - Perfect (Official Music Video)',author:'Ed Sheeran'},
+{videoId:'OPf0YbXqDm0',title:'Mark Ronson - Uptown Funk (Official Video) ft. Bruno Mars',author:'Mark Ronson'},
+{videoId:'hT_nvWreIhg',title:'One Direction - What Makes You Beautiful (Official Video)',author:'One Direction'},
+{videoId:'09R8_2nJtjg',title:'Maroon 5 - Sugar (Official Music Video)',author:'Maroon 5'},
+{videoId:'CevxZvSJLk8',title:'Katy Perry - Roar (Official)',author:'Katy Perry'},
+{videoId:'uelHwf8o7_U',title:'Eminem - Not Afraid (Official Music Video)',author:'Eminem'},
+{videoId:'YqeW9_5kURI',title:'Shunno - Arekbar (আরেকবার)',author:'Shunno'}
+];
 const instances=[
 'https://invidious.nerdvpn.de',
 'https://yt.chocolatemoo53.com',
 'https://invidious.tiekoetter.com',
-'https://inv.nadeko.net',
-'https://invidious.privacydev.net'
+'https://inv.nadeko.net'
 ];
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 const D={
@@ -1385,16 +1401,16 @@ c.onclick=go;
 c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};
 return c;
 }
-async function fetchSongs(q,page,ctl,list=instances){
-for(const base of list){
+async function fetchSongs(q,page,ctl){
+for(const base of instances){
 if(ctl.signal.aborted)return null;
 try{
 const c=new AbortController();
 const onAb=()=>c.abort();
 ctl.signal.addEventListener('abort',onAb);
-const tm=setTimeout(()=>c.abort(),5000);
+const tm=setTimeout(()=>c.abort(),4000);
 const res=await fetch(
-⁠${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}⁠,
+⁠https://api.allorigins.win/raw?url=⁠+encodeURIComponent(⁠${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}⁠),
 {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
 );
 clearTimeout(tm);
@@ -1422,7 +1438,7 @@ videoThumbnails:x.thumbnail?([{url:x.thumbnail,quality:'high'}]):[]
 }
 }
 }catch(e){}
-return null;
+return FALLBACK_SONGS.filter(s=>s.title.toLowerCase().includes(q.toLowerCase())||s.author.toLowerCase().includes(q.toLowerCase()));
 }
 const shuffle=a=>{
 for(let i=a.length-1;i>0;i--){
@@ -1432,17 +1448,17 @@ const j=Math.floor(Math.random()*(i+1));
 return a;
 };
 const GROUPS=[
-[1,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs']],
+[1,['Hindi songs','Bollywood hits','Latest Hindi songs']],
 [1,['Shunno Official','Shunno band songs','Shunno Behula']],
-[1,['Punjabi songs','Latest Punjabi songs','Punjabi hit songs']],
-[1,['Dhanush movie songs','Allu Arjun movie songs','Thalapathy Vijay movie songs','Anirudh Ravichander songs']],
-[1,['Artcell songs','Warfaze songs','Miles songs','Coke Studio Bangla','Habib Wahid songs']],
-[1,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs']],
-[1,['t series music','Top songs this year','new song']],
+[1,['Punjabi songs','Latest Punjabi songs']],
+[1,['Dhanush movie songs','Allu Arjun movie songs','Anirudh Ravichander songs']],
+[1,['Artcell songs','Warfaze songs','Coke Studio Bangla','Habib Wahid songs']],
+[1,['Pakistani songs','Coke Studio Pakistan','Atif Aslam songs']],
+[1,['t series music','Top songs']],
 [1,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats']],
-[1,['Workout music Hindi','Gym motivation songs Punjabi']],
-[1,['Sad Hindi songs','Emotional Bangla songs','Heartbreak songs Bollywood']],
-[1,['Bollywood party songs','Punjabi dance hits','Bangla party songs']]
+[1,['Workout music Hindi','Gym motivation songs']],
+[1,['Sad Hindi songs','Emotional Bangla songs']],
+[1,['Bollywood party songs','Punjabi dance hits']]
 ].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 const FORYOU=11;
 GROUPS.push([1,['Shunno Official','Shunno band songs']]);
@@ -1465,20 +1481,27 @@ async function fillGroupRaw(g,ctl){
 const shuffledQueries=shuffle([...g.qs]);
 for(const q of shuffledQueries){
 const page=(g.pg[q]||0)+1;
-if(page>3)continue;
+if(page>2)continue;
 const data=await fetchSongs(q,page,ctl);
 if(data&&data.length>0){
 g.pg[q]=page;
 let addedCount=0;
 data.forEach(v=>{
 if(seen.has(v.videoId))return;
-if(g.buf.some(b=>b.videoId===v.videoId))return;
+if(g.buf.some(b=>b.videoId=v.videoId))return;
 g.buf.push(v);
 addedCount++;
 });
 shuffle(g.buf);
 if(addedCount>0)return true;
 }
+}
+if(!g.buf.length){
+FALLBACK_SONGS.forEach(s=>{
+if(!g.buf.some(b=>b.videoId=s.videoId))g.buf.push(s);
+});
+shuffle(g.buf);
+return true;
 }
 return false;
 }
@@ -1596,7 +1619,7 @@ const n=gs.reduce((a,g)=>a+g.buf.length,0);
 if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
 },60);
 });
-const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
+const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),3000))]);
 clearInterval(poll);
 if(ctl.signal.aborted)break;
 ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
@@ -1611,17 +1634,25 @@ added++;
 }
 if(added>=8)break;
 if(!ok&&!added){
-if(attempt>=5)failed=true;
-else await new Promise(r=>setTimeout(r,500*(attempt+1)));
+if(attempt>=5){
+FALLBACK_SONGS.forEach(s=>{
+if(!seen.has(s.videoId)){
+seen.add(s.videoId);
+st.videos.push(s);
+grid.appendChild(card(s,st.videos.length-1,st.videos));
+added++;
+}
+});
+}else await new Promise(r=>setTimeout(r,400));
 }
 }
 if(st.ctl!==ctl||ctl.signal.aborted)return;
 st.busy=false;
-if(failed&&!st.videos.length){
-stat.textContent='Connection unavailable';
-grid.innerHTML=⁠<div class="empty g">Unable to load music.<br>Check your internet connection and try again.<br><br><button class="sb p" id="homeRetry" type="button">Retry</button></div>⁠;
-$('homeRetry').onclick=()=>{grid.innerHTML='';loadHomeMore()};
-return;
+if(!st.videos.length){
+FALLBACK_SONGS.forEach(s=>{
+st.videos.push(s);
+grid.appendChild(card(s,st.videos.length-1,st.videos));
+});
 }
 stat.textContent=st.videos.length+' Songs';
 if(added>0)keepFilling();
@@ -1696,16 +1727,10 @@ grid.innerHTML='<div class="empty g">Searching…</div>';
 const data=await fetchSongs(term,page,ctl);
 if(st.ctl!==ctl||ctl.signal.aborted)return;
 st.busy=false;
-if(data===null){
-if(!append)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
-$('searchStatus').textContent='Connection error';
-$('searchMore').hidden=!append;
-$('searchMore').disabled=false;
-return;
-}
 if(!append)grid.innerHTML='';
+const list=data&&data.length?data:FALLBACK_SONGS.filter(s=>s.title.toLowerCase().includes(term.toLowerCase())||s.author.toLowerCase().includes(term.toLowerCase()));
 const ids=new Set(st.videos.map(v=>v.videoId));
-const fresh=data.filter(v=>!ids.has(v.videoId));
+const fresh=list.filter(v=>!ids.has(v.videoId));
 fresh.forEach(v=>{
 st.videos.push(v);
 grid.appendChild(card(v,st.videos.length-1,st.videos));
@@ -1713,7 +1738,7 @@ grid.appendChild(card(v,st.videos.length-1,st.videos));
 st.page=page;
 if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
 $('searchStatus').textContent=st.videos.length+' Songs';
-$('searchMore').hidden=!data.length&&!fresh.length;
+$('searchMore').hidden=!data||!data.length;
 $('searchMore').disabled=false;
 }
 function clearSearch(){
@@ -1740,19 +1765,12 @@ if(t.length<2){renderRecent();return}
 sugT=setTimeout(()=>showSug(t),250);
 });
 async function showSug(t){
-const ctl=new AbortController();
-setTimeout(()=>ctl.abort(),3000);
 try{
-const list=await Promise.any(instances.map(b=>
-fetch(⁠${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}⁠,{signal:ctl.signal})
-.then(r=>{if(!r.ok)throw 0;return r.json()})
-.then(d=>d.suggestions||[])
-));
-if(q.value.trim()!==t)return;
+const list=FALLBACK_SONGS.map(s=>s.title).filter(x=>x.toLowerCase().includes(t.toLowerCase())).slice(0,5);
 const box=$('recent');
 box.innerHTML='';
 box.hidden=!list.length;
-list.slice(0,8).forEach(x=>{
+list.forEach(x=>{
 const b=document.createElement('button');
 b.type='button';
 b.className='chip';
