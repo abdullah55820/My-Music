@@ -618,6 +618,8 @@ body.dragging #topfade{opacity:0}
 .lyadj span{min-width:0;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lyadj input{width:72px;height:32px;padding:0;margin:0;border:0;border-radius:8px;background:transparent;color:inherit;text-align:center;font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:visible;text-overflow:clip;outline:0;-webkit-appearance:none;appearance:none;user-select:text;-webkit-user-select:text}
 .lyadj input:focus{background:rgba(255,255,255,.18)}
+/* While typing: only this bar floats above the keyboard. The player itself never resizes, so nothing flickers. */
+.lyadj.kb{position:fixed;left:50%;right:auto;bottom:auto;transform:translateX(-50%);width:auto;height:46px;padding:0 10px;border-radius:23px;background:rgba(40,40,44,.92);border:1px solid rgba(255,255,255,.2);z-index:10001}
 
 .meta{
   width:100%;
@@ -2036,6 +2038,18 @@ async function lrcQuery(q){
   return Array.isArray(d)?d.filter(x=>x.syncedLyrics||x.plainLyrics):[];
 }
 
+/* Direct lookup by track + artist (+ duration). Used as a fallback. */
+async function lrcGet(track,artist,dur){
+  try{
+    const u='https://lrclib.net/api/get?track_name='+encodeURIComponent(track)+
+      '&artist_name='+encodeURIComponent(artist)+(dur>0?'&duration='+Math.round(dur):'');
+    const r=await fetch(u);
+    if(!r.ok)return null;
+    const d=await r.json();
+    return (d&&(d.syncedLyrics||d.plainLyrics))?d:null;
+  }catch(e){return null}
+}
+
 function bestLyric(list,v,dur,onlySynced){
   const hay=new Set(wordsOf((v.title||'')+' '+(v.author||'')));
   let best=null,bs=0;
@@ -2044,13 +2058,13 @@ function bestLyric(list,v,dur,onlySynced){
     const tw=wordsOf(c.trackName);
     if(!tw.length)return;
     const hit=tw.filter(w=>hay.has(w)).length/tw.length;
-    if(hit<.8)return;
+    if(hit<.5)return;
     const aw=wordsOf(c.artistName);
     const ah=aw.length?aw.filter(w=>hay.has(w)).length/aw.length:0;
     let ds=0.5;
     if(dur>0&&c.duration>0){
       const diff=Math.abs(c.duration-dur);
-      const lim=c.syncedLyrics?8:12;
+      const lim=c.syncedLyrics?15:20;
       if(diff>lim)return;
       ds=1-diff/lim;
     }
@@ -2086,7 +2100,9 @@ async function loadLyrics(v){
       const dur=await getDur(v);
       const t=cleanTitle(v.title);
       const parts=t.split(/\s[-–—]\s/).map(x=>x.trim()).filter(Boolean);
-      const qs=[t,...parts,t+' '+(v.author||'')].filter((x,i,a)=>x&&a.indexOf(x)===i);
+      const first3=t.split(' ').slice(0,3).join(' ');
+      const qs=[t,...parts,t+' '+(v.author||''),first3,(v.author||'')+' '+first3]
+        .filter((x,i,a)=>x&&x.length>1&&a.indexOf(x)===i);
       /* Prefer lyrics that have timestamps (they follow the song). Plain text
          lyrics cannot scroll with the song, so use them only as a last resort. */
       let sync=null,plain=null;
@@ -2096,7 +2112,13 @@ async function loadLyrics(v){
         if(sync)break;
         if(!plain)plain=bestLyric(list,v,dur,false);
       }
-      const found=sync||plain;
+      let found=sync||plain;
+      if(!found&&parts.length>=2){
+        found=await lrcGet(parts[1],parts[0],dur)||await lrcGet(parts[0],parts[1],dur);
+      }
+      if(!found&&v.author){
+        found=await lrcGet(t,v.author,dur);
+      }
       LY[id]=found;
     }catch(e){LY[id]=null}
   }
@@ -2140,7 +2162,7 @@ function showOff(){
 
 /* Tap the number to type the sync value yourself (e.g. -2.5 or 3) */
 (function(){
-  const i=$('lyOffIn');
+  const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
     const n=parseFloat(i.value.replace(/[−–—]/g,'-').replace(/[^\d.\-+]/g,''));
     if(Number.isFinite(n))setOff(Math.max(-120,Math.min(120,n)));
@@ -2153,34 +2175,28 @@ function showOff(){
   });
   i.addEventListener('click',e=>e.stopPropagation());
 
-  /* When the keyboard opens, iOS shifts the page and the home page peeks out
-     under the player. Keep the player glued to the visible area instead. */
-  const vv=window.visualViewport;
-  const p=$('player');
+  /* The player never changes size while typing (that caused the flicker).
+     Only the sync bar floats just above the keyboard. */
+  const TB=58; /* iOS keyboard toolbar height */
+  let raf=0;
   const fit=()=>{
-    if(vv&&mode==='full'&&document.activeElement===i){
-      /* The iOS keyboard toolbar (↑ ↓ ✓) sits above the keyboard but is not
-         counted in the visual viewport. Extend the player under it (EXTRA) so
-         no home-page cards show through, and add the same amount as bottom
-         padding so the controls stay visible above it. */
-      const EXTRA=110;
-      p.style.top=vv.offsetTop+'px';
-      p.style.height=(vv.height+EXTRA)+'px';
-      p.style.bottom='auto';
-      p.style.paddingBottom=`calc(env(safe-area-inset-bottom) + 18px + ${EXTRA}px)`;
+    raf=0;
+    if(mode==='full'&&document.activeElement===i&&vv){
+      bar.classList.add('kb');
+      const h=bar.offsetHeight||46;
+      bar.style.top=(vv.offsetTop+vv.height-TB-h)+'px';
     }else{
-      p.style.top='';
-      p.style.height='';
-      p.style.bottom='';
-      p.style.paddingBottom='';
+      bar.classList.remove('kb');
+      bar.style.top='';
     }
   };
+  const sched=()=>{if(!raf)raf=requestAnimationFrame(fit)};
   if(vv){
-    vv.addEventListener('resize',fit);
-    vv.addEventListener('scroll',fit);
+    vv.addEventListener('resize',sched);
+    vv.addEventListener('scroll',sched);
   }
-  i.addEventListener('focus',()=>{fit();setTimeout(fit,100);setTimeout(fit,350)});
-  i.addEventListener('blur',()=>setTimeout(fit,50));
+  i.addEventListener('focus',()=>{sched();setTimeout(sched,120);setTimeout(sched,350)});
+  i.addEventListener('blur',()=>setTimeout(sched,50));
 })();
 function setOff(n){
   const v=queue[idx];
