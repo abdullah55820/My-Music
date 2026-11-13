@@ -1487,11 +1487,21 @@ $('likeBtn').addEventListener('click',e=>{
 });
 
 /* ---------- SONGS ---------- */
+/* Public Invidious servers. Some die from time to time, the app tries several at once
+   and uses whichever answers first. Add or remove links here any time. */
 const instances=[
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
   'https://yt.chocolatemoo53.com',
-  'https://invidious.tiekoetter.com'
+  'https://invidious.tiekoetter.com',
+  'https://invidious.privacyredirect.com',
+  'https://invidious.fdn.fr',
+  'https://invidious.protokolla.fi',
+  'https://iv.melmac.space',
+  'https://invidious.private.coffee',
+  'https://yewtu.be',
+  'https://inv.tux.pizza',
+  'https://invidious.lunar.icu'
 ];
 
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
@@ -1579,14 +1589,21 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
+/* ---------- MUSIC GROUPS: [weight, queries, mustMatch(optional)] ----------
+   Higher weight = more songs in the Home feed (All tab mixes every group by weight).
+   mustMatch = only songs whose channel/title match this regex are kept
+   (used so Shunno / T-Series groups only give real Shunno / T-Series songs).
    Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
+          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You (keep at 15),
+          16 Lofi, 17 Chill, 18 Sad, 19 Party, 20 Shunno, 21 T-Series */
 const GROUPS=[
+  /* 0 Hindi */
   [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
+  /* 1 Bangla */
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
+  /* 2 Punjabi */
   [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
+  /* 3-11 South Indian */
   [.25,['Dhanush movie songs']],
   [.25,['Allu Arjun movie songs']],
   [.25,['Thalapathy Vijay movie songs']],
@@ -1596,11 +1613,27 @@ const GROUPS=[
   [.25,['Kalyani Priyadarshan movie songs']],
   [.25,['Pooja Hegde movie songs']],
   [.25,['Tamannaah movie songs']],
+  /* 12 Bangladeshi */
   [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
+  /* 13 Pakistani */
   [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
-  [1,['t series music','Top songs this year','shunno','new song']],
-  [3,['t series music']]
-].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
+  /* 14 Trending */
+  [1.5,['t series music','Top songs this year','new song','Trending songs India','Trending Bangla songs']],
+  /* 15 For You (queries are rebuilt from your history) */
+  [3,['t series music']],
+  /* 16 Lofi */
+  [2,['Hindi lofi songs','Bangla lofi songs','Punjabi lofi songs','Bollywood lofi mashup','Slowed reverb Hindi songs','Pakistani lofi songs','Bengali lofi remix','Urdu lofi songs']],
+  /* 17 Chill */
+  [1.5,['Hindi chill songs','Bangla chill songs','Punjabi chill songs','Bollywood chill vibes','Acoustic Hindi songs','Bangla acoustic songs','Unplugged Hindi songs','Pakistani chill songs']],
+  /* 18 Sad */
+  [2,['Hindi sad songs','Bangla sad songs','Punjabi sad songs','Pakistani sad songs','Bollywood heartbreak songs','Bangla koster gaan','Arijit Singh sad songs','Bengali sad songs','Urdu sad songs']],
+  /* 19 Party */
+  [2,['Hindi party songs','Bollywood dance songs','Punjabi party songs','Bangla party songs','Bangla dance songs','Club songs Hindi','Wedding songs Bollywood','Pakistani party songs']],
+  /* 20 Shunno (only real Shunno songs) */
+  [2.5,['Shunno band songs','Shunno band official','Shunno Bangla band','Shunno new song','Shunno live','Shunno full album','Shunno band concert','শূন্য ব্যান্ড'],/shunno|শূন্য/i],
+  /* 21 T-Series (only real T-Series songs) */
+  [2.5,['t series music','T-Series new songs','T-Series Hindi songs','T-Series latest video songs','T-Series romantic songs','T-Series Punjabi songs','T-Series Bhushan Kumar songs','T-Series lofi'],/t-?series/i]
+].map(([weight,qs,must])=>({qs,buf:[],pg:{},weight,must}));
 
 const FORYOU=15;
 
@@ -1625,12 +1658,20 @@ async function fillGroupRaw(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,3),few);
 
   if(data===null)return false;
 
   g.pg[q]=page;
-  data.forEach(v=>{
+
+  /* keep only matching songs for Shunno / T-Series groups */
+  let list=data;
+  if(g.must){
+    list=data.filter(v=>g.must.test((v.author||'')+' '+(v.title||'')));
+    if(!list.length)g.cool=Date.now()+6000; /* short pause so it doesn't spam the servers */
+  }
+
+  list.forEach(v=>{
     if(seen.has(v.videoId))return;
     if(g.buf.some(b=>b.videoId===v.videoId))return;
     g.buf.push(v);
@@ -1639,14 +1680,27 @@ async function fillGroupRaw(g,ctl){
   return true;
 }
 
+/* chip name, [group indexes]  (null = All, mixes every group) */
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['Bangladeshi',[12]],['Pakistani',[13]],
+  ['All',null],
+  ['Hindi',[0,21]],
+  ['Bangla',[1,20]],
+  ['Punjabi',[2]],
+  ['Bangladeshi',[12,20]],
+  ['Pakistani',[13]],
   ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[14]],['For You',[FORYOU]]
+  ['Lofi',[16]],
+  ['Chill',[17]],
+  ['Sad',[18]],
+  ['Party',[19]],
+  ['Shunno',[20]],
+  ['T-Series',[21]],
+  ['Trending',[14]],
+  ['For You',[FORYOU]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
+/* All = every group except "For You" (so Shunno, T-Series, Lofi, Sad etc. all mix together) */
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==FORYOU);
 
 const CACHE={};
 
@@ -1672,7 +1726,7 @@ function restoreChip(i){
 
   st.videos=[];
   seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
+  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false;g.cool=0});
   window.scrollTo(0,0);
   return true;
 }
@@ -1747,7 +1801,7 @@ async function loadHomeMore(){
   let added=0,failed=false;
 
   for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
-    const need=activeGroups().filter(g=>g.buf.length<4);
+    const need=activeGroups().filter(g=>g.buf.length<4&&!(g.cool>Date.now()));
     let ok=0;
 
     if(need.length){
@@ -1755,22 +1809,25 @@ async function loadHomeMore(){
       let poll;
       const first=!st.videos.length;
       const t0=Date.now();
-      const minGroups=Math.min(3,activeGroups().length);
+      /* wait for more groups on first load so the All feed starts properly mixed */
+      const minGroups=Math.min(6,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
           if(ctl.signal.aborted){r('abort');return}
           if(!first)return;
           const gs=activeGroups().filter(g=>g.buf.length);
           const n=gs.reduce((a,g)=>a+g.buf.length,0);
-          if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
+          if((n>=16&&gs.length>=minGroups)||(n>0&&Date.now()-t0>2200))r('fast');
         },60);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4500))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
 
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
+    }else if(activeGroups().some(g=>g.buf.length)){
+      ok=1;
     }
 
     while(added<24){
@@ -2152,6 +2209,7 @@ function refreshHome(){
   GROUPS.forEach((g,i)=>{
     if(i!==FORYOU){g.buf=[];g.pg={}}
     g.busy=false;
+    g.cool=0;
   });
 
   return loadHomeMore();
