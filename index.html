@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -211,6 +212,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #ptr svg{width:20px;height:20px}
 #ptr.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Custom Dialog & Toast */
+.dlg-msg{margin:0 0 20px;font-size:15px;line-height:1.5;text-align:center;color:var(--muted)}
+.dlg-btns{display:flex;gap:10px}
+.dlg-btns button{flex:1;height:46px;border-radius:16px;font-size:15px;font-weight:700}
 </style>
 </head>
 <body>
@@ -434,6 +439,18 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- Custom Modal Dialog (replaces alert/confirm) -->
+<div class="psheet" id="dlgSheet" style="z-index:14000" hidden>
+  <div class="pcard">
+    <h3 id="dlgTitle">Notice</h3>
+    <p class="dlg-msg" id="dlgMsg"></p>
+    <div class="dlg-btns">
+      <button class="sb" id="dlgCancel" type="button">Cancel</button>
+      <button class="sb p" id="dlgOk" type="button">OK</button>
+    </div>
+  </div>
+</div>
+
 <div id="topfade"></div>
 
 <div id="ptr" class="g" aria-hidden="true">
@@ -445,6 +462,29 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <script>
 const $=id=>document.getElementById(id);
 const on=(id,fn)=>$(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
+
+/* ---------- CUSTOM DIALOG (NO ALERT / CONFIRM) ---------- */
+function showModal(msg,isConfirm=false,danger=false){
+  return new Promise(res=>{
+    $('dlgTitle').textContent=isConfirm?'Confirm':'Notice';
+    $('dlgMsg').textContent=msg;
+    $('dlgCancel').hidden=!isConfirm;
+    $('dlgOk').className=danger?'sb d':'sb p';
+    $('dlgOk').textContent=isConfirm?(danger?'Remove':'Yes'):'OK';
+    $('dlgSheet').hidden=false;
+
+    const done=val=>{
+      $('dlgSheet').hidden=true;
+      $('dlgOk').onclick=null;
+      $('dlgCancel').onclick=null;
+      $('dlgSheet').onclick=null;
+      res(val);
+    };
+    $('dlgOk').onclick=()=>done(true);
+    $('dlgCancel').onclick=()=>done(false);
+    $('dlgSheet').onclick=e=>{if(e.target.id==='dlgSheet')done(false)};
+  });
+}
 
 function setThemeColor(col,paintBody=true){
   document.querySelectorAll('meta[name=theme-color]').forEach(m=>m.remove());
@@ -673,7 +713,7 @@ $('photoIn').addEventListener('change',e=>{
     URL.revokeObjectURL(url);
 
     if(!data||!LS.set('sf_bg_photo',data)){
-      alert('Could not save the photo. Please try a smaller one.');
+      showModal('Could not save the photo. Please try a smaller one.');
       return;
     }
 
@@ -683,7 +723,7 @@ $('photoIn').addEventListener('change',e=>{
     save();apply();
   };
 
-  im.onerror=()=>{URL.revokeObjectURL(url);alert('Could not open this photo.')};
+  im.onerror=()=>{URL.revokeObjectURL(url);showModal('Could not open this photo.')};
   im.src=url;
 });
 
@@ -1487,24 +1527,14 @@ $('likeBtn').addEventListener('click',e=>{
 });
 
 /* ---------- SONGS ---------- */
-/* Public Invidious servers. Some die from time to time, the app tries several at once
-   and uses whichever answers first. Add or remove links here any time. */
 const instances=[
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
   'https://yt.chocolatemoo53.com',
-  'https://invidious.tiekoetter.com',
-  'https://invidious.privacyredirect.com',
-  'https://invidious.fdn.fr',
-  'https://invidious.protokolla.fi',
-  'https://iv.melmac.space',
-  'https://invidious.private.coffee',
-  'https://yewtu.be',
-  'https://inv.tux.pizza',
-  'https://invidious.lunar.icu'
+  'https://invidious.tiekoetter.com'
 ];
 
-const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
+const MIN_TS=Math.floor(Date.UTC(2008,0,1)/1000);
 
 const D={
   home:{videos:[],busy:false,ctl:null},
@@ -1589,22 +1619,14 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries, mustMatch(optional)] ----------
-   Higher weight = more songs in the Home feed (All tab mixes every group by weight).
-   mustMatch = only songs whose channel/title match this regex are kept
-   (used so Shunno / T-Series groups only give real Shunno / T-Series songs).
+/* ---------- MUSIC GROUPS: [weight, queries] ----------
+   Higher weight = more songs in the Home feed.
    Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You (keep at 15),
-          16 Lofi, 17 Chill, 18 Sad, 19 Party, 20 Shunno, 21 T-Series */
+          12 Bangladeshi, 13 Pakistani, 14 Shunno Band, 15 Trending, 16 For You */
 const GROUPS=[
-  /* 0 Hindi */
-  [6,['Hindi songs 2026','Shunno','Shunno official', 'Shunno band songs', 'Shunno audio',
-'Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
-  /* 1 Bangla */
+  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
-  /* 2 Punjabi */
   [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
-  /* 3-11 South Indian */
   [.25,['Dhanush movie songs']],
   [.25,['Allu Arjun movie songs']],
   [.25,['Thalapathy Vijay movie songs']],
@@ -1614,29 +1636,14 @@ const GROUPS=[
   [.25,['Kalyani Priyadarshan movie songs']],
   [.25,['Pooja Hegde movie songs']],
   [.25,['Tamannaah movie songs']],
-  /* 12 Bangladeshi */
   [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
-  /* 13 Pakistani */
   [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
-  /* 14 Trending */
-  [1.5,['t series music','Top songs this year','new song','Trending songs India','Trending Bangla songs']],
-  /* 15 For You (queries are rebuilt from your history) */
-  [3,['t series music']],
-  /* 16 Lofi */
-  [2,['Hindi lofi songs','Bangla lofi songs','Punjabi lofi songs','Bollywood lofi mashup','Slowed reverb Hindi songs','Pakistani lofi songs','Bengali lofi remix','Urdu lofi songs']],
-  /* 17 Chill */
-  [1.5,['Hindi chill songs','Bangla chill songs','Punjabi chill songs','Bollywood chill vibes','Acoustic Hindi songs','Bangla acoustic songs','Unplugged Hindi songs','Pakistani chill songs']],
-  /* 18 Sad */
-  [2,['Hindi sad songs','Bangla sad songs','Punjabi sad songs','Pakistani sad songs','Bollywood heartbreak songs','Bangla koster gaan','Arijit Singh sad songs','Bengali sad songs','Urdu sad songs']],
-  /* 19 Party */
-  [2,['Hindi party songs','Bollywood dance songs','Punjabi party songs','Bangla party songs','Bangla dance songs','Club songs Hindi','Wedding songs Bollywood','Pakistani party songs']],
-  /* 20 Shunno (only real Shunno songs) */
-  [2.5,['Shunno band songs','Shunno band official','Shunno Bangla band','Shunno new song','Shunno live','Shunno full album','Shunno band concert','শূন্য ব্যান্ড'],/shunno|শূন্য/i],
-  /* 21 T-Series (only real T-Series songs) */
-  [2.5,['t series music','T-Series new songs','T-Series Hindi songs','T-Series latest video songs','T-Series romantic songs','T-Series Punjabi songs','T-Series Bhushan Kumar songs','T-Series lofi'],/t-?series/i]
-].map(([weight,qs,must])=>({qs,buf:[],pg:{},weight,must}));
+  [1.5,['Shunno band songs','Shunno official','Shunno Godhuli Opare','Shunno Shoto Asha','Shunno Behula']],
+  [1,['t series music','Top songs this year','new song']],
+  [3,['t series music']]
+].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 
-const FORYOU=15;
+const FORYOU=16;
 
 function buildForYou(){
   const c={};
@@ -1659,20 +1666,12 @@ async function fillGroupRaw(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,3),few);
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
 
   if(data===null)return false;
 
   g.pg[q]=page;
-
-  /* keep only matching songs for Shunno / T-Series groups */
-  let list=data;
-  if(g.must){
-    list=data.filter(v=>g.must.test((v.author||'')+' '+(v.title||'')));
-    if(!list.length)g.cool=Date.now()+6000; /* short pause so it doesn't spam the servers */
-  }
-
-  list.forEach(v=>{
+  data.forEach(v=>{
     if(seen.has(v.videoId))return;
     if(g.buf.some(b=>b.videoId===v.videoId))return;
     g.buf.push(v);
@@ -1681,27 +1680,14 @@ async function fillGroupRaw(g,ctl){
   return true;
 }
 
-/* chip name, [group indexes]  (null = All, mixes every group) */
 const CHIPS=[
-  ['All',null],
-  ['Hindi',[0,21]],
-  ['Bangla',[1,20]],
-  ['Punjabi',[2]],
-  ['Bangladeshi',[12,20]],
-  ['Pakistani',[13]],
+  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
+  ['Bangladeshi',[12,14]],['Shunno',[14]],['Pakistani',[13]],
   ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Lofi',[16]],
-  ['Chill',[17]],
-  ['Sad',[18]],
-  ['Party',[19]],
-  ['Shunno',[20]],
-  ['T-Series',[21]],
-  ['Trending',[14]],
-  ['For You',[FORYOU]]
+  ['Trending',[15]],['For You',[FORYOU]]
 ];
 let chip=0;
-/* All = every group except "For You" (so Shunno, T-Series, Lofi, Sad etc. all mix together) */
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==FORYOU);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,15);
 
 const CACHE={};
 
@@ -1727,7 +1713,7 @@ function restoreChip(i){
 
   st.videos=[];
   seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false;g.cool=0});
+  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
   window.scrollTo(0,0);
   return true;
 }
@@ -1802,7 +1788,7 @@ async function loadHomeMore(){
   let added=0,failed=false;
 
   for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
-    const need=activeGroups().filter(g=>g.buf.length<4&&!(g.cool>Date.now()));
+    const need=activeGroups().filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
@@ -1810,25 +1796,22 @@ async function loadHomeMore(){
       let poll;
       const first=!st.videos.length;
       const t0=Date.now();
-      /* wait for more groups on first load so the All feed starts properly mixed */
-      const minGroups=Math.min(6,activeGroups().length);
+      const minGroups=Math.min(3,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
           if(ctl.signal.aborted){r('abort');return}
           if(!first)return;
           const gs=activeGroups().filter(g=>g.buf.length);
           const n=gs.reduce((a,g)=>a+g.buf.length,0);
-          if((n>=16&&gs.length>=minGroups)||(n>0&&Date.now()-t0>2200))r('fast');
+          if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
         },60);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4500))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
 
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
-    }else if(activeGroups().some(g=>g.buf.length)){
-      ok=1;
     }
 
     while(added<24){
@@ -2131,8 +2114,8 @@ function renderLib(){
     return;
   }
 
-  const rm=hist?null:v=>{
-    if(!confirm('Remove "'+(v.title||'song')+'"?'))return;
+  const rm=hist?null:async v=>{
+    if(!(await showModal('Remove "'+(v.title||'song')+'"?',true,true)))return;
     if(fav)LS.set('sf_liked_songs',getLiked().filter(x=>x.videoId!==v.videoId));
     else{pl.songs=pl.songs.filter(x=>x.videoId!==v.videoId);setPL(PL)}
     renderLib();
@@ -2149,8 +2132,9 @@ $('libSort').addEventListener('click',e=>{
   renderLib();
 });
 
-$('plDel').onclick=()=>{
-  if(!libView.startsWith('pl:')||!confirm('Delete this playlist?'))return;
+$('plDel').onclick=async()=>{
+  if(!libView.startsWith('pl:'))return;
+  if(!(await showModal('Delete this playlist?',true,true)))return;
   const id=libView.slice(3);
   setPL(getPL().filter(x=>x.id!==id));
   history.back();
@@ -2210,7 +2194,6 @@ function refreshHome(){
   GROUPS.forEach((g,i)=>{
     if(i!==FORYOU){g.buf=[];g.pg={}}
     g.busy=false;
-    g.cool=0;
   });
 
   return loadHomeMore();
@@ -2327,7 +2310,7 @@ $('impIn').onchange=async e=>{
     if(d.recent)LS.set('sf_recent',d.recent);
     if(d.settings){S={...DEF,...d.settings};save()}
     location.reload();
-  }catch(err){alert('Invalid backup file.')}
+  }catch(err){showModal('Invalid backup file.')}
 };
 
 /* ---------- INIT ---------- */
@@ -2341,3 +2324,5 @@ loadHomeMore();
 </script>
 </body>
 </html>
+
+```
