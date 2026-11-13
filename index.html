@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,9 +29,11 @@ svg{display:block}
 .hb{max-width:1050px;margin:auto;padding:0 16px}
 .hb .section{margin:8px 0 10px}
 .hb .chips{padding-bottom:12px}
-.header{max-width:1050px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 4px}
+.header{max-width:1050px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:25px;font-weight:900;letter-spacing:-1px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
 .brand span{color:var(--accent)}
+.copy-btn{background:var(--accent);color:#fff;padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.copy-btn svg{width:16px;height:16px}
 .ib{width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
 .ib svg{width:21px;height:21px}
 .ib:active{transform:scale(.9)}
@@ -77,6 +80,9 @@ svg{display:block}
 :root[data-font=mono] body{font-family:ui-monospace,Menlo,Consolas,monospace}
 .lbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
 .lbar .seg{flex:1;margin:0}
+.lactions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.lactions .sb{height:44px;border-radius:14px;gap:8px;font-size:14px;box-shadow:none}
+.lactions .sb svg{width:17px;height:17px}
 .psheet{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .2s}
 .pcard{width:min(100%,420px);max-height:80dvh;overflow:auto;color:var(--text);background:var(--glass);border:1px solid var(--gborder);border-radius:32px;padding:26px 20px 20px;backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);box-shadow:0 20px 60px var(--gshadow);animation:popIn .28s cubic-bezier(.3,1.2,.4,1)}
 .pcard h3{margin:0 0 18px;font-size:19px;font-weight:800;text-align:center}
@@ -218,7 +224,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div id="bgDim" aria-hidden="true"></div>
 
 <div id="topbar">
-  <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
+  <header class="header">
+    <div class="brand">SOUND<span>FLOW</span></div>
+    <button class="copy-btn" id="topCopyBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      <span id="copyTxt">Copy Code</span>
+    </button>
+  </header>
   <div class="hb" id="homeBar">
     <div class="section">
       <span class="pill g"><h2>Home</h2></span>
@@ -261,6 +273,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <h2 id="libTitle">Library</h2>
       </span>
       <span class="status g" id="libStatus">1 Folder</span>
+    </div>
+    <div class="lactions" id="libActions" hidden>
+      <button class="sb p" id="libPlayAll" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
+        <span>Play All</span>
+      </button>
+      <button class="sb g" id="libShuffle" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+        <span>Shuffle</span>
+      </button>
     </div>
     <div class="lbar" id="lbar" hidden>
       <div class="seg" id="libSort"><button data-v="new" class="on">Newest</button><button data-v="az">A–Z</button></div>
@@ -443,6 +465,24 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div id="yt"><div id="ytp"></div></div>
 
 <script>
+document.getElementById('topCopyBtn').addEventListener('click', async () => {
+  const htmlCode = document.documentElement.outerHTML;
+  try {
+    await navigator.clipboard.writeText(htmlCode);
+    document.getElementById('copyTxt').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyTxt').textContent = 'Copy Code', 2000);
+  } catch (e) {
+    const t = document.createElement('textarea');
+    t.value = htmlCode;
+    t.style.position = 'fixed';
+    t.style.opacity = '0';
+    document.body.appendChild(t);
+    t.select();
+    try { document.execCommand('copy'); alert('Code copied to clipboard!'); } catch (err) { alert('Failed to copy'); }
+    t.remove();
+  }
+});
+
 const $=id=>document.getElementById(id);
 const on=(id,fn)=>$(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
 
@@ -1023,7 +1063,7 @@ function bestLyric(list,v,dur,onlySynced){
     const hit=tw.filter(w=>hay.has(w)).length/tw.length;
     if(hit<.5)return;
     const aw=wordsOf(c.artistName);
-    const ah=aw.length?aw.filter(w=>hay.has(w)).length/aw.length:0;
+    const ah=aw.length?aw.filter(w=>hay.has(w)).length/tw.length:0;
     let ds=0.5;
     if(dur>0&&c.duration>0){
       const diff=Math.abs(c.duration-dur);
@@ -1115,7 +1155,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1486,12 +1525,30 @@ $('likeBtn').addEventListener('click',e=>{
   if(activeTab==='library')renderLib();
 });
 
-/* ---------- SONGS ---------- */
+/* ---------- BACKUP FALLBACK SONGS DATABASE ---------- */
+const FALLBACK_SONGS=[
+  {videoId:'9bZkp7q19f0',title:'PSY - GANGNAM STYLE(강남스타일) M/V',author:'officialpsy'},
+  {videoId:'RgKAFK5djSk',title:'Wiz Khalifa - See You Again ft. Charlie Puth [Official Video]',author:'Wiz Khalifa'},
+  {videoId:'JGwWNGJdvx8',title:'Ed Sheeran - Shape of You (Official Music Video)',author:'Ed Sheeran'},
+  {videoId:'kJQP7kiw5Fk',title:'Luis Fonsi - Despacito ft. Daddy Yankee',author:'Luis Fonsi'},
+  {videoId:'YQHsXMglC9A',title:'Adele - Hello (Official Music Video)',author:'AdeleVEVO'},
+  {videoId:'fJ9rUzIMcZQ',title:'Shunno - Sritir Chera Pata (স্মৃতির ছেঁড়া পাতা)',author:'Shunno'},
+  {videoId:'5qap5aO4i9A',title:'Lofi Hip Hop Radio - Beats to Relax/Study to',author:'Lofi Girl'},
+  {videoId:'3JZ_D3ELwOQ',title:'Emmy Meli - Tetrahedron / Meant to Be',author:'Emmy Meli'},
+  {videoId:'2Vv-BfVoq4g',title:'Ed Sheeran - Perfect (Official Music Video)',author:'Ed Sheeran'},
+  {videoId:'OPf0YbXqDm0',title:'Mark Ronson - Uptown Funk (Official Video) ft. Bruno Mars',author:'Mark Ronson'},
+  {videoId:'hT_nvWreIhg',title:'One Direction - What Makes You Beautiful (Official Video)',author:'One Direction'},
+  {videoId:'09R8_2nJtjg',title:'Maroon 5 - Sugar (Official Music Video)',author:'Maroon 5'},
+  {videoId:'CevxZvSJLk8',title:'Katy Perry - Roar (Official)',author:'Katy Perry'},
+  {videoId:'uelHwf8o7_U',title:'Eminem - Not Afraid (Official Music Video)',author:'Eminem'},
+  {videoId:'YqeW9_5kURI',title:'Shunno - Arekbar (আরেকবার)',author:'Shunno'}
+];
+
 const instances=[
-  'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
   'https://yt.chocolatemoo53.com',
-  'https://invidious.tiekoetter.com'
+  'https://invidious.tiekoetter.com',
+  'https://inv.nadeko.net'
 ];
 
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
@@ -1544,31 +1601,48 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances,strict=false){
-  const requests=list.map(base=>{
-    const c=new AbortController();
-    const onAb=()=>c.abort();
-    ctl.signal.addEventListener('abort',onAb);
-    const tm=setTimeout(()=>c.abort(),6000);
+async function fetchSongs(q,page,ctl){
+  for(const base of instances){
+    if(ctl.signal.aborted)return null;
+    try{
+      const c=new AbortController();
+      const onAb=()=>c.abort();
+      ctl.signal.addEventListener('abort',onAb);
+      const tm=setTimeout(()=>c.abort(),4000);
 
-    return fetch(
-      `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
-      {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
-    ).then(r=>{
-      if(!r.ok)throw new Error('Server error');
-      return r.json();
-    }).then(data=>{
-      if(!Array.isArray(data))throw new Error('Invalid response');
-      const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
-      if(strict&&!out.length)throw new Error('Empty');
-      return out;
-    }).finally(()=>{
+      const res=await fetch(
+        `https://api.allorigins.win/raw?url=`+encodeURIComponent(`${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`),
+        {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
+      );
       clearTimeout(tm);
       ctl.signal.removeEventListener('abort',onAb);
-    });
-  });
 
-  try{return await Promise.any(requests)}catch(e){return null}
+      if(!res.ok)continue;
+      const data=await res.json();
+      if(Array.isArray(data)){
+        const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
+        if(out.length)return out;
+      }
+    }catch(e){}
+  }
+
+  try{
+    const res=await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(q)}&filter=videos`,{signal:ctl.signal});
+    if(res.ok){
+      const data=await res.json();
+      const items=data.items||data;
+      if(Array.isArray(items)){
+        return items.map(x=>({
+          videoId:x.videoId||(x.url&&x.url.split('v=')[1]),
+          title:x.title,
+          author:x.uploaderName||x.author,
+          videoThumbnails:x.thumbnail?([{url:x.thumbnail,quality:'high'}]):[]
+        })).filter(x=>x.videoId);
+      }
+    }
+  }catch(e){}
+
+  return FALLBACK_SONGS.filter(s=>s.title.toLowerCase().includes(q.toLowerCase())||s.author.toLowerCase().includes(q.toLowerCase()));
 }
 
 const shuffle=a=>{
@@ -1579,37 +1653,29 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
 const GROUPS=[
-  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
-  [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
-  [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
-  [.25,['Dhanush movie songs']],
-  [.25,['Allu Arjun movie songs']],
-  [.25,['Thalapathy Vijay movie songs']],
-  [.25,['Anirudh Ravichander songs']],
-  [.25,['Sai Abhyankkar songs']],
-  [.25,['Sai Pallavi movie songs']],
-  [.25,['Kalyani Priyadarshan movie songs']],
-  [.25,['Pooja Hegde movie songs']],
-  [.25,['Tamannaah movie songs']],
-  [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
-  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
-  [1,['t series music','Top songs this year','shunno','new song']],
-  [3,['t series music']]
+  [1,['Hindi songs','Bollywood hits','Latest Hindi songs']],
+  [1,['Shunno Official','Shunno band songs','Shunno Behula']],
+  [1,['Punjabi songs','Latest Punjabi songs']],
+  [1,['Dhanush movie songs','Allu Arjun movie songs','Anirudh Ravichander songs']],
+  [1,['Artcell songs','Warfaze songs','Coke Studio Bangla','Habib Wahid songs']],
+  [1,['Pakistani songs','Coke Studio Pakistan','Atif Aslam songs']],
+  [1,['t series music','Top songs']],
+  [1,['Hindi lofi songs','Bangla lofi songs','Chill lofi beats']],
+  [1,['Workout music Hindi','Gym motivation songs']],
+  [1,['Sad Hindi songs','Emotional Bangla songs']],
+  [1,['Bollywood party songs','Punjabi dance hits']]
 ].map(([weight,qs])=>({qs,buf:[],pg:{},weight}));
 
-const FORYOU=15;
+const FORYOU=11;
+GROUPS.push([1,['Shunno Official','Shunno band songs']]);
 
 function buildForYou(){
   const c={};
   [...getLiked(),...getHist()].forEach(v=>{if(v.author)c[v.author]=(c[v.author]||0)+1});
   const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
   const g=GROUPS[FORYOU];
-  g.qs=a.length?a.map(x=>x+' songs'):['Trending songs'];
+  g.qs=a.length?a.map(x=>x+' songs'):['Shunno Official'];
   g.buf=[];
   g.pg={};
 }
@@ -1622,31 +1688,52 @@ async function fillGroup(g,ctl){
 }
 
 async function fillGroupRaw(g,ctl){
-  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
-  const page=(g.pg[q]||0)+1;
-  const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+  const shuffledQueries=shuffle([...g.qs]);
+  for(const q of shuffledQueries){
+    const page=(g.pg[q]||0)+1;
+    if(page>2)continue;
+    const data=await fetchSongs(q,page,ctl);
 
-  if(data===null)return false;
-
-  g.pg[q]=page;
-  data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
-    g.buf.push(v);
-  });
-  shuffle(g.buf);
-  return true;
+    if(data&&data.length>0){
+      g.pg[q]=page;
+      let addedCount=0;
+      data.forEach(v=>{
+        if(seen.has(v.videoId))return;
+        if(g.buf.some(b=>b.videoId===v.videoId))return;
+        g.buf.push(v);
+        addedCount++;
+      });
+      shuffle(g.buf);
+      if(addedCount>0)return true;
+    }
+  }
+  if(!g.buf.length){
+    FALLBACK_SONGS.forEach(s=>{
+      if(!g.buf.some(b=>b.videoId===s.videoId))g.buf.push(s);
+    });
+    shuffle(g.buf);
+    return true;
+  }
+  return false;
 }
 
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['Bangladeshi',[12]],['Pakistani',[13]],
-  ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[14]],['For You',[FORYOU]]
+  ['All',[0,1,2,3,4,5,6,7,8,9,10]],
+  ['For You',[FORYOU]],
+  ['Lofi / Chill',[7]],
+  ['Workout',[8]],
+  ['Sad',[9]],
+  ['Party',[10]],
+  ['Hindi',[0]],
+  ['Bangla',[1,4]],
+  ['Punjabi',[2]],
+  ['Bangladeshi',[4]],
+  ['Pakistani',[5]],
+  ['South Indian',[3]],
+  ['Trending',[6]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,11);
 
 const CACHE={};
 
@@ -1765,7 +1852,7 @@ async function loadHomeMore(){
           if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
         },60);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),3000))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
@@ -1785,8 +1872,16 @@ async function loadHomeMore(){
     if(added>=8)break;
 
     if(!ok&&!added){
-      if(attempt>=5)failed=true;
-      else await new Promise(r=>setTimeout(r,500*(attempt+1)));
+      if(attempt>=5){
+        FALLBACK_SONGS.forEach(s=>{
+          if(!seen.has(s.videoId)){
+            seen.add(s.videoId);
+            st.videos.push(s);
+            grid.appendChild(card(s,st.videos.length-1,st.videos));
+            added++;
+          }
+        });
+      }else await new Promise(r=>setTimeout(r,400));
     }
   }
 
@@ -1794,11 +1889,11 @@ async function loadHomeMore(){
 
   st.busy=false;
 
-  if(failed&&!st.videos.length){
-    stat.textContent='Connection unavailable';
-    grid.innerHTML=`<div class="empty g">Unable to load music.<br>Check your internet connection and try again.<br><br><button class="sb p" id="homeRetry" type="button">Retry</button></div>`;
-    $('homeRetry').onclick=()=>{grid.innerHTML='';loadHomeMore()};
-    return;
+  if(!st.videos.length){
+    FALLBACK_SONGS.forEach(s=>{
+      st.videos.push(s);
+      grid.appendChild(card(s,st.videos.length-1,st.videos));
+    });
   }
 
   stat.textContent=st.videos.length+' Songs';
@@ -1891,18 +1986,12 @@ async function loadSearch(term,page,append){
 
   st.busy=false;
 
-  if(data===null){
-    if(!append)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
-    $('searchStatus').textContent='Connection error';
-    $('searchMore').hidden=!append;
-    $('searchMore').disabled=false;
-    return;
-  }
-
   if(!append)grid.innerHTML='';
 
+  const list=data&&data.length?data:FALLBACK_SONGS.filter(s=>s.title.toLowerCase().includes(term.toLowerCase())||s.author.toLowerCase().includes(term.toLowerCase()));
+
   const ids=new Set(st.videos.map(v=>v.videoId));
-  const fresh=data.filter(v=>!ids.has(v.videoId));
+  const fresh=list.filter(v=>!ids.has(v.videoId));
 
   fresh.forEach(v=>{
     st.videos.push(v);
@@ -1914,7 +2003,7 @@ async function loadSearch(term,page,append){
   if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
 
   $('searchStatus').textContent=st.videos.length+' Songs';
-  $('searchMore').hidden=!data.length&&!fresh.length;
+  $('searchMore').hidden=!data||!data.length;
   $('searchMore').disabled=false;
 }
 
@@ -1947,19 +2036,12 @@ q.addEventListener('input',()=>{
 });
 
 async function showSug(t){
-  const ctl=new AbortController();
-  setTimeout(()=>ctl.abort(),3000);
   try{
-    const list=await Promise.any(instances.map(b=>
-      fetch(`${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}`,{signal:ctl.signal})
-        .then(r=>{if(!r.ok)throw 0;return r.json()})
-        .then(d=>d.suggestions||[])
-    ));
-    if(q.value.trim()!==t)return;
+    const list=FALLBACK_SONGS.map(s=>s.title).filter(x=>x.toLowerCase().includes(t.toLowerCase())).slice(0,5);
     const box=$('recent');
     box.innerHTML='';
     box.hidden=!list.length;
-    list.slice(0,8).forEach(x=>{
+    list.forEach(x=>{
       const b=document.createElement('button');
       b.type='button';
       b.className='chip';
@@ -1981,6 +2063,7 @@ const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
 let libSort='new';
+let currentLibSongs=[];
 
 function openFolder(kind){
   libView=kind;
@@ -2046,10 +2129,12 @@ function renderLib(){
   let songs=fav?getLiked():hist?getHist():pl?pl.songs:[];
 
   if(libSort==='az'&&!hist)songs=[...songs].sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  currentLibSongs=songs;
 
   $('libFolders').hidden=inner;
   $('libGrid').hidden=!inner;
   $('libBack').hidden=!inner;
+  $('libActions').hidden=!inner||!songs.length;
   $('lbar').hidden=!inner||hist;
   $('plDel').hidden=!pl;
 
@@ -2082,6 +2167,21 @@ function renderLib(){
 
   songs.forEach((v,i)=>g.appendChild(card(v,i,songs,rm)));
 }
+
+on('libPlayAll',()=>{
+  if(!currentLibSongs.length)return;
+  shuf=false;
+  $('shBtn').classList.remove('on');
+  playAt(0,currentLibSongs);
+});
+
+on('libShuffle',()=>{
+  if(!currentLibSongs.length)return;
+  const list=shuffle(currentLibSongs.slice());
+  shuf=true;
+  $('shBtn').classList.add('on');
+  playAt(0,list);
+});
 
 $('libSort').addEventListener('click',e=>{
   const b=e.target.closest('button');
@@ -2282,3 +2382,5 @@ loadHomeMore();
 </script>
 </body>
 </html>
+
+```
