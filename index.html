@@ -2284,14 +2284,15 @@ loadHomeMore();
 (function(){
   const CFG={
     apiKey:"AIzaSyBEbe08tF-kLx_NMjK4U9x38Nf54_MXLH4",
-    authDomain:"soundflow-37b28.firebaseapp.com",
+    // Vercel domain is used as authDomain. vercel.json proxies /__/auth/* to Firebase.
+    authDomain:"abdullah55.vercel.app",
     projectId:"soundflow-37b28",
     storageBucket:"soundflow-37b28.firebasestorage.app",
     messagingSenderId:"133876585541",
     appId:"1:133876585541:web:33be86e76dd04a29a5ff2c"
   };
   const SYNC=['sf_liked_songs','sf_history','sf_playlists','sf_recent','sf_settings_v3'];
-  let user=null,auth=null,db=null,pushT=null,pulling=false;
+  let user=null,auth=null,db=null,pushT=null,pulling=false,authReady=Promise.resolve();
 
   const sec=document.createElement('div');
   sec.className='sec g';
@@ -2350,33 +2351,62 @@ loadHomeMore();
     document.head.appendChild(s);
   });
 
+  // iOS Home Screen apps are standalone; use redirect there rather than a blocked popup.
+  const isStandalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+
   load('firebase-app-compat.js')
     .then(()=>Promise.all([load('firebase-auth-compat.js'),load('firebase-firestore-compat.js')]))
     .then(()=>{
       firebase.initializeApp(CFG);
       auth=firebase.auth();
       db=firebase.firestore();
-      auth.onAuthStateChanged(async u=>{
-        user=u;
-        $('gIn').hidden=!!u;
-        $('gOut').hidden=!u;
-        info(u?u.email:'Sign in to sync across devices');
-        if(u)await pull();
+      authReady=auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async()=>{
+        auth.onAuthStateChanged(async u=>{
+          user=u;
+          $('gIn').hidden=!!u;
+          $('gOut').hidden=!u;
+          info(u?(u.email||'Google account connected'):'Sign in to sync across devices');
+          if(u)await pull();
+        });
+        // Resolve a pending Google redirect when the Home Screen app returns.
+        try{
+          const result=await auth.getRedirectResult();
+          if(result&&result.user)info('Signed in as '+(result.user.email||'Google account'));
+        }catch(e){
+          info('Login error: '+(e.code||e.message));
+        }
       });
+      return authReady;
     })
-    .catch(()=>info('Could not load Firebase. Check internet.'));
+    .catch(e=>info('Could not load Firebase: '+(e.code||e.message||'Check internet')));
 
   $('gIn').onclick=async()=>{
     if(!auth)return info('Please wait…');
-    const p=new firebase.auth.GoogleAuthProvider();
-    try{await auth.signInWithPopup(p)}
-    catch(e){
-      if(e.code==='auth/popup-closed-by-user')return;
-      if(e.code==='auth/unauthorized-domain')return info('Add your site domain in Firebase → Authentication → Settings → Authorized domains');
-      try{await auth.signInWithRedirect(p)}catch(err){info('Login error: '+(err.code||err.message))}
+    try{
+      await authReady;
+      const p=new firebase.auth.GoogleAuthProvider();
+      p.setCustomParameters({prompt:'select_account'});
+      if(isStandalone){
+        info('Opening Google sign-in…');
+        await auth.signInWithRedirect(p);
+        return;
+      }
+      try{
+        await auth.signInWithPopup(p);
+      }catch(e){
+        if(e.code==='auth/popup-closed-by-user')return;
+        if(e.code==='auth/unauthorized-domain'){
+          info('Add abdullah55.vercel.app in Firebase Authorized domains.');
+          return;
+        }
+        info('Switching to secure sign-in…');
+        await auth.signInWithRedirect(p);
+      }
+    }catch(err){
+      info('Login error: '+(err.code||err.message));
     }
   };
-  $('gOut').onclick=()=>{if(auth)auth.signOut()};
+  $('gOut').onclick=()=>{if(auth)auth.signOut().catch(e=>info('Sign-out error: '+(e.code||e.message)))};
 })();
 </script>
 </body>
