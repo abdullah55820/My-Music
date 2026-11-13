@@ -761,9 +761,9 @@ $('spBack').onclick=()=>{
   history.back();
 };
 
-/* ---------- PLAYER & SIMILAR SONG RADIO ---------- */
+/* ---------- PLAYER & TRUE SIMILAR SONG RADIO ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
-let simQueue=[],simSeedId='',simFetching=false,simCtl=null;
+let simQueue=[],simSeedId='',simCtl=null;
 
 const seek=$('seek');
 const PLAY='<path d="M7 4v16l13-8z"/>';
@@ -817,7 +817,7 @@ function onYtError(){
   playing=false;
   icons();
   stopT();
-  if(++errCount<6)setTimeout(next,600);
+  if(++errCount<6)setTimeout(next,400);
 }
 
 function icons(){$('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY}
@@ -994,7 +994,7 @@ function avgColor(src,w,h){
 function loadCorsImg(url){
   return new Promise((res,rej)=>{
     const im=new Image();
-    const t=setTimeout(rej,4000);
+    const t=setTimeout(rej,2500);
     im.crossOrigin='anonymous';
     im.onload=()=>{clearTimeout(t);res(im)};
     im.onerror=()=>{clearTimeout(t);rej()};
@@ -1020,7 +1020,7 @@ function setTint(v){
   const isCurrent=()=>queue[idx]&&queue[idx].videoId===id;
 
   sampleTint(v).then(col=>{if(isCurrent())paintTint(col||'#2a2a2e')});
-  setTimeout(()=>{if(!tintCache[id]&&isCurrent())paintTint('#2a2a2e')},2500);
+  setTimeout(()=>{if(!tintCache[id]&&isCurrent())paintTint('#2a2a2e')},2000);
 
   if(queue.length>1){
     const nv=queue[(idx+1)%queue.length];
@@ -1267,41 +1267,61 @@ function closePlayer(){
   resetProg();
 }
 
-/* Fetch similar songs automatically whenever a song plays */
+/* Fetch true YouTube recommended/related songs via /api/v1/videos/{id} */
+async function fetchRelated(videoId,ctl){
+  const reqs=instances.map(base=>{
+    const c=new AbortController();
+    const onAb=()=>c.abort();
+    ctl.signal.addEventListener('abort',onAb);
+    const tm=setTimeout(()=>c.abort(),2500);
+    return fetch(`${base}/api/v1/videos/${encodeURIComponent(videoId)}`,{
+      signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'
+    }).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
+      const rel=(d&&d.recommendedVideos)||[];
+      const out=rel.filter(x=>x&&x.videoId&&(!x.lengthSeconds||(x.lengthSeconds>60&&x.lengthSeconds<720)));
+      if(!out.length)throw 0;
+      return out;
+    }).finally(()=>{clearTimeout(tm);ctl.signal.removeEventListener('abort',onAb)});
+  });
+  try{return await Promise.any(reqs)}catch(e){return null}
+}
+
 async function fetchSimilar(v){
   if(!v||!v.videoId)return;
   if(simCtl)simCtl.abort();
   const ctl=new AbortController();
   simCtl=ctl;
-  simFetching=true;
   simSeedId=v.videoId;
 
-  const titleClean=cleanTitle(v.title);
-  const authorClean=(v.author||'').replace(/\s*-\s*Topic$/i,'').trim();
-  const q1=(titleClean+' '+authorClean+' song').trim();
-  const q2=authorClean?(authorClean+' hit songs'):(titleClean+' mix');
+  let res=await fetchRelated(v.videoId,ctl);
+  if(ctl.signal.aborted)return;
 
-  try{
-    let res=await fetchSongs(q1,1,ctl,instances,true);
-    if((!res||res.length<4)&&!ctl.signal.aborted){
-      const res2=await fetchSongs(q2,1,ctl,instances,true);
-      if(res2)res=[...(res||[]),...res2];
-    }
-    if(ctl.signal.aborted)return;
-    if(res&&res.length){
-      const playedIds=new Set(queue.slice(0,idx+1).map(x=>x.videoId));
-      const unique=[];
-      const localSeen=new Set();
-      res.forEach(item=>{
-        if(item&&item.videoId&&!playedIds.has(item.videoId)&&!localSeen.has(item.videoId)){
-          localSeen.add(item.videoId);
-          unique.push(item);
-        }
-      });
-      simQueue=unique;
-    }
-  }catch(e){}finally{
-    if(simCtl===ctl)simFetching=false;
+  /* Fallback to artist + song search if related endpoint is empty */
+  if(!res||!res.length){
+    const authorClean=(v.author||'').replace(/\s*-\s*Topic$/i,'').trim();
+    const titleClean=cleanTitle(v.title);
+    const q=authorClean?(authorClean+' songs'):(titleClean+' song');
+    res=await fetchSongs(q,1,ctl,instances,true,2500);
+  }
+  if(ctl.signal.aborted)return;
+
+  if(res&&res.length){
+    const playedIds=new Set(queue.slice(0,idx+1).map(x=>x.videoId));
+    const unique=[];
+    const localSeen=new Set();
+    res.forEach(item=>{
+      if(item&&item.videoId&&!playedIds.has(item.videoId)&&!localSeen.has(item.videoId)){
+        localSeen.add(item.videoId);
+        unique.push({
+          videoId:item.videoId,
+          title:item.title,
+          author:item.author,
+          lengthSeconds:item.lengthSeconds,
+          videoThumbnails:item.videoThumbnails
+        });
+      }
+    });
+    simQueue=unique;
   }
 }
 
@@ -1324,7 +1344,7 @@ function playAt(i,list,isSimilarTransition=false){
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
   else pending=v.videoId;
 
-  /* Always prefetch similar songs based on the currently playing song if simQueue is low */
+  /* Prefetch similar songs immediately in background without blocking playback or Next button */
   if(!isSimilarTransition||simQueue.length<3){
     fetchSimilar(v);
   }
@@ -1333,7 +1353,8 @@ function playAt(i,list,isSimilarTransition=false){
 const SLEEPS=[0,15,30,60];
 let shuf=false,rep=0,slIdx=0,slT=null;
 
-const next=async()=>{
+/* Instant Next — zero waiting delay */
+function next(){
   if(!queue.length||idx<0)return;
 
   if(shuf&&queue.length>1){
@@ -1343,14 +1364,7 @@ const next=async()=>{
     return;
   }
 
-  /* Wait briefly if similar songs are still being fetched for the current track */
-  if(!simQueue.length&&simFetching){
-    for(let k=0;k<12&&simFetching&&!simQueue.length;k++){
-      await new Promise(r=>setTimeout(r,200));
-    }
-  }
-
-  /* Play similar song next (both on Next click and when song ends) */
+  /* If similar songs are ready, play the next similar song immediately */
   if(simQueue.length){
     const nextSim=simQueue.shift();
     queue.splice(idx+1,0,nextSim);
@@ -1358,13 +1372,13 @@ const next=async()=>{
     return;
   }
 
-  /* Fallback to next item in existing list */
+  /* Otherwise jump immediately to next song in queue */
   if(idx+1<queue.length){
     playAt(idx+1);
   }else{
     playAt(0);
   }
-};
+}
 
 const getHist=()=>LS.get('sf_history',[]);
 function addHist(v){
@@ -1629,12 +1643,12 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances,strict=false){
+async function fetchSongs(q,page,ctl,list=instances,strict=false,timeoutMs=2500){
   const requests=list.map(base=>{
     const c=new AbortController();
     const onAb=()=>c.abort();
     ctl.signal.addEventListener('abort',onAb);
-    const tm=setTimeout(()=>c.abort(),6000);
+    const tm=setTimeout(()=>c.abort(),timeoutMs);
 
     return fetch(
       `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
@@ -1712,7 +1726,7 @@ async function fillGroupRaw(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few,2400);
 
   if(data===null)return false;
 
@@ -1803,7 +1817,6 @@ function takeSong(){
 
   const isAll=(chip===0);
 
-  /* Strict Round-Robin for 'All' tab so songs always mix evenly across categories even after refresh */
   if(isAll){
     for(let step=0;step<allGs.length;step++){
       const idxG=(rrIdx+step)%allGs.length;
@@ -1849,6 +1862,7 @@ const AHEAD=6000;
 
 function keepFilling(){if(!D.home.busy)loadHomeMore()}
 
+/* Fast loading capped at 2-2.5 seconds */
 async function loadHomeMore(){
   const st=D.home;
   if(st.busy)return;
@@ -1863,30 +1877,28 @@ async function loadHomeMore(){
   let added=0,failed=false;
   const isAll=(chip===0);
 
-  for(let attempt=0;attempt<6&&added<24&&!ctl.signal.aborted;attempt++){
+  for(let attempt=0;attempt<3&&added<24&&!ctl.signal.aborted;attempt++){
     const need=activeGroups().filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
       const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
       let poll;
-      const first=!st.videos.length;
       const t0=Date.now();
-      const minGroups=Math.min(isAll?6:3,activeGroups().length);
+      const minGroups=Math.min(isAll?4:2,activeGroups().length);
       const enough=new Promise(r=>{
         poll=setInterval(()=>{
           if(ctl.signal.aborted){r('abort');return}
           const gs=activeGroups().filter(g=>g.buf.length);
           const n=gs.reduce((a,g)=>a+g.buf.length,0);
           if(isAll){
-            /* Wait until multiple diverse categories have loaded before rendering so refresh never dumps one language */
-            if((gs.length>=minGroups&&n>=12)||(gs.length>=3&&Date.now()-t0>2200)||(n>0&&Date.now()-t0>3500))r('fast');
+            if((gs.length>=minGroups&&n>=8)||(gs.length>=2&&Date.now()-t0>1400)||(n>0&&Date.now()-t0>2000))r('fast');
           }else{
-            if(!first||(n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
+            if((n>=6&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1200))r('fast');
           }
-        },60);
+        },50);
       });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4200))]);
+      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),2400))]);
       clearInterval(poll);
 
       if(ctl.signal.aborted)break;
@@ -1894,9 +1906,8 @@ async function loadHomeMore(){
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
-    /* In 'All' tab, only dispense when at least 3 different categories have songs buffered (or on last attempt) */
     const readyCategories=activeGroups().filter(g=>g.buf.length).length;
-    if(!isAll||readyCategories>=3||attempt>=3){
+    if(!isAll||readyCategories>=2||attempt>=1){
       while(added<24){
         const v=takeSong();
         if(!v)break;
@@ -1907,11 +1918,11 @@ async function loadHomeMore(){
       }
     }
 
-    if(added>=12)break;
+    if(added>=10)break;
 
     if(!ok&&!added){
-      if(attempt>=5)failed=true;
-      else await new Promise(r=>setTimeout(r,500*(attempt+1)));
+      if(attempt>=2)failed=true;
+      else await new Promise(r=>setTimeout(r,300));
     }
   }
 
@@ -2010,7 +2021,7 @@ async function loadSearch(term,page,append){
     grid.innerHTML='<div class="empty g">Searching…</div>';
   }
 
-  const data=await fetchSongs(term,page,ctl);
+  const data=await fetchSongs(term,page,ctl,instances,false,2800);
 
   if(st.ctl!==ctl||ctl.signal.aborted)return;
 
@@ -2068,12 +2079,12 @@ q.addEventListener('input',()=>{
   clearTimeout(sugT);
   const t=q.value.trim();
   if(t.length<2){renderRecent();return}
-  sugT=setTimeout(()=>showSug(t),250);
+  sugT=setTimeout(()=>showSug(t),220);
 });
 
 async function showSug(t){
   const ctl=new AbortController();
-  setTimeout(()=>ctl.abort(),3000);
+  setTimeout(()=>ctl.abort(),2200);
   try{
     const list=await Promise.any(instances.map(b=>
       fetch(`${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}`,{signal:ctl.signal})
@@ -2308,7 +2319,7 @@ async function doRefresh(){
   ptr.classList.add('spin');
   ptrMove(60,true);
 
-  await Promise.all([refreshHome(),new Promise(r=>setTimeout(r,700))]);
+  await Promise.all([refreshHome(),new Promise(r=>setTimeout(r,500))]);
 
   ptr.classList.remove('spin');
   refreshing=false;
