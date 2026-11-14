@@ -75,8 +75,21 @@ svg{display:block}
 :root[data-labels=off] .nb span{display:none}
 :root[data-font=serif] body{font-family:Georgia,"Times New Roman",serif}
 :root[data-font=mono] body{font-family:ui-monospace,Menlo,Consolas,monospace}
-.lbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
-.lbar .seg{flex:1;margin:0}
+.lbar{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:26px;margin-bottom:14px}
+.lrow{display:flex;gap:10px;align-items:center}
+.lrow .seg{flex:1;margin:0}
+.lglass{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.26),rgba(255,255,255,.05) 55%,rgba(255,255,255,.14)),var(--glass);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(26px) saturate(210%) brightness(1.05);-webkit-backdrop-filter:blur(26px) saturate(210%) brightness(1.05);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.12),inset 0 0 22px rgba(255,255,255,.06),0 10px 30px var(--gshadow)}
+.lglass .seg{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.lglass .seg button.on{background:rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 8px rgba(0,0,0,.15)}
+.lsrch{display:flex;align-items:center;gap:10px;height:48px;padding:0 7px 0 16px;border-radius:24px;margin:0;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -8px 16px rgba(255,255,255,.04)}
+.lsrch:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),inset 0 1px 0 rgba(255,255,255,.4)}
+.lsrch>svg{width:19px;height:19px;color:var(--muted);flex-shrink:0}
+.lsrch input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--text);font-size:16px}
+.lsrch input::placeholder{color:var(--muted)}
+.lsrch input::-webkit-search-cancel-button{display:none}
+:root[data-theme=light] .lglass .seg{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.06)}
+:root[data-theme=light] .lglass .seg button.on{background:rgba(255,255,255,.85)}
+:root[data-theme=light] .lsrch{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.8)}
 .psheet{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .2s}
 .pcard{width:min(100%,420px);max-height:80dvh;overflow:auto;color:var(--text);background:var(--glass);border:1px solid var(--gborder);border-radius:32px;padding:26px 20px 20px;backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);box-shadow:0 20px 60px var(--gshadow);animation:popIn .28s cubic-bezier(.3,1.2,.4,1)}
 .pcard h3{margin:0 0 18px;font-size:19px;font-weight:800;text-align:center}
@@ -92,10 +105,12 @@ svg{display:block}
 :root[data-cols="1"] .grid .thumb,:root[data-cols="1"] .grid .fcover{aspect-ratio:16/9;border-radius:0}
 :root[data-cols="1"] .grid .title{margin:12px 14px 4px;font-size:15px;line-height:1.35}
 :root[data-cols="1"] .grid .artist{margin:0 14px 13px;font-size:12px}
-:root[data-list=on] .grid .card{display:grid;grid-template-columns:68px minmax(0,1fr);grid-template-rows:1fr 1fr;column-gap:12px;align-items:center;padding:8px}
-:root[data-list=on] .grid .thumb,:root[data-list=on] .grid .fcover{grid-row:1/3;width:68px;height:68px}
-:root[data-list=on] .grid .title{align-self:end;margin:0 2px 2px;font-size:14px}
-:root[data-list=on] .grid .artist{align-self:start;margin:2px 2px 0;font-size:12px}
+:root[data-list=on] .grid{gap:6px}
+:root[data-list=on] .grid .card{display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;row-gap:0;align-items:center;align-content:center;padding:5px 10px 5px 5px;border-radius:calc(var(--r) - 4px)}
+:root[data-list=on] .grid .thumb,:root[data-list=on] .grid .fcover{grid-row:1/3;width:46px;height:46px;border-radius:10px}
+:root[data-list=on] .grid .title{align-self:end;margin:0 2px 1px;font-size:13px;line-height:1.25;-webkit-line-clamp:1}
+:root[data-list=on] .grid .artist{align-self:start;margin:0 2px;font-size:11px}
+:root[data-list=on] .grid .fbadge{display:none}
 .card{border-radius:var(--r);padding:9px;cursor:pointer;min-width:0;transition:transform .2s;contain:layout paint style}
 .card:active{transform:scale(.97)}
 .grid .g{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
@@ -282,10 +297,19 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </span>
       <span class="status g" id="libStatus">1 Folder</span>
     </div>
-    <div class="lbar" id="lbar" hidden>
-      <div class="seg" id="libSort"><button data-v="new" class="on">Newest</button><button data-v="az">A–Z</button></div>
-      <button class="sb p" id="locAdd" type="button" hidden>Add songs</button>
-      <button class="sb d" id="plDel" type="button" hidden>Delete</button>
+    <div class="lbar lglass" id="lbar" hidden>
+      <div class="lrow">
+        <div class="seg" id="libSort"><button data-v="new" class="on">Newest</button><button data-v="az">A–Z</button></div>
+        <button class="sb p" id="locAdd" type="button" hidden>Add songs</button>
+        <button class="sb d" id="plDel" type="button" hidden>Delete</button>
+      </div>
+      <form class="lsrch" id="lsrch" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+        <input id="lq" type="search" placeholder="Search offline songs" autocomplete="off" enterkeyhint="search">
+        <button class="xbtn" id="lqx" type="button" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </form>
     </div>
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
@@ -1087,7 +1111,17 @@ function loadCorsImg(url){
 }
 
 async function sampleTint(v){
-  if(v.local)return '#3a3a40';
+  if(v.local){
+    const lid=v.videoId;
+    if(tintCache[lid])return tintCache[lid];
+    for(let i=0;i<12&&!LOCART[lid];i++)await new Promise(r=>setTimeout(r,150));
+    const src=LOCART[lid];
+    if(!src)return '#3a3a40';
+    try{
+      const im=await loadCorsImg(src);
+      return tintCache[lid]=avgColor(im,im.naturalWidth,im.naturalHeight);
+    }catch(e){return '#3a3a40'}
+  }
   const id=v.videoId;
   if(tintCache[id])return tintCache[id];
   const path=`i.ytimg.com/vi/${id}/mqdefault.jpg`;
@@ -1317,7 +1351,7 @@ function setMedia(v){
       title:v.title||'Song',
       artist:v.author||'SoundFlow',
       album:'SoundFlow',
-      artwork:[{src:thumbOf(v),sizes:'320x320'}]
+      artwork:[{src:thumbOf(v),sizes:'512x512'}]
     });
   }catch(e){}
 }
@@ -2202,36 +2236,43 @@ function removeLocal(v){
   if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
 }
 
-/* ---- cover art for offline songs ---- */
+/* ---- cover art for offline songs (kept at original quality) ---- */
+const artSrc=a=>(typeof a==='string')?a:URL.createObjectURL(a);
+
 function genArt(title){
-  const c=document.createElement('canvas');
-  c.width=c.height=320;
-  const x=c.getContext('2d');
-  let h=0;
-  for(const ch of String(title||'')) h=(h*31+ch.charCodeAt(0))%360;
-  const g=x.createLinearGradient(0,0,320,320);
-  g.addColorStop(0,`hsl(${h},70%,55%)`);
-  g.addColorStop(1,`hsl(${(h+60)%360},70%,32%)`);
-  x.fillStyle=g;
-  x.fillRect(0,0,320,320);
-  x.fillStyle='#fff';
-  x.font='700 150px -apple-system,sans-serif';
-  x.textAlign='center';
-  x.textBaseline='middle';
-  x.fillText([...String(title||'').trim()][0]||'♪',160,170);
-  return c.toDataURL('image/jpeg',.8);
+  return new Promise(res=>{
+    const c=document.createElement('canvas');
+    c.width=c.height=800;
+    const x=c.getContext('2d');
+    let h=0;
+    for(const ch of String(title||'')) h=(h*31+ch.charCodeAt(0))%360;
+    const g=x.createLinearGradient(0,0,800,800);
+    g.addColorStop(0,`hsl(${h},70%,55%)`);
+    g.addColorStop(1,`hsl(${(h+60)%360},70%,32%)`);
+    x.fillStyle=g;
+    x.fillRect(0,0,800,800);
+    x.fillStyle='#fff';
+    x.font='700 380px -apple-system,sans-serif';
+    x.textAlign='center';
+    x.textBaseline='middle';
+    x.fillText([...String(title||'').trim()][0]||'♪',400,430);
+    c.toBlob(b=>res(b),'image/jpeg',.92);
+  });
 }
 
-async function blobToThumb(blob){
+/* keeps the original picture untouched; only shrinks it if it is huge */
+async function keepArt(blob){
   const url=URL.createObjectURL(blob);
   try{
     const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
-    const s=Math.min(im.naturalWidth,im.naturalHeight);
-    if(!s)return null;
-    const c=document.createElement('canvas');
-    c.width=c.height=320;
-    c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,320,320);
-    return c.toDataURL('image/jpeg',.8);
+    const w=im.naturalWidth,h=im.naturalHeight;
+    if(!w||!h)return null;
+    const m=Math.max(w,h);
+    if(m<=1400)return blob;
+    const k=1400/m,c=document.createElement('canvas');
+    c.width=Math.round(w*k);c.height=Math.round(h*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(r,'image/jpeg',.92));
   }catch(e){return null}
   finally{URL.revokeObjectURL(url)}
 }
@@ -2239,7 +2280,7 @@ async function blobToThumb(blob){
 /* reads embedded cover from MP3 (ID3 APIC) or M4A (covr) */
 async function readCover(f){
   try{
-    const b=new Uint8Array(await f.slice(0,3*1024*1024).arrayBuffer());
+    const b=new Uint8Array(await f.slice(0,6*1024*1024).arrayBuffer());
     if(b[0]===73&&b[1]===68&&b[2]===51){
       const ver=b[3];
       const end=Math.min(10+((b[6]<<21)|(b[7]<<14)|(b[8]<<7)|b[9]),b.length);
@@ -2259,7 +2300,7 @@ async function readCover(f){
           qd+=2;
           if(enc===1||enc===2){while(qd<end&&!(b[qd]===0&&b[qd+1]===0))qd++;qd+=2}
           else{while(qd<end&&b[qd])qd++;qd++}
-          const t=await blobToThumb(new Blob([b.slice(qd,p+10+sz)],{type:/png/i.test(mime)?'image/png':'image/jpeg'}));
+          const t=await keepArt(new Blob([b.slice(qd,p+10+sz)],{type:/png/i.test(mime)?'image/png':'image/jpeg'}));
           if(t)return t;
           break;
         }
@@ -2269,8 +2310,8 @@ async function readCover(f){
     for(let i=4;i<b.length-24;i++){
       if(b[i]===99&&b[i+1]===111&&b[i+2]===118&&b[i+3]===114){
         const dl=((b[i+4]<<24)|(b[i+5]<<16)|(b[i+6]<<8)|b[i+7])>>>0;
-        if(dl>16&&dl<4*1024*1024){
-          const t=await blobToThumb(new Blob([b.slice(i+20,i+4+dl)],{type:'image/jpeg'}));
+        if(dl>16&&dl<6*1024*1024){
+          const t=await keepArt(new Blob([b.slice(i+20,i+4+dl)],{type:'image/jpeg'}));
           if(t)return t;
         }
         break;
@@ -2285,8 +2326,14 @@ async function loadArt(){
     if(LOCART[v.videoId])continue;
     try{
       let a=await idbGet(v.videoId+':art');
-      if(!a){a=genArt(v.title);try{await idbPut(v.videoId+':art',a)}catch(e){}}
-      LOCART[v.videoId]=a;
+      if(!a||typeof a==='string'){
+        /* older low-quality art: rebuild it from the song file at full quality */
+        const f=await idbGet(v.videoId);
+        let b=f?await readCover(f):null;
+        if(!b)b=await genArt(v.title);
+        if(b){a=b;try{await idbPut(v.videoId+':art',b)}catch(e){}}
+      }
+      if(a)LOCART[v.videoId]=artSrc(a);
     }catch(e){}
   }
   renderLib();
@@ -2308,9 +2355,11 @@ $('locIn').onchange=async e=>{
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     const title=f.name.replace(/\.[^.]+$/,'');
     try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
-    const art=(await readCover(f))||genArt(title);
-    LOCART[id]=art;
-    try{await idbPut(id+':art',art)}catch(err){}
+    const art=(await readCover(f))||(await genArt(title));
+    if(art){
+      LOCART[id]=artSrc(art);
+      try{await idbPut(id+':art',art)}catch(err){}
+    }
     list.unshift({videoId:id,title,author:'Offline',lengthSeconds:0,local:true});
     setLoc(list);
   }
@@ -2319,10 +2368,11 @@ $('locIn').onchange=async e=>{
   if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
 };
 
-let libSort='new';
+let libSort='new',libQ='';
 
 function openFolder(kind){
   libView=kind;
+  libQ='';$('lq').value='';$('lqx').hidden=true;
   renderLib();
   window.scrollTo(0,0);
   pushLayer(()=>{libView='folders';renderLib()});
@@ -2385,12 +2435,14 @@ function renderLib(){
   let songs=fav?getLiked():hist?getHist():loc?getLoc():pl?pl.songs:[];
 
   if(libSort==='az'&&!hist)songs=[...songs].sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  if(loc&&libQ.trim()){const t=libQ.trim().toLowerCase();songs=songs.filter(x=>(x.title||'').toLowerCase().includes(t))}
 
   $('libFolders').hidden=inner;
   $('libGrid').hidden=!inner;
   $('libBack').hidden=!inner;
   $('lbar').hidden=!inner||hist;
   $('plDel').hidden=!pl;
+  $('lsrch').hidden=!loc;
   $('locAdd').hidden=!loc;
 
   $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':loc?'Offline':pl?pl.name:'Library';
@@ -2409,6 +2461,7 @@ function renderLib(){
   const g=$('libGrid');
   g.innerHTML='';
 
+  if(loc&&libQ.trim()&&!songs.length){g.innerHTML='<div class="empty g">No matching songs.</div>';return}
   if(!songs.length){
     g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':loc?'No songs yet.<br><br>Tap Add songs and select all your audio files at once. They play even without internet.':'This playlist is empty.<br><br>Add songs using the playlist button in the player.'}</div>`;
     return;
@@ -2432,6 +2485,10 @@ $('libSort').addEventListener('click',e=>{
   document.querySelectorAll('#libSort button').forEach(x=>x.classList.toggle('on',x===b));
   renderLib();
 });
+
+$('lq').addEventListener('input',()=>{libQ=$('lq').value;$('lqx').hidden=!libQ;renderLib()});
+$('lqx').onclick=()=>{$('lq').value='';libQ='';$('lqx').hidden=true;renderLib();$('lq').focus()};
+$('lsrch').addEventListener('submit',e=>{e.preventDefault();$('lq').blur()});
 
 $('plDel').onclick=()=>{
   if(!libView.startsWith('pl:')||!confirm('Delete this playlist?'))return;
