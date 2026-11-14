@@ -869,7 +869,7 @@ const keep=(()=>{
   a.setAttribute('playsinline','');
   return a;
 })();
-const keepOn=()=>{try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+const keepOn=()=>{if(isLoc()){keepOff();return}try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 const keepOff=()=>{try{keep.pause()}catch(e){}};
 
 function planNext(){
@@ -902,7 +902,7 @@ function loadLocal(v){
     au.load();
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
-    keepOn();
+    keepOff();
     preloadNext();
   };
   if(PRE.id===id&&PRE.url){
@@ -921,6 +921,7 @@ function loadLocal(v){
 /* lock screen / notification bar progress */
 function posState(forcedPos){
   if(!('mediaSession' in navigator)||!navigator.mediaSession.setPositionState)return;
+  if(isLoc()&&forcedPos===undefined)return;
   const d=durT();
   let c=forcedPos!==undefined?forcedPos:curT();
   if(forcedPos===undefined&&seekLock){
@@ -937,9 +938,7 @@ function posState(forcedPos){
     }catch(e){}
   }
 }
-['loadedmetadata','durationchange','seeked','play','pause'].forEach(ev=>au.addEventListener(ev,()=>{if(isLoc())posState()}));
-let lastTU=0;
-au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>800){lastTU=Date.now();posState()}});
+['loadedmetadata','durationchange','seeked','play','pause'].forEach(ev=>au.addEventListener(ev,()=>{if(isLoc()&&ev==='seeked')posState(au.currentTime||0)}));
 au.addEventListener('timeupdate',()=>{
   if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
@@ -952,10 +951,9 @@ au.addEventListener('timeupdate',()=>{
 
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
-  if(!userPause)keepOn();
+  keepOff();
   errCount=0;playing=true;icons();
   bindMediaHandlers();
-  posState();
   $('art').classList.remove('paused');
   startT();
 });
@@ -963,7 +961,6 @@ au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
   keepOff();
   playing=false;icons();
-  posState();
   $('art').classList.add('paused');
   stopT();
 });
@@ -1094,7 +1091,7 @@ function tick(){
       seek.value=p;
       setProg(p);
     }
-    if(d>0&&Date.now()-lastPos>800){
+    if(d>0&&!isLoc()&&Date.now()-lastPos>800){
       lastPos=Date.now();
       posState(c);
     }
