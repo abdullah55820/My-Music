@@ -890,7 +890,7 @@ function onState(e){
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
     playing=true;
-    kaPlay();
+    kaClaim();
     icons();
     $('art').classList.remove('paused');
     startT();
@@ -1840,6 +1840,14 @@ ka.setAttribute('playsinline','');
   }catch(e){}
 })();
 function kaPlay(){try{if(!isLoc())ka.play().catch(()=>{})}catch(e){}}
+function kaClaim(){
+  if(isLoc())return;
+  const go=()=>{if(isLoc()||!playing)return;try{ka.pause()}catch(e){}kaPlay()};
+  go();
+  setTimeout(go,900);
+  setTimeout(go,2500);
+}
+addEventListener('touchend',()=>{if(!isLoc()&&playing&&ka.paused)kaPlay()},{passive:true});
 
 const ARTM={};
 async function bestYtArt(id){
