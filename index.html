@@ -142,15 +142,15 @@ svg{display:block}
 .nb svg{width:23px;height:23px}
 .nb span{font-size:10px;font-weight:650}
 .nb.active{color:var(--accent);background:var(--accent-soft)}
-body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
-body.fp #topbar,body.fp .page,body.fp #bg,body.fp #bgDim{visibility:hidden}
+body.fp:not(.dragging) .nav{opacity:0;visibility:hidden;pointer-events:none}
+body.fp:not(.dragging) #topbar,body.fp:not(.dragging) .page,body.fp:not(.dragging) #bg,body.fp:not(.dragging) #bgDim{visibility:hidden}
 body.spo #topbar,body.spo .page{visibility:hidden}
-.player{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);overflow:hidden;overscroll-behavior:none;background:#161618;isolation:isolate;visibility:hidden;pointer-events:none;transform:translateY(100%);transform-origin:50% 100%;will-change:transform;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s}
-.player.active{visibility:visible;pointer-events:auto;transform:none;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s}
-.pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(55px);transform:translateZ(0) scale(1.3);pointer-events:none}
-.pshade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));pointer-events:none}
+.player{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);overflow:hidden;overscroll-behavior:none;background:#161618;isolation:isolate;visibility:hidden;pointer-events:none;transform:translateY(100%);transform-origin:50% 100%;will-change:transform;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s,border-radius .3s}
+.player.active{visibility:visible;pointer-events:auto;transform:none;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s,border-radius .3s}
+.pbg{position:absolute;left:-200px;top:-200px;width:calc(100% + 400px);height:calc(100% + 400px);z-index:0;object-fit:cover;filter:blur(95px) saturate(150%);-webkit-filter:blur(95px) saturate(150%);transform:translateZ(0) scale(1.4);pointer-events:none}
+.pshade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.18) 25%,rgba(0,0,0,.42) 52%,rgba(0,0,0,.68) 78%,rgba(0,0,0,.85));pointer-events:none}
 #topfade{position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 120px);z-index:10000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%)}
-body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
+body.fp:not(.dragging) #topfade{opacity:1;visibility:visible;transition:opacity .25s}
 body.dragging #topfade{opacity:0}
 .grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
@@ -628,7 +628,7 @@ function apply(){
 
   $('bg').style.backgroundImage=bgImg;
 
-  if(mode!=='full'){
+  if(mode!=='full'||document.body.classList.contains('dragging')){
     const topDim=shade(top,(+S.bgDim||0)/100);
     st.backgroundColor=topDim;
     st.backgroundImage=bgImg;
@@ -802,6 +802,7 @@ $('spBack').onclick=()=>{
 
 /* ---------- PLAYER ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
+let seekLock=null; /* Prevents slider from jumping back to 0:00 while YouTube/Audio buffers after seeking */
 
 const seek=$('seek');
 /* ---------- LOCAL AUDIO ENGINE (Offline songs, work without internet) ---------- */
@@ -816,16 +817,18 @@ const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(y
 const seekT=t=>{
   const d=durT();
   const target=d>0?Math.max(0,Math.min(t,d)):Math.max(0,t);
+  seekLock={target,until:Date.now()+2200};
   if(isLoc())au.currentTime=target;
   else if(apiReady)yt.seekTo(target,true);
-  setTimeout(()=>posState(target),50);
+  $('cur').textContent=fmt(target);
+  if(d>0){const p=target/d*100;seek.value=p;setProg(p)}
+  posState(target);
 };
 const pauseAny=()=>{userPause=true;keepOff();try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{userPause=false;if(isLoc())keepOn();try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
 
-/* silent audio that loops while a song is loaded. Without it iPhone suspends the page the
-   moment the song ends (screen locked), so the next song never starts or has no sound */
+/* silent audio that loops while a song is loaded */
 const keep=(()=>{
   const n=8000,b=new Uint8Array(44+n),dv=new DataView(b.buffer);
   const w=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i)};
@@ -841,8 +844,6 @@ const keep=(()=>{
 const keepOn=()=>{try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 const keepOff=()=>{try{keep.pause()}catch(e){}};
 
-/* decide which song comes next and keep its file ready, so the next song can start
-   instantly even when the screen is locked */
 function planNext(){
   if(!queue.length||idx<0){nxt=-1;return}
   if(shuf&&queue.length>1){let j;do{j=Math.floor(Math.random()*queue.length)}while(j===idx);nxt=j}
@@ -867,6 +868,7 @@ function loadLocal(v){
     locURL=url;
     advancing=false;
     userPause=false;
+    seekLock=null;
     lastStart=Date.now();
     try{if('mediaSession' in navigator&&navigator.mediaSession.setPositionState)navigator.mediaSession.setPositionState()}catch(e){}
     au.src=url;
@@ -874,7 +876,6 @@ function loadLocal(v){
     if(pr&&pr.catch)pr.catch(()=>{});
     keepOn();
     preloadNext();
-    /* if the new song is paused or frozen (no sound), restart it */
     [1200,3500].forEach(ms=>setTimeout(()=>{
       const q=queue[idx];
       if(!q||q.videoId!==id||!isLoc()||au.src!==url||userPause)return;
@@ -893,10 +894,15 @@ function loadLocal(v){
   }).catch(()=>{});
 }
 
-/* lock screen / notification bar progress (lets you drag the song position there for BOTH online & offline) */
+/* lock screen / notification bar progress */
 function posState(forcedPos){
   if(!('mediaSession' in navigator)||!navigator.mediaSession.setPositionState)return;
-  const d=durT(),c=forcedPos!==undefined?forcedPos:curT();
+  const d=durT();
+  let c=forcedPos!==undefined?forcedPos:curT();
+  if(forcedPos===undefined&&seekLock){
+    if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.5)c=seekLock.target;
+    else seekLock=null;
+  }
   if(d>0&&Number.isFinite(d)){
     try{
       navigator.mediaSession.setPositionState({
@@ -947,7 +953,7 @@ au.addEventListener('ended',()=>{
 });
 au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
 
-/* iOS: unlock audio on the first touch so local songs can start after loading */
+/* iOS: unlock audio on first touch */
 (function(){
   const SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   let done=false;
@@ -1043,7 +1049,15 @@ let lastPos=0;
 function tick(){
   if(!canPlay()||seeking)return;
   try{
-    const c=curT(),d=durT();
+    let c=curT();
+    const d=durT();
+    if(seekLock){
+      if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.5){
+        c=seekLock.target;
+      }else{
+        seekLock=null;
+      }
+    }
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
@@ -1085,8 +1099,6 @@ function finishSeek(){
   if(duration>0){
     const newTime=duration*target/100;
     seekT(newTime);
-    $('cur').textContent=fmt(newTime);
-    posState(newTime);
   }
   seek.value=target;
   setProg(target);
@@ -1119,7 +1131,7 @@ seek.addEventListener('pointercancel',e=>{
 seek.addEventListener('lostpointercapture',()=>{if(seeking)finishSeek()});
 
 function resetProg(){
-  seeking=false;seekPointer=null;seekTarget=0;
+  seeking=false;seekPointer=null;seekTarget=0;seekLock=null;
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
@@ -1133,7 +1145,6 @@ function toggle(){
 
 const LOCAL_ART='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5e5ce6"/><stop offset="1" stop-color="#ff375f"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><circle cx="46" cy="82" r="12" fill="#fff"/><circle cx="78" cy="74" r="12" fill="#fff"/><rect x="55" y="34" width="6" height="48" fill="#fff"/><rect x="87" y="26" width="6" height="48" fill="#fff"/><path d="M55 34l38-8v10l-38 8z" fill="#fff"/></svg>');
 
-/* thumbnails of offline songs (cover art or generated), loaded from IndexedDB */
 const LOCART={};
 
 function thumbOf(v){
@@ -1168,10 +1179,12 @@ const tintCache={};
 function paintTint(col){
   if(mode!=='full')return;
 
-  const st=document.documentElement.style;
-  st.backgroundImage='none';
-  st.backgroundColor=col;
-  setThemeColor(col);
+  if(!document.body.classList.contains('dragging')){
+    const st=document.documentElement.style;
+    st.backgroundImage='none';
+    st.backgroundColor=col;
+    setThemeColor(col);
+  }
   $('player').style.backgroundColor=col;
 
   const old=$('topfade');
@@ -1184,7 +1197,7 @@ function paintTint(col){
   void document.body.offsetHeight;
 
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    if(mode==='full'&&queue[idx]&&tintCache[queue[idx].videoId]===col){
+    if(mode==='full'&&!document.body.classList.contains('dragging')&&queue[idx]&&tintCache[queue[idx].videoId]===col){
       setThemeColor(col);
       void document.body.offsetHeight;
     }
@@ -1392,7 +1405,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1712,7 +1724,7 @@ on('minBtn',()=>history.back());
 on('mClose',closePlayer);
 on('mInfo',()=>{if(mode==='mini')showFull()});
 
-/* lock screen / control centre buttons (binds dynamically so both online and offline songs allow seeking) */
+/* lock screen / control centre buttons */
 function bindMediaHandlers(){
   if(!('mediaSession' in navigator))return;
   const ms=navigator.mediaSession;
@@ -1725,25 +1737,19 @@ function bindMediaHandlers(){
     const step=(d&&d.seekOffset)||10;
     const t=Math.max(0,curT()-step);
     seekT(t);
-    posState(t);
   });
   h('seekforward',d=>{
     const step=(d&&d.seekOffset)||10;
     const du=durT();
     const t=du>0?Math.min(du,curT()+step):curT()+step;
     seekT(t);
-    posState(t);
   });
   h('seekto',d=>{
     if(!d||d.seekTime==null)return;
     try{
       const du=durT();
       if(du>0&&d.seekTime>=du-1){next();return}
-      const target=Math.max(0,du>0?Math.min(d.seekTime,du):d.seekTime);
-      seekT(target);
-      $('cur').textContent=fmt(target);
-      if(du>0){const p=target/du*100;seek.value=p;setProg(p)}
-      posState(target);
+      seekT(d.seekTime);
     }catch(e){}
   });
 }
@@ -1775,12 +1781,13 @@ pl.addEventListener('touchmove',e=>{
       drag=true;
       document.body.classList.add('dragging');
       pl.style.transition='none';
+      apply(); /* Restores the underlying page background immediately so it shows behind the sliding card */
     }else return;
   }
 
   const d=Math.max(0,dy);
   pl.style.transform=`translateY(${d}px) scale(${1-Math.min(d/1600,.07)})`;
-  pl.style.borderRadius=Math.min(d/3,38)+'px';
+  pl.style.borderRadius=Math.min(d/2.5,38)+'px';
 },{passive:false});
 
 function endDrag(e){
@@ -1801,6 +1808,7 @@ function endDrag(e){
     pl.style.transform='';
     pl.style.borderRadius='';
     document.body.classList.remove('dragging');
+    if(queue[idx])setTint(queue[idx]);
   }
 }
 
@@ -1919,10 +1927,6 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
 const GROUPS=[
   [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
@@ -1944,7 +1948,6 @@ const GROUPS=[
 
 const FORYOU=15;
 
-/* channel groups: only songs uploaded by that channel are kept (filter on author) */
 const chG=(qs,re)=>({qs,buf:[],pg:{},weight:1,filter:v=>re.test(v.author||'')});
 GROUPS.push(
   chG(['T-Series','T-Series new songs','T-Series Hindi songs','T-Series romantic songs','T-Series Bollywood','T-Series latest','T-Series Punjabi songs','T-Series sad songs'],/t[\s-]?series/i),
@@ -2086,7 +2089,6 @@ const AHEAD=6000;
 
 function keepFilling(){if(!D.home.busy)loadHomeMore()}
 
-/* Offline mode: when there is no internet, Home shows all imported Offline songs */
 function showOfflineHome(){
   const loc=getLoc(),g=$('homeGrid');
   if(g.dataset.off)return true;
@@ -2350,7 +2352,7 @@ const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-/* ---------- OFFLINE SONGS (stored on this phone, play without internet) ---------- */
+
 const IDB={
   db:null,
   open(){
@@ -2391,7 +2393,6 @@ function removeLocal(v){
   if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
 }
 
-/* ---- cover art for offline songs (kept at original quality) ---- */
 const artSrc=a=>(typeof a==='string')?a:URL.createObjectURL(a);
 
 function genArt(title){
@@ -2415,7 +2416,6 @@ function genArt(title){
   });
 }
 
-/* keeps the original picture untouched; only shrinks it if it is huge */
 async function keepArt(blob){
   const url=URL.createObjectURL(blob);
   try{
@@ -2432,7 +2432,6 @@ async function keepArt(blob){
   finally{URL.revokeObjectURL(url)}
 }
 
-/* reads embedded cover from MP3 (ID3 APIC) or M4A (covr) */
 async function readCover(f){
   try{
     const b=new Uint8Array(await f.slice(0,6*1024*1024).arrayBuffer());
@@ -2482,7 +2481,6 @@ async function loadArt(){
     try{
       let a=await idbGet(v.videoId+':art');
       if(!a||typeof a==='string'){
-        /* older low-quality art: rebuild it from the song file at full quality */
         const f=await idbGet(v.videoId);
         let b=f?await readCover(f):null;
         if(!b)b=await genArt(v.title);
@@ -2582,7 +2580,6 @@ function folderCard(name,songs,open,icon){
 /* ---------- OFFLINE SEARCH RANKING ---------- */
 const normT=s=>(s||'').normalize('NFC').toLowerCase().replace(/[_\-|.,()\[\]{}:;'"!?~]+/g,' ').replace(/\s+/g,' ').trim();
 const BNMAP={'ক':'k','খ':'k','গ':'g','ঘ':'g','ঙ':'n','চ':'c','ছ':'c','জ':'j','ঝ':'j','ঞ':'n','ট':'t','ঠ':'t','ড':'d','ঢ':'d','ণ':'n','ত':'t','থ':'t','দ':'d','ধ':'d','ন':'n','প':'p','ফ':'f','ব':'b','ভ':'b','ম':'m','য':'j','র':'r','ল':'l','শ':'s','ষ':'s','স':'s','হ':'h','ৎ':'t','ং':'n','ঃ':'','ঁ':''};
-/* consonant skeleton: Bangla "আমি মানে" and English "Ami Mane" both become "mmn" */
 function skel(str){
   const s=(str||'').normalize('NFC').toLowerCase();
   let o='';
@@ -2914,7 +2911,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 
   const info=t=>{$('gInfo').textContent=t};
 
-  /* Show Gmail name, email and profile photo in the account card */
   function renderAcct(u){
     $('gIn').hidden=!!u;
     $('gOut').hidden=!u;
