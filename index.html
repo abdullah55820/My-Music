@@ -920,7 +920,7 @@ function onYtError(){
 
 function icons(){
   $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
-  try{if('mediaSession' in navigator)navigator.mediaSession.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
+  try{if('mediaSession' in navigator&&(idx<0||isLoc()))navigator.mediaSession.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
 }
 
 const fmt=s=>{
@@ -1652,6 +1652,7 @@ function playAt(i,list){
 
   if(v.local){
     pending=null;
+    msMode(true);
     try{ka.pause()}catch(e){}
     if(apiReady)try{yt.stopVideo()}catch(e){}
     loadLocal(v);
@@ -1659,6 +1660,7 @@ function playAt(i,list){
   }
 
   try{au.pause()}catch(e){}
+  msMode(false);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
   else pending=v.videoId;
 
@@ -1864,12 +1866,12 @@ async function updateMedia(v){
     mk([{src:u,sizes:'512x512',type:(u.match(/^data:([^;]+)/)||[])[1]||'image/jpeg'}]);
     return;
   }
-  try{MS.metadata=null}catch(e){}
+  return;
 }
 
 let lastPS=0;
 function posState(){
-  if(!MS||!MS.setPositionState)return;
+  if(!MS||!MS.setPositionState||!isLoc())return;
   const now=Date.now();
   if(now-lastPS<900)return;
   lastPS=now;
@@ -1879,21 +1881,30 @@ function posState(){
   }catch(e){}
 }
 
-if(MS){
+let msLocal=null;
+function msMode(local){
+  if(!MS||msLocal===local)return;
+  const wasLocal=msLocal===true;
+  msLocal=local;
   const h=(a,f)=>{try{MS.setActionHandler(a,f)}catch(e){}};
-  h('play',()=>{resumeAny();kaPlay()});
-  h('pause',()=>{pauseAny();try{ka.pause()}catch(e){}});
-  h('previoustrack',()=>prev());
-  h('nexttrack',()=>next());
-  h('seekbackward',null);
-  h('seekforward',null);
-  h('seekto',d=>{
-    if(d&&d.seekTime!=null&&canPlay()){
-      seekT(d.seekTime);
-      lastPS=0;
-      setTimeout(posState,250);
-    }
-  });
+  if(local){
+    h('play',()=>{resumeAny()});
+    h('pause',()=>{pauseAny()});
+    h('previoustrack',()=>prev());
+    h('nexttrack',()=>next());
+    h('seekbackward',null);
+    h('seekforward',null);
+    h('seekto',d=>{
+      if(d&&d.seekTime!=null&&canPlay()){
+        seekT(d.seekTime);
+        lastPS=0;
+        setTimeout(posState,250);
+      }
+    });
+  }else{
+    ['play','pause','previoustrack','nexttrack','seekbackward','seekforward','seekto'].forEach(a=>h(a,null));
+    if(wasLocal){try{MS.metadata=null;MS.playbackState='none'}catch(e){}}
+  }
 }
 
 on('playBtn',toggle);
