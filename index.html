@@ -872,14 +872,8 @@ const keep=(()=>{
 const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc())return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 let holdT=null;
 const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
-/* after pause the silent audio keeps running for PAUSE_HOLD_MIN minutes, so iOS does not drop the lock screen controls */
-const PAUSE_HOLD_MIN=30;
-const keepHold=()=>{
-  if(isLoc()){keepOff();return}
-  clearTimeout(holdT);
-  try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
-  holdT=setTimeout(()=>{holdT=null;if(!playing)try{keep.pause()}catch(e){}},PAUSE_HOLD_MIN*60*1000);
-};
+/* pause = silent audio really stops (iPhone default behaviour) */
+const keepHold=()=>keepOff();
 
 function planNext(){
   if(!queue.length||idx<0){nxt=-1;return}
@@ -939,11 +933,11 @@ function posState(forcedPos){
   if(!(d>0&&Number.isFinite(d)))return;
   if(!Number.isFinite(c))c=0;
   try{
-    /* playbackRate must NOT be 0 (it throws TypeError); while paused a tiny rate keeps the lock-screen clock frozen */
+    /* playbackRate must NOT be 0 (it throws TypeError) - paused state is told through playbackState */
     navigator.mediaSession.setPositionState({
       duration:d,
       position:Math.min(Math.max(c,0),d),
-      playbackRate:playing?1:0.0001
+      playbackRate:1
     });
   }catch(e){}
 }
@@ -1788,7 +1782,7 @@ function bindMediaHandlers(){
   const ms=navigator.mediaSession;
   const h=(a,f)=>{try{ms.setActionHandler(a,f)}catch(e){}};
   h('play',()=>resumeAny());
-  h('pause',()=>{if(!playing&&userPause)resumeAny();else pauseAny()});
+  h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
   /* seekbackward/seekforward replace prev/next buttons on iOS and fight the scrubber, so they are off */
