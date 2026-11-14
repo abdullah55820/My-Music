@@ -811,6 +811,7 @@ au.setAttribute('playsinline','');
 let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
+const isPl=()=>isLoc()?(!au.paused&&!au.ended):playing;
 const curT=()=>{
   if(isLoc())return au.currentTime||0;
   if(apiReady&&yt&&typeof yt.getCurrentTime==='function')return yt.getCurrentTime()||0;
@@ -937,17 +938,25 @@ function posState(forcedPos){
     navigator.mediaSession.setPositionState({
       duration:d,
       position:Math.min(Math.max(c,0),d),
-      playbackRate:playing?1:0.0001
+      playbackRate:isPl()?1:0.0001
     });
   }catch(e){}
   /* playbackState must always be the last thing written, so the lock-screen icon matches */
-  try{navigator.mediaSession.playbackState=playing?'playing':'paused'}catch(e){}
+  try{navigator.mediaSession.playbackState=isPl()?'playing':'paused'}catch(e){}
 }
 function clearPosState(){
   try{if('mediaSession' in navigator&&navigator.mediaSession.setPositionState)navigator.mediaSession.setPositionState()}catch(e){}
 }
 document.addEventListener('visibilitychange',()=>{if(canPlay()&&queue[idx])posState()});
 ['loadedmetadata','durationchange','seeked','play','pause'].forEach(ev=>au.addEventListener(ev,()=>{if(isLoc())posState()}));
+['play','playing','pause'].forEach(ev=>au.addEventListener(ev,()=>{
+  if(!isLoc()||isSil())return;
+  [0,150,600].forEach(t=>setTimeout(()=>{
+    if(!isLoc()||isSil())return;
+    try{navigator.mediaSession.playbackState=isPl()?'playing':'paused'}catch(e){}
+    posState();
+  },t));
+}));
 let lastTU=0;
 au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>800){lastTU=Date.now();posState()}});
 au.addEventListener('timeupdate',()=>{
@@ -1072,7 +1081,7 @@ function onYtError(){
 
 function icons(){
   $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
-  try{if('mediaSession' in navigator)navigator.mediaSession.playbackState=playing?'playing':'paused'}catch(e){}
+  try{if('mediaSession' in navigator)navigator.mediaSession.playbackState=isPl()?'playing':'paused'}catch(e){}
 }
 
 const fmt=s=>{
