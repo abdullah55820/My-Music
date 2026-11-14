@@ -258,6 +258,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .stnote{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
 #bkInfo{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--muted);word-break:break-word}
 #bkInfo:empty{display:none}
+#rmList .pitem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
+#rmList .pitem small{flex-shrink:0}
+#rmList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -474,15 +477,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <h3>Backup &amp; Storage</h3>
       <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
       <div class="strow"><b>Songs size</b><span id="stSize">0 MB</span></div>
-      <div class="strow"><b>Cover art &amp; data</b><span id="stOther">0 MB</span></div>
-      <div class="strow"><b>Total used by this app</b><span id="stTotal">0 MB</span></div>
-      <div class="stbar"><i id="stBar"></i></div>
-      <div class="strow"><b>Free space available</b><span id="stFree">—</span></div>
-      <p class="stnote">Backup saves every imported song in its original quality, together with favourites, playlists, history and settings. Restore puts everything back exactly as it was.</p>
+      <p class="stnote">Songs size = all songs + cover art + data together. Backup saves every song in original quality; Restore puts everything back.</p>
       <div class="btnrow" style="margin-top:14px">
         <button class="sb p" id="bkMake" type="button">Backup to file</button>
         <button class="sb p" id="bkSave" type="button" hidden>Save backup file</button>
         <button class="sb" id="bkRestore" type="button">Restore from file</button>
+        <button class="sb d" id="bkManage" type="button">Remove songs</button>
       </div>
       <input type="file" id="bkIn" hidden>
       <div id="bkInfo"></div>
@@ -498,6 +498,19 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <input id="pName" placeholder="Playlist name" maxlength="40">
       <button class="sb p" id="pOk" type="button">OK</button>
     </div>
+  </div>
+</div>
+
+<div class="psheet" id="rmSheet" hidden>
+  <div class="pcard">
+    <h3>Remove songs</h3>
+    <div class="btnrow" style="margin:0 0 10px">
+      <button class="sb" id="rmAll" type="button">Select all</button>
+      <button class="sb d" id="rmDel" type="button" disabled>Delete</button>
+      <button class="sb" id="rmClose" type="button">Close</button>
+    </div>
+    <div class="stnote" id="rmInfo" style="margin:0 0 12px"></div>
+    <div id="rmList"></div>
   </div>
 </div>
 
@@ -2720,7 +2733,7 @@ function renderLib(){
 
   if(loc){
     const shown=songs.length;
-    storageStats().then(s=>{if(libView==='loc')$('libStatus').textContent=shown+' Songs · '+fmtB(s.songBytes)});
+    storageStats().then(s=>{if(libView==='loc')$('libStatus').textContent=shown+' Songs · '+fmtB(songTotal(s))});
   }
 
   if(!inner){
@@ -2928,6 +2941,8 @@ const fmtB=n=>{
   return Math.max(1,Math.round(n/1024))+' KB';
 };
 
+const songTotal=s=>s.songBytes+s.artBytes+s.other;
+
 async function storageStats(){
   const r={songs:0,songBytes:0,artBytes:0,other:0,usage:0,quota:0};
   try{
@@ -2972,18 +2987,79 @@ async function refreshStorage(){
   try{
     const s=await storageStats();
     $('stSongs').textContent=getLoc().length;
-    $('stSize').textContent=fmtB(s.songBytes);
-    $('stOther').textContent=fmtB(s.artBytes+s.other);
-    $('stTotal').textContent=fmtB(s.usage);
-    $('stFree').textContent=s.quota?fmtB(Math.max(0,s.quota-s.usage)):'Unknown';
-    $('stBar').style.width=(s.quota?Math.min(100,s.usage/s.quota*100):0)+'%';
-    if(activeTab==='library'&&libView==='loc'&&!libQ.trim())$('libStatus').textContent=getLoc().length+' Songs · '+fmtB(s.songBytes);
+    $('stSize').textContent=fmtB(songTotal(s));
+    if(activeTab==='library'&&libView==='loc'&&!libQ.trim())$('libStatus').textContent=getLoc().length+' Songs · '+fmtB(songTotal(s));
   }catch(e){}
   finally{
     stBusy=false;
     if(stAgain){stAgain=false;refreshStorage()}
   }
 }
+
+/* ---------- REMOVE SONGS (frees phone storage) ---------- */
+let rmSel=new Set();
+function rmUpdate(){
+  const n=getLoc().length;
+  $('rmInfo').textContent=n?(rmSel.size+' selected of '+n):'No imported songs.';
+  $('rmDel').disabled=!rmSel.size;
+  $('rmAll').textContent=(n&&rmSel.size===n)?'Deselect all':'Select all';
+  $('rmAll').disabled=!n;
+}
+function openRemove(){
+  const L=getLoc(),box=$('rmList');
+  rmSel=new Set();
+  box.innerHTML='';
+  L.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='pitem';
+    const n=document.createElement('span');
+    n.textContent=v.title||'Untitled';
+    const c=document.createElement('small');
+    b.append(n,c);
+    b.onclick=()=>{
+      if(rmSel.has(v.videoId)){rmSel.delete(v.videoId);b.classList.remove('sel')}
+      else{rmSel.add(v.videoId);b.classList.add('sel')}
+      rmUpdate();
+    };
+    b.dataset.id=v.videoId;
+    box.appendChild(b);
+    idbGet(v.videoId).then(bl=>{if(bl&&bl.size)c.textContent=fmtB(bl.size)}).catch(()=>{});
+  });
+  rmUpdate();
+  $('rmSheet').hidden=false;
+}
+$('bkManage').onclick=openRemove;
+$('rmClose').onclick=()=>{$('rmSheet').hidden=true};
+$('rmSheet').addEventListener('click',e=>{if(e.target.id==='rmSheet')$('rmSheet').hidden=true});
+$('rmAll').onclick=()=>{
+  const L=getLoc(),all=L.length&&rmSel.size===L.length;
+  rmSel=new Set(all?[]:L.map(v=>v.videoId));
+  document.querySelectorAll('#rmList .pitem').forEach(b=>b.classList.toggle('sel',rmSel.has(b.dataset.id)));
+  rmUpdate();
+};
+$('rmDel').onclick=async()=>{
+  const ids=[...rmSel];
+  if(!ids.length)return;
+  if(!confirm('Delete '+ids.length+' song(s) from this phone? This frees the storage and cannot be undone.'))return;
+  $('rmDel').disabled=true;$('rmAll').disabled=true;
+  const set=new Set(ids);
+  if(queue[idx]&&set.has(queue[idx].videoId))closePlayer();
+  for(let i=0;i<ids.length;i++){
+    $('rmInfo').textContent='Deleting '+(i+1)+' / '+ids.length+'…';
+    await idbDel(ids[i]).catch(()=>{});
+    await idbDel('art_'+ids[i]).catch(()=>{});
+    delete ARTC[ids[i]];delete MP[ids[i]];delete tintCache[ids[i]];
+  }
+  const keep=x=>!set.has(x.videoId);
+  setLoc(getLoc().filter(keep));
+  LS.set('sf_liked_songs',getLiked().filter(keep));
+  LS.set('sf_history',getHist().filter(keep));
+  setPL(getPL().map(p=>({...p,songs:p.songs.filter(keep)})));
+  renderLib();
+  if(offMode)renderOfflineHome();
+  await refreshStorage();
+  openRemove();
+};
 
 /* ---------- BACKUP & RESTORE (original quality, one file) ----------
    File format .sfbak:  "SFBK2\n" then repeated entries:
