@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -802,33 +801,39 @@ $('spBack').onclick=()=>{
 
 /* ---------- PLAYER ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
-let seekLock=null; /* Prevents slider from jumping back to 0:00 while YouTube/Audio buffers after seeking */
+let seekLock=null;
 
 const seek=$('seek');
-/* ---------- LOCAL AUDIO ENGINE (Offline songs, work without internet) ---------- */
+/* ---------- LOCAL AUDIO ENGINE (Offline songs, instant playback) ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
-const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
-const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
+const curT=()=>isLoc()?(au.currentTime||0):(apiReady&&yt&&yt.getCurrentTime?(yt.getCurrentTime()||0):0);
+const durT=()=>{
+  if(isLoc())return Number.isFinite(au.duration)?au.duration:0;
+  const d=(apiReady&&yt&&yt.getDuration)?(yt.getDuration()||0):0;
+  return d>0?d:(queue[idx]&&queue[idx].lengthSeconds?queue[idx].lengthSeconds:0);
+};
 const seekT=t=>{
   const d=durT();
   const target=d>0?Math.max(0,Math.min(t,d)):Math.max(0,t);
-  seekLock={target,until:Date.now()+2200};
-  if(isLoc())au.currentTime=target;
-  else if(apiReady)yt.seekTo(target,true);
+  seekLock={target,until:Date.now()+3500};
   $('cur').textContent=fmt(target);
   if(d>0){const p=target/d*100;seek.value=p;setProg(p)}
+  if(isLoc()){
+    try{au.currentTime=target}catch(e){}
+  }else if(apiReady&&yt&&yt.seekTo){
+    try{yt.seekTo(target,true)}catch(e){}
+  }
   posState(target);
 };
 const pauseAny=()=>{userPause=true;keepOff();try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{userPause=false;if(isLoc())keepOn();try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
 
-/* silent audio that loops while a song is loaded */
 const keep=(()=>{
   const n=8000,b=new Uint8Array(44+n),dv=new DataView(b.buffer);
   const w=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i)};
@@ -870,23 +875,19 @@ function loadLocal(v){
     userPause=false;
     seekLock=null;
     lastStart=Date.now();
-    try{if('mediaSession' in navigator&&navigator.mediaSession.setPositionState)navigator.mediaSession.setPositionState()}catch(e){}
     au.src=url;
+    au.load();
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
     keepOn();
     preloadNext();
-    [1200,3500].forEach(ms=>setTimeout(()=>{
-      const q=queue[idx];
-      if(!q||q.videoId!==id||!isLoc()||au.src!==url||userPause)return;
-      if(au.paused||(au.currentTime<0.1&&au.readyState<3)){
-        try{if(au.readyState===0)au.load()}catch(e){}
-        const p2=au.play();
-        if(p2&&p2.catch)p2.catch(()=>{});
-      }
-    },ms));
   };
-  if(PRE.id===id&&PRE.url){const u=PRE.url;PRE={id:null,url:null};start(u);return}
+  if(PRE.id===id&&PRE.url){
+    const u=PRE.url;
+    PRE={id:null,url:null};
+    start(u);
+    return;
+  }
   idbGet(id).then(blob=>{
     if(!queue[idx]||queue[idx].videoId!==id)return;
     if(!blob){onYtError();return}
@@ -900,7 +901,7 @@ function posState(forcedPos){
   const d=durT();
   let c=forcedPos!==undefined?forcedPos:curT();
   if(forcedPos===undefined&&seekLock){
-    if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.5)c=seekLock.target;
+    if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.2)c=seekLock.target;
     else seekLock=null;
   }
   if(d>0&&Number.isFinite(d)){
@@ -919,7 +920,7 @@ au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>800){lastTU=
 au.addEventListener('timeupdate',()=>{
   if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
-  if(Number.isFinite(d)&&d>3&&d-c<0.7){
+  if(Number.isFinite(d)&&d>3&&d-c<0.5){
     if(rep===2){au.currentTime=0;return}
     advancing=true;
     next();
@@ -948,7 +949,6 @@ au.addEventListener('ended',()=>{
   if(Date.now()-lastStart<1500)return;
   playing=false;icons();stopT();
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
-  
   next();
 });
 au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
@@ -1018,7 +1018,6 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    
     next();
   }
 }
@@ -1052,7 +1051,7 @@ function tick(){
     let c=curT();
     const d=durT();
     if(seekLock){
-      if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.5){
+      if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.2){
         c=seekLock.target;
       }else{
         seekLock=null;
@@ -1061,7 +1060,11 @@ function tick(){
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
-    if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
+    if(d>0){
+      const p=c/d*100;
+      seek.value=p;
+      setProg(p);
+    }
     if(d>0&&Date.now()-lastPos>800){
       lastPos=Date.now();
       posState(c);
@@ -1069,7 +1072,7 @@ function tick(){
   }catch(e){}
 }
 
-function startT(){stopT();tick();timer=setInterval(tick,100)}
+function startT(){stopT();tick();timer=setInterval(tick,120)}
 function stopT(){clearInterval(timer);timer=null}
 
 /* ---------- SEEK BAR ---------- */
@@ -1099,9 +1102,10 @@ function finishSeek(){
   if(duration>0){
     const newTime=duration*target/100;
     seekT(newTime);
+  }else{
+    seek.value=target;
+    setProg(target);
   }
-  seek.value=target;
-  setProg(target);
 }
 
 seek.addEventListener('pointerdown',e=>{
@@ -1748,7 +1752,7 @@ function bindMediaHandlers(){
     if(!d||d.seekTime==null)return;
     try{
       const du=durT();
-      if(du>0&&d.seekTime>=du-1){next();return}
+      if(du>0&&isLoc()&&d.seekTime>=du-1){next();return}
       seekT(d.seekTime);
     }catch(e){}
   });
@@ -1781,7 +1785,7 @@ pl.addEventListener('touchmove',e=>{
       drag=true;
       document.body.classList.add('dragging');
       pl.style.transition='none';
-      apply(); /* Restores the underlying page background immediately so it shows behind the sliding card */
+      apply();
     }else return;
   }
 
@@ -3010,5 +3014,3 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
-
-```
