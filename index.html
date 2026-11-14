@@ -808,7 +808,7 @@ const seek=$('seek');
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
-let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0,userPause=false;
+let locURL=null,PRE=new Map(),nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const isPl=()=>isLoc()?(!au.paused&&!au.ended):playing;
@@ -883,16 +883,27 @@ function planNext(){
   if(shuf&&queue.length>1){let j;do{j=Math.floor(Math.random()*queue.length)}while(j===idx);nxt=j}
   else nxt=(idx+1)%queue.length;
 }
+let preBusy=false;
 async function preloadNext(){
-  planNext();
-  const v=queue[nxt];
-  if(!v||!v.local||nxt===idx||PRE.id===v.videoId)return;
+  if(preBusy)return;
+  preBusy=true;
   try{
-    const b=await idbGet(v.videoId);
-    if(!b)return;
-    if(PRE.url)try{URL.revokeObjectURL(PRE.url)}catch(e){}
-    PRE={id:v.videoId,url:URL.createObjectURL(b)};
-  }catch(e){}
+    planNext();
+    const n=queue.length;
+    const want=[];
+    if(nxt>=0&&nxt!==idx)want.push(nxt);
+    if(idx>=0&&n>1){const pv=(idx-1+n)%n;if(pv!==idx&&!want.includes(pv))want.push(pv)}
+    const ids=new Set(want.map(i=>queue[i]&&queue[i].videoId));
+    for(const [k,u] of [...PRE]){if(!ids.has(k)){try{URL.revokeObjectURL(u)}catch(e){}PRE.delete(k)}}
+    for(const i of want){
+      const v=queue[i];
+      if(!v||!v.local||PRE.has(v.videoId))continue;
+      try{
+        const b=await idbGet(v.videoId);
+        if(b&&!PRE.has(v.videoId))PRE.set(v.videoId,URL.createObjectURL(b));
+      }catch(e){}
+    }
+  }finally{preBusy=false}
 }
 
 function loadLocal(v){
@@ -905,15 +916,15 @@ function loadLocal(v){
     seekLock=null;
     lastStart=Date.now();
     au.src=url;
-    au.load();
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
     if(LOCAL_KEEP)keepOn();else keepOff();
-    preloadNext();
+    /* preload AFTER the song has started, so it does not slow the current song down */
+    setTimeout(()=>{if(isLoc()&&queue[idx]&&queue[idx].videoId===id)preloadNext()},2500);
   };
-  if(PRE.id===id&&PRE.url){
-    const u=PRE.url;
-    PRE={id:null,url:null};
+  if(PRE.has(id)){
+    const u=PRE.get(id);
+    PRE.delete(id);
     start(u);
     return;
   }
@@ -1193,7 +1204,7 @@ function resetProg(){
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
-  clearPosState();
+  if(!isLoc())clearPosState();
 }
 
 function toggle(){
