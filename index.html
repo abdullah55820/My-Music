@@ -258,9 +258,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .stnote{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
 #bkInfo{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--muted);word-break:break-word}
 #bkInfo:empty{display:none}
-#rmList .pitem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
-#rmList .pitem small{flex-shrink:0}
-#rmList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+#rmList .pitem span,#bkList .pitem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
+#rmList .pitem small,#bkList .pitem small{flex-shrink:0}
+#rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -477,10 +477,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <h3>Backup &amp; Storage</h3>
       <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
       <div class="strow"><b>Songs size</b><span id="stSize">0 MB</span></div>
-      <p class="stnote">Songs size = all songs + cover art + data together. Backup saves every song in original quality; Restore puts everything back.</p>
+      <p class="stnote">Songs size = all songs + cover art + data together. Backup lets you pick songs and save them as a file in original quality. If one big file fails, make 2–3 smaller backups.</p>
       <div class="btnrow" style="margin-top:14px">
         <button class="sb p" id="bkMake" type="button">Backup to file</button>
-        <button class="sb p" id="bkSave" type="button" hidden>Save backup file</button>
         <button class="sb" id="bkRestore" type="button">Restore from file</button>
         <button class="sb d" id="bkManage" type="button">Remove songs</button>
       </div>
@@ -498,6 +497,19 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <input id="pName" placeholder="Playlist name" maxlength="40">
       <button class="sb p" id="pOk" type="button">OK</button>
     </div>
+  </div>
+</div>
+
+<div class="psheet" id="bkSheet" hidden>
+  <div class="pcard">
+    <h3>Backup songs</h3>
+    <div class="btnrow" style="margin:0 0 10px">
+      <button class="sb" id="bkAll" type="button">Select all</button>
+      <button class="sb p" id="bkGo" type="button" disabled>Save to file</button>
+      <button class="sb" id="bkClose" type="button">Close</button>
+    </div>
+    <div class="stnote" id="bkSInfo" style="margin:0 0 12px"></div>
+    <div id="bkList"></div>
   </div>
 </div>
 
@@ -3077,65 +3089,136 @@ function bkEntry(head,body){
 
 function bkInfo(t){$('bkInfo').textContent=t||''}
 
-async function makeBackup(){
-  if(bkBusy)return;
-  bkBusy=true;
-  const btn=$('bkMake');
-  btn.disabled=true;$('bkRestore').disabled=true;
-  $('bkSave').hidden=true;bkBlob=null;
-  try{
-    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-    const L=getLoc();
-    const meta={
-      liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),
-      settings:S,local:L,lyoff:LS.get('sf_lyoff',{}),photo:PHOTO,t:Date.now()
-    };
-    const mb=BK_ENC.encode(JSON.stringify(meta));
-    const parts=[BK_ENC.encode('SFBK2\n'),...bkEntry({k:'meta',n:mb.length},mb)];
-    let done=0,missing=0;
-    for(const v of L){
-      bkInfo('Preparing '+(++done)+' / '+L.length+'…');
-      const blob=await idbGet(v.videoId);
-      if(!blob){missing++;continue}
-      parts.push(...bkEntry({k:'file',id:v.videoId,n:blob.size,type:blob.type||''},blob));
-      const art=await idbGet('art_'+v.videoId);
-      if(typeof art==='string'&&art){
-        const ab=BK_ENC.encode(art);
-        parts.push(...bkEntry({k:'art',id:v.videoId,n:ab.length},ab));
-      }
-    }
-    bkBlob=new Blob(parts,{type:'application/octet-stream'});
-    bkName='soundflow-backup-'+new Date().toISOString().slice(0,10)+'.sfbak';
-    bkInfo('Backup ready: '+(L.length-missing)+' songs, '+fmtB(bkBlob.size)+'. Tap "Save backup file" and choose where to keep it (Files / Drive).'+(missing?' '+missing+' song(s) were missing and skipped.':''));
-    $('bkSave').hidden=false;
-  }catch(e){
-    bkBlob=null;
-    bkInfo('Backup failed: '+((e&&e.message)||'not enough memory. Try again with fewer songs.'));
-  }
-  bkBusy=false;
-  btn.disabled=false;$('bkRestore').disabled=false;
+const bkSInfo=t=>{$('bkSInfo').textContent=t||''};
+let bkSel=new Set(),bkSizes={},bkReady=null;
+
+function bkText(){
+  const n=getLoc().length;
+  let tot=0;bkSel.forEach(id=>{tot+=bkSizes[id]||0});
+  bkSInfo(n?(bkSel.size+' of '+n+' selected · '+fmtB(tot)+(tot>1.2e9?'. Big file: if saving fails, select fewer songs and make more than one backup.':'')):'No imported songs.');
+}
+function bkUpdate(){
+  const n=getLoc().length;
+  bkReady=null;
+  $('bkGo').textContent='Save to file';
+  $('bkGo').disabled=!bkSel.size||bkBusy;
+  $('bkAll').textContent=(n&&bkSel.size===n)?'Deselect all':'Select all';
+  $('bkAll').disabled=!n||bkBusy;
+  bkText();
 }
 
-$('bkMake').onclick=makeBackup;
+function openBackupPicker(){
+  if(bkBusy)return;
+  const L=getLoc(),box=$('bkList');
+  bkSel=new Set();bkSizes={};bkReady=null;
+  box.innerHTML='';
+  L.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='pitem';b.dataset.id=v.videoId;
+    const n=document.createElement('span');
+    n.textContent=v.title||'Untitled';
+    const c=document.createElement('small');
+    b.append(n,c);
+    b.onclick=()=>{
+      if(bkBusy)return;
+      if(bkSel.has(v.videoId)){bkSel.delete(v.videoId);b.classList.remove('sel')}
+      else{bkSel.add(v.videoId);b.classList.add('sel')}
+      bkUpdate();
+    };
+    box.appendChild(b);
+    idbGet(v.videoId).then(bl=>{
+      if(bl&&bl.size){bkSizes[v.videoId]=bl.size;c.textContent=fmtB(bl.size);bkText()}
+    }).catch(()=>{});
+  });
+  bkUpdate();
+  $('bkSheet').hidden=false;
+}
 
-$('bkSave').onclick=async()=>{
-  if(!bkBlob)return;
-  const f=new File([bkBlob],bkName,{type:'application/octet-stream'});
+async function buildBackup(ids){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  const set=new Set(ids);
+  const L=getLoc().filter(v=>set.has(v.videoId));
+  const meta={
+    liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),
+    settings:S,local:L,lyoff:LS.get('sf_lyoff',{}),photo:PHOTO,t:Date.now()
+  };
+  const mb=BK_ENC.encode(JSON.stringify(meta));
+  const parts=[BK_ENC.encode('SFBK2\n'),...bkEntry({k:'meta',n:mb.length},mb)];
+  let done=0;
+  for(const v of L){
+    bkSInfo('Preparing '+(++done)+' / '+L.length+'…');
+    const blob=await idbGet(v.videoId);
+    if(!blob)continue;
+    parts.push(...bkEntry({k:'file',id:v.videoId,n:blob.size,type:blob.type||''},blob));
+    const art=await idbGet('art_'+v.videoId);
+    if(typeof art==='string'&&art){
+      const ab=BK_ENC.encode(art);
+      parts.push(...bkEntry({k:'art',id:v.videoId,n:ab.length},ab));
+    }
+  }
+  const d=new Date(),z=x=>String(x).padStart(2,'0');
+  return {
+    blob:new Blob(parts,{type:'application/octet-stream'}),
+    name:'soundflow-backup-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+'.sfbak',
+    count:L.length
+  };
+}
+
+async function bkDeliver(b,auto){
+  const f=new File([b.blob],b.name,{type:'application/octet-stream'});
   try{
     if(navigator.canShare&&navigator.canShare({files:[f]})){
-      await navigator.share({files:[f],title:bkName});
-      bkInfo('Backup shared / saved.');
-      return;
+      await navigator.share({files:[f],title:b.name});
+      bkSInfo('Done. Keep this file in Files or Google Drive.');
+      return 'done';
     }
-  }catch(e){if(e&&e.name==='AbortError')return}
+  }catch(e){
+    if(e&&e.name==='AbortError')return 'cancel';
+    if(auto)return 'retry';
+  }
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(bkBlob);
-  a.download=bkName;
+  a.href=URL.createObjectURL(b.blob);
+  a.download=b.name;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-  bkInfo('Backup downloaded to your Downloads / Files.');
+  bkSInfo('File downloaded to your Downloads / Files.');
+  return 'done';
+}
+
+$('bkGo').onclick=async()=>{
+  if(bkBusy)return;
+  if(bkReady){await bkDeliver(bkReady,false);return}
+  const ids=[...bkSel];
+  if(!ids.length)return;
+  bkBusy=true;
+  $('bkGo').disabled=true;$('bkAll').disabled=true;
+  let res=null;
+  try{res=await buildBackup(ids)}
+  catch(e){bkSInfo('Backup failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'))}
+  bkBusy=false;
+  $('bkAll').disabled=false;
+  if(!res){$('bkGo').disabled=!bkSel.size;return}
+  bkReady=res;
+  $('bkGo').disabled=false;
+  bkSInfo('Backup ready: '+res.count+' songs, '+fmtB(res.blob.size)+'.');
+  const r=await bkDeliver(res,true);
+  if(r==='retry'||r==='cancel'){
+    $('bkGo').textContent='Tap to save file';
+    bkSInfo('Backup ready: '+res.count+' songs, '+fmtB(res.blob.size)+'. Tap "Tap to save file" and choose Files or Drive.');
+  }
+};
+
+$('bkMake').onclick=openBackupPicker;
+$('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
+$('bkSheet').addEventListener('click',e=>{if(e.target.id==='bkSheet'&&!bkBusy)$('bkSheet').hidden=true});
+$('bkAll').onclick=()=>{
+  if(bkBusy)return;
+  const L=getLoc(),all=L.length&&bkSel.size===L.length;
+  bkSel=new Set(all?[]:L.map(v=>v.videoId));
+  document.querySelectorAll('#bkList .pitem').forEach(b=>b.classList.toggle('sel',bkSel.has(b.dataset.id)));
+  bkUpdate();
 };
 
 $('bkRestore').onclick=()=>$('bkIn').click();
