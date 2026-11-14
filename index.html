@@ -798,7 +798,7 @@ const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null;
-const isLoc=()=>{const v=queue[idx];return !!(v&&(v.local||v._st===true))};
+const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
@@ -1424,7 +1424,7 @@ function bestLyric(list,v,dur,onlySynced){
 
 async function getDur(v){
   if(v.lengthSeconds>0)return v.lengthSeconds;
-  if(v.local||v._st===true){
+  if(v.local){
     for(let i=0;i<24;i++){
       if(Number.isFinite(au.duration)&&au.duration>0)return au.duration;
       await new Promise(r=>setTimeout(r,250));
@@ -1630,7 +1630,6 @@ function closePlayer(){
   apply();
   if(apiReady)yt.stopVideo();
   try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
-  stTok++;
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
   try{ka.pause();if('mediaSession' in navigator)navigator.mediaSession.metadata=null}catch(e){}
   icons();
@@ -1653,7 +1652,6 @@ function playAt(i,list){
 
   if(v.local){
     pending=null;
-    stTok++;
     try{ka.pause()}catch(e){}
     if(apiReady)try{yt.stopVideo()}catch(e){}
     loadLocal(v);
@@ -1661,12 +1659,9 @@ function playAt(i,list){
   }
 
   try{au.pause()}catch(e){}
-  v._st=false;
-  const tok=++stTok;
-  kaPlay();
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
   else pending=v.videoId;
-  streamHandoff(v,tok);
+
 }
 
 const SLEEPS=[0,15,30,60];
@@ -1845,83 +1840,9 @@ ka.setAttribute('playsinline','');
     ka.src=URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
   }catch(e){}
 })();
-function kaPlay(){try{if(!isLoc())ka.play().catch(()=>{})}catch(e){}}
-function kaClaim(){
-  if(isLoc())return;
-  const go=()=>{if(isLoc()||!playing)return;try{ka.pause()}catch(e){}kaPlay()};
-  go();
-  setTimeout(go,900);
-  setTimeout(go,2500);
-}
+function kaPlay(){}
+function kaClaim(){}
 addEventListener('touchend',()=>{if(!isLoc()&&playing&&ka.paused)kaPlay()},{passive:true});
-
-/* ---------- ONLINE SONGS: hand over from the YouTube player to our own audio ----------
-   YouTube starts instantly. In the background we ask the server for the audio stream; when it arrives we
-   continue the song from the same second in our own <audio>, so the lock screen / control centre belong
-   to this app (prev, next, drag the bar). If no server answers, YouTube just keeps playing. */
-let stTok=0;
-let toastT=null;
-function toast(msg){
-  let t=document.getElementById('sfToast');
-  if(!t){
-    t=document.createElement('div');t.id='sfToast';
-    t.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:20000;padding:8px 14px;border-radius:99px;background:rgba(0,0,0,.72);color:#fff;font:600 12px -apple-system,sans-serif;pointer-events:none;transition:opacity .3s;white-space:nowrap';
-    document.body.appendChild(t);
-  }
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(toastT);toastT=setTimeout(()=>{t.style.opacity='0'},2600);
-}
-async function streamUrl(id){
-  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),8000);
-  try{
-    return await Promise.any(instances.map(base=>
-      fetch(`${base}/api/v1/videos/${id}?local=true`,{signal:ctl.signal,cache:'no-store'})
-        .then(r=>{if(!r.ok)throw 0;return r.json()})
-        .then(d=>{
-          const aud=(d.adaptiveFormats||[]).filter(f=>f&&f.url&&/^audio\/mp4/.test(f.type||'')).sort((a,b)=>(+b.bitrate||0)-(+a.bitrate||0));
-          let u=aud[0]&&aud[0].url;
-          if(!u){const m=(d.formatStreams||[]).find(f=>f&&f.url&&/mp4/.test(f.type||''));u=m&&m.url}
-          if(!u)throw 0;
-          return /^https?:/.test(u)?u:base+u;
-        })
-    ));
-  }catch(e){return null}
-  finally{clearTimeout(tm)}
-}
-
-async function streamHandoff(v,tok){
-  const id=v.videoId;
-  const ok=()=>tok===stTok&&queue[idx]===v&&!v.local;
-  const u=await streamUrl(id);
-  if(!ok())return;
-  if(!u){toast('Server busy · lock screen seek limited');return}
-  try{
-    au.src=u;
-    await new Promise((res,rej)=>{
-      const to=setTimeout(rej,9000);
-      au.onloadedmetadata=()=>{clearTimeout(to);res()};
-      au.onerror=()=>{clearTimeout(to);rej()};
-    });
-    au.onloadedmetadata=null;au.onerror=null;
-    if(!ok()){au.pause();return}
-    let t=0;
-    try{t=yt.getCurrentTime()||0}catch(e){}
-    try{au.currentTime=t+.2}catch(e){}
-    v._st=true;
-    if(playing){
-      try{await au.play()}
-      catch(e){v._st=false;try{au.pause()}catch(x){}toast('Could not take over audio');return}
-    }
-    try{ka.pause()}catch(e){}
-    try{yt.stopVideo()}catch(e){}
-    if(!playing){icons();$('art').classList.add('paused')}
-    lastPS=0;posState();
-    toast('Lock screen controls ready ✓');
-  }catch(e){
-    au.onloadedmetadata=null;au.onerror=null;
-    if(v._st!==true){try{au.pause();au.removeAttribute('src')}catch(x){}toast('Stream failed · lock screen seek limited')}
-  }
-}
 
 const ARTM={};
 async function bestYtArt(id){
@@ -1943,9 +1864,7 @@ async function updateMedia(v){
     mk([{src:u,sizes:'512x512',type:(u.match(/^data:([^;]+)/)||[])[1]||'image/jpeg'}]);
     return;
   }
-  mk(ARTM[id]||[{src:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,sizes:'480x360',type:'image/jpeg'}]);
-  const a=await bestYtArt(id);
-  if(queue[idx]&&queue[idx].videoId===id)mk(a);
+  try{MS.metadata=null}catch(e){}
 }
 
 let lastPS=0;
