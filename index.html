@@ -3134,6 +3134,13 @@ function openBackupPicker(){
   $('bkSheet').hidden=false;
 }
 
+function bkFileName(L,stamp){
+  const clean=t=>(t||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,40);
+  const first=clean(L[0]&&L[0].title)||'Songs';
+  const base=L.length>1?first+' +'+(L.length-1)+' songs':first;
+  return base+' '+stamp+'.sfbak';
+}
+
 async function buildBackup(ids){
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   const set=new Set(ids);
@@ -3159,7 +3166,7 @@ async function buildBackup(ids){
   const d=new Date(),z=x=>String(x).padStart(2,'0');
   return {
     blob:new Blob(parts,{type:'application/octet-stream'}),
-    name:'soundflow-backup-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+'.sfbak',
+    name:bkFileName(L,d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())),
     count:L.length
   };
 }
