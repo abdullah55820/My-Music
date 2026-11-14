@@ -807,10 +807,10 @@ let seekLock=null;
 const seek=$('seek');
 /* ---------- LOCAL AUDIO ENGINE ---------- */
 const au=new Audio();
-au.preload='auto';
+au.preload='metadata';
 au.setAttribute('playsinline','');
 let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0;
-const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
+const isLoc=()=> {const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>{
   if(isLoc())return au.currentTime||0;
@@ -850,7 +850,7 @@ const resumeAny=()=>{
     else if(apiReady&&yt&&yt.playVideo)yt.playVideo();
   }catch(e){}
 };
-const isSil=()=>au.src.startsWith('data:');
+const isSil=()=>false;
 
 function planNext(){
   if(!queue.length||idx<0){nxt=-1;return}
@@ -897,7 +897,7 @@ function loadLocal(v){
 }
 
 au.addEventListener('timeupdate',()=>{
-  if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
+  if(!isLoc()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
   if(Number.isFinite(d)&&d>3&&d-c<0.5){
     if(rep===2){au.currentTime=0;return}
@@ -907,13 +907,13 @@ au.addEventListener('timeupdate',()=>{
 });
 
 au.addEventListener('playing',()=>{
-  if(!isLoc()||isSil())return;
+  if(!isLoc())return;
   errCount=0;playing=true;icons();
   $('art').classList.remove('paused');
   startT();
 });
 au.addEventListener('pause',()=>{
-  if(!isLoc()||au.ended||isSil())return;
+  if(!isLoc()||au.ended)return;
   playing=false;icons();
   $('art').classList.add('paused');
   stopT();
@@ -925,11 +925,10 @@ au.addEventListener('ended',()=>{
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
   next();
 });
-au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
+au.addEventListener('error',()=>{if(isLoc()&&au.getAttribute('src'))onYtError()});
 
 /* iOS: unlock audio on first touch */
 (function(){
-  const SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   let done=false;
   const unlock=()=>{
     if(done)return;
@@ -938,8 +937,7 @@ au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))on
     removeEventListener('click',unlock,true);
     try{
       if(au.getAttribute('src'))return;
-      au.src=SIL;
-      au.play().then(()=>{if(isSil())au.pause()}).catch(()=>{});
+      au.play().catch(()=>{});
     }catch(e){}
   };
   addEventListener('touchend',unlock,true);
