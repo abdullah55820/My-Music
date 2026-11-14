@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -812,7 +813,13 @@ const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
-const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+const seekT=t=>{
+  const d=durT();
+  const target=d>0?Math.max(0,Math.min(t,d)):Math.max(0,t);
+  if(isLoc())au.currentTime=target;
+  else if(apiReady)yt.seekTo(target,true);
+  setTimeout(()=>posState(target),50);
+};
 const pauseAny=()=>{userPause=true;keepOff();try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{userPause=false;if(isLoc())keepOn();try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
@@ -886,17 +893,23 @@ function loadLocal(v){
   }).catch(()=>{});
 }
 
-/* lock screen / notification bar progress (lets you drag the song position there) */
-function posState(){
+/* lock screen / notification bar progress (lets you drag the song position there for BOTH online & offline) */
+function posState(forcedPos){
   if(!('mediaSession' in navigator)||!navigator.mediaSession.setPositionState)return;
-  const d=durT(),c=curT();
+  const d=durT(),c=forcedPos!==undefined?forcedPos:curT();
   if(d>0&&Number.isFinite(d)){
-    try{navigator.mediaSession.setPositionState({duration:d,position:Math.min(Math.max(c,0),d),playbackRate:1})}catch(e){}
+    try{
+      navigator.mediaSession.setPositionState({
+        duration:d,
+        position:Math.min(Math.max(c,0),d),
+        playbackRate:playing?1:0
+      });
+    }catch(e){}
   }
 }
 ['loadedmetadata','durationchange','seeked','play','pause'].forEach(ev=>au.addEventListener(ev,()=>{if(isLoc())posState()}));
 let lastTU=0;
-au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>1000){lastTU=Date.now();posState()}});
+au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>800){lastTU=Date.now();posState()}});
 au.addEventListener('timeupdate',()=>{
   if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
@@ -911,6 +924,8 @@ au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   if(!userPause)keepOn();
   errCount=0;playing=true;icons();
+  bindMediaHandlers();
+  posState();
   $('art').classList.remove('paused');
   startT();
 });
@@ -918,6 +933,7 @@ au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
   keepOff();
   playing=false;icons();
+  posState();
   $('art').classList.add('paused');
   stopT();
 });
@@ -981,11 +997,14 @@ function onState(e){
     errCount=0;
     playing=true;
     icons();
+    bindMediaHandlers();
+    posState();
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
     playing=false;
     icons();
+    posState();
     $('art').classList.add('paused');
     stopT();
   }else if(st===YT.PlayerState.ENDED){
@@ -1029,9 +1048,9 @@ function tick(){
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
-    if(d>0&&'mediaSession' in navigator&&navigator.mediaSession.setPositionState&&Date.now()-lastPos>1000){
+    if(d>0&&Date.now()-lastPos>800){
       lastPos=Date.now();
-      try{navigator.mediaSession.setPositionState({duration:d,position:Math.min(c,d),playbackRate:1})}catch(e){}
+      posState(c);
     }
   }catch(e){}
 }
@@ -1064,8 +1083,10 @@ function finishSeek(){
   const duration=durT();
   if(duration>0&&isLoc()&&target>=99.6){next();return}
   if(duration>0){
-    seekT(duration*target/100);
-    $('cur').textContent=fmt(duration*target/100);
+    const newTime=duration*target/100;
+    seekT(newTime);
+    $('cur').textContent=fmt(newTime);
+    posState(newTime);
   }
   seek.value=target;
   setProg(target);
@@ -1446,6 +1467,7 @@ function setMedia(v){
       album:'SoundFlow',
       artwork:[{src:thumbOf(v),sizes:'512x512'}]
     });
+    bindMediaHandlers();
   }catch(e){}
 }
 
@@ -1690,25 +1712,42 @@ on('minBtn',()=>history.back());
 on('mClose',closePlayer);
 on('mInfo',()=>{if(mode==='mini')showFull()});
 
-/* lock screen / control centre buttons */
-if('mediaSession' in navigator){
+/* lock screen / control centre buttons (binds dynamically so both online and offline songs allow seeking) */
+function bindMediaHandlers(){
+  if(!('mediaSession' in navigator))return;
   const ms=navigator.mediaSession;
   const h=(a,f)=>{try{ms.setActionHandler(a,f)}catch(e){}};
   h('play',()=>resumeAny());
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
+  h('seekbackward',d=>{
+    const step=(d&&d.seekOffset)||10;
+    const t=Math.max(0,curT()-step);
+    seekT(t);
+    posState(t);
+  });
+  h('seekforward',d=>{
+    const step=(d&&d.seekOffset)||10;
+    const du=durT();
+    const t=du>0?Math.min(du,curT()+step):curT()+step;
+    seekT(t);
+    posState(t);
+  });
   h('seekto',d=>{
     if(!d||d.seekTime==null)return;
     try{
       const du=durT();
-      if(isLoc()&&du>0&&d.seekTime>=du-1){next();return}
-      seekT(d.seekTime);
-      setTimeout(()=>{if(isLoc())posState()},200);
+      if(du>0&&d.seekTime>=du-1){next();return}
+      const target=Math.max(0,du>0?Math.min(d.seekTime,du):d.seekTime);
+      seekT(target);
+      $('cur').textContent=fmt(target);
+      if(du>0){const p=target/du*100;seek.value=p;setProg(p)}
+      posState(target);
     }catch(e){}
   });
-
 }
+bindMediaHandlers();
 
 let tx=0,ty=0,tt=0,ts=false,drag=false;
 const pl=$('player');
@@ -2975,3 +3014,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+
+```
