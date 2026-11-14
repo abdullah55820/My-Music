@@ -850,7 +850,7 @@ const pauseAny=()=>{
 const resumeAny=()=>{
   userPause=false;
   keepOn();
-  if(isLoc())keepOff();
+  if(isLoc()&&!LOCAL_KEEP)keepOff();
   try{
     if(isLoc())au.play().catch(()=>{});
     else if(apiReady&&yt&&yt.playVideo)yt.playVideo();
@@ -870,7 +870,9 @@ const keep=(()=>{
   a.setAttribute('playsinline','');
   return a;
 })();
-const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc())return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+/* true = silent audio also runs under offline songs (iOS then keeps ONE Now Playing session). set false to test without it */
+const LOCAL_KEEP=true;
+const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc()&&!LOCAL_KEEP)return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 let holdT=null;
 const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
 /* pause = silent audio really stops (iPhone default behaviour) */
@@ -906,7 +908,7 @@ function loadLocal(v){
     au.load();
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
-    keepOff();
+    if(LOCAL_KEEP)keepOn();else keepOff();
     preloadNext();
   };
   if(PRE.id===id&&PRE.url){
@@ -971,7 +973,7 @@ au.addEventListener('timeupdate',()=>{
 
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
-  keepOff();
+  if(LOCAL_KEEP){if(!userPause)keepOn()}else keepOff();
   errCount=0;playing=true;icons();
   bindMediaHandlers();
   setMedia(queue[idx]);
@@ -1195,7 +1197,7 @@ function resetProg(){
 }
 
 function toggle(){
-  if(isLoc()){if(au.paused){userPause=false;keepOff();au.play().catch(()=>{})}else{userPause=true;keepHold();au.pause()}return}
+  if(isLoc()){if(au.paused){userPause=false;if(LOCAL_KEEP)keepOn();else keepOff();au.play().catch(()=>{})}else{userPause=true;keepHold();au.pause()}return}
   if(!apiReady)return;
   if(playing){keepHold();yt.pauseVideo()}
   else{keepOn();yt.playVideo()}
