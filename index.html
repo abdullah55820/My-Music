@@ -207,23 +207,29 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #ptr.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ---------- ACCOUNT CARD (top of Profile) ---------- */
-.acct{position:relative;overflow:hidden;text-align:center;padding:0 18px 20px;border-radius:28px;margin-bottom:14px}
-.acban{height:92px;margin:0 -18px;background:linear-gradient(135deg,var(--accent),#bf5af2 58%,#ff2d55);opacity:.92}
-.acav{position:relative;width:96px;height:96px;margin:-48px auto 0;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--accent);color:#fff;border:4px solid var(--surface);box-shadow:0 10px 26px var(--gshadow)}
-.acav svg{width:44px;height:44px}
+/* ---------- ACCOUNT CARD (compact) ---------- */
+.acct{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:22px;margin-bottom:14px}
+.acav{position:relative;flex-shrink:0;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--accent);color:#fff}
+.acav svg{width:26px;height:26px}
 .acav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .acav.has svg{display:none}
-.acname{margin-top:14px;font-size:22px;font-weight:800;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.acmail{margin-top:3px;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.acstat{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 14px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:750}
-.acstat svg{width:14px;height:14px}
-.acbtns{justify-content:center;margin-top:18px}
-.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:24px;background:#fff;color:#1f1f1f;font-size:15px;font-weight:700;box-shadow:0 6px 18px var(--gshadow);transition:transform .15s}
-.gbtn svg{width:21px;height:21px}
+.actx{flex:1;min-width:0}
+.acname{font-size:16px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acmail{margin-top:2px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;min-height:38px;padding:0 14px;border-radius:19px;background:#fff;color:#1f1f1f;font-size:13px;font-weight:700;box-shadow:0 3px 10px var(--gshadow);transition:transform .15s}
+.gbtn svg{width:17px;height:17px}
 .gbtn:active{transform:scale(.96)}
-.acbtns .sb{min-height:44px;border-radius:22px;padding:0 22px}
-#gInfo{display:block;margin-top:12px;font-size:12px;color:var(--muted)}
+.acct .sb{flex-shrink:0;min-height:38px;border-radius:19px;padding:0 14px}
+#gInfo{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
+#gInfo:empty{display:none}
+
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
+.sec.fold{padding:14px 16px}
+.sec.fold h3{display:flex;justify-content:space-between;align-items:center;margin:0;padding:2px 0;font-size:15px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;cursor:pointer;user-select:none;-webkit-user-select:none}
+.sec.fold h3::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
+.sec.fold.open h3{margin-bottom:6px}
+.sec.fold.open h3::after{transform:rotate(-135deg)}
+.sec.fold:not(.open)>*:not(h3){display:none}
 </style>
 </head>
 <body>
@@ -366,25 +372,17 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
   <div class="spb">
     <div class="acct g" id="acct">
-      <div class="acban"></div>
       <div class="acav" id="acAv">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/></svg>
         <img id="acImg" alt="" hidden referrerpolicy="no-referrer">
       </div>
-      <div class="acname" id="acName">Guest</div>
-      <div class="acmail" id="acMail">Not signed in</div>
-      <div class="acstat">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>
-        <span id="favCount">0 favourite songs</span>
+      <div class="actx">
+        <div class="acname" id="acName">Guest</div>
+        <div class="acmail" id="acMail">Not signed in</div>
+        <small id="gInfo"></small>
       </div>
-      <div class="btnrow acbtns">
-        <button class="gbtn" id="gIn" type="button">
-          <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
-          Sign in with Google
-        </button>
-        <button class="sb d" id="gOut" type="button" hidden>Sign out</button>
-      </div>
-      <small id="gInfo">Sign in to sync across devices</small>
+      <button class="gbtn" id="gIn" type="button"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Sign in</button>
+      <button class="sb d" id="gOut" type="button" hidden>Sign out</button>
     </div>
 
     <div class="sec g">
@@ -737,7 +735,6 @@ function closeProfileNative(){
 
 function openProfile(){
   if(spOpen())return;
-  $('favCount').textContent=getLiked().length+' favourite songs';
   profileClosingByButton=false;
   $('sp').classList.remove('no-transition');
   $('sp').classList.add('open');
@@ -1512,7 +1509,6 @@ $('likeBtn').addEventListener('click',e=>{
   LS.set('sf_liked_songs',s);
 
   $('likeBtn').classList.toggle('liked',!has);
-  $('favCount').textContent=s.length+' favourite songs';
   if(activeTab==='library')renderLib();
 });
 
@@ -2310,6 +2306,14 @@ renderLib();
 renderRecent();
 loadHomeMore();
 
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
+document.querySelectorAll('.spb .sec').forEach(sec=>{
+  const h=sec.querySelector('h3');
+  if(!h)return;
+  sec.classList.add('fold');
+  h.addEventListener('click',()=>sec.classList.toggle('open'));
+});
+
 /* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
 (function(){
   const CFG={
@@ -2343,7 +2347,7 @@ loadHomeMore();
       im.removeAttribute('src');
       av.classList.remove('has');
     }
-    info(u?'Synced across your devices':'Sign in to sync across devices');
+    info('');
   }
 
   const _set=LS.set;
@@ -2382,7 +2386,6 @@ loadHomeMore();
       if(d.settings){S={...DEF,...d.settings};save()}
       pulling=false;
       apply();renderLib();renderRecent();
-      $('favCount').textContent=getLiked().length+' favourite songs';
       push();
     }catch(e){
       pulling=false;
