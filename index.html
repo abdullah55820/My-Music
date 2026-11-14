@@ -767,7 +767,7 @@ $('spBack').onclick=()=>{
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 
 const seek=$('seek');
-/* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
+/* ---------- LOCAL AUDIO ENGINE (Offline songs, work without internet) ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
@@ -889,7 +889,10 @@ function onYtError(){
   if(++errCount<queue.length)setTimeout(next,600);
 }
 
-function icons(){$('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY}
+function icons(){
+  $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
+  try{if('mediaSession' in navigator)navigator.mediaSession.playbackState=playing?'playing':'paused'}catch(e){}
+}
 
 const fmt=s=>{
   if(!Number.isFinite(s)||s<0)return '0:00';
@@ -901,6 +904,7 @@ function setProg(p){
   seek.style.backgroundImage=`linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
 }
 
+let lastPos=0;
 function tick(){
   if(!canPlay()||seeking)return;
   try{
@@ -909,6 +913,10 @@ function tick(){
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
+    if(d>0&&'mediaSession' in navigator&&navigator.mediaSession.setPositionState&&Date.now()-lastPos>1000){
+      lastPos=Date.now();
+      try{navigator.mediaSession.setPositionState({duration:d,position:Math.min(c,d),playbackRate:1})}catch(e){}
+    }
   }catch(e){}
 }
 
@@ -987,8 +995,11 @@ function toggle(){
 
 const LOCAL_ART='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5e5ce6"/><stop offset="1" stop-color="#ff375f"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><circle cx="46" cy="82" r="12" fill="#fff"/><circle cx="78" cy="74" r="12" fill="#fff"/><rect x="55" y="34" width="6" height="48" fill="#fff"/><rect x="87" y="26" width="6" height="48" fill="#fff"/><path d="M55 34l38-8v10l-38 8z" fill="#fff"/></svg>');
 
+/* thumbnails of offline songs (cover art or generated), loaded from IndexedDB */
+const LOCART={};
+
 function thumbOf(v){
-  if(v.local)return LOCAL_ART;
+  if(v.local)return LOCART[v.videoId]||LOCAL_ART;
   const t=v.videoThumbnails||[];
   return(t.find(x=>x.quality==='maxres')||t.find(x=>x.quality==='high')||t.find(x=>x.quality==='medium')||t[0]||{}).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
@@ -1298,6 +1309,19 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
+/* ---------- LOCK SCREEN / MEDIA SESSION ---------- */
+function setMedia(v){
+  if(!('mediaSession' in navigator)||!v)return;
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:v.title||'Song',
+      artist:v.author||'SoundFlow',
+      album:'SoundFlow',
+      artwork:[{src:thumbOf(v),sizes:'320x320'}]
+    });
+  }catch(e){}
+}
+
 function setInfo(v){
   fbThumb($('pThumb'),v.videoId);
   fbThumb($('mThumb'),v.videoId);
@@ -1305,6 +1329,7 @@ function setInfo(v){
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||'YouTube';
   $('likeBtn').classList.toggle('liked',getLiked().some(x=>x.videoId===v.videoId));
+  setMedia(v);
   setPlayerBg(v);
   setTint(v);
   if(lyOn)loadLyrics(v);
@@ -1342,6 +1367,7 @@ function closePlayer(){
   apply();
   if(apiReady)yt.stopVideo();
   try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
+  try{if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none'}}catch(e){}
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
   icons();
   $('art').classList.remove('paused');
@@ -1535,6 +1561,17 @@ on('prevBtn',prev);
 on('minBtn',()=>history.back());
 on('mClose',closePlayer);
 on('mInfo',()=>{if(mode==='mini')showFull()});
+
+/* lock screen / control centre buttons */
+if('mediaSession' in navigator){
+  const ms=navigator.mediaSession;
+  const h=(a,f)=>{try{ms.setActionHandler(a,f)}catch(e){}};
+  h('play',()=>resumeAny());
+  h('pause',()=>pauseAny());
+  h('previoustrack',()=>prev());
+  h('nexttrack',()=>next());
+  h('seekto',d=>{if(d&&d.seekTime!=null)try{seekT(d.seekTime)}catch(e){}});
+}
 
 let tx=0,ty=0,tt=0,ts=false,drag=false;
 const pl=$('player');
@@ -1783,6 +1820,7 @@ function saveChip(){
 function restoreChip(i){
   const st=D.home,grid=$('homeGrid'),c=CACHE[i];
 
+  delete grid.dataset.off;
   if(st.ctl)st.ctl.abort();
   st.busy=false;
   grid.replaceChildren();
@@ -1859,9 +1897,22 @@ const AHEAD=6000;
 
 function keepFilling(){if(!D.home.busy)loadHomeMore()}
 
+/* Offline mode: when there is no internet, Home shows all imported Offline songs */
+function showOfflineHome(){
+  const loc=getLoc(),g=$('homeGrid');
+  if(g.dataset.off)return true;
+  if(!loc.length)return false;
+  g.innerHTML='';
+  g.dataset.off='1';
+  const L=loc.slice();
+  L.forEach((v,i)=>g.appendChild(card(v,i,L)));
+  $('homeStatus').textContent='Offline · '+L.length+(L.length===1?' Song':' Songs');
+  return true;
+}
+
 async function loadHomeMore(){
   const st=D.home;
-  if(st.busy)return;
+  if(st.busy||$('homeGrid').dataset.off)return;
   st.busy=true;
 
   const ctl=new AbortController();
@@ -1922,8 +1973,9 @@ async function loadHomeMore(){
   st.busy=false;
 
   if(failed&&!st.videos.length){
+    if(showOfflineHome())return;
     stat.textContent='Connection unavailable';
-    grid.innerHTML=`<div class="empty g">Unable to load music.<br>Check your internet connection and try again.<br><br><button class="sb p" id="homeRetry" type="button">Retry</button> <button class="sb" id="homeLoc" type="button">My Files</button></div>`;
+    grid.innerHTML=`<div class="empty g">Unable to load music.<br>Check your internet connection and try again.<br><br><button class="sb p" id="homeRetry" type="button">Retry</button> <button class="sb" id="homeLoc" type="button">Offline</button></div>`;
     $('homeRetry').onclick=()=>{grid.innerHTML='';loadHomeMore()};
     $('homeLoc').onclick=()=>{setTab('library');openFolder('loc')};
     return;
@@ -2109,7 +2161,7 @@ const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-/* ---------- MY FILES (stored on this phone, play offline) ---------- */
+/* ---------- OFFLINE SONGS (stored on this phone, play without internet) ---------- */
 const IDB={
   db:null,
   open(){
@@ -2139,11 +2191,108 @@ const setLoc=v=>LS.set('sf_local',v);
 
 function removeLocal(v){
   idbDel(v.videoId).catch(()=>{});
+  idbDel(v.videoId+':art').catch(()=>{});
+  delete LOCART[v.videoId];
   const id=v.videoId,keep=x=>x.videoId!==id;
   setLoc(getLoc().filter(keep));
   LS.set('sf_liked_songs',getLiked().filter(keep));
   LS.set('sf_history',getHist().filter(keep));
   setPL(getPL().map(p=>({...p,songs:p.songs.filter(keep)})));
+  const g=$('homeGrid');
+  if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
+}
+
+/* ---- cover art for offline songs ---- */
+function genArt(title){
+  const c=document.createElement('canvas');
+  c.width=c.height=320;
+  const x=c.getContext('2d');
+  let h=0;
+  for(const ch of String(title||'')) h=(h*31+ch.charCodeAt(0))%360;
+  const g=x.createLinearGradient(0,0,320,320);
+  g.addColorStop(0,`hsl(${h},70%,55%)`);
+  g.addColorStop(1,`hsl(${(h+60)%360},70%,32%)`);
+  x.fillStyle=g;
+  x.fillRect(0,0,320,320);
+  x.fillStyle='#fff';
+  x.font='700 150px -apple-system,sans-serif';
+  x.textAlign='center';
+  x.textBaseline='middle';
+  x.fillText([...String(title||'').trim()][0]||'♪',160,170);
+  return c.toDataURL('image/jpeg',.8);
+}
+
+async function blobToThumb(blob){
+  const url=URL.createObjectURL(blob);
+  try{
+    const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const s=Math.min(im.naturalWidth,im.naturalHeight);
+    if(!s)return null;
+    const c=document.createElement('canvas');
+    c.width=c.height=320;
+    c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,320,320);
+    return c.toDataURL('image/jpeg',.8);
+  }catch(e){return null}
+  finally{URL.revokeObjectURL(url)}
+}
+
+/* reads embedded cover from MP3 (ID3 APIC) or M4A (covr) */
+async function readCover(f){
+  try{
+    const b=new Uint8Array(await f.slice(0,3*1024*1024).arrayBuffer());
+    if(b[0]===73&&b[1]===68&&b[2]===51){
+      const ver=b[3];
+      const end=Math.min(10+((b[6]<<21)|(b[7]<<14)|(b[8]<<7)|b[9]),b.length);
+      let p=10;
+      while(p+10<end){
+        const id=String.fromCharCode(b[p],b[p+1],b[p+2],b[p+3]);
+        if(!/^[A-Z0-9]{4}$/.test(id))break;
+        const sz=ver===4
+          ?((b[p+4]<<21)|(b[p+5]<<14)|(b[p+6]<<7)|b[p+7])
+          :((b[p+4]<<24)|(b[p+5]<<16)|(b[p+6]<<8)|b[p+7]);
+        if(sz<=0)break;
+        if(id==='APIC'){
+          let qd=p+10;
+          const enc=b[qd++],ms=qd;
+          while(qd<end&&b[qd])qd++;
+          const mime=String.fromCharCode(...b.slice(ms,qd));
+          qd+=2;
+          if(enc===1||enc===2){while(qd<end&&!(b[qd]===0&&b[qd+1]===0))qd++;qd+=2}
+          else{while(qd<end&&b[qd])qd++;qd++}
+          const t=await blobToThumb(new Blob([b.slice(qd,p+10+sz)],{type:/png/i.test(mime)?'image/png':'image/jpeg'}));
+          if(t)return t;
+          break;
+        }
+        p+=10+sz;
+      }
+    }
+    for(let i=4;i<b.length-24;i++){
+      if(b[i]===99&&b[i+1]===111&&b[i+2]===118&&b[i+3]===114){
+        const dl=((b[i+4]<<24)|(b[i+5]<<16)|(b[i+6]<<8)|b[i+7])>>>0;
+        if(dl>16&&dl<4*1024*1024){
+          const t=await blobToThumb(new Blob([b.slice(i+20,i+4+dl)],{type:'image/jpeg'}));
+          if(t)return t;
+        }
+        break;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+async function loadArt(){
+  for(const v of getLoc()){
+    if(LOCART[v.videoId])continue;
+    try{
+      let a=await idbGet(v.videoId+':art');
+      if(!a){a=genArt(v.title);try{await idbPut(v.videoId+':art',a)}catch(e){}}
+      LOCART[v.videoId]=a;
+    }catch(e){}
+  }
+  renderLib();
+  const g=$('homeGrid');
+  if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
+  if(queue[idx]&&queue[idx].local)setMedia(queue[idx]);
 }
 
 $('locAdd').onclick=()=>$('locIn').click();
@@ -2152,14 +2301,22 @@ $('locIn').onchange=async e=>{
   e.target.value='';
   if(!files.length)return;
   const list=getLoc();
+  let n=0;
   for(const f of files){
     if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name))continue;
+    $('libStatus').textContent='Importing '+(++n)+'/'+files.length+'…';
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const title=f.name.replace(/\.[^.]+$/,'');
     try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
-    list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true});
+    const art=(await readCover(f))||genArt(title);
+    LOCART[id]=art;
+    try{await idbPut(id+':art',art)}catch(err){}
+    list.unshift({videoId:id,title,author:'Offline',lengthSeconds:0,local:true});
+    setLoc(list);
   }
-  setLoc(list);
   renderLib();
+  const g=$('homeGrid');
+  if(g.dataset.off){delete g.dataset.off;showOfflineHome()}
 };
 
 let libSort='new';
@@ -2236,7 +2393,7 @@ function renderLib(){
   $('plDel').hidden=!pl;
   $('locAdd').hidden=!loc;
 
-  $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':loc?'My Files':pl?pl.name:'Library';
+  $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':loc?'Offline':pl?pl.name:'Library';
   $('libStatus').textContent=inner?songs.length+' Songs':(3+PL.length)+' Folders';
 
   if(!inner){
@@ -2244,7 +2401,7 @@ function renderLib(){
     F.innerHTML='';
     F.appendChild(folderCard('Favourites',getLiked(),()=>openFolder('fav'),HEART));
     F.appendChild(folderCard('Recently Played',getHist(),()=>openFolder('hist'),CLOCK));
-    F.appendChild(folderCard('My Files',getLoc(),()=>openFolder('loc'),FILEI));
+    F.appendChild(folderCard('Offline',getLoc(),()=>openFolder('loc'),FILEI));
     PL.forEach(x=>F.appendChild(folderCard(x.name,x.songs,()=>openFolder('pl:'+x.id),LISTI)));
     return;
   }
@@ -2253,7 +2410,7 @@ function renderLib(){
   g.innerHTML='';
 
   if(!songs.length){
-    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':loc?'No songs yet.<br><br>Tap Add songs to pick audio files from your phone. They play even without internet.':'This playlist is empty.<br><br>Add songs using the playlist button in the player.'}</div>`;
+    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':loc?'No songs yet.<br><br>Tap Add songs and select all your audio files at once. They play even without internet.':'This playlist is empty.<br><br>Add songs using the playlist button in the player.'}</div>`;
     return;
   }
 
@@ -2326,6 +2483,7 @@ function refreshHome(){
   const st=D.home;
   if(st.ctl)st.ctl.abort();
 
+  delete $('homeGrid').dataset.off;
   st.busy=false;
   st.videos=[];
   $('homeGrid').innerHTML='';
@@ -2458,7 +2616,11 @@ $('impIn').onchange=async e=>{
 
 /* ---------- OFFLINE (service worker) ---------- */
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
-addEventListener('online',()=>{if(!D.home.videos.length&&!D.home.busy)loadHomeMore()});
+addEventListener('online',()=>{
+  const g=$('homeGrid');
+  if(g.dataset.off){delete g.dataset.off;g.innerHTML='';D.home.videos=[];D.home.busy=false}
+  if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
+});
 
 /* ---------- INIT ---------- */
 buildSettingsUI();
@@ -2468,6 +2630,7 @@ setProg(0);
 renderLib();
 renderRecent();
 loadHomeMore();
+loadArt();
 
 /* ---------- COLLAPSIBLE SETTINGS ---------- */
 document.querySelectorAll('.spb .sec').forEach(sec=>{
