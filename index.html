@@ -813,9 +813,26 @@ const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
-const pauseAny=()=>{userPause=true;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
-const resumeAny=()=>{userPause=false;try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
+const pauseAny=()=>{userPause=true;keepOff();try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
+const resumeAny=()=>{userPause=false;if(isLoc())keepOn();try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
+
+/* silent audio that loops while a song is loaded. Without it iPhone suspends the page the
+   moment the song ends (screen locked), so the next song never starts or has no sound */
+const keep=(()=>{
+  const n=8000,b=new Uint8Array(44+n),dv=new DataView(b.buffer);
+  const w=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i)};
+  w(0,'RIFF');dv.setUint32(4,36+n,true);w(8,'WAVEfmt ');dv.setUint32(16,16,true);
+  dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,8000,true);dv.setUint32(28,8000,true);
+  dv.setUint16(32,1,true);dv.setUint16(34,8,true);w(36,'data');dv.setUint32(40,n,true);
+  b.fill(128,44);
+  const a=new Audio(URL.createObjectURL(new Blob([b],{type:'audio/wav'})));
+  a.loop=true;
+  a.setAttribute('playsinline','');
+  return a;
+})();
+const keepOn=()=>{try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+const keepOff=()=>{try{keep.pause()}catch(e){}};
 
 /* decide which song comes next and keep its file ready, so the next song can start
    instantly even when the screen is locked */
@@ -848,6 +865,7 @@ function loadLocal(v){
     au.src=url;
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
+    keepOn();
     preloadNext();
     /* if the new song is paused or frozen (no sound), restart it */
     [1200,3500].forEach(ms=>setTimeout(()=>{
@@ -891,12 +909,14 @@ au.addEventListener('timeupdate',()=>{
 
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
+  if(!userPause)keepOn();
   errCount=0;playing=true;icons();
   $('art').classList.remove('paused');
   startT();
 });
 au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
+  keepOff();
   playing=false;icons();
   $('art').classList.add('paused');
   stopT();
@@ -1085,7 +1105,7 @@ function resetProg(){
 }
 
 function toggle(){
-  if(isLoc()){if(au.paused){userPause=false;au.play().catch(()=>{})}else{userPause=true;au.pause()}return}
+  if(isLoc()){if(au.paused){userPause=false;keepOn();au.play().catch(()=>{})}else{userPause=true;keepOff();au.pause()}return}
   if(!apiReady)return;
   playing?yt.pauseVideo():yt.playVideo();
 }
@@ -1473,6 +1493,7 @@ function closePlayer(){
   stopT();
   apply();
   if(apiReady)yt.stopVideo();
+  keepOff();
   try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
   try{if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none'}}catch(e){}
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
@@ -1686,8 +1707,7 @@ if('mediaSession' in navigator){
       setTimeout(()=>{if(isLoc())posState()},200);
     }catch(e){}
   });
-  h('seekbackward',d=>{try{seekT(Math.max(0,curT()-((d&&d.seekOffset)||10)))}catch(e){}});
-  h('seekforward',d=>{try{seekT(Math.min(durT()||1e9,curT()+((d&&d.seekOffset)||10)))}catch(e){}});
+
 }
 
 let tx=0,ty=0,tt=0,ts=false,drag=false;
