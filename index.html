@@ -59,7 +59,7 @@ svg{display:block}
 .chips .chip{background:var(--glass);border:1px solid var(--gborder);backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);transition:background .25s,color .25s}
 .chips .chip.on{color:var(--accent);background:linear-gradient(var(--accent-soft),var(--accent-soft)),var(--glass)}
 .chip .x{margin-left:8px;opacity:.7;font-size:15px;line-height:1}
-#topbar .g{box-shadow:none}
+#topbar .g:not(.lglass){box-shadow:none}
 .opts{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:24px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
 .opt{position:relative;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;transition:background .2s,color .2s,transform .15s}
 .opt svg{width:23px;height:23px}
@@ -256,8 +256,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
   <div class="hb" id="homeBar">
     <div class="section">
-      <span class="pill g"><h2>Home</h2></span>
-      <span class="status g" id="homeStatus">Discover music</span>
+      <span class="pill g lglass"><h2>Home</h2></span>
+      <span class="status g lglass" id="homeStatus">Discover music</span>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -278,8 +278,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </form>
     <div class="chips" id="recent" hidden></div>
     <div class="section" id="searchHeading" hidden>
-      <span class="pill g"><h2>Results</h2></span>
-      <span class="status g" id="searchStatus">Search songs</span>
+      <span class="pill g lglass"><h2>Results</h2></span>
+      <span class="status g lglass" id="searchStatus">Search songs</span>
     </div>
     <div class="grid" id="searchGrid" hidden></div>
     <button class="load g" id="searchMore" hidden>Load More</button>
@@ -289,13 +289,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <main class="page" id="libraryPage">
   <div class="wrap">
     <div class="section">
-      <span class="pill g">
+      <span class="pill g lglass">
         <button class="back" id="libBack" type="button" hidden aria-label="Back">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
         </button>
         <h2 id="libTitle">Library</h2>
       </span>
-      <span class="status g" id="libStatus">1 Folder</span>
+      <span class="status g lglass" id="libStatus">1 Folder</span>
     </div>
     <div class="lbar lglass" id="lbar" hidden>
       <div class="lrow">
@@ -1741,7 +1741,7 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances,strict=false){
+async function fetchSongs(q,page,ctl,list=instances,strict=false,filter=null){
   const requests=list.map(base=>{
     const c=new AbortController();
     const onAb=()=>c.abort();
@@ -1756,7 +1756,8 @@ async function fetchSongs(q,page,ctl,list=instances,strict=false){
       return r.json();
     }).then(data=>{
       if(!Array.isArray(data))throw new Error('Invalid response');
-      const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
+      let out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
+      if(filter)out=out.filter(filter);
       if(strict&&!out.length)throw new Error('Empty');
       return out;
     }).finally(()=>{
@@ -1801,6 +1802,18 @@ const GROUPS=[
 
 const FORYOU=15;
 
+/* channel groups: only songs uploaded by that channel are kept (filter on author) */
+const chG=(qs,re)=>({qs,buf:[],pg:{},weight:1,filter:v=>re.test(v.author||'')});
+GROUPS.push(
+  chG(['T-Series','T-Series new songs','T-Series Hindi songs','T-Series romantic songs','T-Series Bollywood','T-Series latest','T-Series Punjabi songs','T-Series sad songs'],/t[\s-]?series/i),
+  chG(['Zee Music Company','Zee Music Company new songs','Zee Music Company Hindi songs','Zee Music Company romantic songs','Zee Music Company Bollywood','Zee Music Company latest'],/zee\s*music/i),
+  chG(['Tips Official','Tips Official new songs','Tips Official Hindi songs','Tips Official romantic songs','Tips Official Bollywood','Tips Music songs'],/^tips\b/i),
+  chG(['YRF','YRF songs','YRF Bollywood songs','Yash Raj Films songs','YRF romantic songs','YRF latest songs'],/^yrf\b|yash\s*raj/i),
+  chG(['Sony Music India','Sony Music India new songs','Sony Music India Hindi songs','Sony Music India romantic'],/sony\s*music\s*india/i),
+  chG(['Saregama Music','Saregama Music songs','Saregama Hindi songs','Saregama Bangla songs','Saregama Bengali songs'],/saregama/i),
+  chG(['Speed Records','Speed Records Punjabi songs','Speed Records new songs','Speed Records latest'],/speed\s*records/i)
+);
+
 function buildForYou(){
   const c={};
   [...getLiked(),...getHist()].forEach(v=>{if(v.author&&!v.local)c[v.author]=(c[v.author]||0)+1});
@@ -1822,7 +1835,7 @@ async function fillGroupRaw(g,ctl){
   const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few,g.filter||null);
 
   if(data===null)return false;
 
@@ -1837,7 +1850,7 @@ async function fillGroupRaw(g,ctl){
 }
 
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
+  ['All',null],['T-Series',[16]],['Zee Music Company',[17]],['Tips Official',[18]],['YRF',[19]],['Sony Music',[20]],['Saregama',[21]],['Speed Records',[22]],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
   ['Bangladeshi',[12]],['Pakistani',[13]],
   ['South Indian',[3,4,5,6,7,8,9,10,11]],
   ['Trending',[14]],['For You',[FORYOU]]
@@ -2424,6 +2437,53 @@ function folderCard(name,songs,open,icon){
   return c;
 }
 
+/* ---------- OFFLINE SEARCH RANKING ---------- */
+const normT=s=>(s||'').normalize('NFC').toLowerCase().replace(/[_\-|.,()\[\]{}:;'"!?~]+/g,' ').replace(/\s+/g,' ').trim();
+const BNMAP={'ক':'k','খ':'k','গ':'g','ঘ':'g','ঙ':'n','চ':'c','ছ':'c','জ':'j','ঝ':'j','ঞ':'n','ট':'t','ঠ':'t','ড':'d','ঢ':'d','ণ':'n','ত':'t','থ':'t','দ':'d','ধ':'d','ন':'n','প':'p','ফ':'f','ব':'b','ভ':'b','ম':'m','য':'j','র':'r','ল':'l','শ':'s','ষ':'s','স':'s','হ':'h','ৎ':'t','ং':'n','ঃ':'','ঁ':''};
+/* consonant skeleton: Bangla "আমি মানে" and English "Ami Mane" both become "mmn" */
+function skel(str){
+  const s=(str||'').normalize('NFC').toLowerCase();
+  let o='';
+  for(const ch of s){
+    if(ch==='়'){const l=o.slice(-1);if(l==='d')o=o.slice(0,-1)+'r';else if(l==='j')o=o.slice(0,-1)+'y';continue}
+    if(BNMAP[ch]!==undefined){o+=BNMAP[ch];continue}
+    if(/[ঀ-৿]/.test(ch))continue;
+    o+=/[a-z]/.test(ch)?ch:' ';
+  }
+  o=o.replace(/sh|ch/g,m=>m[0]==='c'?'k':'s').replace(/ph/g,'p').replace(/[aeiouyh]/g,'')
+     .replace(/[vw]/g,'b').replace(/z/g,'j').replace(/q|c/g,'k').replace(/x/g,'ks').replace(/f/g,'p');
+  let t='';const starts=new Set();
+  o.split(' ').filter(Boolean).forEach(w=>{
+    w=w.replace(/(.)\1+/g,'$1');
+    starts.add(t.length);
+    t+=w;
+  });
+  return {t,starts};
+}
+function rankSongs(list,query){
+  const q=normT(query);
+  if(!q)return list;
+  const toks=q.split(' ');
+  const qs=/[ঀ-৿]/.test(q)?skel(query).t:'';
+  const out=[];
+  list.forEach((s,i)=>{
+    const t=normT(s.title);
+    let sc=-1;
+    if(toks.every(w=>t.includes(w))){
+      if(t.startsWith(q))sc=0;
+      else if((' '+t).includes(' '+q))sc=1;
+      else if(t.split(' ').some(w=>w.startsWith(toks[0])))sc=2;
+      else sc=3;
+    }else if(qs){
+      const k=skel(s.title),ix=k.t.indexOf(qs);
+      if(ix>=0)sc=4+(ix===0?0:k.starts.has(ix)?1:2);
+    }
+    if(sc>=0)out.push({s,sc,i});
+  });
+  out.sort((a,b)=>a.sc-b.sc||a.i-b.i);
+  return out.map(x=>x.s);
+}
+
 function renderLib(){
   const PL=getPL();
   const pid=libView.startsWith('pl:')?libView.slice(3):null;
@@ -2435,7 +2495,7 @@ function renderLib(){
   let songs=fav?getLiked():hist?getHist():loc?getLoc():pl?pl.songs:[];
 
   if(libSort==='az'&&!hist)songs=[...songs].sort((a,b)=>(a.title||'').localeCompare(b.title||''));
-  if(loc&&libQ.trim()){const t=libQ.trim().toLowerCase();songs=songs.filter(x=>(x.title||'').toLowerCase().includes(t))}
+  if(loc&&libQ.trim())songs=rankSongs(songs,libQ);
 
   $('libFolders').hidden=inner;
   $('libGrid').hidden=!inner;
