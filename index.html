@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -804,34 +805,56 @@ let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=nul
 let seekLock=null;
 
 const seek=$('seek');
-/* ---------- LOCAL AUDIO ENGINE (Offline songs, instant playback) ---------- */
+/* ---------- LOCAL AUDIO ENGINE + ONLINE MEDIA SESSION BRIDGE ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
-const curT=()=>isLoc()?(au.currentTime||0):(apiReady&&yt&&yt.getCurrentTime?(yt.getCurrentTime()||0):0);
+const curT=()=>{
+  if(isLoc())return au.currentTime||0;
+  if(apiReady&&yt&&typeof yt.getCurrentTime==='function')return yt.getCurrentTime()||0;
+  return 0;
+};
 const durT=()=>{
   if(isLoc())return Number.isFinite(au.duration)?au.duration:0;
-  const d=(apiReady&&yt&&yt.getDuration)?(yt.getDuration()||0):0;
+  const d=(apiReady&&yt&&typeof yt.getDuration==='function')?(yt.getDuration()||0):0;
   return d>0?d:(queue[idx]&&queue[idx].lengthSeconds?queue[idx].lengthSeconds:0);
 };
 const seekT=t=>{
   const d=durT();
   const target=d>0?Math.max(0,Math.min(t,d)):Math.max(0,t);
-  seekLock={target,until:Date.now()+3500};
+  seekLock={target,until:Date.now()+4500};
   $('cur').textContent=fmt(target);
-  if(d>0){const p=target/d*100;seek.value=p;setProg(p)}
+  if(d>0){
+    const p=target/d*100;
+    seek.value=p;
+    setProg(p);
+  }
   if(isLoc()){
     try{au.currentTime=target}catch(e){}
-  }else if(apiReady&&yt&&yt.seekTo){
+  }else if(apiReady&&yt&&typeof yt.seekTo==='function'){
     try{yt.seekTo(target,true)}catch(e){}
   }
   posState(target);
 };
-const pauseAny=()=>{userPause=true;keepOff();try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
-const resumeAny=()=>{userPause=false;if(isLoc())keepOn();try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
+const pauseAny=()=>{
+  userPause=true;
+  keepOff();
+  try{
+    if(isLoc())au.pause();
+    else if(apiReady&&yt&&yt.pauseVideo)yt.pauseVideo();
+  }catch(e){}
+};
+const resumeAny=()=>{
+  userPause=false;
+  keepOn();
+  try{
+    if(isLoc())au.play().catch(()=>{});
+    else if(apiReady&&yt&&yt.playVideo)yt.playVideo();
+  }catch(e){}
+};
 const isSil=()=>au.src.startsWith('data:');
 
 const keep=(()=>{
@@ -1002,19 +1025,22 @@ function onState(e){
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
     playing=true;
+    keepOn();
     icons();
-    bindMediaHandlers();
+    setMedia(queue[idx]);
     posState();
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
     playing=false;
+    keepOff();
     icons();
     posState();
     $('art').classList.add('paused');
     stopT();
   }else if(st===YT.PlayerState.ENDED){
     playing=false;
+    keepOff();
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
@@ -1024,6 +1050,7 @@ function onState(e){
 
 function onYtError(){
   playing=false;
+  keepOff();
   icons();
   stopT();
   if(++errCount<queue.length)setTimeout(next,600);
@@ -1051,7 +1078,9 @@ function tick(){
     let c=curT();
     const d=durT();
     if(seekLock){
-      if(Date.now()<seekLock.until&&Math.abs(c-seekLock.target)>1.2){
+      if(Math.abs(c-seekLock.target)<=1.2){
+        seekLock=null;
+      }else if(Date.now()<seekLock.until){
         c=seekLock.target;
       }else{
         seekLock=null;
@@ -1144,7 +1173,8 @@ function resetProg(){
 function toggle(){
   if(isLoc()){if(au.paused){userPause=false;keepOn();au.play().catch(()=>{})}else{userPause=true;keepOff();au.pause()}return}
   if(!apiReady)return;
-  playing?yt.pauseVideo():yt.playVideo();
+  if(playing){keepOff();yt.pauseVideo()}
+  else{keepOn();yt.playVideo()}
 }
 
 const LOCAL_ART='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5e5ce6"/><stop offset="1" stop-color="#ff375f"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><circle cx="46" cy="82" r="12" fill="#fff"/><circle cx="78" cy="74" r="12" fill="#fff"/><rect x="55" y="34" width="6" height="48" fill="#fff"/><rect x="87" y="26" width="6" height="48" fill="#fff"/><path d="M55 34l38-8v10l-38 8z" fill="#fff"/></svg>');
@@ -3014,3 +3044,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+
+```
