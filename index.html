@@ -500,7 +500,7 @@ function goBack(){
 addEventListener('keydown',e=>{if(e.key==='Escape')goBack()});
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:0,gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',lyEn:'system',lyBn:'system'};
+const DEF={theme:'system',accent:'#0a84ff',preset:'auto',gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',lyEn:'system',lyBn:'system'};
 
 const LYEN={
   system:'-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif',
@@ -550,14 +550,15 @@ function shade(col,a){
 function apply(){
   const d=document.documentElement,st=d.style;
 
-  if(S.preset==='photo'&&!PHOTO)S.preset=0;
-  if(S.preset!=='photo'&&!PRESETS[S.preset])S.preset=0;
+  if(S.preset==='photo'&&!PHOTO)S.preset='auto';
+  if(S.preset!=='photo'&&S.preset!=='auto'&&!PRESETS[S.preset])S.preset='auto';
 
   const isPhoto=S.preset==='photo';
   const pr=isPhoto?null:(PRESETS[S.preset]||PRESETS[0]);
-  const solid=(pr&&pr[0]==='#')?pr:null;
+  let solid=(pr&&pr[0]==='#')?pr:null;
 
   let dark=S.theme==='dark'||(S.theme==='system'&&darkMQ.matches);
+  if(S.preset==='auto')solid=dark?'#000000':'#ffffff';
   if(solid==='#000000')dark=true;
   else if(solid==='#ffffff')dark=false;
 
@@ -626,6 +627,11 @@ function buildSettingsUI(){
   });
 
   const p=$('presets');
+  const au=document.createElement('button');
+  au.type='button';au.className='pv';au.dataset.i='auto';au.title='System';
+  au.style.background='linear-gradient(135deg,#000 50%,#fff 50%)';
+  au.onclick=()=>{S.preset='auto';save();apply()};
+  p.appendChild(au);
   PRESETS.forEach((g,i)=>{
     const b=document.createElement('button');
     b.type='button';b.className='pv';b.dataset.i=i;b.style.background=g;
@@ -662,7 +668,7 @@ $('photoPick').onclick=()=>$('photoIn').click();
 $('photoDel').onclick=()=>{
   PHOTO=null;
   LS.del('sf_bg_photo');
-  if(S.preset==='photo')S.preset=0;
+  if(S.preset==='photo')S.preset='auto';
   S.photoTop='';
   save();apply();
 };
