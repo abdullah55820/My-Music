@@ -804,6 +804,23 @@ let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=nul
 let seekLock=null;
 
 const seek=$('seek');
+/* TIMING TEST: shows how long each step of an offline song change takes. set false to hide */
+const DEBUG_TIMING=true;
+let TM={};
+function tmShow(){
+  if(!DEBUG_TIMING)return;
+  let el=document.getElementById('tmBox');
+  if(!el){
+    el=document.createElement('div');
+    el.id='tmBox';
+    el.style.cssText='position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top) + 4px);z-index:20000;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.8);color:#0f0;font:12px/1.4 ui-monospace,Menlo,monospace;pointer-events:none';
+    document.body.appendChild(el);
+  }
+  el.textContent='UI '+Math.round(TM.ui)+'ms | file '+(TM.pre?'preloaded':Math.round(TM.db)+'ms')+' | src set '+Math.round(TM.src)+'ms | audio playing '+Math.round(TM.play)+'ms';
+  el.hidden=false;
+  clearTimeout(TM.h);
+  TM.h=setTimeout(()=>{el.hidden=true},6000);
+}
 /* ---------- LOCAL AUDIO ENGINE + ONLINE MEDIA SESSION BRIDGE ---------- */
 const au=new Audio();
 au.preload='auto';
@@ -920,6 +937,7 @@ function loadLocal(v){
     userPause=false;
     seekLock=null;
     lastStart=Date.now();
+    TM.src=performance.now()-TM.t0;
     au.src=url;
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
@@ -928,12 +946,15 @@ function loadLocal(v){
     setTimeout(()=>{if(isLoc()&&queue[idx]&&queue[idx].videoId===id)preloadNext()},1200);
   };
   if(PRE.has(id)){
+    TM.pre=true;TM.db=0;
     const u=PRE.get(id);
     PRE.delete(id);
     start(u);
     return;
   }
+  const tdb=performance.now();
   idbGet(id).then(blob=>{
+    TM.pre=false;TM.db=performance.now()-tdb;
     if(!queue[idx]||queue[idx].videoId!==id)return;
     if(!blob){onYtError();return}
     start(URL.createObjectURL(blob));
@@ -990,6 +1011,7 @@ au.addEventListener('timeupdate',()=>{
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   if(LOCAL_KEEP){if(!userPause)keepOn()}else keepOff();
+  if(TM.t0&&!TM.play){TM.play=performance.now()-TM.t0;tmShow()}
   errCount=0;playing=true;icons();
   bindMediaHandlers();
   setMedia(queue[idx]);
@@ -1622,6 +1644,7 @@ function playAt(i,list){
   const v=queue[i];
   if(!v||!v.videoId)return;
 
+  TM={t0:performance.now(),h:TM.h};
   idx=i;
   addHist(v);
   if(mode==='closed')showFull();
@@ -1629,6 +1652,7 @@ function playAt(i,list){
   resetProg();
   playing=false;
   icons();
+  TM.ui=performance.now()-TM.t0;
 
   if(v.local){
     pending=null;
