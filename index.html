@@ -875,6 +875,7 @@ const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
 /* after pause the silent audio keeps running for PAUSE_HOLD_MIN minutes, so iOS does not drop the lock screen controls */
 const PAUSE_HOLD_MIN=30;
 const keepHold=()=>{
+  if(isLoc()){keepOff();return}
   clearTimeout(holdT);
   try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
   holdT=setTimeout(()=>{holdT=null;if(!playing)try{keep.pause()}catch(e){}},PAUSE_HOLD_MIN*60*1000);
@@ -968,12 +969,14 @@ au.addEventListener('playing',()=>{
   keepOff();
   errCount=0;playing=true;icons();
   bindMediaHandlers();
+  setMedia(queue[idx]);
   posState();
   $('art').classList.remove('paused');
   startT();
 });
 au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
+  if(!userPause&&(au.readyState<2||Date.now()-lastStart<1500))return;
   keepHold();
   playing=false;icons();
   posState();
