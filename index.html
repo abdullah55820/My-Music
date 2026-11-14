@@ -933,13 +933,15 @@ function posState(forcedPos){
   if(!(d>0&&Number.isFinite(d)))return;
   if(!Number.isFinite(c))c=0;
   try{
-    /* playbackRate must NOT be 0 (it throws TypeError) - paused state is told through playbackState */
+    /* playbackRate must NOT be 0 (it throws TypeError); a tiny rate while paused stops iOS thinking it is playing */
     navigator.mediaSession.setPositionState({
       duration:d,
       position:Math.min(Math.max(c,0),d),
-      playbackRate:1
+      playbackRate:playing?1:0.0001
     });
   }catch(e){}
+  /* playbackState must always be the last thing written, so the lock-screen icon matches */
+  try{navigator.mediaSession.playbackState=playing?'playing':'paused'}catch(e){}
 }
 function clearPosState(){
   try{if('mediaSession' in navigator&&navigator.mediaSession.setPositionState)navigator.mediaSession.setPositionState()}catch(e){}
@@ -972,8 +974,9 @@ au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
   if(!userPause&&(au.readyState<2||Date.now()-lastStart<1500))return;
   keepHold();
-  playing=false;icons();
+  playing=false;
   posState();
+  icons();
   $('art').classList.add('paused');
   stopT();
 });
