@@ -840,7 +840,7 @@ const seekT=t=>{
 };
 const pauseAny=()=>{
   userPause=true;
-  keepOff();
+  keepHold();
   try{
     if(isLoc())au.pause();
     else if(apiReady&&yt&&yt.pauseVideo)yt.pauseVideo();
@@ -849,6 +849,7 @@ const pauseAny=()=>{
 const resumeAny=()=>{
   userPause=false;
   keepOn();
+  if(isLoc())keepOff();
   try{
     if(isLoc())au.play().catch(()=>{});
     else if(apiReady&&yt&&yt.playVideo)yt.playVideo();
@@ -868,8 +869,15 @@ const keep=(()=>{
   a.setAttribute('playsinline','');
   return a;
 })();
-const keepOn=()=>{if(isLoc())return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
-const keepOff=()=>{try{keep.pause()}catch(e){}};
+const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc())return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+let holdT=null;
+const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
+/* paused: keep the silent audio alive for a while so the page and the lock screen controls are not dropped */
+const keepHold=()=>{
+  clearTimeout(holdT);
+  try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+  holdT=setTimeout(()=>{holdT=null;if(!playing)try{keep.pause()}catch(e){}},10*60*1000);
+};
 
 function planNext(){
   if(!queue.length||idx<0){nxt=-1;return}
@@ -956,7 +964,7 @@ au.addEventListener('timeupdate',()=>{
 
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
-  if(!userPause)keepOn();
+  keepOff();
   errCount=0;playing=true;icons();
   bindMediaHandlers();
   posState();
@@ -965,7 +973,7 @@ au.addEventListener('playing',()=>{
 });
 au.addEventListener('pause',()=>{
   if(!isLoc()||au.ended||isSil())return;
-  keepOff();
+  keepHold();
   playing=false;icons();
   posState();
   $('art').classList.add('paused');
@@ -1038,7 +1046,7 @@ function onState(e){
     startT();
   }else if(st===YT.PlayerState.PAUSED){
     playing=false;
-    keepOff();
+    keepHold();
     icons();
     posState();
     $('art').classList.add('paused');
@@ -1177,9 +1185,9 @@ function resetProg(){
 }
 
 function toggle(){
-  if(isLoc()){if(au.paused){userPause=false;keepOn();au.play().catch(()=>{})}else{userPause=true;keepOff();au.pause()}return}
+  if(isLoc()){if(au.paused){userPause=false;keepOff();au.play().catch(()=>{})}else{userPause=true;keepHold();au.pause()}return}
   if(!apiReady)return;
-  if(playing){keepOff();yt.pauseVideo()}
+  if(playing){keepHold();yt.pauseVideo()}
   else{keepOn();yt.playVideo()}
 }
 
@@ -1776,7 +1784,7 @@ function bindMediaHandlers(){
   const ms=navigator.mediaSession;
   const h=(a,f)=>{try{ms.setActionHandler(a,f)}catch(e){}};
   h('play',()=>resumeAny());
-  h('pause',()=>pauseAny());
+  h('pause',()=>{if(!playing&&userPause)resumeAny();else pauseAny()});
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
   /* seekbackward/seekforward replace prev/next buttons on iOS and fight the scrubber, so they are off */
