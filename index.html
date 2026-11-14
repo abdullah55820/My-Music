@@ -872,11 +872,12 @@ const keep=(()=>{
 const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc())return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 let holdT=null;
 const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
-/* paused: keep the silent audio alive for a while so the page and the lock screen controls are not dropped */
+/* after pause the silent audio keeps running for PAUSE_HOLD_MIN minutes, so iOS does not drop the lock screen controls */
+const PAUSE_HOLD_MIN=30;
 const keepHold=()=>{
   clearTimeout(holdT);
   try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
-  holdT=setTimeout(()=>{holdT=null;if(!playing)try{keep.pause()}catch(e){}},10*60*1000);
+  holdT=setTimeout(()=>{holdT=null;if(!playing)try{keep.pause()}catch(e){}},PAUSE_HOLD_MIN*60*1000);
 };
 
 function planNext(){
@@ -937,11 +938,11 @@ function posState(forcedPos){
   if(!(d>0&&Number.isFinite(d)))return;
   if(!Number.isFinite(c))c=0;
   try{
-    /* playbackRate must NOT be 0 (it throws TypeError) - paused state is told through playbackState */
+    /* playbackRate must NOT be 0 (it throws TypeError); while paused a tiny rate keeps the lock-screen clock frozen */
     navigator.mediaSession.setPositionState({
       duration:d,
       position:Math.min(Math.max(c,0),d),
-      playbackRate:1
+      playbackRate:playing?1:0.0001
     });
   }catch(e){}
 }
