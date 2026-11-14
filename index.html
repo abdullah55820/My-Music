@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -801,31 +802,15 @@ $('spBack').onclick=()=>{
 
 /* ---------- PLAYER ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
-let seekLock=null;
+let seekLock=null,playReqId=0;
 
 const seek=$('seek');
-/* TIMING TEST: shows how long each step of an offline song change takes. set false to hide */
-const DEBUG_TIMING=true;
-let TM={};
-function tmShow(){
-  if(!DEBUG_TIMING)return;
-  let el=document.getElementById('tmBox');
-  if(!el){
-    el=document.createElement('div');
-    el.id='tmBox';
-    el.style.cssText='position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top) + 4px);z-index:20000;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.8);color:#0f0;font:12px/1.4 ui-monospace,Menlo,monospace;pointer-events:none';
-    document.body.appendChild(el);
-  }
-  el.textContent='UI '+Math.round(TM.ui)+'ms | file '+(TM.pre?'preloaded':Math.round(TM.db)+'ms')+' | src set '+Math.round(TM.src)+'ms | audio playing '+Math.round(TM.play)+'ms';
-  el.hidden=false;
-  clearTimeout(TM.h);
-  TM.h=setTimeout(()=>{el.hidden=true},6000);
-}
 /* ---------- LOCAL AUDIO ENGINE + ONLINE MEDIA SESSION BRIDGE ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
-let locURL=null,PRE=new Map(),nxt=-1,advancing=false,lastStart=0,userPause=false;
+const LOC_BLOB=new Map(); // Fast in-memory blob URL cache for zero-latency switching
+let locURL=null,nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const isPl=()=>isLoc()?(!au.paused&&!au.ended):playing;
@@ -887,77 +872,79 @@ const keep=(()=>{
   a.setAttribute('playsinline','');
   return a;
 })();
-/* true = silent audio also runs under offline songs (iOS then keeps ONE Now Playing session). set false to test without it */
 const LOCAL_KEEP=true;
 const keepOn=()=>{clearTimeout(holdT);holdT=null;if(isLoc()&&!LOCAL_KEEP)return;try{const p=keep.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 let holdT=null;
 const keepOff=()=>{clearTimeout(holdT);holdT=null;try{keep.pause()}catch(e){}};
-/* pause = silent audio really stops (iPhone default behaviour) */
 const keepHold=()=>keepOff();
+
+function getCachedBlobURL(id){
+  if(LOC_BLOB.has(id)){
+    const u=LOC_BLOB.get(id);
+    LOC_BLOB.delete(id);
+    LOC_BLOB.set(id,u);
+    return u;
+  }
+  return null;
+}
+
+function cacheBlobURL(id,blob){
+  if(LOC_BLOB.has(id))return LOC_BLOB.get(id);
+  const u=URL.createObjectURL(blob);
+  LOC_BLOB.set(id,u);
+  if(LOC_BLOB.size>12){
+    const oldestKey=LOC_BLOB.keys().next().value;
+    const oldUrl=LOC_BLOB.get(oldestKey);
+    LOC_BLOB.delete(oldestKey);
+    if(oldUrl&&oldUrl!==locURL)try{URL.revokeObjectURL(oldUrl)}catch(e){}
+  }
+  return u;
+}
 
 function planNext(){
   if(!queue.length||idx<0){nxt=-1;return}
   if(shuf&&queue.length>1){let j;do{j=Math.floor(Math.random()*queue.length)}while(j===idx);nxt=j}
   else nxt=(idx+1)%queue.length;
 }
-let preBusy=false;
-async function preloadNext(){
-  if(preBusy)return;
-  preBusy=true;
-  try{
-    planNext();
-    const n=queue.length;
-    const want=[];
-    if(nxt>=0&&nxt!==idx)want.push(nxt);
-    if(idx>=0&&n>1){const pv=(idx-1+n)%n;if(pv!==idx&&!want.includes(pv))want.push(pv)}
-    const ids=new Set(want.map(i=>queue[i]&&queue[i].videoId));
-    for(const [k,u] of [...PRE]){if(!ids.has(k)){try{URL.revokeObjectURL(u)}catch(e){}PRE.delete(k)}}
-    for(const i of want){
-      const v=queue[i];
-      if(!v||!v.local||PRE.has(v.videoId))continue;
-      try{
-        let b=await idbGet(v.videoId);
-        if(!b)continue;
-        /* read the file into memory now, so switching songs later needs no disk read */
-        if(b.size<=60*1024*1024){
-          try{b=new Blob([await b.arrayBuffer()],{type:b.type||'audio/mpeg'})}catch(e){}
-        }
-        if(!PRE.has(v.videoId)&&queue[idx]&&queue[idx].local)PRE.set(v.videoId,URL.createObjectURL(b));
-      }catch(e){}
-    }
-  }finally{preBusy=false}
+
+async function preloadNeighbors(){
+  planNext();
+  if(!queue.length||idx<0)return;
+  const targets=new Set([nxt,(idx+1)%queue.length,(idx-1+queue.length)%queue.length]);
+  for(const j of targets){
+    const v=queue[j];
+    if(!v||!v.local||j===idx||LOC_BLOB.has(v.videoId))continue;
+    try{
+      const b=await idbGet(v.videoId);
+      if(b)cacheBlobURL(v.videoId,b);
+    }catch(e){}
+  }
 }
 
-function loadLocal(v){
+function loadLocal(v,reqId){
   const id=v.videoId;
   const start=url=>{
-    if(locURL&&locURL!==url){try{URL.revokeObjectURL(locURL)}catch(e){}}
+    if(reqId!==playReqId)return;
     locURL=url;
     advancing=false;
     userPause=false;
     seekLock=null;
     lastStart=Date.now();
-    TM.src=performance.now()-TM.t0;
     au.src=url;
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
     if(LOCAL_KEEP)keepOn();else keepOff();
-    /* preload shortly AFTER the song has started, so it does not slow the current song down */
-    setTimeout(()=>{if(isLoc()&&queue[idx]&&queue[idx].videoId===id)preloadNext()},1200);
+    preloadNeighbors();
   };
-  if(PRE.has(id)){
-    TM.pre=true;TM.db=0;
-    const u=PRE.get(id);
-    PRE.delete(id);
-    start(u);
+  const cached=getCachedBlobURL(id);
+  if(cached){
+    start(cached);
     return;
   }
-  const tdb=performance.now();
   idbGet(id).then(blob=>{
-    TM.pre=false;TM.db=performance.now()-tdb;
-    if(!queue[idx]||queue[idx].videoId!==id)return;
+    if(reqId!==playReqId||!queue[idx]||queue[idx].videoId!==id)return;
     if(!blob){onYtError();return}
-    start(URL.createObjectURL(blob));
+    start(cacheBlobURL(id,blob));
   }).catch(()=>{});
 }
 
@@ -973,14 +960,12 @@ function posState(forcedPos){
   if(!(d>0&&Number.isFinite(d)))return;
   if(!Number.isFinite(c))c=0;
   try{
-    /* playbackRate must NOT be 0 (it throws TypeError); a tiny rate while paused stops iOS thinking it is playing */
     navigator.mediaSession.setPositionState({
       duration:d,
       position:Math.min(Math.max(c,0),d),
       playbackRate:isPl()?1:0.0001
     });
   }catch(e){}
-  /* playbackState must always be the last thing written, so the lock-screen icon matches */
   try{navigator.mediaSession.playbackState=isPl()?'playing':'paused'}catch(e){}
 }
 function clearPosState(){
@@ -1001,7 +986,7 @@ au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>800){lastTU=
 au.addEventListener('timeupdate',()=>{
   if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
-  if(Number.isFinite(d)&&d>3&&d-c<0.5){
+  if(Number.isFinite(d)&&d>3&&d-c<0.45){
     if(rep===2){au.currentTime=0;return}
     advancing=true;
     next();
@@ -1011,7 +996,6 @@ au.addEventListener('timeupdate',()=>{
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   if(LOCAL_KEEP){if(!userPause)keepOn()}else keepOff();
-  if(TM.t0&&!TM.play){TM.play=performance.now()-TM.t0;tmShow()}
   errCount=0;playing=true;icons();
   bindMediaHandlers();
   setMedia(queue[idx]);
@@ -1062,11 +1046,11 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     height:'200',width:'200',
-    playerVars:{autoplay:0,controls:0,disablekb:1,playsinline:1,rel:0},
+    playerVars:{autoplay:0,controls:0,disablekb:1,playsinline:1,rel:0,iv_load_policy:3},
     events:{
       onReady:()=>{
         apiReady=true;
-        if(pending){const id=pending;pending=null;yt.loadVideoById(id)}
+        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0})}
       },
       onStateChange:onState,
       onError:onYtError
@@ -1116,7 +1100,7 @@ function onYtError(){
   keepOff();
   icons();
   stopT();
-  if(++errCount<queue.length)setTimeout(next,600);
+  if(++errCount<queue.length)setTimeout(next,350);
 }
 
 function icons(){
@@ -1231,7 +1215,7 @@ function resetProg(){
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
-  if(!isLoc())clearPosState();
+  clearPosState();
 }
 
 function toggle(){
@@ -1623,15 +1607,16 @@ function showFull(){
 }
 
 function closePlayer(){
+  playReqId++;
   mode='closed';
   resetPlayerStyles();
   $('player').classList.remove('active');
   $('mini').classList.remove('visible');
   stopT();
   apply();
-  if(apiReady)yt.stopVideo();
+  if(apiReady)try{yt.stopVideo()}catch(e){}
   keepOff();
-  try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
+  try{au.pause();au.removeAttribute('src');au.load();locURL=null}catch(e){}
   try{if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none';metaKey=''}}catch(e){}
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
   icons();
@@ -1644,7 +1629,7 @@ function playAt(i,list){
   const v=queue[i];
   if(!v||!v.videoId)return;
 
-  TM={t0:performance.now(),h:TM.h};
+  const reqId=++playReqId;
   idx=i;
   addHist(v);
   if(mode==='closed')showFull();
@@ -1652,25 +1637,32 @@ function playAt(i,list){
   resetProg();
   playing=false;
   icons();
-  TM.ui=performance.now()-TM.t0;
+
+  // Trigger background loading for more home songs immediately if near the end
+  if(queue===D.home.videos&&idx>=queue.length-4)keepFilling();
 
   if(v.local){
     pending=null;
     if(apiReady)try{yt.stopVideo()}catch(e){}
-    loadLocal(v);
+    loadLocal(v,reqId);
     return;
   }
 
-  try{au.pause()}catch(e){}
+  // Stop any playing local audio cleanly & immediately
+  if(!au.paused&&!isSil())try{au.pause()}catch(e){}
   keepOn();
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
-  else pending=v.videoId;
+
+  if(apiReady&&yt&&typeof yt.loadVideoById==='function'){
+    yt.loadVideoById({videoId:v.videoId,startSeconds:0});
+  }else{
+    pending=v.videoId;
+  }
 }
 
 const SLEEPS=[0,15,30,60];
 let shuf=false,rep=0,slIdx=0,slT=null;
 
-const next=async()=>{
+const next=()=>{
   if(!queue.length||idx<0)return;
   if(shuf&&queue.length>1){
     let j=(nxt>=0&&nxt!==idx&&nxt<queue.length)?nxt:-1;
@@ -1680,25 +1672,15 @@ const next=async()=>{
   }
 
   const live=queue===D.home.videos||queue===D.search.videos;
-  if(live&&idx>=queue.length-1){
-    const q0=queue,i0=idx,len=q0.length;
-
-    if(q0===D.home.videos)keepFilling();
+  if(live&&idx>=queue.length-2){
+    if(queue===D.home.videos)keepFilling();
     else{
       const s=D.search;
       if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
     }
-
-    for(let k=0;k<40&&q0.length<=len;k++){
-      await new Promise(r=>setTimeout(r,250));
-      if(queue!==q0||idx!==i0)return;
-    }
-
-    if(queue!==q0||idx!==i0)return;
-    playAt(q0.length>len?i0+1:0);
-    return;
   }
 
+  // Switch immediately without blocking on network fetches
   playAt((idx+1)%queue.length);
 };
 
@@ -1803,7 +1785,7 @@ on('shareBtn',async()=>{
   setTimeout(()=>btn.classList.remove('ok'),1200);
 });
 
-on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf);if(isLoc())preloadNext()});
+on('shBtn',()=>{shuf=!shuf;$('shBtn').classList.toggle('on',shuf);if(isLoc())preloadNeighbors()});
 on('rpBtn',()=>{rep=rep?0:2;$('rpBtn').classList.toggle('on',rep>0)});
 on('slBtn',()=>{
   slIdx=(slIdx+1)%SLEEPS.length;
@@ -1839,7 +1821,6 @@ function bindMediaHandlers(){
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
-  /* seekbackward/seekforward replace prev/next buttons on iOS and fight the scrubber, so they are off */
   h('seekbackward',null);
   h('seekforward',null);
   h('seekto',d=>{
@@ -2280,7 +2261,7 @@ new IntersectionObserver(entries=>{
   if(entries.some(e=>e.isIntersecting)&&activeTab==='home')loadHomeMore();
 },{rootMargin:AHEAD+'px 0px'}).observe($('sentinel'));
 
-setInterval(()=>{if(!D.home.busy&&D.home.videos.length&&!(mode!=='closed'&&isLoc()))loadHomeMore()},800);
+setInterval(()=>{if(!D.home.busy&&D.home.videos.length)loadHomeMore()},800);
 
 /* ---------- SEARCH ---------- */
 const q=$('q');
@@ -2484,6 +2465,11 @@ function removeLocal(v){
   idbDel(v.videoId).catch(()=>{});
   idbDel(v.videoId+':art').catch(()=>{});
   delete LOCART[v.videoId];
+  if(LOC_BLOB.has(v.videoId)){
+    const u=LOC_BLOB.get(v.videoId);
+    LOC_BLOB.delete(v.videoId);
+    try{URL.revokeObjectURL(u)}catch(e){}
+  }
   const id=v.videoId,keep=x=>x.videoId!==id;
   setLoc(getLoc().filter(keep));
   LS.set('sf_liked_songs',getLiked().filter(keep));
@@ -3110,3 +3096,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+
+```
