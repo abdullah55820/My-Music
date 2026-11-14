@@ -218,6 +218,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .sb{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:12px;background:var(--surface-2);font-size:13px;font-weight:700}
 .sb.p{background:var(--accent);color:#fff}
 .sb.d{color:#ff453a}
+.sb:disabled{opacity:.5}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 #ptr{position:fixed;left:50%;top:env(safe-area-inset-top);width:40px;height:40px;margin-left:-20px;border-radius:50%;display:grid;place-items:center;z-index:50;pointer-events:none;opacity:0;color:var(--accent)}
 #ptr svg{width:20px;height:20px}
@@ -247,6 +248,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .sec.fold.open h3{margin-bottom:6px}
 .sec.fold.open h3::after{transform:rotate(-135deg)}
 .sec.fold:not(.open)>*:not(h3){display:none}
+
+/* ---------- BACKUP & STORAGE ---------- */
+.strow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:11px 0;font-size:14px}
+.strow b{font-weight:600}
+.strow span{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.stbar{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:6px 0 4px}
+.stbar i{display:block;height:100%;width:0;border-radius:4px;background:var(--accent);transition:width .4s}
+.stnote{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
+#bkInfo{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--muted);word-break:break-word}
+#bkInfo:empty{display:none}
 </style>
 </head>
 <body>
@@ -459,14 +470,22 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="row"><div><b>Transparency</b></div><input type="range" data-k="ga" min="10" max="90"></div>
     </div>
 
-    <div class="sec g">
-      <h3>Reset</h3>
-      <div class="btnrow" style="margin-bottom:14px">
-        <button class="sb" id="expBtn" type="button">Export backup</button>
-        <button class="sb" id="impBtn" type="button">Import backup</button>
+    <div class="sec g" id="bkSec">
+      <h3>Backup &amp; Storage</h3>
+      <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
+      <div class="strow"><b>Songs size</b><span id="stSize">0 MB</span></div>
+      <div class="strow"><b>Cover art &amp; data</b><span id="stOther">0 MB</span></div>
+      <div class="strow"><b>Total used by this app</b><span id="stTotal">0 MB</span></div>
+      <div class="stbar"><i id="stBar"></i></div>
+      <div class="strow"><b>Free space available</b><span id="stFree">—</span></div>
+      <p class="stnote">Backup saves every imported song in its original quality, together with favourites, playlists, history and settings. Restore puts everything back exactly as it was.</p>
+      <div class="btnrow" style="margin-top:14px">
+        <button class="sb p" id="bkMake" type="button">Backup to file</button>
+        <button class="sb p" id="bkSave" type="button" hidden>Save backup file</button>
+        <button class="sb" id="bkRestore" type="button">Restore from file</button>
       </div>
-      <input type="file" id="impIn" accept="application/json,.json" hidden>
-      <button class="sb d" id="resetAll" type="button">Reset Customization</button>
+      <input type="file" id="bkIn" hidden>
+      <div id="bkInfo"></div>
     </div>
   </div>
 </section>
@@ -750,13 +769,6 @@ $('photoIn').addEventListener('change',e=>{
   im.src=url;
 });
 
-$('resetAll').onclick=()=>{
-  PHOTO=null;
-  LS.del('sf_bg_photo');
-  S={...DEF};
-  save();apply();
-};
-
 /* ---------- PROFILE ---------- */
 let profileClosingByButton=false;
 const spOpen=()=>$('sp').classList.contains('open');
@@ -775,6 +787,7 @@ function openProfile(){
   $('sp').classList.remove('no-transition');
   $('sp').classList.add('open');
   document.body.classList.add('spo');
+  refreshStorage();
   pushLayer(()=>{
     if(!profileClosingByButton)closeProfileNative();
     profileClosingByButton=false;
@@ -2589,7 +2602,7 @@ const getLoc=()=>LS.get('sf_local',[]);
 const setLoc=v=>LS.set('sf_local',v);
 
 function removeLocal(v){
-  idbDel(v.videoId).catch(()=>{});
+  idbDel(v.videoId).catch(()=>{}).then(()=>refreshStorage());
   idbDel('art_'+v.videoId).catch(()=>{});
   delete ARTC[v.videoId];delete MP[v.videoId];delete tintCache[v.videoId];
   const id=v.videoId,keep=x=>x.videoId!==id;
@@ -2597,6 +2610,7 @@ function removeLocal(v){
   LS.set('sf_liked_songs',getLiked().filter(keep));
   LS.set('sf_history',getHist().filter(keep));
   setPL(getPL().map(p=>({...p,songs:p.songs.filter(keep)})));
+  refreshStorage();
 }
 
 $('locAdd').onclick=()=>$('locIn').click();
@@ -2604,15 +2618,19 @@ $('locIn').onchange=async e=>{
   const files=[...(e.target.files||[])];
   e.target.value='';
   if(!files.length)return;
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
   const list=getLoc();
   for(const f of files){
     if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name))continue;
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
     list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true});
+    setLoc(list);
+    refreshStorage();
   }
   setLoc(list);
   renderLib();
+  refreshStorage();
   if(offMode)renderOfflineHome();
 };
 
@@ -2699,6 +2717,11 @@ function renderLib(){
 
   $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':loc?'My Files':pl?pl.name:'Library';
   $('libStatus').textContent=inner?songs.length+' Songs':(3+PL.length)+' Folders';
+
+  if(loc){
+    const shown=songs.length;
+    storageStats().then(s=>{if(libView==='loc')$('libStatus').textContent=shown+' Songs · '+fmtB(s.songBytes)});
+  }
 
   if(!inner){
     const F=$('libFolders');
@@ -2897,33 +2920,223 @@ function touchDone(e){
 addEventListener('touchend',touchDone,{passive:true});
 addEventListener('touchcancel',touchDone,{passive:true});
 
-/* ---------- BACKUP ---------- */
-$('expBtn').onclick=()=>{
-  const d={liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),settings:S};
+/* ---------- STORAGE USAGE ---------- */
+const fmtB=n=>{
+  if(!Number.isFinite(n)||n<=0)return '0 MB';
+  if(n>=1073741824)return (n/1073741824).toFixed(2)+' GB';
+  if(n>=1048576)return (n/1048576).toFixed(1)+' MB';
+  return Math.max(1,Math.round(n/1024))+' KB';
+};
+
+async function storageStats(){
+  const r={songs:0,songBytes:0,artBytes:0,other:0,usage:0,quota:0};
+  try{
+    const db=await IDB.open();
+    await new Promise(res=>{
+      const t=db.transaction('files','readonly');
+      const c=t.objectStore('files').openCursor();
+      c.onsuccess=()=>{
+        const cur=c.result;
+        if(!cur)return;
+        const k=String(cur.key),v=cur.value;
+        if(k.startsWith('art_'))r.artBytes+=typeof v==='string'?v.length:((v&&v.size)||0);
+        else{r.songs++;r.songBytes+=(v&&v.size)||0}
+        cur.continue();
+      };
+      t.oncomplete=res;t.onerror=res;t.onabort=res;
+    });
+  }catch(e){}
+  try{
+    let n=0;
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      n+=(k.length+(localStorage.getItem(k)||'').length)*2;
+    }
+    r.other=n;
+  }catch(e){}
+  try{
+    if(navigator.storage&&navigator.storage.estimate){
+      const e=await navigator.storage.estimate();
+      r.usage=e.usage||0;r.quota=e.quota||0;
+    }
+  }catch(e){}
+  const own=r.songBytes+r.artBytes+r.other;
+  if(!r.usage||r.usage<own)r.usage=own;
+  return r;
+}
+
+let stBusy=false,stAgain=false;
+async function refreshStorage(){
+  if(stBusy){stAgain=true;return}
+  stBusy=true;
+  try{
+    const s=await storageStats();
+    $('stSongs').textContent=getLoc().length;
+    $('stSize').textContent=fmtB(s.songBytes);
+    $('stOther').textContent=fmtB(s.artBytes+s.other);
+    $('stTotal').textContent=fmtB(s.usage);
+    $('stFree').textContent=s.quota?fmtB(Math.max(0,s.quota-s.usage)):'Unknown';
+    $('stBar').style.width=(s.quota?Math.min(100,s.usage/s.quota*100):0)+'%';
+    if(activeTab==='library'&&libView==='loc'&&!libQ.trim())$('libStatus').textContent=getLoc().length+' Songs · '+fmtB(s.songBytes);
+  }catch(e){}
+  finally{
+    stBusy=false;
+    if(stAgain){stAgain=false;refreshStorage()}
+  }
+}
+
+/* ---------- BACKUP & RESTORE (original quality, one file) ----------
+   File format .sfbak:  "SFBK2\n" then repeated entries:
+   [4 bytes header length][header JSON][raw bytes]
+   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
+const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
+let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
+
+function bkEntry(head,body){
+  const h=BK_ENC.encode(JSON.stringify(head));
+  const l=new Uint8Array(4);
+  new DataView(l.buffer).setUint32(0,h.length);
+  return [l,h,body];
+}
+
+function bkInfo(t){$('bkInfo').textContent=t||''}
+
+async function makeBackup(){
+  if(bkBusy)return;
+  bkBusy=true;
+  const btn=$('bkMake');
+  btn.disabled=true;$('bkRestore').disabled=true;
+  $('bkSave').hidden=true;bkBlob=null;
+  try{
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+    const L=getLoc();
+    const meta={
+      liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),
+      settings:S,local:L,lyoff:LS.get('sf_lyoff',{}),photo:PHOTO,t:Date.now()
+    };
+    const mb=BK_ENC.encode(JSON.stringify(meta));
+    const parts=[BK_ENC.encode('SFBK2\n'),...bkEntry({k:'meta',n:mb.length},mb)];
+    let done=0,missing=0;
+    for(const v of L){
+      bkInfo('Preparing '+(++done)+' / '+L.length+'…');
+      const blob=await idbGet(v.videoId);
+      if(!blob){missing++;continue}
+      parts.push(...bkEntry({k:'file',id:v.videoId,n:blob.size,type:blob.type||''},blob));
+      const art=await idbGet('art_'+v.videoId);
+      if(typeof art==='string'&&art){
+        const ab=BK_ENC.encode(art);
+        parts.push(...bkEntry({k:'art',id:v.videoId,n:ab.length},ab));
+      }
+    }
+    bkBlob=new Blob(parts,{type:'application/octet-stream'});
+    bkName='soundflow-backup-'+new Date().toISOString().slice(0,10)+'.sfbak';
+    bkInfo('Backup ready: '+(L.length-missing)+' songs, '+fmtB(bkBlob.size)+'. Tap "Save backup file" and choose where to keep it (Files / Drive).'+(missing?' '+missing+' song(s) were missing and skipped.':''));
+    $('bkSave').hidden=false;
+  }catch(e){
+    bkBlob=null;
+    bkInfo('Backup failed: '+((e&&e.message)||'not enough memory. Try again with fewer songs.'));
+  }
+  bkBusy=false;
+  btn.disabled=false;$('bkRestore').disabled=false;
+}
+
+$('bkMake').onclick=makeBackup;
+
+$('bkSave').onclick=async()=>{
+  if(!bkBlob)return;
+  const f=new File([bkBlob],bkName,{type:'application/octet-stream'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      await navigator.share({files:[f],title:bkName});
+      bkInfo('Backup shared / saved.');
+      return;
+    }
+  }catch(e){if(e&&e.name==='AbortError')return}
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:'application/json'}));
-  a.download='soundflow-backup.json';
+  a.href=URL.createObjectURL(bkBlob);
+  a.download=bkName;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+  bkInfo('Backup downloaded to your Downloads / Files.');
 };
 
-$('impBtn').onclick=()=>$('impIn').click();
+$('bkRestore').onclick=()=>$('bkIn').click();
 
-$('impIn').onchange=async e=>{
+const uniq=(a=[],b=[])=>{
+  const m=new Set();
+  return [...(a||[]),...(b||[])].filter(x=>x&&x.videoId&&!m.has(x.videoId)&&m.add(x.videoId));
+};
+
+function applyMeta(d,okIds){
+  LS.set('sf_liked_songs',uniq(getLiked(),d.liked));
+  LS.set('sf_history',uniq(getHist(),d.hist).slice(0,50));
+  const P=getPL();
+  (d.pl||[]).forEach(c=>{
+    const l=P.find(x=>x.id===c.id);
+    if(l)l.songs=uniq(l.songs,c.songs);else P.push(c);
+  });
+  setPL(P);
+  LS.set('sf_recent',[...new Set([...getRecent(),...(d.recent||[])])].slice(0,8));
+  if(d.local){
+    const cur=getLoc(),have=new Set(cur.map(x=>x.videoId));
+    d.local.forEach(x=>{if(x&&x.videoId&&!have.has(x.videoId)&&(!okIds||okIds.has(x.videoId)))cur.push(x)});
+    setLoc(cur);
+  }
+  if(d.lyoff)LS.set('sf_lyoff',{...getOffs(),...d.lyoff});
+  if(d.photo)LS.set('sf_bg_photo',d.photo);
+  if(d.settings){S={...DEF,...d.settings};save()}
+}
+
+$('bkIn').onchange=async e=>{
   const f=e.target.files&&e.target.files[0];
   e.target.value='';
-  if(!f)return;
+  if(!f||bkBusy)return;
+  bkBusy=true;
+  $('bkMake').disabled=true;$('bkRestore').disabled=true;
   try{
-    const d=JSON.parse(await f.text());
-    if(d.liked)LS.set('sf_liked_songs',d.liked);
-    if(d.hist)LS.set('sf_history',d.hist);
-    if(d.pl)setPL(d.pl);
-    if(d.recent)LS.set('sf_recent',d.recent);
-    if(d.settings){S={...DEF,...d.settings};save()}
-    location.reload();
-  }catch(err){alert('Invalid backup file.')}
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
+    const magic=BK_DEC.decode(await u8(f,0,6));
+    if(magic.startsWith('SFBK2')){
+      let pos=6,meta=null,files=0,failed=0;
+      const okIds=new Set(),size=f.size;
+      while(pos+4<=size){
+        const hl=new DataView(await f.slice(pos,pos+4).arrayBuffer()).getUint32(0);
+        pos+=4;
+        const h=JSON.parse(BK_DEC.decode(await u8(f,pos,hl)));
+        pos+=hl;
+        const end=pos+h.n;
+        if(end>size)throw new Error('The backup file is incomplete or damaged.');
+        if(h.k==='meta'){
+          meta=JSON.parse(BK_DEC.decode(await u8(f,pos,h.n)));
+        }else if(h.k==='file'){
+          bkInfo('Restoring song '+(files+failed+1)+(meta&&meta.local?' / '+meta.local.length:'')+'…');
+          try{
+            await idbPut(h.id,f.slice(pos,end,h.type||'audio/mpeg'));
+            okIds.add(h.id);files++;
+          }catch(err){failed++}
+        }else if(h.k==='art'){
+          try{await idbPut('art_'+h.id,BK_DEC.decode(await u8(f,pos,h.n)))}catch(err){}
+        }
+        pos=end;
+        refreshStorage();
+      }
+      if(!meta)throw new Error('The backup file has no data.');
+      applyMeta(meta,okIds);
+      bkInfo('Restored '+files+' songs in original quality'+(failed?' ('+failed+' could not be saved: storage full)':'')+'. Reloading…');
+    }else{
+      const d=JSON.parse(await f.text());
+      applyMeta(d,null);
+      bkInfo('Restored favourites, playlists and settings. Reloading…');
+    }
+    setTimeout(()=>location.reload(),1200);
+  }catch(err){
+    bkInfo('Restore failed: '+((err&&err.message)||'invalid backup file.'));
+    $('bkMake').disabled=false;$('bkRestore').disabled=false;
+    bkBusy=false;
+    refreshStorage();
+  }
 };
 
 /* ---------- OFFLINE (service worker) ---------- */
@@ -2940,6 +3153,7 @@ icons();
 setProg(0);
 renderLib();
 renderRecent();
+refreshStorage();
 if(navigator.onLine)loadHomeMore();else renderOfflineHome();
 
 /* ---------- COLLAPSIBLE SETTINGS ---------- */
@@ -2947,7 +3161,10 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   const h=sec.querySelector('h3');
   if(!h)return;
   sec.classList.add('fold');
-  h.addEventListener('click',()=>sec.classList.toggle('open'));
+  h.addEventListener('click',()=>{
+    sec.classList.toggle('open');
+    if(sec.id==='bkSec')refreshStorage();
+  });
 });
 
 /* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
