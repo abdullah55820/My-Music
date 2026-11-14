@@ -807,14 +807,14 @@ const seek=$('seek');
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
-let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false;
+let locURL=null,PRE={id:null,url:null},nxt=-1,advancing=false,lastStart=0,userPause=false;
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
-const pauseAny=()=>{try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
-const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
+const pauseAny=()=>{userPause=true;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
+const resumeAny=()=>{userPause=false;try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
 
 /* decide which song comes next and keep its file ready, so the next song can start
@@ -842,10 +842,23 @@ function loadLocal(v){
     if(locURL&&locURL!==url){try{URL.revokeObjectURL(locURL)}catch(e){}}
     locURL=url;
     advancing=false;
+    userPause=false;
+    lastStart=Date.now();
+    try{if('mediaSession' in navigator&&navigator.mediaSession.setPositionState)navigator.mediaSession.setPositionState()}catch(e){}
     au.src=url;
     const pr=au.play();
     if(pr&&pr.catch)pr.catch(()=>{});
     preloadNext();
+    /* if the new song is paused or frozen (no sound), restart it */
+    [1200,3500].forEach(ms=>setTimeout(()=>{
+      const q=queue[idx];
+      if(!q||q.videoId!==id||!isLoc()||au.src!==url||userPause)return;
+      if(au.paused||(au.currentTime<0.1&&au.readyState<3)){
+        try{if(au.readyState===0)au.load()}catch(e){}
+        const p2=au.play();
+        if(p2&&p2.catch)p2.catch(()=>{});
+      }
+    },ms));
   };
   if(PRE.id===id&&PRE.url){const u=PRE.url;PRE={id:null,url:null};start(u);return}
   idbGet(id).then(blob=>{
@@ -867,7 +880,7 @@ function posState(){
 let lastTU=0;
 au.addEventListener('timeupdate',()=>{if(isLoc()&&Date.now()-lastTU>1000){lastTU=Date.now();posState()}});
 au.addEventListener('timeupdate',()=>{
-  if(!isLoc()||isSil()||advancing||au.paused)return;
+  if(!isLoc()||isSil()||advancing||au.paused||Date.now()-lastStart<1500)return;
   const d=au.duration,c=au.currentTime;
   if(Number.isFinite(d)&&d>3&&d-c<0.7){
     if(rep===2){au.currentTime=0;return}
@@ -890,6 +903,7 @@ au.addEventListener('pause',()=>{
 });
 au.addEventListener('ended',()=>{
   if(!isLoc())return;
+  if(Date.now()-lastStart<1500)return;
   playing=false;icons();stopT();
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
   
@@ -1028,6 +1042,7 @@ function finishSeek(){
   seeking=false;
   seekPointer=null;
   const duration=durT();
+  if(duration>0&&isLoc()&&target>=99.6){next();return}
   if(duration>0){
     seekT(duration*target/100);
     $('cur').textContent=fmt(duration*target/100);
@@ -1070,7 +1085,7 @@ function resetProg(){
 }
 
 function toggle(){
-  if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
+  if(isLoc()){if(au.paused){userPause=false;au.play().catch(()=>{})}else{userPause=true;au.pause()}return}
   if(!apiReady)return;
   playing?yt.pauseVideo():yt.playVideo();
 }
@@ -1662,7 +1677,15 @@ if('mediaSession' in navigator){
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
-  h('seekto',d=>{if(d&&d.seekTime!=null)try{seekT(d.seekTime);setTimeout(()=>{if(isLoc())posState()},200)}catch(e){}});
+  h('seekto',d=>{
+    if(!d||d.seekTime==null)return;
+    try{
+      const du=durT();
+      if(isLoc()&&du>0&&d.seekTime>=du-1){next();return}
+      seekT(d.seekTime);
+      setTimeout(()=>{if(isLoc())posState()},200);
+    }catch(e){}
+  });
   h('seekbackward',d=>{try{seekT(Math.max(0,curT()-((d&&d.seekOffset)||10)))}catch(e){}});
   h('seekforward',d=>{try{seekT(Math.min(durT()||1e9,curT()+((d&&d.seekOffset)||10)))}catch(e){}});
 }
