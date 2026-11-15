@@ -955,13 +955,24 @@ function onState(e){
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
     userWant=true;
+    nativeExitPending=false;
     playing=true;
     kaClaim();
     icons();
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
-    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
+    /* If iOS pauses the iframe while its native fullscreen player is closing,
+       keep the previous play intent until the page regains focus. */
+    if(nativeAway||nativeExitPending){
+      playing=false;
+      icons();
+      $('art').classList.add('paused');
+      stopT();
+      if(nativeExitPending)resumeAfterNativeExit();
+      return;
+    }
+    /* A normal pause (including the app's own pause button) is respected. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1086,6 +1097,9 @@ function toggle(){
   /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
+    nativeExitPending=false;
+    nativeAway=false;
+    clearNativeResumeTimers();
     playing=false;icons();
     $('art').classList.add('paused');
     stopT();
@@ -1718,6 +1732,60 @@ function setVid(on){
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
+
+/* iOS YouTube native fullscreen return handling.
+   A blur/hidden page followed by focus/visible usually means the native player
+   has been dismissed. Resume only when playback was active before leaving.
+   The app's own pause button clears userWant, so it is never overridden. */
+let nativeAway=false, nativeExitPending=false, nativeAwayAt=0, nativeResumeTimer=[];
+function clearNativeResumeTimers(){
+  nativeResumeTimer.forEach(clearTimeout);
+  nativeResumeTimer=[];
+}
+function armNativeReturn(){
+  if(!isLoc() && userWant && playing){
+    nativeAway=true;
+    nativeAwayAt=Date.now();
+  }
+}
+function resumeAfterNativeExit(){
+  if(isLoc() || !userWant || !apiReady || !nativeExitPending)return;
+  clearNativeResumeTimers();
+  [120,350,750,1300,2100].forEach(ms=>{
+    nativeResumeTimer.push(setTimeout(()=>{
+      try{
+        if(userWant && nativeExitPending && !isLoc() && yt.getPlayerState()!==YT.PlayerState.PLAYING){
+          yt.playVideo();
+        }
+      }catch(e){}
+    },ms));
+  });
+}
+function finishNativeReturn(){
+  if(!nativeAway || isLoc() || !userWant)return;
+  nativeAway=false;
+  nativeExitPending=true;
+  /* Give the iframe time to report its PAUSED state after iOS closes its player. */
+  setTimeout(()=>{
+    try{
+      if(userWant && apiReady && yt.getPlayerState()!==YT.PlayerState.PLAYING){
+        resumeAfterNativeExit();
+      }
+    }catch(e){}
+  },180);
+}
+addEventListener('blur',armNativeReturn,true);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)armNativeReturn();
+  else finishNativeReturn();
+});
+addEventListener('focus',finishNativeReturn,true);
+addEventListener('pageshow',finishNativeReturn);
+['webkitendfullscreen','fullscreenchange','webkitfullscreenchange'].forEach(ev=>{
+  document.addEventListener(ev,()=>{
+    if(nativeAway)finishNativeReturn();
+  },true);
+});
 
 /* The fullscreen close control only exits the fullscreen video layout.
    It does not call pauseVideo(), playVideo(), or toggle the song state. */
