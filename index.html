@@ -1633,6 +1633,8 @@ function syncVideo(){
   if(!show){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
+    const f0=box.querySelector('iframe');
+    if(f0)f0.style.cssText='';
     return;
   }
   const r=az.getBoundingClientRect();
@@ -1643,6 +1645,10 @@ function syncVideo(){
   box.style.top=(r.top+(r.height-vh)/2)+'px';
   box.style.width=sz+'px';box.style.height=vh+'px';
   box.classList.add('vid');
+  /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
+  const fr=box.querySelector('iframe');
+  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
+  try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 function setVid(on){
   vidMode=on;
