@@ -194,7 +194,7 @@ body.dragging #topfade{opacity:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
-#yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 20px 55px rgba(0,0,0,.5)}
+#yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 body.dragging #yt.vid{opacity:0}
 .az.vid .art{visibility:hidden;transform:none!important}
@@ -1639,8 +1639,9 @@ function syncVideo(){
   const sz=Math.min(r.width,r.height,520);
   box.style.right='auto';box.style.bottom='auto';
   box.style.left=(r.left+(r.width-sz)/2)+'px';
-  box.style.top=(r.top+(r.height-sz)/2)+'px';
-  box.style.width=sz+'px';box.style.height=sz+'px';
+  const vh=sz*9/16;
+  box.style.top=(r.top+(r.height-vh)/2)+'px';
+  box.style.width=sz+'px';box.style.height=vh+'px';
   box.classList.add('vid');
 }
 function setVid(on){
