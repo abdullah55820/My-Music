@@ -141,7 +141,7 @@ body.fp.dragging .nav{opacity:1;visibility:visible}
 .player.active{visibility:visible;pointer-events:auto;transform:none;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s}
 .pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(55px);transform:translateZ(0) scale(1.3);pointer-events:none}
 .pshade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));pointer-events:none}
-#topfade{position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 120px);z-index:10000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%)}
+#topfade{position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 46px);z-index:10000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%)}
 body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
 body.dragging #topfade{opacity:0}
 .grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
@@ -258,6 +258,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .stnote{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
 #bkInfo{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--muted);word-break:break-word}
 #bkInfo:empty{display:none}
+.pcard.fx{display:flex;flex-direction:column;overflow:hidden;height:min(80dvh,720px);padding-bottom:12px}
+.pcard.fx h3{margin:0 0 12px}
+.pcard.fx .top{flex-shrink:0}
+.pcard.fx .lst{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:6px}
 #rmList .pitem span,#bkList .pitem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
 #rmList .pitem small,#bkList .pitem small{flex-shrink:0}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -477,13 +481,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <h3>Backup &amp; Storage</h3>
       <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
       <div class="strow"><b>Songs size</b><span id="stSize">0 MB</span></div>
-      <p class="stnote">Songs size = all songs + cover art + data together. Backup lets you pick songs and save them as a file in original quality. If one big file fails, make 2–3 smaller backups.</p>
+      <p class="stnote">Songs size = all songs + cover art + data together. Backup to file: pick songs and save them as normal audio files (mp3 etc.) with their own names, in original quality. Import songs: choose them again from Files and each song is added separately. If saving many songs fails, do a few at a time.</p>
       <div class="btnrow" style="margin-top:14px">
         <button class="sb p" id="bkMake" type="button">Backup to file</button>
-        <button class="sb" id="bkRestore" type="button">Restore from file</button>
+        <button class="sb" id="bkRestore" type="button">Import songs</button>
         <button class="sb d" id="bkManage" type="button">Remove songs</button>
       </div>
-      <input type="file" id="bkIn" hidden>
+      <input type="file" id="bkIn" multiple hidden>
       <div id="bkInfo"></div>
     </div>
   </div>
@@ -501,28 +505,31 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 </div>
 
 <div class="psheet" id="bkSheet" hidden>
-  <div class="pcard">
-    <h3>Backup songs</h3>
+  <div class="pcard fx">
+    <div class="top"><h3>Backup songs</h3>
     <div class="btnrow" style="margin:0 0 10px">
       <button class="sb" id="bkAll" type="button">Select all</button>
       <button class="sb p" id="bkGo" type="button" disabled>Save to file</button>
+      <button class="sb" id="bkFull" type="button" disabled hidden>Full backup (.sfbak)</button>
       <button class="sb" id="bkClose" type="button">Close</button>
     </div>
     <div class="stnote" id="bkSInfo" style="margin:0 0 12px"></div>
-    <div id="bkList"></div>
+    </div>
+    <div class="lst" id="bkList"></div>
   </div>
 </div>
 
 <div class="psheet" id="rmSheet" hidden>
-  <div class="pcard">
-    <h3>Remove songs</h3>
+  <div class="pcard fx">
+    <div class="top"><h3>Remove songs</h3>
     <div class="btnrow" style="margin:0 0 10px">
       <button class="sb" id="rmAll" type="button">Select all</button>
       <button class="sb d" id="rmDel" type="button" disabled>Delete</button>
       <button class="sb" id="rmClose" type="button">Close</button>
     </div>
     <div class="stnote" id="rmInfo" style="margin:0 0 12px"></div>
-    <div id="rmList"></div>
+    </div>
+    <div class="lst" id="rmList"></div>
   </div>
 </div>
 
@@ -2639,17 +2646,18 @@ function removeLocal(v){
 }
 
 $('locAdd').onclick=()=>$('locIn').click();
-$('locIn').onchange=async e=>{
-  const files=[...(e.target.files||[])];
-  e.target.value='';
+async function importFiles(files){
   if(!files.length)return;
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
   const list=getLoc();
+  let added=0,tot=files.length;
   for(const f of files){
     if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name))continue;
+    bkInfo('Adding '+(added+1)+' / '+tot+'…');
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
-    list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true});
+    list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true,ext:((f.name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'').toLowerCase()});
+    added++;
     setLoc(list);
     refreshStorage();
   }
@@ -2657,7 +2665,9 @@ $('locIn').onchange=async e=>{
   renderLib();
   refreshStorage();
   if(offMode)renderOfflineHome();
-};
+  bkInfo(added?(added+' song(s) added to Library → My Files.'):'No audio files were added.');
+}
+$('locIn').onchange=e=>{const files=[...(e.target.files||[])];e.target.value='';importFiles(files)};
 
 let libSort='new';
 let libQ='';
@@ -3101,7 +3111,9 @@ function bkUpdate(){
   const n=getLoc().length;
   bkReady=null;
   $('bkGo').textContent='Save to file';
+  $('bkFull').textContent='Full backup (.sfbak)';
   $('bkGo').disabled=!bkSel.size||bkBusy;
+  $('bkFull').disabled=!bkSel.size||bkBusy;
   $('bkAll').textContent=(n&&bkSel.size===n)?'Deselect all':'Select all';
   $('bkAll').disabled=!n||bkBusy;
   bkText();
@@ -3194,28 +3206,84 @@ async function bkDeliver(b,auto){
   return 'done';
 }
 
-$('bkGo').onclick=async()=>{
+const BK_EXT={'audio/mpeg':'mp3','audio/mp3':'mp3','audio/mp4':'m4a','audio/x-m4a':'m4a','audio/m4a':'m4a','audio/aac':'aac','audio/wav':'wav','audio/x-wav':'wav','audio/flac':'flac','audio/x-flac':'flac','audio/ogg':'ogg','audio/opus':'opus'};
+const bkClean=t=>(t||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+
+async function buildAudio(ids){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  const set=new Set(ids),L=getLoc().filter(v=>set.has(v.videoId));
+  const files=[],used={};
+  let done=0,size=0;
+  for(const v of L){
+    bkSInfo('Preparing '+(++done)+' / '+L.length+'…');
+    const blob=await idbGet(v.videoId);
+    if(!blob)continue;
+    const ext=v.ext||BK_EXT[blob.type]||'mp3';
+    const base=bkClean(v.title)||'Song';
+    let n=base,k=1;
+    while(used[n.toLowerCase()])n=base+' ('+(++k)+')';
+    used[n.toLowerCase()]=1;
+    files.push(new File([blob],n+'.'+ext,{type:blob.type||'audio/mpeg'}));
+    size+=blob.size;
+  }
+  if(!files.length)throw new Error('No song files found.');
+  return {files,count:files.length,size};
+}
+
+async function deliverAudio(r,auto){
+  try{
+    if(navigator.canShare&&navigator.canShare({files:r.files})){
+      await navigator.share({files:r.files});
+      bkSInfo('Done. Keep these songs in Files or Google Drive.');
+      return 'done';
+    }
+  }catch(e){
+    if(e&&e.name==='AbortError')return 'cancel';
+    if(auto)return 'retry';
+  }
+  for(const f of r.files){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(f);
+    a.download=f.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+    await new Promise(x=>setTimeout(x,400));
+  }
+  bkSInfo('Songs downloaded to your Downloads / Files.');
+  return 'done';
+}
+
+const bkDeliverAny=(b,auto)=>b.kind==='audio'?deliverAudio(b,auto):bkDeliver(b,auto);
+const bkBtnOf=k=>$(k==='audio'?'bkGo':'bkFull');
+const bkSizeOf=r=>r.kind==='audio'?r.size:r.blob.size;
+
+async function bkRun(kind){
   if(bkBusy)return;
-  if(bkReady){await bkDeliver(bkReady,false);return}
+  if(bkReady&&bkReady.kind===kind){await bkDeliverAny(bkReady,false);return}
   const ids=[...bkSel];
   if(!ids.length)return;
   bkBusy=true;
-  $('bkGo').disabled=true;$('bkAll').disabled=true;
+  $('bkGo').disabled=true;$('bkFull').disabled=true;$('bkAll').disabled=true;
   let res=null;
-  try{res=await buildBackup(ids)}
-  catch(e){bkSInfo('Backup failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'))}
+  try{res=kind==='audio'?await buildAudio(ids):await buildBackup(ids);res.kind=kind}
+  catch(e){bkSInfo('Failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'))}
   bkBusy=false;
   $('bkAll').disabled=false;
-  if(!res){$('bkGo').disabled=!bkSel.size;return}
+  if(!res){$('bkGo').disabled=!bkSel.size;$('bkFull').disabled=!bkSel.size;return}
   bkReady=res;
-  $('bkGo').disabled=false;
-  bkSInfo('Backup ready: '+res.count+' songs, '+fmtB(res.blob.size)+'.');
-  const r=await bkDeliver(res,true);
+  $('bkGo').disabled=false;$('bkFull').disabled=false;
+  const msg='Ready: '+res.count+' songs, '+fmtB(bkSizeOf(res))+'.';
+  bkSInfo(msg);
+  const r=await bkDeliverAny(res,true);
   if(r==='retry'||r==='cancel'){
-    $('bkGo').textContent='Tap to save file';
-    bkSInfo('Backup ready: '+res.count+' songs, '+fmtB(res.blob.size)+'. Tap "Tap to save file" and choose Files or Drive.');
+    bkBtnOf(kind).textContent='Tap to save';
+    bkSInfo(msg+' Tap "Tap to save" and choose Files or Drive.');
   }
-};
+}
+$('bkGo').onclick=()=>bkRun('audio');
+$('bkFull').onclick=()=>bkRun('full');
 
 $('bkMake').onclick=openBackupPicker;
 $('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
@@ -3228,7 +3296,7 @@ $('bkAll').onclick=()=>{
   bkUpdate();
 };
 
-$('bkRestore').onclick=()=>$('bkIn').click();
+$('bkRestore').onclick=()=>$('locIn').click();
 
 const uniq=(a=[],b=[])=>{
   const m=new Set();
@@ -3256,9 +3324,21 @@ function applyMeta(d,okIds){
 }
 
 $('bkIn').onchange=async e=>{
-  const f=e.target.files&&e.target.files[0];
+  const fl=[...(e.target.files||[])];
   e.target.value='';
+  const f=fl[0];
   if(!f||bkBusy)return;
+  const isAud=x=>(x.type||'').startsWith('audio/')||/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(x.name);
+  if(fl.every(isAud)){
+    bkBusy=true;
+    $('bkMake').disabled=true;$('bkRestore').disabled=true;
+    bkInfo('Adding '+fl.length+' song(s) to My Files…');
+    try{await importFiles(fl);bkInfo('Done. '+fl.length+' song(s) added to Library → My Files.')}
+    catch(err){bkInfo('Could not add songs: '+((err&&err.message)||'error'))}
+    bkBusy=false;
+    $('bkMake').disabled=false;$('bkRestore').disabled=false;
+    return;
+  }
   bkBusy=true;
   $('bkMake').disabled=true;$('bkRestore').disabled=true;
   try{
