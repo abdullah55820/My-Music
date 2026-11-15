@@ -858,7 +858,9 @@ const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
-const pauseAny=()=>{try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
+/* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
+let userWant=false;
+const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
 const isSil=()=>au.src.startsWith('data:');
 
@@ -945,6 +947,7 @@ function onState(e){
   const st=e.data;
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
+    userWant=true;
     playing=true;
     kaClaim();
     icons();
@@ -952,6 +955,11 @@ function onState(e){
     vqShow(false);
     startT();
   }else if(st===YT.PlayerState.PAUSED){
+    /* PATCH: pause caused by fullscreen exit / app switch (not by the user) -> resume at once */
+    if(userWant&&Date.now()<guardUntil){
+      try{yt.playVideo()}catch(err){}
+      return;
+    }
     playing=false;
     try{ka.pause()}catch(e){}
     icons();
@@ -1089,12 +1097,14 @@ function toggle(){
   if(!apiReady)return;
   /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
+    userWant=false;
     playing=false;icons();
     $('art').classList.add('paused');
     stopT();
     yt.pauseVideo();
     vqShow(true);
   }else{
+    userWant=true;
     playing=true;icons();
     $('art').classList.remove('paused');
     yt.playVideo();
@@ -1701,14 +1711,38 @@ function vqShow(sticky){
   if(!sticky)vqT=setTimeout(()=>el.classList.remove('show'),1500);
 }
 
+/* PATCH: after video on/off, if the user wanted music playing, resume it */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
+  autoResume();
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
+
+/* PATCH: auto-resume after fullscreen exit / app or tab switch / returning to page.
+   Only resumes if the user did not pause the song themselves. */
+let guardUntil=0;
+function autoResume(){
+  if(!userWant||isLoc()||!apiReady)return;
+  guardUntil=Date.now()+4000;
+  [100,400,900,1600,2600,3800].forEach(ms=>setTimeout(()=>{
+    try{if(userWant&&!isLoc()&&yt.getPlayerState()!==1)yt.playVideo()}catch(e){}
+  },ms));
+}
+/* guard window starts when fullscreen / screen changes begin, so an automatic pause is caught instantly */
+function openGuard(){if(userWant&&!isLoc())guardUntil=Date.now()+4000}
+['fullscreenchange','webkitfullscreenchange','webkitbeginfullscreen','webkitendfullscreen'].forEach(ev=>{
+  document.addEventListener(ev,()=>{openGuard();autoResume()});
+  addEventListener(ev,()=>{openGuard();autoResume()},true);
+});
+addEventListener('resize',openGuard);
+addEventListener('orientationchange',()=>{openGuard();autoResume()});
+document.addEventListener('visibilitychange',()=>{openGuard();if(!document.hidden)autoResume()});
+addEventListener('pageshow',autoResume);
+addEventListener('focus',autoResume);
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -1764,6 +1798,7 @@ function showFull(){
 
 function closePlayer(){
   mode='closed';
+  userWant=false;
   syncVideo();
   resetPlayerStyles();
   $('player').classList.remove('active');
