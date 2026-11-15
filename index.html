@@ -961,14 +961,8 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
-    /* PATCH: pause caused by fullscreen exit / app switch (not by the user) -> resume at once */
-    /* a pause is real only if the user tapped inside the video (window blur) a moment before; anything else = automatic, resume */
-    if(userWant&&(Date.now()<guardUntil||Date.now()-tapAt>1200)){
-      try{yt.playVideo()}catch(err){}
-      [60,250,700,1500].forEach(ms=>setTimeout(()=>{try{if(userWant&&yt.getPlayerState()!==1)yt.playVideo()}catch(err){}},ms));
-      return;
-    }
-    if(userWant&&Date.now()-tapAt<=1200&&Date.now()>=guardUntil)userWant=false;
+    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
+    userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
     icons();
@@ -1715,39 +1709,18 @@ function syncVideo(){
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
-/* PATCH: after video on/off, if the user wanted music playing, resume it */
+/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
-  autoResume();
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
 
-/* PATCH: auto-resume after fullscreen exit / app or tab switch / returning to page.
-   Only resumes if the user did not pause the song themselves. */
-let guardUntil=0,tapAt=0;
-addEventListener('blur',()=>{tapAt=Date.now()});
-function autoResume(){
-  if(!userWant||isLoc()||!apiReady)return;
-  guardUntil=Date.now()+4000;
-  [100,400,900,1600,2600,3800].forEach(ms=>setTimeout(()=>{
-    try{if(userWant&&!isLoc()&&yt.getPlayerState()!==1)yt.playVideo()}catch(e){}
-  },ms));
-}
-/* guard window starts when fullscreen / screen changes begin, so an automatic pause is caught instantly */
-function openGuard(){if(userWant&&!isLoc())guardUntil=Date.now()+4000}
-['fullscreenchange','webkitfullscreenchange','webkitbeginfullscreen','webkitendfullscreen'].forEach(ev=>{
-  document.addEventListener(ev,()=>{openGuard();autoResume()});
-  addEventListener(ev,()=>{openGuard();autoResume()},true);
-});
-addEventListener('resize',openGuard);
-addEventListener('orientationchange',()=>{openGuard();autoResume()});
-document.addEventListener('visibilitychange',()=>{openGuard();if(!document.hidden)autoResume()});
-addEventListener('pageshow',autoResume);
-addEventListener('focus',autoResume);
+/* The fullscreen close control only exits the fullscreen video layout.
+   It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
