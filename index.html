@@ -966,7 +966,7 @@ window.onYouTubeIframeAPIReady=()=>{
 })();
 
 function onState(e){
-  if(isLoc())return;
+  if(isLoc()||nvActive)return;
   const st=e.data;
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
@@ -1686,6 +1686,78 @@ on('lyBtn',()=>{
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFull=false,vcT=null,vcDrag=false;
 
+/* ---------- iPHONE NATIVE FULL SCREEN PLAYER ----------
+   While the video is shown, a normal <video> is prepared in the background from a public stream server.
+   One tap on the fullscreen button then opens the iPhone's own full screen player at the same time.
+   If it is not ready (or the server fails) the app's own fullscreen is used instead. */
+let nv=null,nvId='',nvBusy='',nvActive=false,nvWas=false;
+function nvEl(){
+  if(nv)return nv;
+  nv=document.createElement('video');
+  nv.setAttribute('playsinline','');
+  nv.setAttribute('webkit-playsinline','');
+  nv.preload='metadata';
+  nv.style.cssText='position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none';
+  document.body.appendChild(nv);
+  nv.addEventListener('webkitendfullscreen',nvEnd);
+  return nv;
+}
+async function nvPrep(){
+  const v=queue[idx];
+  if(!v||v.local||!v.videoId)return;
+  const id=v.videoId;
+  if(nvId===id||nvBusy===id)return;
+  nvBusy=id;
+  let url=null;
+  try{
+    const ctl=new AbortController();
+    const to=setTimeout(()=>ctl.abort(),7000);
+    const info=await Promise.any(instances.map(b=>
+      fetch(`${b}/api/v1/videos/${id}?local=true&fields=formatStreams`,{signal:ctl.signal,cache:'no-store'})
+        .then(r=>{if(!r.ok)throw 0;return r.json()})
+        .then(d=>{if(!d||!d.formatStreams||!d.formatStreams.length)throw 0;return d})
+    ));
+    clearTimeout(to);
+    const list=info.formatStreams.filter(f=>f.url&&/mp4/i.test((f.type||'')+(f.container||'')));
+    list.sort((a,b)=>(parseInt(b.resolution||b.qualityLabel)||0)-(parseInt(a.resolution||a.qualityLabel)||0));
+    if(list[0])url=list[0].url;
+  }catch(e){}
+  if(nvBusy===id)nvBusy='';
+  if(!url||!queue[idx]||queue[idx].videoId!==id)return;
+  const el=nvEl();
+  el.src=url;
+  el.load();
+  nvId=id;
+}
+function nvFullscreen(){
+  const v=queue[idx];
+  if(!nv||!v||nvId!==v.videoId||nv.readyState<1||!nv.webkitEnterFullscreen)return false;
+  try{
+    nv.currentTime=curT();
+    nvWas=playing;
+    nvActive=true;
+    nv.muted=false;
+    if(nvWas){const p=nv.play();if(p&&p.catch)p.catch(()=>{})}
+    nv.webkitEnterFullscreen();
+    try{yt.pauseVideo()}catch(e){}
+    stopT();
+    return true;
+  }catch(e){nvActive=false;return false}
+}
+function nvEnd(){
+  setTimeout(()=>{
+    if(!nvActive)return;
+    const t=nv.currentTime,was=!nv.paused;
+    try{nv.pause()}catch(e){}
+    nvActive=false;
+    try{yt.seekTo(t,true);if(was)yt.playVideo();else yt.pauseVideo()}catch(e){}
+    playing=was;
+    icons();
+    $('art').classList.toggle('paused',!was);
+    if(was)startT();
+  },150);
+}
+
 function fsGeo(){
   const W=innerWidth,H=innerHeight,rot=H>W;
   const aw=rot?H:W,ah=rot?W:H;
@@ -1748,6 +1820,7 @@ function syncVideo(){
   const fr=box.querySelector('iframe');
   if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+  nvPrep();
 }
 /* quality badge on the video: appears with the YouTube title, then fades away */
 let vqT=null;
@@ -1787,7 +1860,7 @@ function setFull(on){
   }
   syncVideo();
 }
-on('vfs',()=>setFull(true));
+on('vfs',()=>{if(nvFullscreen())return;setFull(true)});
 on('vcClose',()=>history.back());
 on('vcPlay',()=>{toggle();vcPoke()});
 $('vctl').addEventListener('click',e=>{
