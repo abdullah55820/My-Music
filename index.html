@@ -201,9 +201,20 @@ body.dragging #yt.vid{opacity:0}
 #vq.show{opacity:1}
 #vfs{position:fixed;z-index:10003;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
 #vfs svg{width:17px;height:17px}
-#vfs.on{background:#fff;color:#111}
 body.dragging #vfs{opacity:0}
-#yt.vid.ix{pointer-events:auto}
+#yt.vid.fs{z-index:10011;border-radius:0;box-shadow:none;background:#000}
+#vback{position:fixed;inset:0;z-index:10010;background:#000}
+#vfull{position:fixed;inset:0;z-index:10012;touch-action:none}
+#vctl{position:absolute;color:#fff;-webkit-user-select:none;user-select:none}
+#vctl>*{transition:opacity .25s}
+#vctl:not(.ui)>*{opacity:0;pointer-events:none}
+#vcClose{position:absolute;top:18px;left:28px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff}
+#vcClose svg{width:18px;height:18px}
+#vcQ{position:absolute;top:30px;right:28px;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+#vcPlay{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff}
+#vcPlay svg{width:38px;height:38px}
+.vcb{position:absolute;left:28px;right:28px;bottom:22px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.vcb input{flex:1;min-width:0;width:auto;accent-color:#fff}
 #vq:empty{display:none}
 body.dragging #vq{opacity:0}
 .az.vid .art{visibility:hidden;transform:none!important}
@@ -554,6 +565,15 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 <button id="vfs" type="button" aria-label="Fullscreen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
 <div id="vq"></div>
+<div id="vback" hidden></div>
+<div id="vfull" hidden>
+  <div id="vctl" class="ui">
+    <button id="vcClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <span id="vcQ"></span>
+    <button id="vcPlay" type="button" aria-label="Play or pause"><svg id="vcIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+    <div class="vcb"><span id="vcCur">0:00</span><input type="range" id="vcSeek" min="0" max="100" value="0" step="any"><span id="vcDur">0:00</span></div>
+  </div>
+</div>
 <div id="yt"><div id="ytp"></div></div>
 
 <script>
@@ -926,7 +946,7 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     height:'200',width:'200',
-    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
+    playerVars:{autoplay:0,controls:0,fs:0,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
         apiReady=true;
@@ -981,7 +1001,7 @@ function onYtError(){
 }
 
 function icons(){
-  $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
+  $('playIcon').innerHTML=$('mIcon').innerHTML=$('vcIcon').innerHTML=playing?PAUSE:PLAY;
   try{if('mediaSession' in navigator&&(idx<0||isLoc()))navigator.mediaSession.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
 }
 
@@ -1004,6 +1024,7 @@ function tick(){
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
     qTick();
+    if(vidFull)vcTick(c,d);
     posState();
   }catch(e){}
 }
@@ -1017,7 +1038,7 @@ function qTick(){
   qLast=now;
   let t='';
   try{if(!isLoc()&&apiReady)t=QN[yt.getPlaybackQuality()]||''}catch(e){}
-  $('vq').textContent=t;
+  $('vq').textContent=t;$('vcQ').textContent=t;
 }
 
 function startT(){stopT();tick();timer=setInterval(tick,100)}
@@ -1663,7 +1684,15 @@ on('lyBtn',()=>{
 });
 
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
-let vidMode=false,vidIx=false;
+let vidMode=false,vidFull=false,vcT=null,vcDrag=false;
+
+function fsGeo(){
+  const W=innerWidth,H=innerHeight,rot=H>W;
+  const aw=rot?H:W,ah=rot?W:H;
+  const w=Math.min(aw,ah*16/9);
+  return {W,H,rot,aw,ah,w,h:w*9/16};
+}
+
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
@@ -1671,35 +1700,53 @@ function syncVideo(){
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
   if(!show){
-    box.classList.remove('vid');
-    box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
+    box.classList.remove('vid','fs');
+    box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom=box.style.transform='';
     const f0=box.querySelector('iframe');
     if(f0)f0.style.cssText='';
     clearTimeout(vqT);
     $('vq').classList.remove('show');
-    vidIx=false;box.classList.remove('ix');$('vfs').hidden=true;
+    vidFull=false;
+    $('vfull').hidden=true;$('vback').hidden=true;$('vfs').hidden=true;
     return;
   }
-  const r=az.getBoundingClientRect();
-  const sz=Math.min(r.width,r.height,520);
   box.style.right='auto';box.style.bottom='auto';
-  const vl=r.left+(r.width-sz)/2,vh=sz*9/16,vt=r.top+(r.height-vh)/2;
+  let vl,vt,sz,vh;
+  const was=box.classList.contains('vid');
+  if(vidFull){
+    const g=fsGeo();
+    sz=g.w;vh=g.h;vl=(g.W-g.w)/2;vt=(g.H-g.h)/2;
+    box.style.transform=g.rot?'rotate(90deg)':'';
+    box.classList.add('fs');
+    const c=$('vctl');
+    c.style.width=g.aw+'px';c.style.height=g.ah+'px';
+    c.style.left=((g.W-g.aw)/2)+'px';c.style.top=((g.H-g.ah)/2)+'px';
+    c.style.transform=g.rot?'rotate(90deg)':'';
+    $('vback').hidden=false;$('vfull').hidden=false;
+    $('vfs').hidden=true;
+    clearTimeout(vqT);
+    $('vq').classList.remove('show');
+  }else{
+    const r=az.getBoundingClientRect();
+    sz=Math.min(r.width,r.height,520);
+    vh=sz*9/16;vl=r.left+(r.width-sz)/2;vt=r.top+(r.height-vh)/2;
+    box.style.transform='';
+    box.classList.remove('fs');
+    $('vback').hidden=true;$('vfull').hidden=true;
+    $('vq').style.top=(vt+5)+'px';
+    $('vq').style.right=(innerWidth-(vl+sz)+7)+'px';
+    $('vfs').hidden=false;
+    $('vfs').style.top=(vt+vh+10)+'px';
+    $('vfs').style.right=(innerWidth-(vl+sz))+'px';
+  }
   box.style.left=vl+'px';
   box.style.top=vt+'px';
   box.style.width=sz+'px';box.style.height=vh+'px';
-  const was=box.classList.contains('vid');
   box.classList.add('vid');
-  $('vq').style.top=(vt+5)+'px';
-  $('vq').style.right=(innerWidth-(vl+sz)+7)+'px';
-  if(!was)vqShow(false);
-  box.classList.toggle('ix',vidIx);
-  $('vfs').hidden=false;
-  $('vfs').classList.toggle('on',vidIx);
-  $('vfs').style.top=(vt+vh+10)+'px';
-  $('vfs').style.right=(innerWidth-(vl+sz))+'px';
+  if(!vidFull&&!was)vqShow(false);
   /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
-  if(fr)fr.style.cssText=vidIx?'':'position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
+  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 /* quality badge on the video: appears with the YouTube title, then fades away */
@@ -1707,7 +1754,7 @@ let vqT=null;
 function vqShow(sticky){
   const el=$('vq');
   clearTimeout(vqT);
-  if(!$('yt').classList.contains('vid')){el.classList.remove('show');return}
+  if(vidFull||!$('yt').classList.contains('vid')){el.classList.remove('show');return}
   el.classList.add('show');
   if(!sticky)vqT=setTimeout(()=>el.classList.remove('show'),1500);
 }
@@ -1719,26 +1766,45 @@ function setVid(on){
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 
-/* Fullscreen: try the browser's fullscreen on the player; if the phone refuses, show YouTube's own
-   controls (their fullscreen button opens the iPhone's native full screen player). */
-on('vfs',()=>{
-  if(vidIx){vidIx=false;syncVideo();return}
-  let tried=false;
-  try{
-    const f=yt&&yt.getIframe&&yt.getIframe();
-    const fn=f&&(f.requestFullscreen||f.webkitRequestFullscreen);
-    if(fn){
-      f.style.cssText='pointer-events:auto';
-      const r=fn.call(f);
-      tried=true;
-      if(r&&r.catch)r.catch(()=>{vidIx=true;syncVideo()});
-    }
-  }catch(e){}
-  if(!tried){vidIx=true;syncVideo()}
+/* ---------- FULL SCREEN VIDEO (one tap, turns sideways on a portrait phone) ---------- */
+function vcPoke(){
+  const c=$('vctl');
+  c.classList.add('ui');
+  clearTimeout(vcT);
+  if(playing&&!vcDrag)vcT=setTimeout(()=>c.classList.remove('ui'),3000);
+}
+function vcTick(c,d){
+  $('vcCur').textContent=fmt(c);
+  $('vcDur').textContent=fmt(d);
+  if(!vcDrag&&d>0)$('vcSeek').value=c/d*100;
+}
+function setFull(on){
+  if(on===vidFull)return;
+  vidFull=on;
+  if(on){
+    pushLayer(()=>{vidFull=false;syncVideo()});
+    vcPoke();
+  }
+  syncVideo();
+}
+on('vfs',()=>setFull(true));
+on('vcClose',()=>history.back());
+on('vcPlay',()=>{toggle();vcPoke()});
+$('vctl').addEventListener('click',e=>{
+  if(e.target.closest('button,input'))return;
+  const c=$('vctl');
+  if(c.classList.contains('ui')){c.classList.remove('ui');clearTimeout(vcT)}
+  else vcPoke();
 });
-['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
-  if(!document.fullscreenElement&&!document.webkitFullscreenElement)syncVideo();
-}));
+(function(){
+  const sk=$('vcSeek');
+  const down=()=>{vcDrag=true;clearTimeout(vcT)};
+  sk.addEventListener('touchstart',down,{passive:true});
+  sk.addEventListener('pointerdown',down);
+  sk.addEventListener('input',()=>{const d=durT();if(d>0)$('vcCur').textContent=fmt(d*sk.value/100)});
+  sk.addEventListener('change',()=>{const d=durT();if(d>0)seekT(d*sk.value/100);vcDrag=false;vcPoke()});
+})();
+addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
 
 function paintInfo(v){
