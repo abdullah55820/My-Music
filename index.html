@@ -324,7 +324,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
-    <input type="file" id="locIn" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus" multiple hidden>
+    <input type="file" id="locIn" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.zip,application/zip" multiple hidden>
   </div>
 </main>
 
@@ -481,7 +481,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <h3>Backup &amp; Storage</h3>
       <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
       <div class="strow"><b>Songs size</b><span id="stSize">0 MB</span></div>
-      <p class="stnote">Songs size = all songs + cover art + data together. Backup to file: pick songs and save them as normal audio files (mp3 etc.) with their own names, in original quality. Import songs: choose them again from Files and each song is added separately. If saving many songs fails, do a few at a time.</p>
+      <p class="stnote">Songs size = all songs + cover art + data together. Backup to file: pick songs and save them in original quality. One song = one mp3 with its own name. Many songs = one zip (open it in Files to get every mp3). Import songs: pick the mp3 files or the zip; each song is added separately.</p>
       <div class="btnrow" style="margin-top:14px">
         <button class="sb p" id="bkMake" type="button">Backup to file</button>
         <button class="sb" id="bkRestore" type="button">Import songs</button>
@@ -489,6 +489,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       </div>
       <input type="file" id="bkIn" multiple hidden>
       <div id="bkInfo"></div>
+      <div class="stnote" id="appVer">App version: zip-v7</div>
     </div>
   </div>
 </section>
@@ -510,7 +511,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div class="btnrow" style="margin:0 0 10px">
       <button class="sb" id="bkAll" type="button">Select all</button>
       <button class="sb p" id="bkGo" type="button" disabled>Save to file</button>
-      <button class="sb" id="bkFull" type="button" disabled hidden>Full backup (.sfbak)</button>
+      <button class="sb" id="bkFull" type="button" disabled>One by one</button>
       <button class="sb" id="bkClose" type="button">Close</button>
     </div>
     <div class="stnote" id="bkSInfo" style="margin:0 0 12px"></div>
@@ -2646,7 +2647,33 @@ function removeLocal(v){
 }
 
 $('locAdd').onclick=()=>$('locIn').click();
+const ZIP_TYPE={mp3:'audio/mpeg',m4a:'audio/mp4',aac:'audio/aac',wav:'audio/wav',flac:'audio/flac',ogg:'audio/ogg',opus:'audio/opus'};
+async function unzipStored(f){
+  const out=[],size=f.size,dec=new TextDecoder();
+  let pos=0;
+  while(pos+30<=size){
+    const h=new DataView(await f.slice(pos,pos+30).arrayBuffer());
+    if(h.getUint32(0,true)!==0x04034b50)break;
+    const flags=h.getUint16(6,true),method=h.getUint16(8,true),csz=h.getUint32(18,true),nl=h.getUint16(26,true),el=h.getUint16(28,true);
+    if((flags&8)||method!==0)throw new Error('This zip is compressed. Open it in Files first, then import the songs.');
+    const name=dec.decode(new Uint8Array(await f.slice(pos+30,pos+30+nl).arrayBuffer())).split('/').pop();
+    const ds=pos+30+nl+el;
+    const ext=(name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'';
+    out.push(new File([f.slice(ds,ds+csz)],name,{type:ZIP_TYPE[ext.toLowerCase()]||'audio/mpeg'}));
+    pos=ds+csz;
+  }
+  return out;
+}
+
 async function importFiles(files){
+  if(!files.length)return;
+  const flat=[];
+  for(const f of files){
+    if(/\.zip$/i.test(f.name)){
+      try{flat.push(...await unzipStored(f))}catch(err){bkInfo((err&&err.message)||'Could not open the zip.')}
+    }else flat.push(f);
+  }
+  files=flat;
   if(!files.length)return;
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
   const list=getLoc();
@@ -3109,9 +3136,9 @@ function bkText(){
 }
 function bkUpdate(){
   const n=getLoc().length;
-  bkReady=null;
+  bkReady=null;bkQ=null;
   $('bkGo').textContent='Save to file';
-  $('bkFull').textContent='Full backup (.sfbak)';
+  $('bkFull').textContent='One by one';
   $('bkGo').disabled=!bkSel.size||bkBusy;
   $('bkFull').disabled=!bkSel.size||bkBusy;
   $('bkAll').textContent=(n&&bkSel.size===n)?'Deselect all':'Select all';
@@ -3122,7 +3149,7 @@ function bkUpdate(){
 function openBackupPicker(){
   if(bkBusy)return;
   const L=getLoc(),box=$('bkList');
-  bkSel=new Set();bkSizes={};bkReady=null;
+  bkSel=new Set();bkSizes={};bkReady=null;bkQ=null;
   box.innerHTML='';
   L.forEach(v=>{
     const b=document.createElement('button');
@@ -3230,60 +3257,129 @@ async function buildAudio(ids){
   return {files,count:files.length,size};
 }
 
-async function deliverAudio(r,auto){
-  try{
-    if(navigator.canShare&&navigator.canShare({files:r.files})){
-      await navigator.share({files:r.files});
-      bkSInfo('Done. Keep these songs in Files or Google Drive.');
-      return 'done';
-    }
-  }catch(e){
-    if(e&&e.name==='AbortError')return 'cancel';
-    if(auto)return 'retry';
-  }
-  for(const f of r.files){
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(f);
-    a.download=f.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-    await new Promise(x=>setTimeout(x,400));
-  }
-  bkSInfo('Songs downloaded to your Downloads / Files.');
-  return 'done';
+let bkQ=null;
+
+function bkDownload(f){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(f);
+  a.download=f.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
 }
 
-const bkDeliverAny=(b,auto)=>b.kind==='audio'?deliverAudio(b,auto):bkDeliver(b,auto);
-const bkBtnOf=k=>$(k==='audio'?'bkGo':'bkFull');
-const bkSizeOf=r=>r.kind==='audio'?r.size:r.blob.size;
+function bkLabel(q){
+  $('bkGo').textContent=q.i===0?'Tap to save':'Save next ('+(q.i+1)+'/'+q.files.length+')';
+}
 
-async function bkRun(kind){
+/* One song per tap: the phone's save sheet only handles a single file reliably. */
+async function bkSaveOne(auto){
+  const q=bkQ;
+  if(!q)return;
+  const f=q.files[q.i],N=q.files.length;
+  let r='done';
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f]});
+    else bkDownload(f);
+  }catch(e){
+    if(e&&e.name==='AbortError')r='cancel';
+    else if(auto)r='retry';
+    else bkDownload(f);
+  }
+  if(r==='done'){
+    q.i++;
+    if(q.i>=N){
+      bkQ=null;
+      $('bkGo').textContent='Save to file';
+      bkSInfo(f.name.toLowerCase().endsWith('.zip')?'Done. Open the zip in Files to get every song, or use Import songs and pick the zip.':'Done. '+N+' song(s) saved.');
+      return;
+    }
+    bkLabel(q);
+    bkSInfo('Saved '+q.i+' of '+N+'. Tap "Save next" for: '+q.files[q.i].name);
+  }else{
+    bkLabel(q);
+    bkSInfo('Tap to save: '+f.name+' ('+(q.i+1)+' of '+N+')');
+  }
+}
+
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+async function crc32Blob(blob){
+  let c=0xFFFFFFFF;
+  const CH=4*1048576;
+  for(let o=0;o<blob.size;o+=CH){
+    const b=new Uint8Array(await blob.slice(o,o+CH).arrayBuffer());
+    for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);
+  }
+  return (c^0xFFFFFFFF)>>>0;
+}
+
+/* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
+async function buildZip(files){
+  const parts=[],cds=[];
+  let off=0,i=0;
+  const d=new Date();
+  const dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF;
+  const dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+  for(const f of files){
+    bkSInfo('Packing '+(++i)+' / '+files.length+'…');
+    const nm=BK_ENC.encode(f.name),crc=await crc32Blob(f),sz=f.size;
+    if(sz>=0xFFFFFFFF||off>=0xFFFFFFFF)throw new Error('Too big for one zip. Use "One by one" or select fewer songs.');
+    const lh=new Uint8Array(30),v=new DataView(lh.buffer);
+    v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,0x0800,true);v.setUint16(8,0,true);
+    v.setUint16(10,dt,true);v.setUint16(12,dd,true);v.setUint32(14,crc,true);v.setUint32(18,sz,true);v.setUint32(22,sz,true);
+    v.setUint16(26,nm.length,true);v.setUint16(28,0,true);
+    parts.push(lh,nm,f);
+    const ch=new Uint8Array(46),c=new DataView(ch.buffer);
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);
+    c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);
+    c.setUint16(28,nm.length,true);c.setUint16(30,0,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);
+    c.setUint32(38,0,true);c.setUint32(42,off,true);
+    cds.push(ch,nm);
+    off+=30+nm.length+sz;
+  }
+  let cdSize=0;
+  cds.forEach(x=>{cdSize+=x.length});
+  const end=new Uint8Array(22),e=new DataView(end.buffer);
+  e.setUint32(0,0x06054b50,true);e.setUint16(4,0,true);e.setUint16(6,0,true);
+  e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);
+  e.setUint32(12,cdSize,true);e.setUint32(16,off,true);e.setUint16(20,0,true);
+  return new Blob([...parts,...cds,end],{type:'application/zip'});
+}
+
+async function bkStart(mode){
   if(bkBusy)return;
-  if(bkReady&&bkReady.kind===kind){await bkDeliverAny(bkReady,false);return}
+  if(bkQ){await bkSaveOne(false);return}
   const ids=[...bkSel];
   if(!ids.length)return;
   bkBusy=true;
   $('bkGo').disabled=true;$('bkFull').disabled=true;$('bkAll').disabled=true;
-  let res=null;
-  try{res=kind==='audio'?await buildAudio(ids):await buildBackup(ids);res.kind=kind}
-  catch(e){bkSInfo('Failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'))}
+  let res=null,zip=null;
+  try{
+    res=await buildAudio(ids);
+    if(mode==='zip'&&res.count>1)zip=await buildZip(res.files);
+  }catch(e){
+    bkSInfo('Failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'));
+    res=null;
+  }
   bkBusy=false;
   $('bkAll').disabled=false;
-  if(!res){$('bkGo').disabled=!bkSel.size;$('bkFull').disabled=!bkSel.size;return}
-  bkReady=res;
-  $('bkGo').disabled=false;$('bkFull').disabled=false;
-  const msg='Ready: '+res.count+' songs, '+fmtB(bkSizeOf(res))+'.';
-  bkSInfo(msg);
-  const r=await bkDeliverAny(res,true);
-  if(r==='retry'||r==='cancel'){
-    bkBtnOf(kind).textContent='Tap to save';
-    bkSInfo(msg+' Tap "Tap to save" and choose Files or Drive.');
+  $('bkGo').disabled=!bkSel.size;
+  $('bkFull').disabled=!bkSel.size;
+  if(!res)return;
+  if(zip){
+    const f=new File([zip],'SoundFlow songs '+res.count+'.zip',{type:'application/zip'});
+    bkQ={files:[f],i:0};
+    bkSInfo('Ready: one zip with '+res.count+' songs, '+fmtB(zip.size)+'.');
+  }else{
+    bkQ={files:res.files,i:0};
+    bkSInfo('Ready: '+res.count+' song(s), '+fmtB(res.size)+'.');
   }
+  await bkSaveOne(true);
 }
-$('bkGo').onclick=()=>bkRun('audio');
-$('bkFull').onclick=()=>bkRun('full');
+$('bkGo').onclick=()=>bkStart('zip');
+$('bkFull').onclick=()=>bkStart('single');
+
 
 $('bkMake').onclick=openBackupPicker;
 $('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
@@ -3386,7 +3482,7 @@ $('bkIn').onchange=async e=>{
 };
 
 /* ---------- OFFLINE (service worker) ---------- */
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
 addEventListener('online',()=>{
   if(offMode)leaveOfflineHome();
   else if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
