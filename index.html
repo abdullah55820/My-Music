@@ -197,14 +197,17 @@ body.dragging #topfade{opacity:0}
 #yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
-/* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
+/* While the video is embedded in SoundFlow, block taps on the video/title
+   and every YouTube control except the bottom-right Settings + Fullscreen area. */
+#yt.vid .yt-tap-shield{position:absolute;z-index:4;background:transparent;pointer-events:auto;touch-action:pan-y}
+#yt.vid .yt-shield-main{left:0;top:0;width:100%;height:calc(100% - 58px)}
+#yt.vid .yt-shield-bottom{left:0;bottom:0;width:calc(100% - 132px);height:58px}
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
 #yfs.x .i1{display:none}
 #yfs.x .i2{display:block}
 body.dragging #yfs{opacity:0}
-#yt.vid::before{content:"";position:absolute;left:0;top:0;width:72%;height:24%;z-index:3;background:transparent}
 body.dragging #yt.vid{opacity:0}
 .az.vid .art{visibility:hidden;transform:none!important}
 .opt.dis{opacity:.35}
@@ -552,7 +555,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
 </div>
 
-<div id="yt"><div id="ytp"></div></div>
+<div id="yt">
+  <div id="ytp"></div>
+  <div class="yt-tap-shield yt-shield-main" aria-hidden="true"></div>
+  <div class="yt-tap-shield yt-shield-bottom" aria-hidden="true"></div>
+</div>
 <button id="yfs" type="button" aria-label="Fullscreen" hidden>
   <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
   <svg class="i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
@@ -955,24 +962,13 @@ function onState(e){
   if(st===YT.PlayerState.PLAYING){
     errCount=0;
     userWant=true;
-    nativeExitPending=false;
     playing=true;
     kaClaim();
     icons();
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
-    /* If iOS pauses the iframe while its native fullscreen player is closing,
-       keep the previous play intent until the page regains focus. */
-    if(nativeAway||nativeExitPending){
-      playing=false;
-      icons();
-      $('art').classList.add('paused');
-      stopT();
-      if(nativeExitPending)resumeAfterNativeExit();
-      return;
-    }
-    /* A normal pause (including the app's own pause button) is respected. */
+    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1097,9 +1093,6 @@ function toggle(){
   /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
-    nativeExitPending=false;
-    nativeAway=false;
-    clearNativeResumeTimers();
     playing=false;icons();
     $('art').classList.add('paused');
     stopT();
@@ -1732,60 +1725,6 @@ function setVid(on){
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
-
-/* iOS YouTube native fullscreen return handling.
-   A blur/hidden page followed by focus/visible usually means the native player
-   has been dismissed. Resume only when playback was active before leaving.
-   The app's own pause button clears userWant, so it is never overridden. */
-let nativeAway=false, nativeExitPending=false, nativeAwayAt=0, nativeResumeTimer=[];
-function clearNativeResumeTimers(){
-  nativeResumeTimer.forEach(clearTimeout);
-  nativeResumeTimer=[];
-}
-function armNativeReturn(){
-  if(!isLoc() && userWant && playing){
-    nativeAway=true;
-    nativeAwayAt=Date.now();
-  }
-}
-function resumeAfterNativeExit(){
-  if(isLoc() || !userWant || !apiReady || !nativeExitPending)return;
-  clearNativeResumeTimers();
-  [120,350,750,1300,2100].forEach(ms=>{
-    nativeResumeTimer.push(setTimeout(()=>{
-      try{
-        if(userWant && nativeExitPending && !isLoc() && yt.getPlayerState()!==YT.PlayerState.PLAYING){
-          yt.playVideo();
-        }
-      }catch(e){}
-    },ms));
-  });
-}
-function finishNativeReturn(){
-  if(!nativeAway || isLoc() || !userWant)return;
-  nativeAway=false;
-  nativeExitPending=true;
-  /* Give the iframe time to report its PAUSED state after iOS closes its player. */
-  setTimeout(()=>{
-    try{
-      if(userWant && apiReady && yt.getPlayerState()!==YT.PlayerState.PLAYING){
-        resumeAfterNativeExit();
-      }
-    }catch(e){}
-  },180);
-}
-addEventListener('blur',armNativeReturn,true);
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden)armNativeReturn();
-  else finishNativeReturn();
-});
-addEventListener('focus',finishNativeReturn,true);
-addEventListener('pageshow',finishNativeReturn);
-['webkitendfullscreen','fullscreenchange','webkitfullscreenchange'].forEach(ev=>{
-  document.addEventListener(ev,()=>{
-    if(nativeAway)finishNativeReturn();
-  },true);
-});
 
 /* The fullscreen close control only exits the fullscreen video layout.
    It does not call pauseVideo(), playVideo(), or toggle the song state. */
