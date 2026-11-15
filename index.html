@@ -206,10 +206,6 @@ body.dragging #topfade{opacity:0}
 body.dragging #yfs{opacity:0}
 #yt.vid::before{content:"";position:absolute;left:0;top:0;width:72%;height:24%;z-index:3;background:transparent}
 body.dragging #yt.vid{opacity:0}
-#vq{position:fixed;z-index:10002;pointer-events:none;padding:0;background:none;color:#b8b8b8;mix-blend-mode:screen;font-size:10px;font-weight:800;letter-spacing:.2px;opacity:0;transition:opacity .35s}
-#vq.show{opacity:1}
-#vq:empty{display:none}
-body.dragging #vq{opacity:0}
 .az.vid .art{visibility:hidden;transform:none!important}
 .opt.dis{opacity:.35}
 .sp{position:fixed;inset:0;z-index:12000;display:flex;flex-direction:column;background:var(--spbg);backdrop-filter:blur(34px) saturate(170%);-webkit-backdrop-filter:blur(34px) saturate(170%);transform:translate3d(100%,0,0);visibility:hidden;transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -556,7 +552,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
 </div>
 
-<div id="vq"></div>
 <div id="yt"><div id="ytp"></div></div>
 <button id="yfs" type="button" aria-label="Fullscreen" hidden>
   <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
@@ -964,7 +959,6 @@ function onState(e){
     kaClaim();
     icons();
     $('art').classList.remove('paused');
-    vqShow(false);
     startT();
   }else if(st===YT.PlayerState.PAUSED){
     /* PATCH: pause caused by fullscreen exit / app switch (not by the user) -> resume at once */
@@ -979,7 +973,6 @@ function onState(e){
     try{ka.pause()}catch(e){}
     icons();
     $('art').classList.add('paused');
-    vqShow(true);
     stopT();
   }else if(st===YT.PlayerState.ENDED){
     playing=false;
@@ -1021,22 +1014,10 @@ function tick(){
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
-    qTick();
     posState();
   }catch(e){}
 }
 
-/* shows the video quality YouTube is really playing */
-let qLast=0;
-const QN={hd2160:'2160p',hd1440:'1440p',hd1080:'1080p',hd720:'720p',large:'480p',medium:'360p',small:'240p',tiny:'144p',highres:'4K+'};
-function qTick(){
-  const now=Date.now();
-  if(now-qLast<1000)return;
-  qLast=now;
-  let t='';
-  try{if(!isLoc()&&apiReady)t=QN[yt.getPlaybackQuality()]||''}catch(e){}
-  $('vq').textContent=t;
-}
 
 function startT(){stopT();tick();timer=setInterval(tick,100)}
 function stopT(){clearInterval(timer);timer=null}
@@ -1103,8 +1084,6 @@ function resetProg(){
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
-  $('vq').textContent='';
-  qLast=0;
 }
 
 function toggle(){
@@ -1117,13 +1096,11 @@ function toggle(){
     $('art').classList.add('paused');
     stopT();
     yt.pauseVideo();
-    vqShow(true);
   }else{
     userWant=true;
     playing=true;icons();
     $('art').classList.remove('paused');
     yt.playVideo();
-    vqShow(false);
   }
 }
 
@@ -1701,9 +1678,7 @@ function syncVideo(){
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     const f0=box.querySelector('iframe');
     if(f0)f0.style.cssText='';
-    clearTimeout(vqT);
-    $('vq').classList.remove('show');
-    $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';$('vq').style.display='';
+    $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
   /* own fullscreen: the video box fills the screen (rotated in portrait), no native iOS fullscreen, so no pause */
@@ -1716,7 +1691,7 @@ function syncVideo(){
     box.style.transform=por?'rotate(90deg)':'';
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
-    $('vq').style.display='none';
+    
     const f=box.querySelector('iframe');
     if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
     const b=$('yfs');b.hidden=false;b.classList.add('x');
@@ -1724,7 +1699,7 @@ function syncVideo(){
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     return;
   }
-  box.style.transform='';box.style.background='';box.style.borderRadius='';$('vq').style.display='';
+  box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
   const sz=Math.min(r.width,r.height,520);
   box.style.right='auto';box.style.bottom='auto';
@@ -1734,22 +1709,10 @@ function syncVideo(){
   box.style.width=sz+'px';box.style.height=vh+'px';
   const was=box.classList.contains('vid');
   box.classList.add('vid');
-  $('vq').style.top=(vt+5)+'px';
-  $('vq').style.right=(innerWidth-(vl+sz)+7)+'px';
-  if(!was)vqShow(false);
   /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
   if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
-}
-/* quality badge on the video: appears with the YouTube title, then fades away */
-let vqT=null;
-function vqShow(sticky){
-  const el=$('vq');
-  clearTimeout(vqT);
-  if(!$('yt').classList.contains('vid')){el.classList.remove('show');return}
-  el.classList.add('show');
-  if(!sticky)vqT=setTimeout(()=>el.classList.remove('show'),1500);
 }
 
 /* PATCH: after video on/off, if the user wanted music playing, resume it */
