@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,18 +197,14 @@ body.dragging #topfade{opacity:0}
 #yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
-/* স্বচ্ছ শিল্ড: টাইটেল ও নিচের ইউটিউব লোগো ব্লক করবে, কিন্তু উপরের ডান কোণার Settings/Subtitles ও নিচের ডান কোণার Fullscreen খোলা থাকবে */
-#yt .yt-tap-shield{display:none}
-#yt.vid .yt-tap-shield{display:block;position:absolute;z-index:4;background:transparent;pointer-events:auto;touch-action:pan-y}
-#yt.vid .yt-shield-top{left:0;top:0;width:calc(100% - 95px);height:48px}
-#yt.vid .yt-shield-mid{left:0;top:48px;width:100%;height:calc(100% - 96px)}
-#yt.vid .yt-shield-bottom{left:0;bottom:0;width:calc(100% - 65px);height:48px}
+/* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
 #yfs.x .i1{display:none}
 #yfs.x .i2{display:block}
 body.dragging #yfs{opacity:0}
+#yt.vid::before{content:"";position:absolute;left:0;top:0;width:72%;height:24%;z-index:3;background:transparent}
 body.dragging #yt.vid{opacity:0}
 .az.vid .art{visibility:hidden;transform:none!important}
 .opt.dis{opacity:.35}
@@ -557,12 +552,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
 </div>
 
-<div id="yt">
-  <div id="ytp"></div>
-  <div class="yt-tap-shield yt-shield-top" aria-hidden="true"></div>
-  <div class="yt-tap-shield yt-shield-mid" aria-hidden="true"></div>
-  <div class="yt-tap-shield yt-shield-bottom" aria-hidden="true"></div>
-</div>
+<div id="yt"><div id="ytp"></div></div>
 <button id="yfs" type="button" aria-label="Fullscreen" hidden>
   <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
   <svg class="i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
@@ -875,6 +865,7 @@ const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+/* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
@@ -939,7 +930,7 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     height:'200',width:'200',
-    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0,modestbranding:1},
+    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
         apiReady=true;
@@ -970,6 +961,7 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
+    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1091,6 +1083,7 @@ function resetProg(){
 function toggle(){
   if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
   if(!apiReady)return;
+  /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
     playing=false;icons();
@@ -1594,6 +1587,7 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
+/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1681,6 +1675,7 @@ function syncVideo(){
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
+  /* own fullscreen: the video box fills the screen (rotated in portrait), no native iOS fullscreen, so no pause */
   if(vidFS){
     const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
     const bw=Math.min(lg,sh*16/9),bh=bw*9/16;
@@ -1706,12 +1701,15 @@ function syncVideo(){
   box.style.left=vl+'px';
   box.style.top=vt+'px';
   box.style.width=sz+'px';box.style.height=vh+'px';
+  const was=box.classList.contains('vid');
   box.classList.add('vid');
+  /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
   if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
+/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
@@ -1720,6 +1718,9 @@ function setVid(on){
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
+
+/* The fullscreen close control only exits the fullscreen video layout.
+   It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -1980,6 +1981,8 @@ on('slBtn',()=>{
 const prev=()=>{if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length)};
 
 /* ---------- LOCK SCREEN / CONTROL CENTRE ---------- */
+/* A silent looping track makes the phone treat THIS page as the player while a YouTube song plays,
+   so the lock screen shows our title/cover and our prev / next / seek buttons. */
 const MS='mediaSession' in navigator?navigator.mediaSession:null;
 const ka=new Audio();
 ka.loop=true;
@@ -2240,7 +2243,10 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ---------- */
+/* ---------- MUSIC GROUPS: [weight, queries] ----------
+   Higher weight = more songs in the Home feed.
+   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
+          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
 const GROUPS=[
   [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
   [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
@@ -2484,6 +2490,7 @@ async function loadHomeMore(){
   if(added>0)keepFilling();
 }
 
+/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
 function homeCheck(){
@@ -3213,7 +3220,10 @@ $('rmDel').onclick=async()=>{
   openRemove();
 };
 
-/* ---------- BACKUP & RESTORE ---------- */
+/* ---------- BACKUP & RESTORE (original quality, one file) ----------
+   File format .sfbak:  "SFBK2\n" then repeated entries:
+   [4 bytes header length][header JSON][raw bytes]
+   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
 const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
 let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
 
@@ -3371,6 +3381,7 @@ function bkLabel(q){
   $('bkGo').textContent=q.i===0?'Tap to save':'Save next ('+(q.i+1)+'/'+q.files.length+')';
 }
 
+/* One song per tap: the phone's save sheet only handles a single file reliably. */
 async function bkSaveOne(auto){
   const q=bkQ;
   if(!q)return;
@@ -3411,6 +3422,7 @@ async function crc32Blob(blob){
   return (c^0xFFFFFFFF)>>>0;
 }
 
+/* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
 async function buildZip(files){
   const parts=[],cds=[];
   let off=0,i=0;
@@ -3618,6 +3630,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 
   const info=t=>{$('gInfo').textContent=t};
 
+  /* Show Gmail name, email and profile photo in the account card */
   function renderAcct(u){
     $('gIn').hidden=!!u;
     $('gOut').hidden=!u;
@@ -3717,5 +3730,3 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
-
-```
