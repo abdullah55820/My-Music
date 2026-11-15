@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -197,12 +198,12 @@ body.dragging #topfade{opacity:0}
 #yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
-/* স্বচ্ছ শিল্ড: ভিডিও স্ক্রিন, টাইটেল এবং ইউটিউব লোগোতে ক্লিক ব্লক করবে (YT অ্যাপে যাবে না), 
-   কিন্তু নিচের ডান পাশের Settings ও Fullscreen বাটন এবং বাম পাশের Play/Seek খোলা থাকবে */
+/* স্বচ্ছ শিল্ড: টাইটেল ও নিচের ইউটিউব লোগো ব্লক করবে, কিন্তু উপরের ডান কোণার Settings/Subtitles ও নিচের ডান কোণার Fullscreen খোলা থাকবে */
 #yt .yt-tap-shield{display:none}
-#yt.vid .yt-tap-shield{display:block;position:absolute;z-index:4;background:transparent;pointer-events:auto;cursor:pointer;touch-action:pan-y}
-#yt.vid .yt-shield-main{left:0;top:0;width:100%;height:calc(100% - 48px)}
-#yt.vid .yt-shield-logo{right:85px;bottom:0;width:65px;height:48px}
+#yt.vid .yt-tap-shield{display:block;position:absolute;z-index:4;background:transparent;pointer-events:auto;touch-action:pan-y}
+#yt.vid .yt-shield-top{left:0;top:0;width:calc(100% - 95px);height:48px}
+#yt.vid .yt-shield-mid{left:0;top:48px;width:100%;height:calc(100% - 96px)}
+#yt.vid .yt-shield-bottom{left:0;bottom:0;width:calc(100% - 65px);height:48px}
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
@@ -558,8 +559,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 <div id="yt">
   <div id="ytp"></div>
-  <div class="yt-tap-shield yt-shield-main" id="ytShieldMain" aria-hidden="true"></div>
-  <div class="yt-tap-shield yt-shield-logo" id="ytShieldLogo" aria-hidden="true"></div>
+  <div class="yt-tap-shield yt-shield-top" aria-hidden="true"></div>
+  <div class="yt-tap-shield yt-shield-mid" aria-hidden="true"></div>
+  <div class="yt-tap-shield yt-shield-bottom" aria-hidden="true"></div>
 </div>
 <button id="yfs" type="button" aria-label="Fullscreen" hidden>
   <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
@@ -1102,10 +1104,6 @@ function toggle(){
     yt.playVideo();
   }
 }
-
-/* ভিডিও স্ক্রিনে ক্লিক করলে Play/Pause হবে, কিন্তু ইউটিউবে ঢুকবে না */
-on('ytShieldMain',toggle);
-on('ytShieldLogo',toggle);
 
 /* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
 const ARTC={};      /* local id -> cover data URL ('' = song has no cover) */
@@ -3719,3 +3717,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+
+```
