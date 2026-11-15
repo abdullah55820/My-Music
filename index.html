@@ -177,6 +177,7 @@ body.dragging #topfade{opacity:0}
 .like.liked svg{fill:currentColor}
 .player input.seek{width:100%;height:28px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
 .seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
+#qBadge{font-weight:700;color:rgba(255,255,255,.9)}
 .trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
 .cb{width:64px;height:64px;display:grid;place-items:center;color:#fff}
@@ -369,7 +370,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         </button>
       </div>
       <input type="range" id="seek" class="seek" min="0" max="100" value="0" step="any">
-      <div class="trow"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+      <div class="trow"><span id="cur">0:00</span><span id="qBadge"></span><span id="dur">0:00</span></div>
     </div>
     <div class="ctr">
       <button class="cb" id="prevBtn" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6v12L2 12zM21 6v12l-9-6z"/></svg></button>
@@ -990,8 +991,21 @@ function tick(){
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
+    qTick();
     posState();
   }catch(e){}
+}
+
+/* shows the video quality YouTube is really playing */
+let qLast=0;
+const QN={hd2160:'2160p',hd1440:'1440p',hd1080:'1080p',hd720:'720p',large:'480p',medium:'360p',small:'240p',tiny:'144p',highres:'4K+'};
+function qTick(){
+  const now=Date.now();
+  if(now-qLast<1000)return;
+  qLast=now;
+  let t='';
+  try{if(!isLoc()&&apiReady)t=QN[yt.getPlaybackQuality()]||''}catch(e){}
+  $('qBadge').textContent=t;
 }
 
 function startT(){stopT();tick();timer=setInterval(tick,100)}
@@ -1059,6 +1073,8 @@ function resetProg(){
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
+  $('qBadge').textContent='';
+  qLast=0;
 }
 
 function toggle(){
