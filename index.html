@@ -61,7 +61,7 @@ svg{display:block}
 .chip .x{margin-left:8px;opacity:.7;font-size:15px;line-height:1}
 #topbar .g{box-shadow:none}
 .opts{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:24px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
-.opt{position:relative;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;transition:background .2s,color .2s,transform .15s}
+.opt{position:relative;width:auto;flex:1 1 0;max-width:50px;min-width:0;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;transition:background .2s,color .2s,transform .15s}
 .opt svg{width:23px;height:23px}
 .opt:active{transform:scale(.88)}
 .opt.on{background:#fff;color:#111}
@@ -194,6 +194,11 @@ body.dragging #topfade{opacity:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
+#yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 20px 55px rgba(0,0,0,.5)}
+#yt.vid iframe{width:100%;height:100%;display:block;border:0}
+body.dragging #yt.vid{opacity:0}
+.az.vid .art{visibility:hidden;transform:none!important}
+.opt.dis{opacity:.35}
 .sp{position:fixed;inset:0;z-index:12000;display:flex;flex-direction:column;background:var(--spbg);backdrop-filter:blur(34px) saturate(170%);-webkit-backdrop-filter:blur(34px) saturate(170%);transform:translate3d(100%,0,0);visibility:hidden;transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .sp.open{transform:translate3d(0,0,0);visibility:visible}
 .sp.no-transition{transition:none!important}
@@ -375,6 +380,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <button class="opt" id="shBtn" type="button" aria-label="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
       <button class="opt" id="rpBtn" type="button" aria-label="Repeat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></button>
       <button class="opt" id="lyBtn" type="button" aria-label="Lyrics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.6-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10h7M8.5 13.5h4.5"/></svg></button>
+      <button class="opt" id="vdBtn" type="button" aria-label="Video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10.5 5-3v9l-5-3z"/></svg></button>
       <button class="opt" id="slBtn" type="button" aria-label="Sleep timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><i class="bd" id="slBd" hidden></i></button>
       <button class="opt" id="plBtn" type="button" aria-label="Add to playlist">
         <svg class="i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h12M3 12h8M3 18h8M18 13v8M14 17h8"/></svg>
@@ -1606,6 +1612,7 @@ function syncLy(c){
 }
 
 on('lyBtn',()=>{
+  if(!lyOn&&vidMode)setVid(false);
   lyOn=!lyOn;
   $('lyr').hidden=!lyOn;
   $('lyAdj').classList.toggle('show',lyOn);
@@ -1614,6 +1621,35 @@ on('lyBtn',()=>{
   $('lyBtn').classList.toggle('on',lyOn);
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
+
+/* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
+let vidMode=false;
+function syncVideo(){
+  const box=$('yt'),az=$('az');
+  const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
+  az.classList.toggle('vid',show);
+  $('vdBtn').classList.toggle('on',vidMode);
+  $('vdBtn').classList.toggle('dis',isLoc());
+  if(!show){
+    box.classList.remove('vid');
+    box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
+    return;
+  }
+  const r=az.getBoundingClientRect();
+  const sz=Math.min(r.width,r.height,520);
+  box.style.right='auto';box.style.bottom='auto';
+  box.style.left=(r.left+(r.width-sz)/2)+'px';
+  box.style.top=(r.top+(r.height-sz)/2)+'px';
+  box.style.width=sz+'px';box.style.height=sz+'px';
+  box.classList.add('vid');
+}
+function setVid(on){
+  vidMode=on;
+  if(on&&lyOn)$('lyBtn').click();
+  syncVideo();
+}
+on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
+addEventListener('resize',syncVideo);
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -1639,6 +1675,7 @@ function setInfo(v){
     });
   }
   if(lyOn)loadLyrics(v);
+  syncVideo();
 }
 
 function resetPlayerStyles(){
@@ -1655,8 +1692,10 @@ function showFull(){
   $('mini').classList.remove('visible');
   $('player').classList.add('active');
   if(queue[idx])setTint(queue[idx]);
+  setTimeout(syncVideo,540);
   pushLayer(()=>{
     mode='mini';
+    syncVideo();
     resetPlayerStyles();
     $('player').classList.remove('active');
     $('mini').classList.add('visible');
@@ -1666,6 +1705,7 @@ function showFull(){
 
 function closePlayer(){
   mode='closed';
+  syncVideo();
   resetPlayerStyles();
   $('player').classList.remove('active');
   $('mini').classList.remove('visible');
