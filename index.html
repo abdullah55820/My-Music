@@ -1064,7 +1064,17 @@ function resetProg(){
 function toggle(){
   if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
   if(!apiReady)return;
-  playing?yt.pauseVideo():yt.playVideo();
+  /* update the buttons at once; YouTube confirms a moment later */
+  if(playing){
+    playing=false;icons();
+    $('art').classList.add('paused');
+    stopT();
+    yt.pauseVideo();
+  }else{
+    playing=true;icons();
+    $('art').classList.remove('paused');
+    yt.playVideo();
+  }
 }
 
 /* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
