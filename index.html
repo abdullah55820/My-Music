@@ -956,10 +956,12 @@ function onState(e){
     startT();
   }else if(st===YT.PlayerState.PAUSED){
     /* PATCH: pause caused by fullscreen exit / app switch (not by the user) -> resume at once */
-    if(userWant&&Date.now()<guardUntil){
-      try{yt.playVideo()}catch(err){}
+    /* a pause is real only if the user tapped inside the video (window blur) a moment before; anything else = automatic, resume */
+    if(userWant&&(Date.now()<guardUntil||Date.now()-tapAt>1200)){
+      [0,150,500,1200].forEach(ms=>setTimeout(()=>{try{if(userWant&&yt.getPlayerState()!==1)yt.playVideo()}catch(err){}},ms));
       return;
     }
+    if(userWant&&Date.now()-tapAt<=1200&&Date.now()>=guardUntil)userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
     icons();
@@ -1724,7 +1726,8 @@ addEventListener('resize',syncVideo);
 
 /* PATCH: auto-resume after fullscreen exit / app or tab switch / returning to page.
    Only resumes if the user did not pause the song themselves. */
-let guardUntil=0;
+let guardUntil=0,tapAt=0;
+addEventListener('blur',()=>{tapAt=Date.now()});
 function autoResume(){
   if(!userWant||isLoc()||!apiReady)return;
   guardUntil=Date.now()+4000;
