@@ -1995,10 +1995,9 @@ function syncVideo(){
   if(vidFS){
     const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
     const bw=Math.min(lg,sh*16/9),bh=bw*9/16;
-    /* #yt is inside the transformed player, so fixed coordinates are relative to that player, not the viewport. */
-    const pr=$('player').getBoundingClientRect();
+    /* #yt is a direct body-level fixed element, so use viewport coordinates. */
     box.style.right='auto';box.style.bottom='auto';
-    box.style.left=(W/2-bw/2-pr.left)+'px';box.style.top=(H/2-bh/2-pr.top)+'px';
+    box.style.left=(W/2-bw/2)+'px';box.style.top=(H/2-bh/2)+'px';
     box.style.width=bw+'px';box.style.height=bh+'px';
     box.style.transform=por?'rotate(90deg)':'';
     box.style.background='#000';box.style.borderRadius='0';
@@ -2017,10 +2016,9 @@ function syncVideo(){
   const land=innerWidth>innerHeight;
   const vw=Math.min(r.width,r.height*16/9,land?9999:520),vh=vw*9/16;
   const vl=r.left+(r.width-vw)/2,vt=r.top+(r.height-vh)/2;
-  /* Convert viewport coordinates to the transformed #player containing-block coordinates. */
-  const pr=$('player').getBoundingClientRect();
+  /* #yt is fixed to the viewport; keep it centred over the left video column. */
   box.style.right='auto';box.style.bottom='auto';
-  box.style.left=(vl-pr.left)+'px';box.style.top=(vt-pr.top)+'px';
+  box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
   /* Match the actual YouTube player dimensions to the measured 16:9 box.
