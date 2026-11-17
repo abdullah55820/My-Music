@@ -2426,6 +2426,32 @@ function buildForYou(){
   g.pg={};
 }
 
+async function fillGroup(g,ctl){
+  if(g.busy)return true;
+  g.busy=true;
+  try{return await fillGroupRaw(g,ctl)}
+  finally{g.busy=false}
+}
+
+async function fillGroupRaw(g,ctl){
+  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
+  const page=(g.pg[q]||0)+1;
+  const few=activeGroups().length<6;
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
+
+  if(data===null)return false;
+
+  g.pg[q]=page;
+  data.forEach(v=>{
+    if(seen.has(v.videoId))return;
+    if(g.f&&!g.f.test(v.author||''))return;
+    if(g.buf.some(b=>b.videoId===v.videoId))return;
+    g.buf.push(v);
+  });
+  shuffle(g.buf);
+  return true;
+}
+
 const CHIPS=[
   ['All',null],['T-Series',[7]],['Bangla',[1]],['Trending',[5]],['Hindi',[0]],
   ['Sony Music',[8]],['YRF',[9]],['Zee Music',[10]],['Saregama',[11]],
