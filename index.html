@@ -273,6 +273,49 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
 /* =====================================================================
+   LIQUID GLASS LOOK  (clear, water-like glass, no milky white fill)
+   Same feel as the round play / pause bubble: see-through, soft light
+   sheen from the top-left corner, thin bright rim, inner glow.
+   ===================================================================== */
+:root{--sh1:.34;--sh2:.07;--sh3:.18;--gaf:.55;--rim:rgba(255,255,255,.2)}
+:root[data-theme=dark]{--rim:rgba(255,255,255,.13)}
+
+.g,.chips .chip,.pitem,.lbar .seg,.pcard{
+  background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)) 0%,rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3)) 100%),var(--glass);
+  border-color:var(--rim)
+}
+.g,.chips .chip,.pitem{
+  box-shadow:0 8px 24px var(--gshadow),inset 0 0 6px rgba(255,255,255,.06)
+}
+/* song cards: Blur Strength + Transparency settings work here too */
+.grid .g{
+  box-shadow:inset 0 0 6px rgba(255,255,255,.05);
+  backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%)
+}
+/* top bar pills + status */
+#topbar .g{box-shadow:inset 0 0 6px rgba(255,255,255,.05)}
+/* bottom tab bar + mini player */
+.nav.g,.mini.g{box-shadow:0 6px 18px rgba(0,0,0,.16),inset 0 0 6px rgba(255,255,255,.06)}
+
+/* unselected chips and small texts: clearly readable */
+.chips .chip{color:var(--text)}
+.chips .chip.on{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 4px 14px var(--accent-soft)
+}
+.status{color:var(--text)}
+.artist{color:var(--text);opacity:.72}
+.nb{color:color-mix(in srgb,var(--text) 78%,transparent)}
+.nb.active{color:var(--accent)}
+
+/* player bars follow the same glass settings */
+.opts{
+  background:rgba(255,255,255,calc(var(--gaf)*.24));
+  border-color:var(--rim);
+  backdrop-filter:blur(var(--gb)) saturate(160%);-webkit-backdrop-filter:blur(var(--gb)) saturate(160%)
+}
+
+/* =====================================================================
    LIQUID GLASS  (touch = water, iPhone style)
    Every glass control: swells under the finger, follows the finger like
    a drop of liquid, shows a moving light reflection, sends out water
@@ -284,10 +327,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* play / pause, previous, next = round glass bubbles */
 .cb{
-  background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.10));
-  border:1px solid rgba(255,255,255,.34);
-  backdrop-filter:blur(22px) saturate(175%);-webkit-backdrop-filter:blur(22px) saturate(175%);
-  box-shadow:0 10px 26px rgba(0,0,0,.28),inset 0 1.5px 1px rgba(255,255,255,.45),inset 0 -8px 14px rgba(255,255,255,.07)
+  background:linear-gradient(145deg,rgba(255,255,255,calc(var(--gaf)*.47)),rgba(255,255,255,calc(var(--gaf)*.18)));
+  border:1px solid var(--rim);
+  backdrop-filter:blur(var(--gb)) saturate(175%);-webkit-backdrop-filter:blur(var(--gb)) saturate(175%);
+  box-shadow:0 10px 26px rgba(0,0,0,.26),inset 0 0 8px rgba(255,255,255,.07)
 }
 .cb svg{width:30px;height:30px}
 .cb.big svg{width:56px;height:56px}
@@ -295,10 +338,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 /* mini song card: play + close buttons = round glass bubbles too */
 .mc{
   width:42px;height:42px;border-radius:50%;
-  background:rgba(128,128,128,.16);
-  border:1px solid var(--gborder);
-  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
-  box-shadow:0 4px 12px rgba(0,0,0,.18),inset 0 1.5px 1px rgba(255,255,255,.35),inset 0 -5px 10px rgba(255,255,255,.06)
+  background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)),rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3))),var(--glass);
+  border:1px solid var(--rim);
+  backdrop-filter:blur(var(--gb)) saturate(170%);-webkit-backdrop-filter:blur(var(--gb)) saturate(170%);
+  box-shadow:0 4px 12px rgba(0,0,0,.16),inset 0 0 6px rgba(255,255,255,.06)
 }
 .mc svg{width:20px;height:20px}
 
@@ -736,6 +779,13 @@ function apply(){
   st.setProperty('--accent',S.accent);
   st.setProperty('--accent-soft',`rgba(${hexRgb(S.accent)},.16)`);
   st.setProperty('--glass',`rgba(${dark?'28,28,30':'255,255,255'},${dark?S.ga/100:S.ga/100*.5})`);
+  {
+    const k=S.ga/55,f=a=>Math.min(.9,a*k).toFixed(3);
+    st.setProperty('--sh1',f(dark?.17:.34));
+    st.setProperty('--sh2',f(dark?.04:.07));
+    st.setProperty('--sh3',f(dark?.09:.18));
+    st.setProperty('--gaf',(S.ga/100).toFixed(2));
+  }
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
