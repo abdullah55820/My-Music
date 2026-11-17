@@ -413,7 +413,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
     /* rows: spacer | title+seek | controls | options | spacer | reserved sync row */
-    grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr) 54px;
+    grid-template-rows:minmax(0,1fr) auto auto auto 44px minmax(0,1fr);
     column-gap:clamp(24px,4.4vw,60px);
     row-gap:clamp(8px,1.6vh,16px);
     padding:2px 0 0;
@@ -423,7 +423,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
   /* LEFT: art / video, vertically centred in the area above the sync row */
   .az{
-    grid-column:1;grid-row:1 / 6;
+    grid-column:1;grid-row:1 / 7;
     width:100%;height:100%;min-height:0;
     overflow:hidden;contain:layout paint;
     display:flex;align-items:center;justify-content:center;
@@ -432,15 +432,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     width:min(100cqw,100cqh,520px);
     max-width:100%;max-height:100%;
     border-radius:16px;
+    box-shadow:none!important;
   }
   #yt.vid{
     border-radius:14px;
     overflow:hidden;
     background:#000;
+    box-shadow:none!important;
   }
   #yt.vid iframe{
     display:block;
-    max-width:100%!important;
     border:0;
   }
 
@@ -508,7 +509,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   /* BOTTOM: reserved empty row, sync buttons exactly in the middle of the screen */
   .lyadj,.lyadj.show{
     position:relative;
-    grid-column:1 / 3;grid-row:6;
+    grid-column:2;grid-row:5;
     justify-self:center;align-self:center;
     left:auto;right:auto;top:auto;bottom:auto;
     transform:none;
@@ -1967,6 +1968,7 @@ function syncVideo(){
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     const f0=box.querySelector('iframe');
     if(f0)f0.style.cssText='';
+    try{if(apiReady)yt.setSize(200,200)}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -1999,9 +2001,12 @@ function syncVideo(){
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* Keep iframe and container in the same coordinate space; no oversized transform drift on iOS. */
+  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
+     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
+     title, share and "more videos" elements small. */
   const fr=box.querySelector('iframe');
-  if(fr)fr.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;border:0;max-width:100%;transform:none';
+  try{if(apiReady)yt.setSize(1920,1080)}catch(e){}
+  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(vw/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
