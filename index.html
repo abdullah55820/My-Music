@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,13 +171,14 @@ body.dragging #topfade{opacity:0}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 
-/* ---------- SEEK BAR: round on both sides, round thumb ---------- */
+/* ---------- SEEK BAR: slim track + round ball thumb ---------- */
 .player input.seek{--pn:0;width:100%;height:30px;margin:2px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;border-radius:999px;background:transparent;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
-.seek::-webkit-slider-runnable-track{height:14px;border-radius:999px;background:linear-gradient(to right,#fff 0,#fff calc(9px + (100% - 18px)*var(--pn,0)),rgba(255,255,255,.3) calc(9px + (100% - 18px)*var(--pn,0)),rgba(255,255,255,.3) 100%)}
-.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin-top:-2px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
-.seek::-moz-range-track{height:14px;border-radius:999px;background:rgba(255,255,255,.3)}
-.seek::-moz-range-progress{height:14px;border-radius:999px;background:#fff}
-.seek::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
+.seek::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:linear-gradient(to right,#fff 0,#fff calc(8px + (100% - 16px)*var(--pn,0)),rgba(255,255,255,.3) calc(8px + (100% - 16px)*var(--pn,0)),rgba(255,255,255,.3) 100%)}
+.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;margin-top:-5px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.45);transition:transform .15s}
+.seek:active::-webkit-slider-thumb{transform:scale(1.25)}
+.seek::-moz-range-track{height:6px;border-radius:999px;background:rgba(255,255,255,.3)}
+.seek::-moz-range-progress{height:6px;border-radius:999px;background:#fff}
+.seek::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.45)}
 
 .trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
@@ -1150,9 +1152,9 @@ function startT(){stopT();tick();timer=setInterval(tick,100)}
 function stopT(){clearInterval(timer);timer=null}
 
 /* ---------- SEEK BAR ----------
-   The bar does NOT jump to your finger. Your finger sets a target and the
-   bar glides toward it a little at a time (eased), so it follows smoothly. */
-let seekPointer=null,seekTarget=0,seekShown=0,seekRaf=0;
+   Tap anywhere on the bar -> jumps straight to that spot.
+   Touch & drag -> glides smoothly behind your finger instead of snapping. */
+let seekPointer=null,seekTarget=0,seekShown=0,seekRaf=0,seekStartX=0,seekMoved=false;
 
 function seekPercentAt(x){
   const r=seek.getBoundingClientRect();
@@ -1165,7 +1167,7 @@ function seekAnim(){
   if(!seeking)return;
   const d=seekTarget-seekShown;
   if(Math.abs(d)<.04)seekShown=seekTarget;
-  else seekShown+=d*.14;
+  else seekShown+=d*.16;
   seek.value=seekShown;
   setProg(seekShown);
   const duration=durT();
@@ -1180,7 +1182,7 @@ function updateSeekFromX(x){
 
 function finishSeek(){
   if(!seeking)return;
-  const target=seekTarget;
+  const target=seekMoved?seekShown:seekTarget;
   seeking=false;
   seekPointer=null;
   cancelAnimationFrame(seekRaf);seekRaf=0;
@@ -1198,31 +1200,32 @@ seek.addEventListener('pointerdown',e=>{
   e.preventDefault();e.stopPropagation();
   seeking=true;
   seekPointer=e.pointerId;
+  seekStartX=e.clientX;
+  seekMoved=false;
   seekShown=parseFloat(seek.value)||0;
-  seekTarget=seekShown;
+  seekTarget=seekPercentAt(e.clientX);
   try{seek.setPointerCapture(e.pointerId)}catch(err){}
-  updateSeekFromX(e.clientX);
 });
 seek.addEventListener('pointermove',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
   e.preventDefault();
-  updateSeekFromX(e.clientX);
+  if(!seekMoved&&Math.abs(e.clientX-seekStartX)>4)seekMoved=true;
+  if(seekMoved)updateSeekFromX(e.clientX);
 });
 seek.addEventListener('pointerup',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
   e.preventDefault();
-  seekTarget=seekPercentAt(e.clientX);
+  if(!seekMoved)seekTarget=seekPercentAt(e.clientX);
   finishSeek();
 });
 seek.addEventListener('pointercancel',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
-  seekTarget=seekPercentAt(e.clientX);
   finishSeek();
 });
 seek.addEventListener('lostpointercapture',()=>{if(seeking)finishSeek()});
 
 function resetProg(){
-  seeking=false;seekPointer=null;seekTarget=0;seekShown=0;
+  seeking=false;seekPointer=null;seekTarget=0;seekShown=0;seekMoved=false;
   cancelAnimationFrame(seekRaf);seekRaf=0;
   seek.value=0;
   setProg(0);
@@ -4019,7 +4022,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     if(e.pointerType==='mouse'&&e.button!==0)return;
     if(off())return;
     const t=e.target;
-    const el=t&&t.closest?t.closest(SEL):null;
+const el=t&&t.closest?t.closest(SEL):null;
     if(!el||el.disabled||P.has(e.pointerId))return;
     const r=el.getBoundingClientRect();
     if(!r.width||!r.height)return;
@@ -4065,3 +4068,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+
+```
