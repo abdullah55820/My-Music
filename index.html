@@ -169,8 +169,12 @@ body.dragging #topfade{opacity:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
-.player input.seek{width:100%;height:22px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;border-radius:99px;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 3px no-repeat;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
-.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
+.player input.seek{--p:0%;width:100%;height:22px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;background:transparent;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+/* thick rounded bar: light grey filled part, darker grey rest, no thumb */
+.seek::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,#ececec 0,#ececec var(--p),rgba(255,255,255,.32) var(--p),rgba(255,255,255,.32) 100%)}
+.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:1px;height:8px;opacity:0;border:0;background:transparent}
+.seek::-moz-range-track{height:8px;border-radius:99px;background:linear-gradient(to right,#ececec 0,#ececec var(--p),rgba(255,255,255,.32) var(--p),rgba(255,255,255,.32) 100%)}
+.seek::-moz-range-thumb{width:1px;height:8px;opacity:0;border:0;background:transparent}
 .trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
 .cb{width:64px;height:64px;display:grid;place-items:center;color:#fff}
@@ -186,7 +190,7 @@ body.dragging #topfade{opacity:0}
 .mc{width:38px;height:42px;display:grid;place-items:center;flex-shrink:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
-#yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none}
+#yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
 #yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
@@ -413,7 +417,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
     /* rows: spacer | title+seek | controls | options | spacer | reserved sync row */
-    grid-template-rows:minmax(0,1fr) auto auto auto 44px minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) auto auto auto 46px minmax(0,1fr);
     column-gap:clamp(24px,4.4vw,60px);
     row-gap:clamp(8px,1.6vh,16px);
     padding:2px 0 0;
@@ -500,11 +504,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     align-self:center;width:100%;
     display:flex;align-items:center;justify-content:space-around;
     gap:clamp(3px,1vw,12px);
-    padding:5px 8px;margin:0;
+    padding:8px 10px;margin:10px 0 0;
     z-index:4;
   }
-  .opt{height:40px;max-width:48px;touch-action:manipulation}
-  .opt svg{width:19px;height:19px;pointer-events:none}
+  .opt{height:46px;max-width:52px;touch-action:manipulation}
+  .opt svg{width:21px;height:21px;pointer-events:none}
 
   /* BOTTOM: reserved empty row, sync buttons exactly in the middle of the screen */
   .lyadj,.lyadj.show{
@@ -515,30 +519,32 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     transform:none;
     display:flex;align-items:center;justify-content:center;
     gap:8px;
-    width:max-content;min-width:154px;height:38px;min-height:38px;
-    padding:0 12px;
-    border-radius:22px;
-    color:rgba(255,255,255,.96);
-    background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.075));
-    border:1px solid rgba(255,255,255,.28);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 5px 18px rgba(0,0,0,.12);
-    -webkit-backdrop-filter:blur(22px) saturate(180%);
-    backdrop-filter:blur(22px) saturate(180%);
+    width:max-content;min-width:170px;height:46px;min-height:46px;
+    padding:0 6px;
+    border-radius:24px;
+    color:#fff;
+    /* same glass + white stroke as the option bar */
+    background:rgba(255,255,255,calc(var(--gaf)*.24));
+    border:1px solid rgba(255,255,255,.18);
+    border-color:var(--rim);
+    box-shadow:none;
+    -webkit-backdrop-filter:blur(var(--gb)) saturate(160%);
+    backdrop-filter:blur(var(--gb)) saturate(160%);
     z-index:5;
   }
   .lyadj{visibility:hidden}
   .lyadj.show{visibility:visible}
   .lyadj button{
     display:grid;place-items:center;
-    width:34px;height:30px;flex:0 0 34px;
+    width:38px;height:38px;flex:0 0 38px;
     border-radius:50%;
     color:#fff;
-    background:rgba(255,255,255,.13);
-    border:1px solid rgba(255,255,255,.20);
-    font-size:17px;font-weight:750;line-height:1;
+    background:transparent;
+    border:0;
+    font-size:19px;font-weight:800;line-height:1;
     touch-action:manipulation;
   }
-  .lyadj button:active{background:rgba(255,255,255,.28)}
+  .lyadj button:active{background:#fff;color:#111}
   .lyadj span{min-width:0;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
   .lyadj input{
     width:48px;height:28px;padding:0;margin:0;
@@ -1225,11 +1231,14 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
-    height:'200',width:'200',
+    /* The player always stays 1920x1080 and is only scaled with CSS. It is never resized,
+       so YouTube never lays the picture out at a wrong size (no black bar, no side shift). */
+    height:'1080',width:'1920',
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
         apiReady=true;
+        syncVideo();
         if(pending){const id=pending;pending=null;yt.loadVideoById(id)}
       },
       onStateChange:onState,
@@ -1293,7 +1302,7 @@ const fmt=s=>{
 
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
-  seek.style.backgroundImage=`linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
+  seek.style.setProperty('--p',p+'%');
 }
 
 function tick(){
@@ -1951,6 +1960,11 @@ on('lyBtn',()=>{
 
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
+/* the YouTube iframe is always 1920x1080; only the CSS scale changes */
+function ytFrame(sc){
+  const f=$('yt').querySelector('iframe');
+  if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+}
 on('yfs',()=>{
   if(vidFS){history.back();return}
   vidFS=true;
@@ -1966,9 +1980,8 @@ function syncVideo(){
   if(!show){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
-    const f0=box.querySelector('iframe');
-    if(f0)f0.style.cssText='';
-    try{if(apiReady)yt.setSize(200,200)}catch(e){}
+    ytFrame(200/1920);
+    try{if(apiReady)yt.setPlaybackQuality('medium')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -2004,9 +2017,7 @@ function syncVideo(){
   /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
      This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
      title, share and "more videos" elements small. */
-  const fr=box.querySelector('iframe');
-  try{if(apiReady)yt.setSize(1920,1080)}catch(e){}
-  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(vw/1920)+')';
+  ytFrame(vw/1920);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
