@@ -2397,36 +2397,30 @@ const shuffle=a=>{
 
 /* ---------- MUSIC GROUPS: [weight, queries] ----------
    Higher weight = more songs in the Home feed.
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
+   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3 South India, 4 Nepali,
+          5 Pakistani, 6 Trending, 7 For You,
+          8 T-Series, 9 Sony Music, 10 YRF, 11 Zee Music,
+          12 Saregama, 13 Tips, 14 Eros Now, 15 Speed Records */
 const GROUPS=[
-  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
-  [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
+  [5,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
+  [5,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs','Bangladeshi songs','Coke Studio Bangla','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
   [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
-  [.25,['Dhanush movie songs']],
-  [.25,['Allu Arjun movie songs']],
-  [.25,['Thalapathy Vijay movie songs']],
-  [.25,['Anirudh Ravichander songs']],
-  [.25,['Sai Abhyankkar songs']],
-  [.25,['Sai Pallavi movie songs']],
-  [.25,['Kalyani Priyadarshan movie songs']],
-  [.25,['Pooja Hegde movie songs']],
-  [.25,['Tamannaah movie songs']],
-  [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
+  [2,['South Indian hit songs','South Indian new songs','South Indian romantic songs','South Indian movie songs','Dhanush movie songs','Allu Arjun movie songs','Thalapathy Vijay movie songs','Anirudh Ravichander songs','Sai Abhyankkar songs','Sai Pallavi movie songs','Kalyani Priyadarshan movie songs','Pooja Hegde movie songs','Tamannaah movie songs']],
+  [1.5,['Nepali new songs','Nepali hit songs','Nepali romantic songs','Latest Nepali songs','Nepali modern songs','Nepali pop songs']],
   [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
-  [1,['t series music','Top songs this year','shunno','new song']],
+  [2,['t series music','Top songs this year','shunno','new song','trending songs 2026','viral songs']],
   [3,['t series music']],
-  [1,['T-Series new songs','T-Series Hindi songs','T-Series latest songs 2026','T-Series romantic songs','T-Series Bollywood hits','T-Series Punjabi songs','T-Series Bhushan Kumar songs'],/t-?series/i],
-  [1,['Sony Music India songs','Sony Music India new songs','Sony Music India Hindi songs','Sony Music India romantic songs','Sony Music South songs','Sony Music India Punjabi songs'],/sony/i],
-  [1,['YRF songs','YRF latest songs','Yash Raj Films songs','YRF romantic songs','YRF Bollywood hits','YRF music'],/\byrf\b|yash\s*raj/i],
-  [1,['Zee Music Company songs','Zee Music Company new songs','Zee Music Company Hindi songs','Zee Music Company romantic songs','Zee Music Company Punjabi'],/zee\s*music/i],
-  [1,['Saregama Music songs','Saregama Hindi songs','Saregama Bangla songs','Saregama Bengali songs','Saregama new songs'],/saregama/i],
-  [1,['Tips Official songs','Tips Official new songs','Tips Official Hindi songs','Tips Official romantic songs'],/tips/i],
-  [1,['Eros Now Music songs','Eros Now Music Hindi songs','Eros Now Music new songs','Eros Now Music romantic songs'],/eros/i],
-  [1,['Speed Records songs','Speed Records new Punjabi songs','Speed Records Punjabi hits','Speed Records latest'],/speed/i]
+  [2,['T-Series new songs','T-Series Hindi songs','T-Series latest songs 2026','T-Series romantic songs','T-Series Bollywood hits','T-Series Punjabi songs','T-Series Bhushan Kumar songs'],/t-?series/i],
+  [2,['Sony Music India songs','Sony Music India new songs','Sony Music India Hindi songs','Sony Music India romantic songs','Sony Music South songs','Sony Music India Punjabi songs'],/sony/i],
+  [1.5,['YRF songs','YRF latest songs','Yash Raj Films songs','YRF romantic songs','YRF Bollywood hits','YRF music'],/\byrf\b|yash\s*raj/i],
+  [1.5,['Zee Music Company songs','Zee Music Company new songs','Zee Music Company Hindi songs','Zee Music Company romantic songs','Zee Music Company Punjabi'],/zee\s*music/i],
+  [1.5,['Saregama Music songs','Saregama Hindi songs','Saregama Bangla songs','Saregama Bengali songs','Saregama new songs'],/saregama/i],
+  [1.5,['Tips Official songs','Tips Official new songs','Tips Official Hindi songs','Tips Official romantic songs'],/tips/i],
+  [1.5,['Eros Now Music songs','Eros Now Music Hindi songs','Eros Now Music new songs','Eros Now Music romantic songs'],/eros/i],
+  [1.5,['Speed Records songs','Speed Records new Punjabi songs','Speed Records Punjabi hits','Speed Records latest'],/speed/i]
 ].map(([weight,qs,f])=>({qs,buf:[],pg:{},weight,f}));
 
-const FORYOU=15;
+const FORYOU=7;
 
 function buildForYou(){
   const c={};
@@ -2465,15 +2459,26 @@ async function fillGroupRaw(g,ctl){
 }
 
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['T-Series',[16]],['Sony Music',[17]],['YRF',[18]],['Zee Music',[19]],['Saregama',[20]],
-  ['Tips',[21]],['Eros Now',[22]],['Speed Records',[23]],
-  ['Bangladeshi',[12]],['Pakistani',[13]],
-  ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[14]],['For You',[FORYOU]]
+  ['All',null],
+  ['T-Series',[8]],
+  ['Bangla',[1]],
+  ['Trending',[6]],
+  ['Hindi',[0]],
+  ['Sony Music',[9]],
+  ['YRF',[10]],
+  ['Zee Music',[11]],
+  ['Saregama',[12]],
+  ['Tips',[13]],
+  ['Eros Now',[14]],
+  ['Speed Records',[15]],
+  ['Punjabi',[2]],
+  ['Pakistani',[5]],
+  ['South India',[3]],
+  ['For You',[FORYOU]],
+  ['Nepali',[4]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((_,i)=>i!==FORYOU);
 
 const CACHE={};
 
