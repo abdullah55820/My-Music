@@ -191,7 +191,8 @@ body.dragging #topfade{opacity:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
-#yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
+/* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
+#yt.vid{z-index:10001;opacity:1;border-radius:0;overflow:visible;background:transparent;box-shadow:none}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
@@ -439,8 +440,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     box-shadow:none!important;
   }
   #yt.vid{
-    border-radius:14px;
-    overflow:hidden;
+    border-radius:0;
+    overflow:visible;
     background:#000;
     box-shadow:none!important;
   }
@@ -1239,7 +1240,7 @@ window.onYouTubeIframeAPIReady=()=>{
       onReady:()=>{
         apiReady=true;
         syncVideo();
-        if(pending){const id=pending;pending=null;yt.loadVideoById(id)}
+        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
       },
       onStateChange:onState,
       onError:onYtError
@@ -1261,6 +1262,7 @@ function onState(e){
     errCount=0;
     userWant=true;
     playing=true;
+    try{yt.setPlaybackQuality('hd1080')}catch(e){}
     kaClaim();
     icons();
     $('art').classList.remove('paused');
@@ -1981,7 +1983,7 @@ function syncVideo(){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     ytFrame(200/1920);
-    try{if(apiReady)yt.setPlaybackQuality('medium')}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -2135,7 +2137,7 @@ function playAt(i,list){
 
   try{au.pause()}catch(e){}
   msMode(false);
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
+  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
   else pending=v.videoId;
 
 }
