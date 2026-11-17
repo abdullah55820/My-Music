@@ -169,7 +169,7 @@ body.dragging #topfade{opacity:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
-.player input.seek{width:100%;height:28px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.player input.seek{width:100%;height:22px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;border-radius:99px;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 3px no-repeat;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
 .seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
 .trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
@@ -389,6 +389,31 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* icons bend like they are under water for a moment */
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
+
+
+/* ---------- LANDSCAPE PLAYER: album left, controls right ---------- */
+@media (orientation:landscape) and (max-height:600px){
+  .player{padding:calc(env(safe-area-inset-top) + 6px) max(22px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 8px) max(22px,env(safe-area-inset-left))}
+  .grab{height:18px;min-height:18px}
+  .grab span{width:38px;height:4px}
+  .pc{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;column-gap:clamp(22px,4vw,56px);row-gap:clamp(6px,1.4vh,12px);padding:4px 0 8px;align-items:center}
+  .az{grid-column:1;grid-row:1 / 5;width:100%;height:100%;min-height:0}
+  .art{width:min(100cqh,100cqw,42vw);max-width:100%;border-radius:18px}
+  .meta{grid-column:2;grid-row:1;margin:0 0 2px;align-self:end}
+  .meta h3{font-size:clamp(17px,2.4vw,23px)}
+  .meta p{font-size:clamp(13px,1.8vw,17px)}
+  .pc>div:nth-child(2){grid-column:2;grid-row:1 / 3;align-self:center}
+  .ctr{grid-column:2;grid-row:3;gap:clamp(22px,5vw,48px)}
+  .cb{width:52px;height:52px}
+  .cb svg{width:32px;height:32px}
+  .cb.big{width:64px;height:64px}
+  .cb.big svg{width:42px;height:42px}
+  .opts{grid-column:2;grid-row:4;align-self:start;padding:4px 8px}
+  .opt{height:40px;max-width:46px}
+  .opt svg{width:19px;height:19px}
+  .lyr{left:0;right:0;top:0;padding:20px 18px 34px;font-size:clamp(15px,2vw,19px)}
+  .lyr .now{font-size:clamp(18px,2.2vw,22px)}
+}
 </style>
 </head>
 <body>
@@ -2369,84 +2394,46 @@ const shuffle=a=>{
 };
 
 /* ---------- MUSIC GROUPS: [weight, queries] ----------
-   Higher weight = more songs in the Home feed.
-   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
-          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
+   All includes every category. South Indian is kept as one combined group. */
 const GROUPS=[
-  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
-  [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
-  [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
-  [.25,['Dhanush movie songs']],
-  [.25,['Allu Arjun movie songs']],
-  [.25,['Thalapathy Vijay movie songs']],
-  [.25,['Anirudh Ravichander songs']],
-  [.25,['Sai Abhyankkar songs']],
-  [.25,['Sai Pallavi movie songs']],
-  [.25,['Kalyani Priyadarshan movie songs']],
-  [.25,['Pooja Hegde movie songs']],
-  [.25,['Tamannaah movie songs']],
-  [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
-  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
-  [1,['t series music','Top songs this year','shunno','new song']],
-  [3,['t series music']],
-  [1,['T-Series new songs','T-Series Hindi songs','T-Series latest songs 2026','T-Series romantic songs','T-Series Bollywood hits','T-Series Punjabi songs','T-Series Bhushan Kumar songs'],/t-?series/i],
-  [1,['Sony Music India songs','Sony Music India new songs','Sony Music India Hindi songs','Sony Music India romantic songs','Sony Music South songs','Sony Music India Punjabi songs'],/sony/i],
-  [1,['YRF songs','YRF latest songs','Yash Raj Films songs','YRF romantic songs','YRF Bollywood hits','YRF music'],/\byrf\b|yash\s*raj/i],
-  [1,['Zee Music Company songs','Zee Music Company new songs','Zee Music Company Hindi songs','Zee Music Company romantic songs','Zee Music Company Punjabi'],/zee\s*music/i],
-  [1,['Saregama Music songs','Saregama Hindi songs','Saregama Bangla songs','Saregama Bengali songs','Saregama new songs'],/saregama/i],
-  [1,['Tips Official songs','Tips Official new songs','Tips Official Hindi songs','Tips Official romantic songs'],/tips/i],
-  [1,['Eros Now Music songs','Eros Now Music Hindi songs','Eros Now Music new songs','Eros Now Music romantic songs'],/eros/i],
-  [1,['Speed Records songs','Speed Records new Punjabi songs','Speed Records Punjabi hits','Speed Records latest'],/speed/i]
+  [6,['Latest Hindi new songs 2026','Hindi new songs 2026','Bollywood latest songs 2026','Latest Bollywood songs','Hindi romantic new songs']],
+  [6,['Latest Bangla new songs 2026','Bangla new songs 2026','Bengali latest songs','Kolkata Bangla new songs','Bangladesh latest Bangla songs','Bangla movie new songs']],
+  [2.5,['Latest Punjabi new songs 2026','Punjabi new songs 2026','Latest Punjabi hits','Punjabi romantic new songs']],
+  [2.5,['Latest South Indian new songs 2026','South Indian new songs Tamil Telugu Malayalam Kannada','Tamil Telugu Malayalam Kannada latest movie songs','South Indian movie new songs','Latest Tamil Telugu Malayalam songs']],
+  [1.5,['Latest Pakistani new songs 2026','Pakistani new songs','Coke Studio Pakistan latest songs','Pakistani drama OST new songs']],
+  [3,['Trending new songs 2026','Latest trending songs','Top trending music videos 2026','Viral new songs 2026']],
+  [1,['Latest new songs 2026','New songs this week 2026']],
+  [1.5,['T-Series latest new songs 2026','T-Series new Hindi songs','T-Series latest songs']],
+  [1,['Sony Music India latest new songs 2026','Sony Music India new songs','Sony Music latest songs']],
+  [1,['YRF latest new songs 2026','YRF new songs','Yash Raj Films latest songs']],
+  [1,['Zee Music latest new songs 2026','Zee Music Company new songs','Zee Music latest songs']],
+  [1,['Saregama latest new songs 2026','Saregama new songs','Saregama latest songs']],
+  [1,['Tips Official latest new songs 2026','Tips new songs','Tips Official latest songs']],
+  [1,['Eros Now latest new songs 2026','Eros Now new songs','Eros Now Music latest songs']],
+  [1,['Speed Records latest new songs 2026','Speed Records new Punjabi songs','Speed Records latest songs']],
+  [1,['Latest Nepali new songs 2026','Nepali new songs','Nepali latest songs 2026']]
 ].map(([weight,qs,f])=>({qs,buf:[],pg:{},weight,f}));
 
-const FORYOU=15;
+const FORYOU=6;
 
 function buildForYou(){
   const c={};
   [...getLiked(),...getHist()].forEach(v=>{if(v.author&&!v.local)c[v.author]=(c[v.author]||0)+1});
   const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
   const g=GROUPS[FORYOU];
-  g.qs=a.length?a.map(x=>x+' songs'):['Trending songs'];
+  g.qs=a.length?a.map(x=>x+' latest songs'):['Latest new songs 2026','Trending songs 2026'];
   g.buf=[];
   g.pg={};
 }
 
-async function fillGroup(g,ctl){
-  if(g.busy)return true;
-  g.busy=true;
-  try{return await fillGroupRaw(g,ctl)}
-  finally{g.busy=false}
-}
-
-async function fillGroupRaw(g,ctl){
-  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
-  const page=(g.pg[q]||0)+1;
-  const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
-
-  if(data===null)return false;
-
-  g.pg[q]=page;
-  data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.f&&!g.f.test(v.author||''))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
-    g.buf.push(v);
-  });
-  shuffle(g.buf);
-  return true;
-}
-
 const CHIPS=[
-  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
-  ['T-Series',[16]],['Sony Music',[17]],['YRF',[18]],['Zee Music',[19]],['Saregama',[20]],
-  ['Tips',[21]],['Eros Now',[22]],['Speed Records',[23]],
-  ['Bangladeshi',[12]],['Pakistani',[13]],
-  ['South Indian',[3,4,5,6,7,8,9,10,11]],
-  ['Trending',[14]],['For You',[FORYOU]]
+  ['All',null],['T-Series',[7]],['Bangla',[1]],['Trending',[5]],['Hindi',[0]],
+  ['Sony Music',[8]],['YRF',[9]],['Zee Music',[10]],['Saregama',[11]],
+  ['Tips',[12]],['Eros Now',[13]],['Speed Records',[14]],
+  ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
 
 const CACHE={};
 
