@@ -192,8 +192,8 @@ body.dragging #topfade{opacity:0}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
 /* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
-#yt.vid{z-index:10001;opacity:1;border-radius:0;overflow:visible;background:transparent;box-shadow:none;clip-path:inset(0)}
-#yt.vid iframe{width:100%;height:100%;display:block;border:0;transform:scale(1.35);transform-origin:center center}
+#yt.vid{z-index:10001;opacity:1;border-radius:0;overflow:visible;background:transparent;box-shadow:none}
+#yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
@@ -1963,16 +1963,8 @@ on('lyBtn',()=>{
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
 /* the YouTube iframe is always 1920x1080; only the CSS scale changes */
-function ytFrame(sc,w,h){
+function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
-  if(w&&h){
-    /* Resize the actual YouTube player as well as its iframe.
-       Changing iframe CSS alone leaves the internal player at 1920x1080,
-       which can produce a one-sided black strip on iOS. */
-    try{if(apiReady)yt.setSize(Math.round(w),Math.round(h))}catch(e){}
-    if(f)f.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;border:0;max-width:none;transform:scale(1.35);transform-origin:center center';
-    return;
-  }
   if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
 }
 on('yfs',()=>{
@@ -2006,7 +1998,7 @@ function syncVideo(){
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
     
-    ytFrame(1,bw,bh);
+    ytFrame(bw/1920);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -2023,9 +2015,10 @@ function syncVideo(){
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* Resize YouTube's internal player to the measured video box, not just its iframe.
-     This prevents the iOS compositor from leaving a black strip on one side. */
-  ytFrame(1,vw,vh);
+  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
+     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
+     title, share and "more videos" elements small. */
+  ytFrame(vw/1920);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
