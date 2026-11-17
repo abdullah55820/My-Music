@@ -2011,12 +2011,10 @@ function syncVideo(){
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
-  /* Fit a true 16:9 video in the middle of the left column.
-     In landscape it can use the full column width (no 520px cap), same spot as the album art. */
-  const land=innerWidth>innerHeight;
-  const vw=Math.min(r.width,r.height*16/9,land?9999:520),vh=vw*9/16;
+  /* Use one consistent video size rule in every orientation.
+     No landscape-specific left/right sizing or shifting. */
+  const vw=Math.min(r.width,r.height*16/9,520),vh=vw*9/16;
   const vl=r.left+(r.width-vw)/2,vt=r.top+(r.height-vh)/2;
-  /* #yt is fixed to the viewport; keep it centred over the left video column. */
   box.style.right='auto';box.style.bottom='auto';
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
