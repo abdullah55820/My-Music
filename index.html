@@ -191,10 +191,25 @@ body.dragging #topfade{opacity:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
-/* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
-#yt.vid{position:absolute;left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);z-index:10001;opacity:1;border-radius:0;overflow:visible;background:transparent;box-shadow:none}
-#yt.vid iframe{width:100%;height:100%;display:block;border:0}
-#yt.vid{pointer-events:auto}
+
+/* --- UPDATED FIX FOR VIDEO BOX --- */
+#yt.vid{
+  z-index:10001;
+  opacity:1;
+  border-radius:0;
+  overflow:hidden;       /* ডানে-বামে অতিরিক্ত অংশ বা দাগ হাইড করার জন্য */
+  background:#000;       /* কালো ব্যাকগ্রাউন্ড */
+  box-shadow:none;
+  pointer-events:auto;
+}
+#yt.vid iframe{
+  width:100%;
+  height:100%;
+  display:block;
+  border:0;
+  object-fit:cover;      /* ভিডিওকে ঠিকভাবে ফ্রেমে ফিট রাখতে */
+}
+
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
@@ -279,8 +294,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* =====================================================================
    LIQUID GLASS LOOK  (clear, water-like glass, no milky white fill)
-   Same feel as the round play / pause bubble: see-through, soft light
-   sheen from the top-left corner, thin bright rim, inner glow.
    ===================================================================== */
 :root{--sh1:.34;--sh2:.07;--sh3:.18;--gaf:.55;--rim:rgba(255,255,255,.2)}
 :root[data-theme=dark]{--rim:rgba(255,255,255,.13)}
@@ -292,19 +305,14 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .g,.chips .chip,.pitem{
   box-shadow:0 8px 24px var(--gshadow),inset 0 0 6px rgba(255,255,255,.06)
 }
-/* song cards: Blur Strength + Transparency settings work here too */
 .grid .g{
   box-shadow:inset 0 0 6px rgba(255,255,255,.05);
   backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%)
 }
-/* top bar pills + status */
 #topbar .g{box-shadow:inset 0 0 6px rgba(255,255,255,.05)}
-/* bottom tab bar + mini player */
 .nav.g,.mini.g{box-shadow:0 6px 18px rgba(0,0,0,.16),inset 0 0 6px rgba(255,255,255,.06)}
 
-/* unselected chips and small texts: clearly readable */
-.chips .chip{color:var(--text)}
-.chips .chip{box-shadow:none}
+.chips .chip{color:var(--text);box-shadow:none}
 .chips .chip.on{
   color:var(--accent);font-weight:800;
   background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)) 0%,rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3)) 100%),var(--glass);
@@ -315,7 +323,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nb{color:color-mix(in srgb,var(--text) 78%,transparent)}
 .nb.active{color:var(--accent)}
 
-/* player bars follow the same glass settings */
 .opts{
   background:rgba(255,255,255,calc(var(--gaf)*.24));
   border-color:var(--rim);
@@ -324,15 +331,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* =====================================================================
    LIQUID GLASS  (touch = water, iPhone style)
-   Every glass control: swells under the finger, follows the finger like
-   a drop of liquid, shows a moving light reflection, sends out water
-   ripples, then wobbles like jelly when you let go.
    ===================================================================== */
 .card,.chip,.nb,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.pv,.sw button,.sw label,.lyadj button,.acct{position:relative}
 .cb,.like,.xbtn,.back{border-radius:50%}
 .mc{border-radius:21px}
 
-/* play / pause, previous, next = round glass bubbles */
 .cb{
   background:linear-gradient(145deg,rgba(255,255,255,calc(var(--gaf)*.47)),rgba(255,255,255,calc(var(--gaf)*.18)));
   border:1px solid var(--rim);
@@ -342,7 +345,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .cb svg{width:30px;height:30px}
 .cb.big svg{width:56px;height:56px}
 
-/* mini song card: play + close buttons = round glass bubbles too */
 .mc{
   width:42px;height:42px;border-radius:50%;
   background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)),rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3))),var(--glass);
@@ -352,14 +354,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 }
 .mc svg{width:20px;height:20px}
 
-/* while touched */
 .lqa{
   z-index:6;overflow:hidden;will-change:transform;
   transform:translate3d(var(--tx,0px),var(--ty,0px),0) scale(var(--sx,1),var(--sy,1));
   transition:transform .32s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s,opacity .2s!important
 }
 
-/* light reflection + glass rim that follows the finger */
 .lq-fx{
   position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;transition:opacity .28s;
   background:radial-gradient(circle at var(--lx,50%) var(--ly,50%),rgba(255,255,255,.58) 0,rgba(255,255,255,.2) 32%,rgba(255,255,255,0) 64%);
@@ -375,7 +375,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),inset 0 2px 5px rgba(255,255,255,.55),inset 0 -7px 16px rgba(255,255,255,.14)
 }
 
-/* water ripple rings */
 .lq-rip{
   position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;z-index:3;
   width:var(--d);height:var(--d);margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);
@@ -392,17 +391,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 @keyframes lqRip{0%{transform:scale(.05);opacity:.95}65%{opacity:.55}100%{transform:scale(1);opacity:0}}
 @keyframes lqRip2{0%{transform:scale(.05);opacity:.5}65%{opacity:.28}100%{transform:scale(.8);opacity:0}}
 
-/* icons bend like they are under water for a moment */
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
 
-
 /* =====================================================================
-   LANDSCAPE PLAYER  (matches the reference picture)
-   Left  : cover art / YouTube video, centred vertically
-   Right : title + artist + heart, seek bar, prev/play/next, option bar,
-           the whole group centred vertically next to the art
-   Bottom: one reserved empty row (always there), lyrics-sync buttons
-           sit in the exact middle of the screen inside that row
+   LANDSCAPE PLAYER
    ===================================================================== */
 @media (orientation:landscape) and (max-height:650px){
   .player{
@@ -417,7 +409,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   .pc{
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
-    /* rows: spacer | title+seek | controls | options | spacer | reserved sync row */
     grid-template-rows:minmax(0,1fr) auto auto auto 46px minmax(0,1fr);
     column-gap:clamp(24px,4.4vw,60px);
     row-gap:clamp(8px,1.6vh,16px);
@@ -426,7 +417,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     align-content:stretch;
   }
 
-  /* LEFT: art / video, vertically centred in the area above the sync row */
   .az{
     grid-column:1;grid-row:1 / 7;
     width:100%;height:100%;min-height:0;
@@ -441,16 +431,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   }
   #yt.vid{
     border-radius:0;
-    overflow:visible;
+    overflow:hidden;
     background:#000;
     box-shadow:none!important;
   }
   #yt.vid iframe{
     display:block;
     border:0;
+    object-fit:cover;
   }
 
-  /* RIGHT: title / artist / heart / seek bar */
   .pc>div:nth-child(2){
     grid-column:2;grid-row:2;
     align-self:center;width:100%;min-width:0;
@@ -486,7 +476,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   .player input.seek{height:22px;margin:0}
   .trow{margin-top:0;font-size:clamp(10px,1.1vw,12px)}
 
-  /* RIGHT: prev / play / next */
   .ctr{
     grid-column:2;grid-row:3;
     justify-content:center;align-self:center;
@@ -499,7 +488,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   .cb.big{width:62px;height:62px}
   .cb.big svg{width:42px;height:42px}
 
-  /* RIGHT: option bar */
   .opts{
     grid-column:2;grid-row:4;
     align-self:center;width:100%;
@@ -511,7 +499,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   .opt{height:46px;max-width:52px;touch-action:manipulation}
   .opt svg{width:21px;height:21px;pointer-events:none}
 
-  /* BOTTOM: reserved empty row, sync buttons exactly in the middle of the screen */
   .lyadj,.lyadj.show{
     position:relative;
     grid-column:2;grid-row:5;
@@ -524,7 +511,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     padding:0 6px;
     border-radius:24px;
     color:#fff;
-    /* same glass + white stroke as the option bar */
     background:rgba(255,255,255,calc(var(--gaf)*.24));
     border:1px solid rgba(255,255,255,.18);
     border-color:var(--rim);
@@ -564,7 +550,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     z-index:10001;
   }
 
-  /* lyrics fill the left column (same box as the art) */
   .lyr{left:0;right:0;top:0;padding:20px 18px 34px;font-size:clamp(15px,2vw,19px)}
   .lyr .now{font-size:clamp(18px,2.2vw,22px)}
 }</style>
@@ -1158,21 +1143,19 @@ $('spBack').onclick=()=>{
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 
 const seek=$('seek');
-/* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null;
-const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
+const isLoc=()=>!!(queue[idx]&&queue[idx].local);
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
-/* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
-const isSil=()=>au.src.startsWith('data:');
+const isSil()=>au.src.startsWith('data:');
 
 async function loadLocal(v){
   const id=v.videoId;
@@ -1209,7 +1192,6 @@ au.addEventListener('ended',()=>{
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
 au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
 
-/* iOS: unlock audio on the first touch so local songs can start after loading */
 (function(){
   const SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   let done=false;
@@ -1232,8 +1214,6 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
-    /* The player always stays 1920x1080 and is only scaled with CSS. It is never resized,
-       so YouTube never lays the picture out at a wrong size (no black bar, no side shift). */
     height:'1080',width:'1920',
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
@@ -1268,7 +1248,6 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
-    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1319,11 +1298,9 @@ function tick(){
   }catch(e){}
 }
 
-
 function startT(){stopT();tick();timer=setInterval(tick,100)}
 function stopT(){clearInterval(timer);timer=null}
 
-/* ---------- SEEK BAR ---------- */
 let seekPointer=null,seekTarget=0;
 
 function seekPercentAt(x){
@@ -1390,7 +1367,6 @@ function resetProg(){
 function toggle(){
   if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
   if(!apiReady)return;
-  /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
     playing=false;icons();
@@ -1405,9 +1381,8 @@ function toggle(){
   }
 }
 
-/* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
-const ARTC={};      /* local id -> cover data URL ('' = song has no cover) */
-const MP={};        /* local id -> metadata promise */
+const ARTC={};
+const MP={};
 const FB={};
 function fallbackArt(v){
   const s=(v.title||'')+(v.author||'');
@@ -1664,7 +1639,6 @@ function setPlayerBg(v){
   im.src=urls[0];
 }
 
-/* ---------- COVER COLOUR ---------- */
 const tintCache={};
 let curTint='';
 
@@ -1763,7 +1737,6 @@ function setTint(v){
   }
 }
 
-/* ---------- LYRICS (LRCLIB) ---------- */
 let lyOn=false,lyLines=null,lyCur=-1;
 const LY={};
 const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
@@ -1894,7 +1867,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1960,14 +1932,14 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
-/* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
-/* Keep the video element inside the left cover-art column. */
-$('az').appendChild($('yt'));
-/* the YouTube iframe is always 1920x1080; only the CSS scale changes */
-function ytFrame(sc){
-  const f=$('yt').querySelector('iframe');
-  if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+function ytFrame(w,h){
+  const box=$('yt');
+  const f=box.querySelector('iframe');
+  if(f)f.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;border:0;max-width:none;transform:none';
+  if(apiReady&&yt&&typeof yt.setSize==='function'){
+    try{yt.setSize(Math.max(1,Math.round(w)),Math.max(1,Math.round(h)))}catch(e){}
+  }
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -1982,28 +1954,24 @@ function syncVideo(){
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
   if(!show){
-    az.appendChild(box);
     box.classList.remove('vid');
-    box.style.position='absolute';box.style.left='50%';box.style.top='50%';box.style.width=box.style.height=box.style.right=box.style.bottom='';box.style.transform='translate(-50%,-50%)';
-    ytFrame(200/1920);
+    box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
+    ytFrame(200,200);
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
-  /* own fullscreen: the video box fills the screen (rotated in portrait), no native iOS fullscreen, so no pause */
   if(vidFS){
-    document.body.appendChild(box);
     const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
     const bw=Math.min(lg,sh*16/9),bh=bw*9/16;
-    box.style.position='fixed';box.style.right='auto';box.style.bottom='auto';
+    box.style.right='auto';box.style.bottom='auto';
     box.style.left=(W/2-bw/2)+'px';box.style.top=(H/2-bh/2)+'px';
     box.style.width=bw+'px';box.style.height=bh+'px';
     box.style.transform=por?'rotate(90deg)':'';
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
     
-    const f=box.querySelector('iframe');
-    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
+    ytFrame(bw,bh);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -2011,39 +1979,27 @@ function syncVideo(){
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
-  /* Fit a true 16:9 video in the middle of the left column.
-     In landscape it can use the full column width (no 520px cap), same spot as the album art. */
-  const land=innerWidth>innerHeight;
-  const vw=Math.min(r.width,r.height*16/9,land?9999:520),vh=vw*9/16;
+  const vw=Math.min(r.width,r.height*16/9,520),vh=vw*9/16;
   const vl=r.left+(r.width-vw)/2,vt=r.top+(r.height-vh)/2;
   box.style.right='auto';box.style.bottom='auto';
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
-     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
-     title, share and "more videos" elements small. */
-  ytFrame(vw/1920);
+  ytFrame(vw,vh);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
-/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
-  /* layout can still be settling for a moment, so measure again */
   if(on)[80,250,600].forEach(t=>setTimeout(syncVideo,t));
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 const syncVideoLater=()=>[60,300,700].forEach(t=>setTimeout(syncVideo,t));
 addEventListener('orientationchange',syncVideoLater);
 addEventListener('resize',()=>{syncVideo();syncVideoLater()});
-/* any size change of the art/video column keeps the video exactly in place */
 try{new ResizeObserver(()=>{if(vidMode)syncVideo()}).observe($('az'))}catch(e){}
-
-/* The fullscreen close control only exits the fullscreen video layout.
-   It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -2143,7 +2099,6 @@ function playAt(i,list){
   msMode(false);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
   else pending=v.videoId;
-
 }
 
 const SLEEPS=[0,15,30,60];
@@ -2255,7 +2210,6 @@ $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
 
-/* ---------- SHARE ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
   if(!v||v.local)return;
@@ -2304,9 +2258,6 @@ on('slBtn',()=>{
 
 const prev=()=>{if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length)};
 
-/* ---------- LOCK SCREEN / CONTROL CENTRE ---------- */
-/* A silent looping track makes the phone treat THIS page as the player while a YouTube song plays,
-   so the lock screen shows our title/cover and our prev / next / seek buttons. */
 const MS='mediaSession' in navigator?navigator.mediaSession:null;
 const ka=new Audio();
 ka.loop=true;
@@ -2410,8 +2361,6 @@ pl.addEventListener('touchstart',e=>{
 pl.addEventListener('touchmove',e=>{
   if(mode!=='full')return;
   if(e.target.closest('.lyr'))return;
-  /* Do not cancel touch movement that began on a player button or input.
-     The old order prevented iOS from completing some landscape button taps. */
   if(!ts)return;
   if(e.cancelable)e.preventDefault();
 
@@ -2457,7 +2406,6 @@ function endDrag(e){
 pl.addEventListener('touchend',endDrag,{passive:true});
 pl.addEventListener('touchcancel',endDrag,{passive:true});
 
-/* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
 const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
 
@@ -2475,7 +2423,6 @@ $('likeBtn').addEventListener('click',e=>{
   if(activeTab==='library')renderLib();
 });
 
-/* ---------- SONGS ---------- */
 const instances=[
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
@@ -2569,8 +2516,6 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   All includes every category. South Indian is kept as one combined group. */
 const GROUPS=[
   [6,['Latest Hindi new songs 2026','Hindi new songs 2026','Bollywood latest songs 2026','Latest Bollywood songs','Hindi romantic new songs']],
   [6,['Latest Bangla new songs 2026','Bangla new songs 2026','Bengali latest songs','Kolkata Bangla new songs','Bangladesh latest Bangla songs','Bangla movie new songs']],
@@ -2720,8 +2665,6 @@ function takeSong(){
   return null;
 }
 
-const AHEAD=6000;
-
 function keepFilling(){if(!D.home.busy&&!offMode&&D.home.videos.length<D.home.cap)loadHomeMore()}
 
 async function loadHomeMore(){
@@ -2804,7 +2747,6 @@ async function loadHomeMore(){
   if(added>0)keepFilling();
 }
 
-/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
 function homeCheck(){
@@ -2823,7 +2765,6 @@ setInterval(homeCheck,600);
 let hcRaf=0;
 addEventListener('scroll',()=>{if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;homeCheck()})},{passive:true});
 
-/* ---------- OFFLINE HOME: imported songs ---------- */
 function renderOfflineHome(){
   offMode=true;
   const st=D.home;
@@ -2860,7 +2801,6 @@ function leaveOfflineHome(){
 
 addEventListener('offline',renderOfflineHome);
 
-/* ---------- SEARCH ---------- */
 const q=$('q');
 const getRecent=()=>LS.get('sf_recent',[]);
 const saveRecent=t=>LS.set('sf_recent',[t,...getRecent().filter(x=>x!==t)].slice(0,8));
@@ -3025,12 +2965,11 @@ $('searchMore').onclick=()=>{
   if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
 };
 
-/* ---------- LIBRARY ---------- */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-/* ---------- MY FILES (stored on this phone, play offline) ---------- */
+
 const IDB={
   db:null,
   open(){
@@ -3259,7 +3198,6 @@ $('plDel').onclick=()=>{
 
 $('libBack').onclick=()=>history.back();
 
-/* ---------- NAVIGATION ---------- */
 function setTab(t){
   if(activeTab===t)return;
   activeTab=t;
@@ -3296,7 +3234,6 @@ document.querySelectorAll('.nb').forEach(b=>{
   };
 });
 
-/* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
   const st=D.home;
   if(st.ctl)st.ctl.abort();
@@ -3352,7 +3289,6 @@ async function doRefresh(){
   ptrMove(0,true);
 }
 
-/* ---------- TOUCH: EDGE SWIPE + PULL TO REFRESH ---------- */
 let sx=0,sy=0,edge=false,pulling=false,pdy=0,inChips=false;
 
 addEventListener('touchstart',e=>{
@@ -3406,7 +3342,6 @@ function touchDone(e){
 addEventListener('touchend',touchDone,{passive:true});
 addEventListener('touchcancel',touchDone,{passive:true});
 
-/* ---------- STORAGE USAGE ---------- */
 const fmtB=n=>{
   if(!Number.isFinite(n)||n<=0)return '0 MB';
   if(n>=1073741824)return (n/1073741824).toFixed(2)+' GB';
@@ -3469,7 +3404,6 @@ async function refreshStorage(){
   }
 }
 
-/* ---------- REMOVE SONGS (frees phone storage) ---------- */
 let rmSel=new Set();
 function rmUpdate(){
   const n=getLoc().length;
@@ -3534,10 +3468,6 @@ $('rmDel').onclick=async()=>{
   openRemove();
 };
 
-/* ---------- BACKUP & RESTORE (original quality, one file) ----------
-   File format .sfbak:  "SFBK2\n" then repeated entries:
-   [4 bytes header length][header JSON][raw bytes]
-   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
 const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
 let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
 
@@ -3695,7 +3625,6 @@ function bkLabel(q){
   $('bkGo').textContent=q.i===0?'Tap to save':'Save next ('+(q.i+1)+'/'+q.files.length+')';
 }
 
-/* One song per tap: the phone's save sheet only handles a single file reliably. */
 async function bkSaveOne(auto){
   const q=bkQ;
   if(!q)return;
@@ -3736,7 +3665,6 @@ async function crc32Blob(blob){
   return (c^0xFFFFFFFF)>>>0;
 }
 
-/* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
 async function buildZip(files){
   const parts=[],cds=[];
   let off=0,i=0;
@@ -3799,7 +3727,6 @@ async function bkStart(mode){
   await bkSaveOne(true);
 }
 $('bkGo').onclick=()=>bkStart('zip');
-
 
 $('bkMake').onclick=openBackupPicker;
 $('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
@@ -3901,14 +3828,12 @@ $('bkIn').onchange=async e=>{
   }
 };
 
-/* ---------- OFFLINE (service worker) ---------- */
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
 addEventListener('online',()=>{
   if(offMode)leaveOfflineHome();
   else if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
 });
 
-/* ---------- INIT ---------- */
 buildSettingsUI();
 apply();
 icons();
@@ -3918,7 +3843,6 @@ renderRecent();
 refreshStorage();
 if(navigator.onLine)loadHomeMore();else renderOfflineHome();
 
-/* ---------- COLLAPSIBLE SETTINGS ---------- */
 document.querySelectorAll('.spb .sec').forEach(sec=>{
   const h=sec.querySelector('h3');
   if(!h)return;
@@ -3929,7 +3853,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   });
 });
 
-/* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
 (function(){
   const CFG={
     apiKey:"AIzaSyBEbe08tF-kLx_NMjK4U9x38Nf54_MXLH4",
@@ -3944,7 +3867,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 
   const info=t=>{$('gInfo').textContent=t};
 
-  /* Show Gmail name, email and profile photo in the account card */
   function renderAcct(u){
     $('gIn').hidden=!!u;
     $('gOut').hidden=!u;
@@ -4042,17 +3964,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   $('gOut').onclick=()=>{if(auth)auth.signOut()};
 })();
 
-/* =====================================================================
-   LIQUID GLASS TOUCH ENGINE
-   Touch any glass control (cards, tabs, chips, player buttons, settings
-   buttons...) and it behaves like a drop of water:
-   1. swells up under your finger
-   2. follows your finger a little (and stretches)
-   3. shows a moving light reflection + glass rim
-   4. sends out two water ripple rings from the touch point
-   5. icons bend like under water for a moment
-   6. wobbles like jelly when you let go
-   ===================================================================== */
 (function(){
   const SEL='.card,.chip,.nb,.opt,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.acct,.pv,.sw button,.sw label,.lyadj button,#yfs';
   const dm=$('lqDisp'),tb=$('lqTurb');
@@ -4062,7 +3973,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   const off=()=>document.documentElement.dataset.anim==='off';
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-  /* water bend on the icons (shared SVG filter, animated by script) */
   function wobble(el,amp){
     if(!dm||!tb)return;
     if(wobEl&&wobEl!==el)wobEl.classList.remove('lqw');
@@ -4092,7 +4002,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     el.style.setProperty('--ly',(st.y-r.top)+'px');
   }
 
-  /* swell + follow the finger */
   function applyShape(st){
     const r=st.r,el=st.el;
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -4122,7 +4031,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   function engage(st){
     if(st.fx)return;
     const el=st.el;
-    /* finish any older effect on the same element */
     clearTimeout(el._lqT);
     if(el._lqA){try{el._lqA.cancel()}catch(e){}el._lqA=null}
     el.querySelectorAll(':scope>.lq-fx').forEach(n=>n.remove());
@@ -4145,7 +4053,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     wobble(el,clamp(Math.min(r.width,r.height)*.14,2,7));
   }
 
-  /* let go: jelly wobble, then clean up */
   function release(st){
     const el=st.el,fx=st.fx,r=st.r;
     if(!fx)return;
@@ -4217,7 +4124,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     P.delete(e.pointerId);
     clearTimeout(st.tm);
     cancelAnimationFrame(st.raf);
-    /* very quick tap on a big card: still play the effect once */
     if(!st.fx&&!cancel&&e.type==='pointerup')engage(st);
     release(st);
   }
