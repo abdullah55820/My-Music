@@ -169,16 +169,8 @@ body.dragging #topfade{opacity:0}
 .like svg{width:27px;height:27px}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
-
-/* ---------- SEEK BAR: slim track + round ball thumb ---------- */
-.player input.seek{--pn:0;width:100%;height:30px;margin:2px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;border-radius:999px;background:transparent;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
-.seek::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:linear-gradient(to right,#fff 0,#fff calc(8px + (100% - 16px)*var(--pn,0)),rgba(255,255,255,.3) calc(8px + (100% - 16px)*var(--pn,0)),rgba(255,255,255,.3) 100%)}
-.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;margin-top:-5px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.45);transition:transform .15s}
-.seek:active::-webkit-slider-thumb{transform:scale(1.25)}
-.seek::-moz-range-track{height:6px;border-radius:999px;background:rgba(255,255,255,.3)}
-.seek::-moz-range-progress{height:6px;border-radius:999px;background:#fff}
-.seek::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.45)}
-
+.player input.seek{width:100%;height:28px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;background:transparent linear-gradient(to right,#fff 0,#fff 0,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 100%) center/100% 5px no-repeat;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(0,0,0,.4)}
 .trow{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
 .ctr{display:flex;justify-content:center;align-items:center;gap:clamp(35px,12vw,55px)}
 .cb{width:64px;height:64px;display:grid;place-items:center;color:#fff}
@@ -198,6 +190,7 @@ body.dragging #topfade{opacity:0}
 #yt.vid{z-index:10001;opacity:1;border-radius:14px;overflow:hidden;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,.5)}
 #yt.vid iframe{width:100%;height:100%;display:block;border:0}
 #yt.vid{pointer-events:auto}
+/* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
@@ -239,6 +232,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #ptr.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ---------- ACCOUNT CARD (compact) ---------- */
 .acct{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:22px;margin-bottom:14px}
 .acav{position:relative;flex-shrink:0;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--accent);color:#fff}
 .acav svg{width:26px;height:26px}
@@ -253,6 +247,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #gInfo{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
 #gInfo:empty{display:none}
 
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
 .sec.fold{padding:14px 16px}
 .sec.fold h3{display:flex;justify-content:space-between;align-items:center;margin:0;padding:2px 0;font-size:15px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;cursor:pointer;user-select:none;-webkit-user-select:none}
 .sec.fold h3::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
@@ -260,6 +255,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .sec.fold.open h3::after{transform:rotate(-135deg)}
 .sec.fold:not(.open)>*:not(h3){display:none}
 
+/* ---------- BACKUP & STORAGE ---------- */
 .strow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:11px 0;font-size:14px}
 .strow b{font-weight:600}
 .strow span{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
@@ -276,6 +272,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #rmList .pitem small,#bkList .pitem small{flex-shrink:0}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
+/* =====================================================================
+   LIQUID GLASS LOOK  (clear, water-like glass, no milky white fill)
+   Same feel as the round play / pause bubble: see-through, soft light
+   sheen from the top-left corner, thin bright rim, inner glow.
+   ===================================================================== */
 :root{--sh1:.34;--sh2:.07;--sh3:.18;--gaf:.55;--rim:rgba(255,255,255,.2)}
 :root[data-theme=dark]{--rim:rgba(255,255,255,.13)}
 
@@ -286,13 +287,17 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .g,.chips .chip,.pitem{
   box-shadow:0 8px 24px var(--gshadow),inset 0 0 6px rgba(255,255,255,.06)
 }
+/* song cards: Blur Strength + Transparency settings work here too */
 .grid .g{
   box-shadow:inset 0 0 6px rgba(255,255,255,.05);
   backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%)
 }
+/* top bar pills + status */
 #topbar .g{box-shadow:inset 0 0 6px rgba(255,255,255,.05)}
+/* bottom tab bar + mini player */
 .nav.g,.mini.g{box-shadow:0 6px 18px rgba(0,0,0,.16),inset 0 0 6px rgba(255,255,255,.06)}
 
+/* unselected chips and small texts: clearly readable */
 .chips .chip{color:var(--text)}
 .chips .chip{box-shadow:none}
 .chips .chip.on{
@@ -305,16 +310,24 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nb{color:color-mix(in srgb,var(--text) 78%,transparent)}
 .nb.active{color:var(--accent)}
 
+/* player bars follow the same glass settings */
 .opts{
   background:rgba(255,255,255,calc(var(--gaf)*.24));
   border-color:var(--rim);
   backdrop-filter:blur(var(--gb)) saturate(160%);-webkit-backdrop-filter:blur(var(--gb)) saturate(160%)
 }
 
+/* =====================================================================
+   LIQUID GLASS  (touch = water, iPhone style)
+   Every glass control: swells under the finger, follows the finger like
+   a drop of liquid, shows a moving light reflection, sends out water
+   ripples, then wobbles like jelly when you let go.
+   ===================================================================== */
 .card,.chip,.nb,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.pv,.sw button,.sw label,.lyadj button,.acct{position:relative}
 .cb,.like,.xbtn,.back{border-radius:50%}
 .mc{border-radius:21px}
 
+/* play / pause, previous, next = round glass bubbles */
 .cb{
   background:linear-gradient(145deg,rgba(255,255,255,calc(var(--gaf)*.47)),rgba(255,255,255,calc(var(--gaf)*.18)));
   border:1px solid var(--rim);
@@ -324,6 +337,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .cb svg{width:30px;height:30px}
 .cb.big svg{width:56px;height:56px}
 
+/* mini song card: play + close buttons = round glass bubbles too */
 .mc{
   width:42px;height:42px;border-radius:50%;
   background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)),rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3))),var(--glass);
@@ -333,12 +347,14 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 }
 .mc svg{width:20px;height:20px}
 
+/* while touched */
 .lqa{
   z-index:6;overflow:hidden;will-change:transform;
   transform:translate3d(var(--tx,0px),var(--ty,0px),0) scale(var(--sx,1),var(--sy,1));
   transition:transform .32s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s,opacity .2s!important
 }
 
+/* light reflection + glass rim that follows the finger */
 .lq-fx{
   position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;transition:opacity .28s;
   background:radial-gradient(circle at var(--lx,50%) var(--ly,50%),rgba(255,255,255,.58) 0,rgba(255,255,255,.2) 32%,rgba(255,255,255,0) 64%);
@@ -354,6 +370,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),inset 0 2px 5px rgba(255,255,255,.55),inset 0 -7px 16px rgba(255,255,255,.14)
 }
 
+/* water ripple rings */
 .lq-rip{
   position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;z-index:3;
   width:var(--d);height:var(--d);margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);
@@ -370,6 +387,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 @keyframes lqRip{0%{transform:scale(.05);opacity:.95}65%{opacity:.55}100%{transform:scale(1);opacity:0}}
 @keyframes lqRip2{0%{transform:scale(.05);opacity:.5}65%{opacity:.28}100%{transform:scale(.8);opacity:0}}
 
+/* icons bend like they are under water for a moment */
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
 </style>
 </head>
@@ -676,6 +694,7 @@ const LS={
   del(k){try{localStorage.removeItem(k)}catch(e){}}
 };
 
+/* ---------- BACK STACK ---------- */
 const layers=[];
 function pushLayer(fn){layers.push(fn);history.pushState({l:1},'')}
 addEventListener('popstate',()=>{const f=layers.pop();if(f)f()});
@@ -685,6 +704,7 @@ function goBack(){
 }
 addEventListener('keydown',e=>{if(e.key==='Escape')goBack()});
 
+/* ---------- SETTINGS ---------- */
 const DEF={theme:'system',accent:'#0a84ff',preset:'auto',gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',lyEn:'system',lyBn:'system'};
 
 const LYEN={
@@ -863,6 +883,7 @@ function buildSettingsUI(){
   });
 }
 
+/* ---------- OWN PHOTO BACKGROUND ---------- */
 $('photoPick').onclick=()=>$('photoIn').click();
 
 $('photoDel').onclick=()=>{
@@ -922,6 +943,7 @@ $('photoIn').addEventListener('change',e=>{
   im.src=url;
 });
 
+/* ---------- PROFILE ---------- */
 let profileClosingByButton=false;
 const spOpen=()=>$('sp').classList.contains('open');
 
@@ -954,22 +976,25 @@ $('spBack').onclick=()=>{
   history.back();
 };
 
+/* ---------- PLAYER ---------- */
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 
 const seek=$('seek');
+/* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null;
-const isLoc()=>!!(queue[idx]&&queue[idx].local);
-const canPlay()=>isLoc()||apiReady;
+const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
+const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+/* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
-const isSil()=>au.src.startsWith('data:');
+const isSil=()=>au.src.startsWith('data:');
 
 async function loadLocal(v){
   const id=v.videoId;
@@ -1006,6 +1031,7 @@ au.addEventListener('ended',()=>{
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
 au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
 
+/* iOS: unlock audio on the first touch so local songs can start after loading */
 (function(){
   const SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   let done=false;
@@ -1060,6 +1086,7 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
+    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1095,7 +1122,7 @@ const fmt=s=>{
 
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
-  seek.style.setProperty('--pn',(p/100).toFixed(4));
+  seek.style.backgroundImage=`linear-gradient(to right,#fff 0,#fff ${p}%,rgba(255,255,255,.3) ${p}%,rgba(255,255,255,.3) 100%)`;
 }
 
 function tick(){
@@ -1110,10 +1137,12 @@ function tick(){
   }catch(e){}
 }
 
+
 function startT(){stopT();tick();timer=setInterval(tick,100)}
 function stopT(){clearInterval(timer);timer=null}
 
-let seekPointer=null,seekTarget=0,seekShown=0,seekRaf=0,seekStartX=0,seekMoved=false;
+/* ---------- SEEK BAR ---------- */
+let seekPointer=null,seekTarget=0;
 
 function seekPercentAt(x){
   const r=seek.getBoundingClientRect();
@@ -1121,30 +1150,19 @@ function seekPercentAt(x){
   return Math.max(0,Math.min(100,(x-r.left)/r.width*100));
 }
 
-function seekAnim(){
-  seekRaf=0;
-  if(!seeking)return;
-  const d=seekTarget-seekShown;
-  if(Math.abs(d)<.04)seekShown=seekTarget;
-  else seekShown+=d*.16;
-  seek.value=seekShown;
-  setProg(seekShown);
-  const duration=durT();
-  if(duration>0)$('cur').textContent=fmt(duration*seekShown/100);
-  if(seekShown!==seekTarget)seekRaf=requestAnimationFrame(seekAnim);
-}
-
 function updateSeekFromX(x){
   seekTarget=seekPercentAt(x);
-  if(!seekRaf)seekRaf=requestAnimationFrame(seekAnim);
+  seek.value=seekTarget;
+  setProg(seekTarget);
+  const duration=durT();
+  if(duration>0)$('cur').textContent=fmt(duration*seekTarget/100);
 }
 
 function finishSeek(){
   if(!seeking)return;
-  const target=seekMoved?seekShown:seekTarget;
+  const target=seekTarget;
   seeking=false;
   seekPointer=null;
-  cancelAnimationFrame(seekRaf);seekRaf=0;
   const duration=durT();
   if(duration>0){
     seekT(duration*target/100);
@@ -1159,33 +1177,29 @@ seek.addEventListener('pointerdown',e=>{
   e.preventDefault();e.stopPropagation();
   seeking=true;
   seekPointer=e.pointerId;
-  seekStartX=e.clientX;
-  seekMoved=false;
-  seekShown=parseFloat(seek.value)||0;
-  seekTarget=seekPercentAt(e.clientX);
   try{seek.setPointerCapture(e.pointerId)}catch(err){}
+  updateSeekFromX(e.clientX);
 });
 seek.addEventListener('pointermove',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
   e.preventDefault();
-  if(!seekMoved&&Math.abs(e.clientX-seekStartX)>4)seekMoved=true;
-  if(seekMoved)updateSeekFromX(e.clientX);
+  updateSeekFromX(e.clientX);
 });
 seek.addEventListener('pointerup',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
   e.preventDefault();
-  if(!seekMoved)seekTarget=seekPercentAt(e.clientX);
+  updateSeekFromX(e.clientX);
   finishSeek();
 });
 seek.addEventListener('pointercancel',e=>{
   if(!seeking||seekPointer!==e.pointerId)return;
+  updateSeekFromX(e.clientX);
   finishSeek();
 });
 seek.addEventListener('lostpointercapture',()=>{if(seeking)finishSeek()});
 
 function resetProg(){
-  seeking=false;seekPointer=null;seekTarget=0;seekShown=0;seekMoved=false;
-  cancelAnimationFrame(seekRaf);seekRaf=0;
+  seeking=false;seekPointer=null;seekTarget=0;
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
@@ -1194,6 +1208,7 @@ function resetProg(){
 function toggle(){
   if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
   if(!apiReady)return;
+  /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
     playing=false;icons();
@@ -1208,8 +1223,9 @@ function toggle(){
   }
 }
 
-const ARTC={};
-const MP={};
+/* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
+const ARTC={};      /* local id -> cover data URL ('' = song has no cover) */
+const MP={};        /* local id -> metadata promise */
 const FB={};
 function fallbackArt(v){
   const s=(v.title||'')+(v.author||'');
@@ -1466,6 +1482,7 @@ function setPlayerBg(v){
   im.src=urls[0];
 }
 
+/* ---------- COVER COLOUR ---------- */
 const tintCache={};
 let curTint='';
 
@@ -1564,6 +1581,7 @@ function setTint(v){
   }
 }
 
+/* ---------- LYRICS (LRCLIB) ---------- */
 let lyOn=false,lyLines=null,lyCur=-1;
 const LY={};
 const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
@@ -1694,6 +1712,7 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
+/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1759,6 +1778,7 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
+/* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -1780,6 +1800,7 @@ function syncVideo(){
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
+  /* own fullscreen: the video box fills the screen (rotated in portrait), no native iOS fullscreen, so no pause */
   if(vidFS){
     const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
     const bw=Math.min(lg,sh*16/9),bh=bw*9/16;
@@ -1805,12 +1826,15 @@ function syncVideo(){
   box.style.left=vl+'px';
   box.style.top=vt+'px';
   box.style.width=sz+'px';box.style.height=vh+'px';
+  const was=box.classList.contains('vid');
   box.classList.add('vid');
+  /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
   if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
+/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
@@ -1819,6 +1843,9 @@ function setVid(on){
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 addEventListener('orientationchange',()=>setTimeout(syncVideo,300));
 addEventListener('resize',syncVideo);
+
+/* The fullscreen close control only exits the fullscreen video layout.
+   It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -1917,6 +1944,7 @@ function playAt(i,list){
   msMode(false);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0});
   else pending=v.videoId;
+
 }
 
 const SLEEPS=[0,15,30,60];
@@ -2028,6 +2056,7 @@ $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
 
+/* ---------- SHARE ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
   if(!v||v.local)return;
@@ -2076,6 +2105,9 @@ on('slBtn',()=>{
 
 const prev=()=>{if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length)};
 
+/* ---------- LOCK SCREEN / CONTROL CENTRE ---------- */
+/* A silent looping track makes the phone treat THIS page as the player while a YouTube song plays,
+   so the lock screen shows our title/cover and our prev / next / seek buttons. */
 const MS='mediaSession' in navigator?navigator.mediaSession:null;
 const ka=new Audio();
 ka.loop=true;
@@ -2224,6 +2256,7 @@ function endDrag(e){
 pl.addEventListener('touchend',endDrag,{passive:true});
 pl.addEventListener('touchcancel',endDrag,{passive:true});
 
+/* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
 const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
 
@@ -2241,6 +2274,7 @@ $('likeBtn').addEventListener('click',e=>{
   if(activeTab==='library')renderLib();
 });
 
+/* ---------- SONGS ---------- */
 const instances=[
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
@@ -2299,7 +2333,7 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances,strict=false,sort='relevance'){
+async function fetchSongs(q,page,ctl,list=instances,strict=false){
   const requests=list.map(base=>{
     const c=new AbortController();
     const onAb=()=>c.abort();
@@ -2307,7 +2341,7 @@ async function fetchSongs(q,page,ctl,list=instances,strict=false,sort='relevance
     const tm=setTimeout(()=>c.abort(),6000);
 
     return fetch(
-      `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}&sort=${sort}`,
+      `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
       {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
     ).then(r=>{
       if(!r.ok)throw new Error('Server error');
@@ -2334,26 +2368,38 @@ const shuffle=a=>{
   return a;
 };
 
+/* ---------- MUSIC GROUPS: [weight, queries] ----------
+   Higher weight = more songs in the Home feed.
+   Index: 0 Hindi, 1 Bangla, 2 Punjabi, 3-11 South Indian artists,
+          12 Bangladeshi, 13 Pakistani, 14 Trending, 15 For You */
 const GROUPS=[
-  [5,['Hindi songs','Bollywood hits','New Hindi songs','Latest Hindi songs','Bollywood romantic songs']],
-  [5,['Bangla song','Bengali songs','Bangla modern song','Bangla romantic songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Kolkata Bangla songs']],
-  [2.5,['Punjabi songs','Punjabi hit songs','Punjabi romantic songs','latest Punjabi songs']],
-  [2,['South Indian songs','Tamil songs','Telugu songs','Malayalam songs','Kannada songs','Anirudh Ravichander hits','Sai Abhyankkar songs','Vijay Thalapathy songs','Allu Arjun hits','Rajinikanth songs','Prabhas hits','Dulquer Salmaan songs','NTR hits','Ram Charan hits','Kollywood hits','Tollywood hits','Mollywood hits'],/tamil|telugu|malayalam|kannada|south|kollywood|tollywood|mollywood|anirudh|vijay|allu|rajini|prabhas|dulquer|ntr|charan/i],
-  [1.5,['Nepali songs','Nepali modern songs','Nepali pop songs']],
-  [1.5,['Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Pakistani drama OST']],
-  [3,['trending songs','popular music video','viral hits','top music']],
-  [3,['hits']],
-  [2,['T-Series hits','T-Series Hindi songs','T-Series Punjabi songs','T-Series romantic songs'],/t-?series/i],
-  [2,['Sony Music India hits','Sony Music India Hindi songs','Sony Music South'],/sony/i],
-  [1.5,['YRF songs','Yash Raj Films hits','YRF music'],/\byrf\b|yash\s*raj/i],
-  [1.5,['Zee Music Company hits','Zee Music Company Hindi songs'],/zee\s*music/i],
-  [1.5,['Saregama Music hits','Saregama Hindi songs','Saregama Bangla songs'],/saregama/i],
-  [1.5,['Tips Official hits','Tips Official Hindi songs'],/tips/i],
-  [1.5,['Eros Now Music hits'],/eros/i],
-  [1.5,['Speed Records Punjabi songs'],/speed/i]
+  [6,['Hindi songs 2026','Bollywood hits','Latest Hindi songs','indian songs','Hindi lofi songs','Bollywood songs 2024','Hindi hit songs','Shah Rukh Khan songs','t series song','Sony Music India','zee music company']],
+  [6,['Bangla new songs','Bengali modern songs','Kolkata Bangla songs','Bengali movie songs','Bangla songs 2025','Latest Bangla songs','Bangla romantic songs','Bangla lofi songs','Bangladesh band songs','Habib Wahid songs','Habib Wahid new songs']],
+  [2.5,['Punjabi songs','Latest Punjabi songs','Punjabi romantic songs','Punjabi hit songs','Punjabi lofi songs']],
+  [.25,['Dhanush movie songs']],
+  [.25,['Allu Arjun movie songs']],
+  [.25,['Thalapathy Vijay movie songs']],
+  [.25,['Anirudh Ravichander songs']],
+  [.25,['Sai Abhyankkar songs']],
+  [.25,['Sai Pallavi movie songs']],
+  [.25,['Kalyani Priyadarshan movie songs']],
+  [.25,['Pooja Hegde movie songs']],
+  [.25,['Tamannaah movie songs']],
+  [2,['Bangladeshi songs','Bangladesh band songs','Coke Studio Bangla','Habib Wahid songs','Tahsan songs','Bangla natok song','Dhallywood songs','Bangladeshi folk songs','Bangla new song 2026']],
+  [1.5,['Pakistani Punjabi songs','Pakistani songs','Coke Studio Pakistan','Atif Aslam songs','Rahat Fateh Ali Khan songs','Pakistani drama OST','Urdu songs']],
+  [1,['t series music','Top songs this year','shunno','new song']],
+  [3,['t series music']],
+  [1,['T-Series new songs','T-Series Hindi songs','T-Series latest songs 2026','T-Series romantic songs','T-Series Bollywood hits','T-Series Punjabi songs','T-Series Bhushan Kumar songs'],/t-?series/i],
+  [1,['Sony Music India songs','Sony Music India new songs','Sony Music India Hindi songs','Sony Music India romantic songs','Sony Music South songs','Sony Music India Punjabi songs'],/sony/i],
+  [1,['YRF songs','YRF latest songs','Yash Raj Films songs','YRF romantic songs','YRF Bollywood hits','YRF music'],/\byrf\b|yash\s*raj/i],
+  [1,['Zee Music Company songs','Zee Music Company new songs','Zee Music Company Hindi songs','Zee Music Company romantic songs','Zee Music Company Punjabi'],/zee\s*music/i],
+  [1,['Saregama Music songs','Saregama Hindi songs','Saregama Bangla songs','Saregama Bengali songs','Saregama new songs'],/saregama/i],
+  [1,['Tips Official songs','Tips Official new songs','Tips Official Hindi songs','Tips Official romantic songs'],/tips/i],
+  [1,['Eros Now Music songs','Eros Now Music Hindi songs','Eros Now Music new songs','Eros Now Music romantic songs'],/eros/i],
+  [1,['Speed Records songs','Speed Records new Punjabi songs','Speed Records Punjabi hits','Speed Records latest'],/speed/i]
 ].map(([weight,qs,f])=>({qs,buf:[],pg:{},weight,f}));
 
-const FORYOU=7;
+const FORYOU=15;
 
 function buildForYou(){
   const c={};
@@ -2365,27 +2411,18 @@ function buildForYou(){
   g.pg={};
 }
 
-async function fillGroup(g,ctl,forceNew=false){
+async function fillGroup(g,ctl){
   if(g.busy)return true;
   g.busy=true;
-  try{return await fillGroupRaw(g,ctl,forceNew)}
+  try{return await fillGroupRaw(g,ctl)}
   finally{g.busy=false}
 }
 
-async function fillGroupRaw(g,ctl,forceNew=false){
-  let q;
-  if(forceNew){
-    const freshQueries=['New Hindi songs 2026','Latest Hindi songs 2026','Bangla new song 2026','Latest Bangla songs 2026','New Punjabi songs 2026','South Indian new songs 2026','Nepali new songs 2026','Pakistani new songs 2026','new song 2026','latest songs 2026','trending songs 2026'];
-    const matching=freshQueries.filter(fq=>g.qs.some(orig=>fq.toLowerCase().includes(orig.toLowerCase().replace(/ songs| hits| music/g,''))));
-    q=matching.length?matching[Math.floor(Math.random()*matching.length)]:g.qs[0];
-  }else{
-    const maxIdx=Object.keys(g.pg).length===0?Math.min(3,g.qs.length):g.qs.length;
-    q=g.qs[Math.floor(Math.random()*maxIdx)];
-  }
-
+async function fillGroupRaw(g,ctl){
+  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
   const page=(g.pg[q]||0)+1;
   const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few,forceNew?'date':'relevance');
+  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
 
   if(data===null)return false;
 
@@ -2396,32 +2433,20 @@ async function fillGroupRaw(g,ctl,forceNew=false){
     if(g.buf.some(b=>b.videoId===v.videoId))return;
     g.buf.push(v);
   });
-  if(forceNew)g.buf.sort((a,b)=>(b.published||0)-(a.published||0));
+  shuffle(g.buf);
   return true;
 }
 
 const CHIPS=[
-  ['First',null],
-  ['T-Series',[8]],
-  ['Bangla',[1]],
-  ['Trending',[6]],
-  ['Hindi',[0]],
-  ['Sony Music',[9]],
-  ['YRF',[10]],
-  ['Zee Music',[11]],
-  ['Saregama',[12]],
-  ['Tips',[13]],
-  ['Eros Now',[14]],
-  ['Speed Records',[15]],
-  ['Punjabi',[2]],
-  ['Pakistani',[5]],
-  ['South India',[3]],
-  ['For You',[FORYOU]],
-  ['Nepali',[4]]
+  ['All',null],['Hindi',[0]],['Bangla',[1]],['Punjabi',[2]],
+  ['T-Series',[16]],['Sony Music',[17]],['YRF',[18]],['Zee Music',[19]],['Saregama',[20]],
+  ['Tips',[21]],['Eros Now',[22]],['Speed Records',[23]],
+  ['Bangladeshi',[12]],['Pakistani',[13]],
+  ['South Indian',[3,4,5,6,7,8,9,10,11]],
+  ['Trending',[14]],['For You',[FORYOU]]
 ];
 let chip=0;
-let isFirstLoad=true;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((_,i)=>i!==FORYOU);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.slice(0,14);
 
 const CACHE={};
 
@@ -2463,7 +2488,6 @@ CHIPS.forEach((c,i)=>{
     if(chip===i)return;
     saveChip();
     chip=i;
-    isFirstLoad=true;
     if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
     if(restoreChip(i))loadHomeMore();
@@ -2481,7 +2505,7 @@ function takeSong(){
 
   const last=st.videos.slice(-14).map(authKey).reverse();
 
-  for(let w of [14,8,4,2,0]){
+  for(const w of [14,8,4,2,0]){
     const ban=new Set(last.slice(0,w));
     const pool=[];
 
@@ -2526,15 +2550,12 @@ async function loadHomeMore(){
   let added=0,failed=false;
   if(!navigator.onLine&&!st.videos.length)failed=true;
 
-  const forceNew=isFirstLoad;
-  isFirstLoad=false;
-
   for(let attempt=0;attempt<6&&added<24&&st.videos.length<st.cap&&!ctl.signal.aborted&&!failed;attempt++){
     const need=activeGroups().filter(g=>g.buf.length<4);
     let ok=0;
 
     if(need.length){
-      const all=Promise.all(need.map(g=>fillGroup(g,ctl,forceNew)));
+      const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
       let poll;
       const first=!st.videos.length;
       const t0=Date.now();
@@ -2556,18 +2577,14 @@ async function loadHomeMore(){
       ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
     }
 
-    const batch=[];
-    while(added<24&&st.videos.length+batch.length<st.cap){
+    while(added<24&&st.videos.length<st.cap){
       const v=takeSong();
       if(!v)break;
       seen.add(v.videoId);
-      batch.push(v);
-      added++;
-    }
-    batch.forEach(v=>{
       st.videos.push(v);
       grid.appendChild(card(v,st.videos.length-1,st.videos));
-    });
+      added++;
+    }
 
     if(added>=8)break;
 
@@ -2598,6 +2615,7 @@ async function loadHomeMore(){
   if(added>0)keepFilling();
 }
 
+/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
 function homeCheck(){
@@ -2616,6 +2634,7 @@ setInterval(homeCheck,600);
 let hcRaf=0;
 addEventListener('scroll',()=>{if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;homeCheck()})},{passive:true});
 
+/* ---------- OFFLINE HOME: imported songs ---------- */
 function renderOfflineHome(){
   offMode=true;
   const st=D.home;
@@ -2652,6 +2671,7 @@ function leaveOfflineHome(){
 
 addEventListener('offline',renderOfflineHome);
 
+/* ---------- SEARCH ---------- */
 const q=$('q');
 const getRecent=()=>LS.get('sf_recent',[]);
 const saveRecent=t=>LS.set('sf_recent',[t,...getRecent().filter(x=>x!==t)].slice(0,8));
@@ -2816,11 +2836,12 @@ $('searchMore').onclick=()=>{
   if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
 };
 
+/* ---------- LIBRARY ---------- */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-
+/* ---------- MY FILES (stored on this phone, play offline) ---------- */
 const IDB={
   db:null,
   open(){
@@ -3049,6 +3070,7 @@ $('plDel').onclick=()=>{
 
 $('libBack').onclick=()=>history.back();
 
+/* ---------- NAVIGATION ---------- */
 function setTab(t){
   if(activeTab===t)return;
   activeTab=t;
@@ -3085,6 +3107,7 @@ document.querySelectorAll('.nb').forEach(b=>{
   };
 });
 
+/* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
   const st=D.home;
   if(st.ctl)st.ctl.abort();
@@ -3097,7 +3120,6 @@ function refreshHome(){
   st.videos=[];
   $('homeGrid').innerHTML='';
   seen.clear();
-  isFirstLoad=true;
 
   Object.keys(CACHE).forEach(k=>delete CACHE[k]);
   if(CHIPS[chip][0]==='For You')buildForYou();
@@ -3141,6 +3163,7 @@ async function doRefresh(){
   ptrMove(0,true);
 }
 
+/* ---------- TOUCH: EDGE SWIPE + PULL TO REFRESH ---------- */
 let sx=0,sy=0,edge=false,pulling=false,pdy=0,inChips=false;
 
 addEventListener('touchstart',e=>{
@@ -3194,6 +3217,7 @@ function touchDone(e){
 addEventListener('touchend',touchDone,{passive:true});
 addEventListener('touchcancel',touchDone,{passive:true});
 
+/* ---------- STORAGE USAGE ---------- */
 const fmtB=n=>{
   if(!Number.isFinite(n)||n<=0)return '0 MB';
   if(n>=1073741824)return (n/1073741824).toFixed(2)+' GB';
@@ -3256,6 +3280,7 @@ async function refreshStorage(){
   }
 }
 
+/* ---------- REMOVE SONGS (frees phone storage) ---------- */
 let rmSel=new Set();
 function rmUpdate(){
   const n=getLoc().length;
@@ -3320,6 +3345,10 @@ $('rmDel').onclick=async()=>{
   openRemove();
 };
 
+/* ---------- BACKUP & RESTORE (original quality, one file) ----------
+   File format .sfbak:  "SFBK2\n" then repeated entries:
+   [4 bytes header length][header JSON][raw bytes]
+   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
 const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
 let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
 
@@ -3477,6 +3506,7 @@ function bkLabel(q){
   $('bkGo').textContent=q.i===0?'Tap to save':'Save next ('+(q.i+1)+'/'+q.files.length+')';
 }
 
+/* One song per tap: the phone's save sheet only handles a single file reliably. */
 async function bkSaveOne(auto){
   const q=bkQ;
   if(!q)return;
@@ -3517,6 +3547,7 @@ async function crc32Blob(blob){
   return (c^0xFFFFFFFF)>>>0;
 }
 
+/* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
 async function buildZip(files){
   const parts=[],cds=[];
   let off=0,i=0;
@@ -3579,6 +3610,7 @@ async function bkStart(mode){
   await bkSaveOne(true);
 }
 $('bkGo').onclick=()=>bkStart('zip');
+
 
 $('bkMake').onclick=openBackupPicker;
 $('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
@@ -3680,12 +3712,14 @@ $('bkIn').onchange=async e=>{
   }
 };
 
+/* ---------- OFFLINE (service worker) ---------- */
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
 addEventListener('online',()=>{
   if(offMode)leaveOfflineHome();
   else if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
 });
 
+/* ---------- INIT ---------- */
 buildSettingsUI();
 apply();
 icons();
@@ -3695,6 +3729,7 @@ renderRecent();
 refreshStorage();
 if(navigator.onLine)loadHomeMore();else renderOfflineHome();
 
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
 document.querySelectorAll('.spb .sec').forEach(sec=>{
   const h=sec.querySelector('h3');
   if(!h)return;
@@ -3705,6 +3740,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   });
 });
 
+/* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
 (function(){
   const CFG={
     apiKey:"AIzaSyBEbe08tF-kLx_NMjK4U9x38Nf54_MXLH4",
@@ -3719,6 +3755,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 
   const info=t=>{$('gInfo').textContent=t};
 
+  /* Show Gmail name, email and profile photo in the account card */
   function renderAcct(u){
     $('gIn').hidden=!!u;
     $('gOut').hidden=!u;
@@ -3816,6 +3853,17 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   $('gOut').onclick=()=>{if(auth)auth.signOut()};
 })();
 
+/* =====================================================================
+   LIQUID GLASS TOUCH ENGINE
+   Touch any glass control (cards, tabs, chips, player buttons, settings
+   buttons...) and it behaves like a drop of water:
+   1. swells up under your finger
+   2. follows your finger a little (and stretches)
+   3. shows a moving light reflection + glass rim
+   4. sends out two water ripple rings from the touch point
+   5. icons bend like under water for a moment
+   6. wobbles like jelly when you let go
+   ===================================================================== */
 (function(){
   const SEL='.card,.chip,.nb,.opt,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.acct,.pv,.sw button,.sw label,.lyadj button,#yfs';
   const dm=$('lqDisp'),tb=$('lqTurb');
@@ -3825,6 +3873,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   const off=()=>document.documentElement.dataset.anim==='off';
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
+  /* water bend on the icons (shared SVG filter, animated by script) */
   function wobble(el,amp){
     if(!dm||!tb)return;
     if(wobEl&&wobEl!==el)wobEl.classList.remove('lqw');
@@ -3854,6 +3903,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     el.style.setProperty('--ly',(st.y-r.top)+'px');
   }
 
+  /* swell + follow the finger */
   function applyShape(st){
     const r=st.r,el=st.el;
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -3883,6 +3933,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   function engage(st){
     if(st.fx)return;
     const el=st.el;
+    /* finish any older effect on the same element */
     clearTimeout(el._lqT);
     if(el._lqA){try{el._lqA.cancel()}catch(e){}el._lqA=null}
     el.querySelectorAll(':scope>.lq-fx').forEach(n=>n.remove());
@@ -3905,6 +3956,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     wobble(el,clamp(Math.min(r.width,r.height)*.14,2,7));
   }
 
+  /* let go: jelly wobble, then clean up */
   function release(st){
     const el=st.el,fx=st.fx,r=st.r;
     if(!fx)return;
@@ -3976,6 +4028,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     P.delete(e.pointerId);
     clearTimeout(st.tm);
     cancelAnimationFrame(st.raf);
+    /* very quick tap on a big card: still play the effect once */
     if(!st.fx&&!cancel&&e.type==='pointerup')engage(st);
     release(st);
   }
