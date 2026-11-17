@@ -1962,10 +1962,14 @@ on('lyBtn',()=>{
 
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
-/* the YouTube iframe is always 1920x1080; only the CSS scale changes */
-function ytFrame(sc){
-  const f=$('yt').querySelector('iframe');
-  if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+/* Size the actual YouTube player to its visible box. No CSS zoom or crop. */
+function ytFrame(w,h){
+  const box=$('yt');
+  const f=box.querySelector('iframe');
+  if(f)f.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;border:0;max-width:none;transform:none';
+  if(apiReady&&yt&&typeof yt.setSize==='function'){
+    try{yt.setSize(Math.max(1,Math.round(w)),Math.max(1,Math.round(h)))}catch(e){}
+  }
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -1982,7 +1986,7 @@ function syncVideo(){
   if(!show){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
-    ytFrame(200/1920);
+    ytFrame(200,200);
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
@@ -1998,8 +2002,7 @@ function syncVideo(){
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
     
-    const f=box.querySelector('iframe');
-    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
+    ytFrame(bw,bh);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -2016,10 +2019,9 @@ function syncVideo(){
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
-     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
-     title, share and "more videos" elements small. */
-  ytFrame(vw/1920);
+  /* Match the actual YouTube player dimensions to the measured 16:9 box.
+     No transform, zoom or crop: the complete source frame remains visible. */
+  ytFrame(vw,vh);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
