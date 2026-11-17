@@ -391,51 +391,165 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
 
 
-/* ---------- LANDSCAPE PLAYER: clean two-column layout ---------- */
+/* ---------- LANDSCAPE PLAYER: reference spacing + liquid-glass lyrics sync ---------- */
 @media (orientation:landscape) and (max-height:650px){
-  .player{padding:calc(env(safe-area-inset-top) + 5px) max(24px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 7px) max(24px,env(safe-area-inset-left))}
-  .grab{height:15px;min-height:15px}.grab span{width:38px;height:4px}
+  .player{
+    padding:calc(env(safe-area-inset-top) + 5px)
+      max(26px,env(safe-area-inset-right))
+      calc(env(safe-area-inset-bottom) + 8px)
+      max(26px,env(safe-area-inset-left));
+  }
+  .grab{height:15px;min-height:15px}
+  .grab span{width:38px;height:4px}
+
   .pc{
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);
-    grid-template-rows:minmax(0,1fr) auto auto;
-    column-gap:clamp(24px,4.2vw,60px);row-gap:clamp(10px,1.8vh,17px);
-    padding:5px 0 7px;align-items:center;align-content:stretch
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);
+    /* The final row is intentionally reserved even while lyrics sync is hidden. */
+    grid-template-rows:minmax(0,1fr) auto auto 44px;
+    column-gap:clamp(24px,4.2vw,60px);
+    row-gap:clamp(9px,1.45vh,14px);
+    padding:5px 0 8px;
+    align-items:center;
+    align-content:stretch;
   }
-  .az{grid-column:1;grid-row:1 / 4;width:100%;height:100%;min-height:0;overflow:hidden;contain:layout paint}
-  .art{width:min(100cqw,100cqh,520px);max-width:100%;max-height:100%;border-radius:16px}
+
+  /* Left side: artwork / video stays in the original YouTube 16:9 frame. */
+  .az{
+    grid-column:1;grid-row:1 / 5;
+    width:100%;height:100%;min-height:0;
+    overflow:hidden;contain:layout paint;
+  }
+  .art{
+    width:min(100cqw,100cqh,520px);
+    max-width:100%;max-height:100%;
+    border-radius:16px;
+  }
+  #yt.vid{
+    border-radius:14px;
+    overflow:hidden;
+    background:#000;
+  }
+  #yt.vid iframe{
+    display:block;
+    width:100%!important;height:100%!important;
+    max-width:100%!important;
+    border:0;
+    transform:none!important;
+  }
+
+  /* Right side starts slightly below the top edge, with generous separation. */
   .pc>div:nth-child(2){
-    grid-column:2;grid-row:1;align-self:start;width:100%;min-width:0;
-    display:grid;grid-template-rows:auto auto auto;row-gap:clamp(5px,1vh,9px);
-    padding-top:clamp(7px,1.4vh,13px)
+    grid-column:2;grid-row:1;
+    align-self:start;width:100%;min-width:0;
+    display:grid;grid-template-rows:auto auto auto;
+    row-gap:clamp(5px,1vh,9px);
+    padding-top:clamp(9px,1.6vh,15px);
   }
-  .meta{width:100%;min-width:0;margin:0;display:flex;align-items:flex-start;gap:12px}
+  .meta{
+    width:100%;min-width:0;margin:0;
+    display:flex;align-items:flex-start;gap:12px;
+  }
   .meta>div{flex:1;min-width:0}
   .meta h3{
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
-    max-height:2.4em;margin:0 0 4px;overflow:hidden;text-overflow:ellipsis;
-    overflow-wrap:anywhere;white-space:normal;font-size:clamp(17px,2.35vw,24px);line-height:1.2
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    max-height:2.4em;
+    margin:0 0 4px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    overflow-wrap:anywhere;
+    white-space:normal;
+    font-size:clamp(17px,2.35vw,24px);
+    line-height:1.2;
   }
-  .meta p{margin:0;font-size:clamp(12px,1.65vw,16px);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .meta p{
+    margin:0;
+    font-size:clamp(12px,1.65vw,16px);
+    line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
   .like{width:40px;height:40px;flex-shrink:0}
   .player input.seek{height:22px;margin:0}
   .trow{margin-top:0;font-size:clamp(10px,1.1vw,12px)}
-  .ctr{grid-column:2;grid-row:2;justify-content:center;align-self:center;gap:clamp(25px,5vw,55px);padding:3px 0;z-index:4;touch-action:manipulation}
+
+  .ctr{
+    grid-column:2;grid-row:2;
+    justify-content:center;align-self:center;
+    gap:clamp(25px,5vw,55px);
+    padding:4px 0;
+    z-index:4;touch-action:manipulation;
+  }
   .cb{width:50px;height:50px;touch-action:manipulation;pointer-events:auto}
   .cb svg{width:31px;height:31px;pointer-events:none}
-  .cb.big{width:62px;height:62px}.cb.big svg{width:42px;height:42px}
-  .opts{grid-column:2;grid-row:3;align-self:start;width:100%;display:flex;align-items:center;justify-content:space-around;gap:clamp(3px,1vw,12px);padding:5px 8px;margin-top:2px;z-index:4}
-  .opt{height:40px;max-width:48px;touch-action:manipulation}.opt svg{width:19px;height:19px;pointer-events:none}
-  .lyadj,.lyadj.show{
-    position:absolute;left:calc(50% + 2px);right:auto;bottom:calc(env(safe-area-inset-bottom) + 4px);
-    transform:translateX(-50%);width:auto;height:32px;min-height:32px;padding:0 7px;gap:6px;
-    border-radius:17px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);z-index:4
+  .cb.big{width:62px;height:62px}
+  .cb.big svg{width:42px;height:42px}
+
+  .opts{
+    grid-column:2;grid-row:3;
+    align-self:center;width:100%;
+    display:flex;align-items:center;justify-content:space-around;
+    gap:clamp(3px,1vw,12px);
+    padding:5px 8px;margin:0;
+    z-index:4;
   }
-  .lyadj button{width:34px;height:28px;border-radius:14px;font-size:17px;touch-action:manipulation}
-  .lyadj input{width:54px;height:26px;font-size:13px}
-  .lyadj.kb{position:fixed;left:50%;right:auto;bottom:auto;transform:translateX(-50%);width:auto;height:46px;z-index:10001}
+  .opt{height:40px;max-width:48px;touch-action:manipulation}
+  .opt svg{width:19px;height:19px;pointer-events:none}
+
+  /* Reserved bottom row: sync controls centered under the option buttons. */
+  .lyadj,.lyadj.show{
+    position:relative;
+    grid-column:2;grid-row:4;
+    justify-self:center;align-self:center;
+    left:auto;right:auto;top:auto;bottom:auto;
+    transform:none;
+    display:flex;align-items:center;justify-content:center;
+    gap:8px;
+    width:max-content;min-width:154px;height:36px;min-height:36px;
+    padding:0 12px;
+    border-radius:22px;
+    color:rgba(255,255,255,.96);
+    background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.075));
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 5px 18px rgba(0,0,0,.12);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    backdrop-filter:blur(22px) saturate(180%);
+    z-index:5;
+  }
+  .lyadj{visibility:hidden}
+  .lyadj.show{visibility:visible}
+  .lyadj button{
+    display:grid;place-items:center;
+    width:32px;height:28px;flex:0 0 32px;
+    border-radius:50%;
+    color:#fff;
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.20);
+    font-size:17px;font-weight:750;line-height:1;
+    touch-action:manipulation;
+  }
+  .lyadj button:active{background:rgba(255,255,255,.28)}
+  .lyadj span{min-width:0;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .lyadj input{
+    width:48px;height:28px;padding:0;margin:0;
+    border:0;border-radius:9px;
+    background:transparent;color:inherit;
+    text-align:center;font-size:13px;font-weight:700;font-family:inherit;
+    font-variant-numeric:tabular-nums;
+    outline:0;-webkit-appearance:none;appearance:none;
+    user-select:text;-webkit-user-select:text;
+  }
+  .lyadj input:focus{background:rgba(255,255,255,.15)}
+  .lyadj.kb{
+    position:fixed;left:50%;right:auto;top:auto;bottom:auto;
+    transform:translateX(-50%);
+    width:auto;height:46px;min-height:46px;
+    z-index:10001;
+  }
+
   .lyr{left:0;right:0;top:0;padding:20px 18px 34px;font-size:clamp(15px,2vw,19px)}
   .lyr .now{font-size:clamp(18px,2.2vw,22px)}
-  #yt.vid{border-radius:14px;overflow:hidden}
 }</style>
 </head>
 <body>
