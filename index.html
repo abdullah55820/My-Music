@@ -192,9 +192,10 @@ body.dragging #topfade{opacity:0}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 /* The video lives inside the art column. Its size and position are local to that column,
    so desktop layout/scroll offsets cannot move it away from the cover-art position. */
-#yt{position:absolute;display:none;left:0;top:0;width:0;height:0;z-index:2;opacity:0;pointer-events:none;overflow:hidden;background:#000}
-#yt.vid{display:block;z-index:2;opacity:1;border-radius:0;overflow:hidden;background:#000;box-shadow:none;pointer-events:auto}
-#yt iframe,#ytp,#ytp iframe{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;border:0}
+#yt{position:absolute;display:block;left:0;top:0;width:1px;height:1px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden;background:#000}
+#yt.vid{z-index:2;opacity:1;border-radius:0;overflow:hidden;background:#000;box-shadow:none;pointer-events:auto}
+#ytp{position:absolute;inset:0;width:100%;height:100%}
+#yt iframe,#ytp iframe{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;border:0}
 #yt.vid::before{content:"";position:absolute;left:0;top:0;width:72%;height:24%;z-index:3;background:transparent}
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
@@ -1963,8 +1964,8 @@ on('lyBtn',()=>{
 let vidMode=false,vidFS=false;
 const ytHome=$('az');
 function ytFrame(){
-  const f=$('yt').querySelector('iframe');
-  if(f)f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;display:block';
+  const box=$('yt'),f=box.querySelector('iframe');
+  if(f)f.style.cssText='position:absolute;inset:0;width:100%!important;height:100%!important;border:0;display:block;max-width:none;transform:none';
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -4214,3 +4215,4 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
+,,,,
