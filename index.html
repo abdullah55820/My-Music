@@ -192,8 +192,8 @@ body.dragging #topfade{opacity:0}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
 /* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
-#yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
-#yt.vid iframe{width:100%;height:100%;display:block;border:0}
+#yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:isolate;transform:translateZ(0)}
+#yt.vid iframe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;display:block;border:0;transform:none!important;transform-origin:center!important}
 #yt.vid{pointer-events:auto}
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
@@ -433,6 +433,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     overflow:hidden;contain:layout paint;
     display:flex;align-items:center;justify-content:center;
   }
+  /* Move the complete video/art column slightly to the right in landscape.
+     The video is measured after this transform, so its frame moves with it. */
+  .az.vid{transform:translateX(clamp(12px,2vw,24px))}
+
   .art{
     width:min(100cqw,100cqh,520px);
     max-width:100%;max-height:100%;
@@ -1962,10 +1966,17 @@ on('lyBtn',()=>{
 
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
-/* the YouTube iframe is always 1920x1080; only the CSS scale changes */
-function ytFrame(sc){
-  const f=$('yt').querySelector('iframe');
-  if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+/* Size the actual YouTube player to the visible video box.
+   CSS-scaling a 1920x1080 iframe can shift its video layer on iOS Safari. */
+function sizeYtPlayer(w,h){
+  const box=$('yt'),f=box.querySelector('iframe');
+  const width=Math.max(1,Math.round(w)),height=Math.max(1,Math.round(h));
+  try{if(apiReady&&yt&&yt.setSize)yt.setSize(width,height)}catch(e){}
+  if(f){
+    f.style.position='absolute';f.style.left='0';f.style.top='0';
+    f.style.width='100%';f.style.height='100%';f.style.maxWidth='none';
+    f.style.border='0';f.style.transform='none';f.style.transformOrigin='center';
+  }
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -1982,7 +1993,7 @@ function syncVideo(){
   if(!show){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
-    ytFrame(200/1920);
+    sizeYtPlayer(200,200);
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
@@ -1998,8 +2009,7 @@ function syncVideo(){
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
     
-    const f=box.querySelector('iframe');
-    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
+    sizeYtPlayer(bw,bh);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -2016,10 +2026,9 @@ function syncVideo(){
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
-     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
-     title, share and "more videos" elements small. */
-  ytFrame(vw/1920);
+  /* Give the YouTube player the exact measured 16:9 box dimensions.
+     This avoids the shifted iframe/video layer seen in iOS Safari. */
+  sizeYtPlayer(vw,vh);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
