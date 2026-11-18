@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -171,6 +170,7 @@ body.dragging #topfade{opacity:0}
 .like.liked{color:#ff2d55}
 .like.liked svg{fill:currentColor}
 .player input.seek{--p:0%;width:100%;height:22px;margin:4px 0 0;padding:0;display:block;appearance:none;-webkit-appearance:none;outline:0;border:0;background:transparent;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+/* thick rounded bar: light grey filled part, darker grey rest, no thumb */
 .seek::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,#ececec 0,#ececec var(--p),rgba(255,255,255,.32) var(--p),rgba(255,255,255,.32) 100%)}
 .seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:1px;height:8px;opacity:0;border:0;background:transparent}
 .seek::-moz-range-track{height:8px;border-radius:99px;background:linear-gradient(to right,#ececec 0,#ececec var(--p),rgba(255,255,255,.32) var(--p),rgba(255,255,255,.32) 100%)}
@@ -190,12 +190,12 @@ body.dragging #topfade{opacity:0}
 .mc{width:38px;height:42px;display:grid;place-items:center;flex-shrink:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
-
-/* VIDEO CONTAINER FIX:
-   True 16:9 container with rounded mask; keep iframe at native 16:9 without setSize distortion */
-#yt{position:fixed;right:0;bottom:0;width:320px;height:180px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
-#yt.vid{z-index:10001;opacity:1;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.45);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0);pointer-events:auto}
-#yt iframe,#ytp{position:absolute!important;top:50%!important;left:50%!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;display:block!important;transform:translate(-50%,-50%) scale(1.02)!important;object-fit:cover!important}
+#yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
+/* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
+#yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
+#yt.vid iframe{width:100%;height:100%;display:block;border:0}
+#yt.vid{pointer-events:auto}
+/* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
@@ -278,7 +278,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
 /* =====================================================================
-   LIQUID GLASS LOOK
+   LIQUID GLASS LOOK  (clear, water-like glass, no milky white fill)
+   Same feel as the round play / pause bubble: see-through, soft light
+   sheen from the top-left corner, thin bright rim, inner glow.
    ===================================================================== */
 :root{--sh1:.34;--sh2:.07;--sh3:.18;--gaf:.55;--rim:rgba(255,255,255,.2)}
 :root[data-theme=dark]{--rim:rgba(255,255,255,.13)}
@@ -290,13 +292,17 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .g,.chips .chip,.pitem{
   box-shadow:0 8px 24px var(--gshadow),inset 0 0 6px rgba(255,255,255,.06)
 }
+/* song cards: Blur Strength + Transparency settings work here too */
 .grid .g{
   box-shadow:inset 0 0 6px rgba(255,255,255,.05);
   backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%)
 }
+/* top bar pills + status */
 #topbar .g{box-shadow:inset 0 0 6px rgba(255,255,255,.05)}
+/* bottom tab bar + mini player */
 .nav.g,.mini.g{box-shadow:0 6px 18px rgba(0,0,0,.16),inset 0 0 6px rgba(255,255,255,.06)}
 
+/* unselected chips and small texts: clearly readable */
 .chips .chip{color:var(--text)}
 .chips .chip{box-shadow:none}
 .chips .chip.on{
@@ -309,6 +315,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nb{color:color-mix(in srgb,var(--text) 78%,transparent)}
 .nb.active{color:var(--accent)}
 
+/* player bars follow the same glass settings */
 .opts{
   background:rgba(255,255,255,calc(var(--gaf)*.24));
   border-color:var(--rim);
@@ -316,12 +323,16 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 }
 
 /* =====================================================================
-   LIQUID GLASS TOUCH INTERACTIONS
+   LIQUID GLASS  (touch = water, iPhone style)
+   Every glass control: swells under the finger, follows the finger like
+   a drop of liquid, shows a moving light reflection, sends out water
+   ripples, then wobbles like jelly when you let go.
    ===================================================================== */
 .card,.chip,.nb,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.pv,.sw button,.sw label,.lyadj button,.acct{position:relative}
 .cb,.like,.xbtn,.back{border-radius:50%}
 .mc{border-radius:21px}
 
+/* play / pause, previous, next = round glass bubbles */
 .cb{
   background:linear-gradient(145deg,rgba(255,255,255,calc(var(--gaf)*.47)),rgba(255,255,255,calc(var(--gaf)*.18)));
   border:1px solid var(--rim);
@@ -331,6 +342,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .cb svg{width:30px;height:30px}
 .cb.big svg{width:56px;height:56px}
 
+/* mini song card: play + close buttons = round glass bubbles too */
 .mc{
   width:42px;height:42px;border-radius:50%;
   background:linear-gradient(145deg,rgba(255,255,255,var(--sh1)),rgba(255,255,255,var(--sh2)) 48%,rgba(255,255,255,var(--sh3))),var(--glass);
@@ -340,12 +352,14 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 }
 .mc svg{width:20px;height:20px}
 
+/* while touched */
 .lqa{
   z-index:6;overflow:hidden;will-change:transform;
   transform:translate3d(var(--tx,0px),var(--ty,0px),0) scale(var(--sx,1),var(--sy,1));
   transition:transform .32s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s,opacity .2s!important
 }
 
+/* light reflection + glass rim that follows the finger */
 .lq-fx{
   position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;transition:opacity .28s;
   background:radial-gradient(circle at var(--lx,50%) var(--ly,50%),rgba(255,255,255,.58) 0,rgba(255,255,255,.2) 32%,rgba(255,255,255,0) 64%);
@@ -361,6 +375,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),inset 0 2px 5px rgba(255,255,255,.55),inset 0 -7px 16px rgba(255,255,255,.14)
 }
 
+/* water ripple rings */
 .lq-rip{
   position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;z-index:3;
   width:var(--d);height:var(--d);margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);
@@ -377,36 +392,41 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 @keyframes lqRip{0%{transform:scale(.05);opacity:.95}65%{opacity:.55}100%{transform:scale(1);opacity:0}}
 @keyframes lqRip2{0%{transform:scale(.05);opacity:.5}65%{opacity:.28}100%{transform:scale(.8);opacity:0}}
 
+/* icons bend like they are under water for a moment */
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
 
 
 /* =====================================================================
-   LANDSCAPE & DESKTOP PLAYER
-   Applies uniformly to mobile landscape AND desktop/tablet wide screens!
+   LANDSCAPE PLAYER  (matches the reference picture)
+   Left  : cover art / YouTube video, centred vertically
+   Right : title + artist + heart, seek bar, prev/play/next, option bar,
+           the whole group centred vertically next to the art
+   Bottom: one reserved empty row (always there), lyrics-sync buttons
+           sit in the exact middle of the screen inside that row
    ===================================================================== */
-@media (orientation:landscape) and (max-height:650px), (min-width:860px){
+@media (orientation:landscape) and (max-height:650px){
   .player{
-    padding:calc(env(safe-area-inset-top) + 12px)
-      max(36px,env(safe-area-inset-right))
-      calc(env(safe-area-inset-bottom) + 12px)
-      max(36px,env(safe-area-inset-left));
+    padding:calc(env(safe-area-inset-top) + 4px)
+      max(28px,env(safe-area-inset-right))
+      calc(env(safe-area-inset-bottom) + 6px)
+      max(28px,env(safe-area-inset-left));
   }
-  .grab{height:20px;min-height:20px}
-  .grab span{width:42px;height:4px}
+  .grab{height:16px;min-height:16px}
+  .grab span{width:38px;height:4px}
 
   .pc{
-    max-width:1380px;
     display:grid;
-    grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);
+    grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
+    /* rows: spacer | title+seek | controls | options | spacer | reserved sync row */
     grid-template-rows:minmax(0,1fr) auto auto auto 46px minmax(0,1fr);
-    column-gap:clamp(28px,4.8vw,68px);
-    row-gap:clamp(10px,1.8vh,18px);
-    padding:4px 0 0;
+    column-gap:clamp(24px,4.4vw,60px);
+    row-gap:clamp(8px,1.6vh,16px);
+    padding:2px 0 0;
     align-items:center;
     align-content:stretch;
   }
 
-  /* LEFT: art / video, vertically centred */
+  /* LEFT: art / video, vertically centred in the area above the sync row */
   .az{
     grid-column:1;grid-row:1 / 7;
     width:100%;height:100%;min-height:0;
@@ -414,16 +434,20 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     display:flex;align-items:center;justify-content:center;
   }
   .art{
-    width:min(100cqw,100cqh,480px);
+    width:min(100cqw,100cqh,520px);
     max-width:100%;max-height:100%;
-    border-radius:18px;
-    box-shadow:0 20px 55px rgba(0,0,0,.45)!important;
+    border-radius:16px;
+    box-shadow:none!important;
   }
   #yt.vid{
-    border-radius:18px;
+    border-radius:16px;
     overflow:hidden;
     background:#000;
-    box-shadow:0 20px 55px rgba(0,0,0,.45)!important;
+    box-shadow:none!important;
+  }
+  #yt.vid iframe{
+    display:block;
+    border:0;
   }
 
   /* RIGHT: title / artist / heart / seek bar */
@@ -431,7 +455,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     grid-column:2;grid-row:2;
     align-self:center;width:100%;min-width:0;
     display:grid;grid-template-rows:auto auto auto;
-    row-gap:clamp(6px,1vh,10px);
+    row-gap:clamp(4px,.9vh,8px);
     padding:0;
   }
   .meta{
@@ -444,50 +468,50 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     -webkit-box-orient:vertical;
     -webkit-line-clamp:2;
     max-height:2.4em;
-    margin:0 0 4px;
+    margin:0 0 3px;
     overflow:hidden;
     text-overflow:ellipsis;
     overflow-wrap:anywhere;
     white-space:normal;
-    font-size:clamp(19px,2.3vw,26px);
+    font-size:clamp(17px,2.3vw,24px);
     line-height:1.2;
   }
   .meta p{
     margin:0;
-    font-size:clamp(13px,1.5vw,17px);
+    font-size:clamp(12px,1.6vw,16px);
     line-height:1.25;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .like{width:42px;height:42px;flex-shrink:0}
+  .like{width:40px;height:40px;flex-shrink:0}
   .player input.seek{height:22px;margin:0}
-  .trow{margin-top:0;font-size:clamp(11px,1.1vw,12px)}
+  .trow{margin-top:0;font-size:clamp(10px,1.1vw,12px)}
 
   /* RIGHT: prev / play / next */
   .ctr{
     grid-column:2;grid-row:3;
     justify-content:center;align-self:center;
-    gap:clamp(28px,5vw,56px);
+    gap:clamp(25px,5vw,55px);
     padding:2px 0;
     z-index:4;touch-action:manipulation;
   }
-  .cb{width:54px;height:54px;touch-action:manipulation;pointer-events:auto}
-  .cb svg{width:32px;height:32px;pointer-events:none}
-  .cb.big{width:68px;height:68px}
-  .cb.big svg{width:44px;height:44px}
+  .cb{width:50px;height:50px;touch-action:manipulation;pointer-events:auto}
+  .cb svg{width:31px;height:31px;pointer-events:none}
+  .cb.big{width:62px;height:62px}
+  .cb.big svg{width:42px;height:42px}
 
   /* RIGHT: option bar */
   .opts{
     grid-column:2;grid-row:4;
     align-self:center;width:100%;
     display:flex;align-items:center;justify-content:space-around;
-    gap:clamp(4px,1vw,12px);
-    padding:8px 10px;margin:8px 0 0;
+    gap:clamp(3px,1vw,12px);
+    padding:8px 10px;margin:10px 0 0;
     z-index:4;
   }
   .opt{height:46px;max-width:52px;touch-action:manipulation}
   .opt svg{width:21px;height:21px;pointer-events:none}
 
-  /* BOTTOM: reserved sync row */
+  /* BOTTOM: reserved empty row, sync buttons exactly in the middle of the screen */
   .lyadj,.lyadj.show{
     position:relative;
     grid-column:2;grid-row:5;
@@ -500,6 +524,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     padding:0 6px;
     border-radius:24px;
     color:#fff;
+    /* same glass + white stroke as the option bar */
     background:rgba(255,255,255,calc(var(--gaf)*.24));
     border:1px solid rgba(255,255,255,.18);
     border-color:var(--rim);
@@ -540,8 +565,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   }
 
   /* lyrics fill the left column (same box as the art) */
-  .lyr{left:0;right:0;top:0;padding:20px 18px 34px;font-size:clamp(16px,2vw,20px)}
-  .lyr .now{font-size:clamp(19px,2.3vw,23px)}
+  .lyr{left:0;right:0;top:0;padding:20px 18px 34px;font-size:clamp(15px,2vw,19px)}
+  .lyr .now{font-size:clamp(18px,2.2vw,22px)}
 }</style>
 </head>
 <body>
@@ -705,7 +730,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <div class="acmail" id="acMail">Not signed in</div>
         <small id="gInfo"></small>
       </div>
-      <button class="gbtn" id="gIn" type="button"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Sign in</button>
+      <button class="gbtn" id="gIn" type="button"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Sign in</button>
       <button class="sb d" id="gOut" type="button" hidden>Sign out</button>
     </div>
 
@@ -1133,6 +1158,7 @@ $('spBack').onclick=()=>{
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 
 const seek=$('seek');
+/* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
 const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
@@ -1142,10 +1168,11 @@ const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
 const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+/* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
-const isSil()=>au.src.startsWith('data:');
+const isSil=()=>au.src.startsWith('data:');
 
 async function loadLocal(v){
   const id=v.videoId;
@@ -1182,6 +1209,7 @@ au.addEventListener('ended',()=>{
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
 au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))onYtError()});
 
+/* iOS: unlock audio on the first touch so local songs can start after loading */
 (function(){
   const SIL='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   let done=false;
@@ -1204,7 +1232,9 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
-    height:'100%',width:'100%',
+    /* The player always stays 1920x1080 and is only scaled with CSS. It is never resized,
+       so YouTube never lays the picture out at a wrong size (no black bar, no side shift). */
+    height:'1080',width:'1920',
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
@@ -1238,6 +1268,7 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
+    /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
     try{ka.pause()}catch(e){}
@@ -1288,9 +1319,11 @@ function tick(){
   }catch(e){}
 }
 
+
 function startT(){stopT();tick();timer=setInterval(tick,100)}
 function stopT(){clearInterval(timer);timer=null}
 
+/* ---------- SEEK BAR ---------- */
 let seekPointer=null,seekTarget=0;
 
 function seekPercentAt(x){
@@ -1357,6 +1390,7 @@ function resetProg(){
 function toggle(){
   if(isLoc()){au.paused?au.play().catch(()=>{}):au.pause();return}
   if(!apiReady)return;
+  /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
     playing=false;icons();
@@ -1371,8 +1405,9 @@ function toggle(){
   }
 }
 
-const ARTC={};
-const MP={};
+/* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
+const ARTC={};      /* local id -> cover data URL ('' = song has no cover) */
+const MP={};        /* local id -> metadata promise */
 const FB={};
 function fallbackArt(v){
   const s=(v.title||'')+(v.author||'');
@@ -1629,6 +1664,7 @@ function setPlayerBg(v){
   im.src=urls[0];
 }
 
+/* ---------- COVER COLOUR ---------- */
 const tintCache={};
 let curTint='';
 
@@ -1727,6 +1763,7 @@ function setTint(v){
   }
 }
 
+/* ---------- LYRICS (LRCLIB) ---------- */
 let lyOn=false,lyLines=null,lyCur=-1;
 const LY={};
 const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
@@ -1857,6 +1894,7 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
+/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -1922,90 +1960,86 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
+/* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
-
+/* the YouTube iframe is always 1920x1080; only the CSS scale changes */
+function ytFrame(sc){
+  const f=$('yt').querySelector('iframe');
+  if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+}
 on('yfs',()=>{
   if(vidFS){history.back();return}
   vidFS=true;
   syncVideo();
   pushLayer(()=>{vidFS=false;syncVideo()});
 });
-
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
   az.classList.toggle('vid',show);
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
-
   if(!show){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
-    box.style.transform='';box.style.background='';box.style.borderRadius='';
-    $('yfs').hidden=true;
+    ytFrame(200/1920);
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
-
+  /* own fullscreen: the video box fills the screen (rotated in portrait), no native iOS fullscreen, so no pause */
   if(vidFS){
     const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
-    const bw=Math.round(Math.min(lg,sh*16/9)),bh=Math.round(bw*9/16);
+    const bw=Math.min(lg,sh*16/9),bh=bw*9/16;
     box.style.right='auto';box.style.bottom='auto';
-    box.style.left=Math.round(W/2-bw/2)+'px';
-    box.style.top=Math.round(H/2-bh/2)+'px';
-    box.style.width=bw+'px';
-    box.style.height=bh+'px';
+    box.style.left=(W/2-bw/2)+'px';box.style.top=(H/2-bh/2)+'px';
+    box.style.width=bw+'px';box.style.height=bh+'px';
     box.style.transform=por?'rotate(90deg)':'';
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
-    if(apiReady&&yt)try{yt.setPlaybackQuality('hd1080')}catch(e){}
+    
+    const f=box.querySelector('iframe');
+    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     return;
   }
-
-  box.style.transform='';box.style.background='#000';box.style.borderRadius='';
-  $('yfs').hidden=true;
+  box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
-  if(!r.width||!r.height)return;
-
-  const isSideBySide=(innerWidth>innerHeight&&innerHeight<=650)||innerWidth>=860;
-  const maxW=isSideBySide?Math.min(r.width,680):Math.min(r.width,520);
-  const targetW=Math.min(maxW,r.width);
-  const targetH=r.height;
-  
-  let vw, vh;
-  if (targetW / targetH > 16 / 9) {
-    vh = targetH;
-    vw = Math.round(vh * 16 / 9);
-  } else {
-    vw = targetW;
-    vh = Math.round(vw * 9 / 16);
-  }
-
-  const vl=Math.round(r.left+(r.width-vw)/2);
-  const vt=Math.round(r.top+(r.height-vh)/2);
-
+  /* Fit a true 16:9 video in the middle of the left column.
+     In landscape it can use the full column width (no 520px cap), same spot as the album art. */
+  const land=innerWidth>innerHeight;
+  const vw=Math.min(r.width,r.height*16/9,land?9999:520),vh=vw*9/16;
+  const vl=r.left+(r.width-vw)/2,vt=r.top+(r.height-vh)/2;
   box.style.right='auto';box.style.bottom='auto';
-  box.style.left=vl+'px';
-  box.style.top=vt+'px';
-  box.style.width=vw+'px';
-  box.style.height=vh+'px';
+  box.style.left=vl+'px';box.style.top=vt+'px';
+  box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-
-  if(apiReady&&yt)try{yt.setPlaybackQuality('hd1080')}catch(e){}
+  /* The player is laid out at a real 1920x1080 size (setSize) and scaled down to the box.
+     This keeps the picture filling the box (no black bar / side shift) and keeps YouTube's
+     title, share and "more videos" elements small. */
+  ytFrame(vw/1920);
+  try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
+/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
-  if(on)[60,200,520].forEach(t=>setTimeout(syncVideo,t));
+  /* layout can still be settling for a moment, so measure again */
+  if(on)[80,250,600].forEach(t=>setTimeout(syncVideo,t));
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
-const syncVideoLater=()=>[60,250,550].forEach(t=>setTimeout(syncVideo,t));
+const syncVideoLater=()=>[60,300,700].forEach(t=>setTimeout(syncVideo,t));
 addEventListener('orientationchange',syncVideoLater);
 addEventListener('resize',()=>{syncVideo();syncVideoLater()});
+/* any size change of the art/video column keeps the video exactly in place */
 try{new ResizeObserver(()=>{if(vidMode)syncVideo()}).observe($('az'))}catch(e){}
+
+/* The fullscreen close control only exits the fullscreen video layout.
+   It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
@@ -2048,9 +2082,8 @@ function showFull(){
   $('mini').classList.remove('visible');
   $('player').classList.add('active');
   if(queue[idx])setTint(queue[idx]);
-  syncVideo();
-  setTimeout(syncVideo,520);
-  setTimeout(syncVideo,850);
+  setTimeout(syncVideo,540);
+  setTimeout(syncVideo,900);
   pushLayer(()=>{
     mode='mini';
     syncVideo();
@@ -2106,8 +2139,10 @@ function playAt(i,list){
   msMode(false);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
   else pending=v.videoId;
+
 }
 
+const SLEEPS=[0,15,30,60];
 let shuf=false,rep=0,slIdx=0,slT=null;
 
 const next=async()=>{
@@ -2216,6 +2251,7 @@ $('pName').addEventListener('keydown',e=>{if(e.key==='Enter')$('pOk').click()});
 $('psheet').addEventListener('click',e=>{if(e.target.id==='psheet')closeSheet()});
 on('plBtn',openSheet);
 
+/* ---------- SHARE ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
   if(!v||v.local)return;
@@ -2264,6 +2300,9 @@ on('slBtn',()=>{
 
 const prev=()=>{if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length)};
 
+/* ---------- LOCK SCREEN / CONTROL CENTRE ---------- */
+/* A silent looping track makes the phone treat THIS page as the player while a YouTube song plays,
+   so the lock screen shows our title/cover and our prev / next / seek buttons. */
 const MS='mediaSession' in navigator?navigator.mediaSession:null;
 const ka=new Audio();
 ka.loop=true;
@@ -2284,6 +2323,16 @@ function kaClaim(){}
 addEventListener('touchend',()=>{if(!isLoc()&&playing&&ka.paused)kaPlay()},{passive:true});
 
 const ARTM={};
+async function bestYtArt(id){
+  if(ARTM[id])return ARTM[id];
+  for(const [q,sz] of [['maxresdefault','1280x720'],['sddefault','640x480']]){
+    const u=`https://i.ytimg.com/vi/${id}/${q}.jpg`;
+    const ok=await new Promise(r=>{const im=new Image();im.onload=()=>r(im.naturalWidth>200);im.onerror=()=>r(false);im.src=u});
+    if(ok)return ARTM[id]=[{src:u,sizes:sz,type:'image/jpeg'}];
+  }
+  return ARTM[id]=[{src:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,sizes:'480x360',type:'image/jpeg'}];
+}
+
 async function updateMedia(v){
   if(!MS||typeof MediaMetadata==='undefined')return;
   const id=v.videoId,title=v.title||'Unknown Song',artist=v.author||(v.local?'My Files':'YouTube');
@@ -2357,6 +2406,8 @@ pl.addEventListener('touchstart',e=>{
 pl.addEventListener('touchmove',e=>{
   if(mode!=='full')return;
   if(e.target.closest('.lyr'))return;
+  /* Do not cancel touch movement that began on a player button or input.
+     The old order prevented iOS from completing some landscape button taps. */
   if(!ts)return;
   if(e.cancelable)e.preventDefault();
 
@@ -2402,6 +2453,7 @@ function endDrag(e){
 pl.addEventListener('touchend',endDrag,{passive:true});
 pl.addEventListener('touchcancel',endDrag,{passive:true});
 
+/* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
 const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
 
@@ -2419,6 +2471,7 @@ $('likeBtn').addEventListener('click',e=>{
   if(activeTab==='library')renderLib();
 });
 
+/* ---------- SONGS ---------- */
 const instances=[
   'https://inv.nadeko.net',
   'https://invidious.nerdvpn.de',
@@ -2512,6 +2565,8 @@ const shuffle=a=>{
   return a;
 };
 
+/* ---------- MUSIC GROUPS: [weight, queries] ----------
+   All includes every category. South Indian is kept as one combined group. */
 const GROUPS=[
   [6,['Latest Hindi new songs 2026','Hindi new songs 2026','Bollywood latest songs 2026','Latest Bollywood songs','Hindi romantic new songs']],
   [6,['Latest Bangla new songs 2026','Bangla new songs 2026','Bengali latest songs','Kolkata Bangla new songs','Bangladesh latest Bangla songs','Bangla movie new songs']],
@@ -2661,6 +2716,8 @@ function takeSong(){
   return null;
 }
 
+const AHEAD=6000;
+
 function keepFilling(){if(!D.home.busy&&!offMode&&D.home.videos.length<D.home.cap)loadHomeMore()}
 
 async function loadHomeMore(){
@@ -2743,6 +2800,7 @@ async function loadHomeMore(){
   if(added>0)keepFilling();
 }
 
+/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
 function homeCheck(){
@@ -2761,6 +2819,7 @@ setInterval(homeCheck,600);
 let hcRaf=0;
 addEventListener('scroll',()=>{if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;homeCheck()})},{passive:true});
 
+/* ---------- OFFLINE HOME: imported songs ---------- */
 function renderOfflineHome(){
   offMode=true;
   const st=D.home;
@@ -2797,6 +2856,7 @@ function leaveOfflineHome(){
 
 addEventListener('offline',renderOfflineHome);
 
+/* ---------- SEARCH ---------- */
 const q=$('q');
 const getRecent=()=>LS.get('sf_recent',[]);
 const saveRecent=t=>LS.set('sf_recent',[t,...getRecent().filter(x=>x!==t)].slice(0,8));
@@ -2961,11 +3021,12 @@ $('searchMore').onclick=()=>{
   if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
 };
 
+/* ---------- LIBRARY ---------- */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-
+/* ---------- MY FILES (stored on this phone, play offline) ---------- */
 const IDB={
   db:null,
   open(){
@@ -3014,7 +3075,7 @@ async function unzipStored(f){
     const h=new DataView(await f.slice(pos,pos+30).arrayBuffer());
     if(h.getUint32(0,true)!==0x04034b50)break;
     const flags=h.getUint16(6,true),method=h.getUint16(8,true),csz=h.getUint32(18,true),nl=h.getUint16(26,true),el=h.getUint16(28,true);
-    if((flags&8)||method!==0)throw new Error('This zip is compressed.');
+    if((flags&8)||method!==0)throw new Error('This zip is compressed. Open it in Files first, then import the songs.');
     const name=dec.decode(new Uint8Array(await f.slice(pos+30,pos+30+nl).arrayBuffer())).split('/').pop();
     const ds=pos+30+nl+el;
     const ext=(name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'';
@@ -3029,18 +3090,19 @@ async function importFiles(files){
   const flat=[];
   for(const f of files){
     if(/\.zip$/i.test(f.name)){
-      try{flat.push(...await unzipStored(f))}catch(err){}
+      try{flat.push(...await unzipStored(f))}catch(err){bkInfo((err&&err.message)||'Could not open the zip.')}
     }else flat.push(f);
   }
   files=flat;
   if(!files.length)return;
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
   const list=getLoc();
-  let added=0;
+  let added=0,tot=files.length;
   for(const f of files){
     if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name))continue;
+    bkInfo('Adding '+(added+1)+' / '+tot+'…');
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    try{await idbPut(id,f)}catch(err){continue}
+    try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
     list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true,ext:((f.name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'').toLowerCase()});
     added++;
     setLoc(list);
@@ -3050,6 +3112,7 @@ async function importFiles(files){
   renderLib();
   refreshStorage();
   if(offMode)renderOfflineHome();
+  bkInfo(added?(added+' song(s) added to Library → My Files.'):'No audio files were added.');
 }
 $('locIn').onchange=e=>{const files=[...(e.target.files||[])];e.target.value='';importFiles(files)};
 
@@ -3157,7 +3220,7 @@ function renderLib(){
 
   if(!songs.length){
     if(total){g.innerHTML='<div class="empty g">No matching songs.</div>';return}
-    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':loc?'No songs yet.<br><br>Tap Add songs to pick audio files.':'This playlist is empty.'}</div>`;
+    g.innerHTML=`<div class="empty g">${fav?'No favourite songs yet.<br><br>Tap the heart while listening to a song.':hist?'Nothing played yet.':loc?'No songs yet.<br><br>Tap Add songs to pick audio files from your phone. They play even without internet.':'This playlist is empty.<br><br>Add songs using the playlist button in the player.'}</div>`;
     return;
   }
 
@@ -3192,6 +3255,7 @@ $('plDel').onclick=()=>{
 
 $('libBack').onclick=()=>history.back();
 
+/* ---------- NAVIGATION ---------- */
 function setTab(t){
   if(activeTab===t)return;
   activeTab=t;
@@ -3213,17 +3277,22 @@ function setTab(t){
 document.querySelectorAll('.nb').forEach(b=>{
   b.onclick=()=>{
     const tab=b.dataset.tab;
+
     if(tab==='profile'){openProfile();return}
+
     if(tab==='home'&&activeTab==='home'){
       if(window.scrollY>5)window.scrollTo({top:0,behavior:'smooth'});
-      else refreshHome();
+      else doRefresh();
       return;
     }
+
     if(tab==='library'&&activeTab==='library'&&libView!=='folders'){history.back();return}
+
     setTab(tab);
   };
 });
 
+/* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
   const st=D.home;
   if(st.ctl)st.ctl.abort();
@@ -3254,11 +3323,14 @@ let refreshing=false;
 
 function ptrMove(d,anim){
   const t=d>0?`translateY(${d}px)`:'';
+
   homeEl.style.transition=hdrEl.style.transition=anim?EASE:'none';
   homeEl.style.transform=hdrEl.style.transform=t;
+
   ptr.style.transition=anim?'top .3s,opacity .3s':'';
   ptr.style.top=`calc(env(safe-area-inset-top) + ${d*.5-20}px)`;
   ptr.style.opacity=Math.min(d/40,1);
+
   if(!refreshing)ptr.firstElementChild.style.transform=`rotate(${d*4}deg)`;
 }
 
@@ -3276,21 +3348,26 @@ async function doRefresh(){
   ptrMove(0,true);
 }
 
+/* ---------- TOUCH: EDGE SWIPE + PULL TO REFRESH ---------- */
 let sx=0,sy=0,edge=false,pulling=false,pdy=0,inChips=false;
 
 addEventListener('touchstart',e=>{
   const t=e.touches[0];
   sx=t.clientX;
   sy=t.clientY;
+
   edge=sx<24&&!spOpen();
   inChips=!!(e.target.closest&&e.target.closest('.chips'));
   pdy=0;
+
   pulling=activeTab==='home'&&mode!=='full'&&!refreshing&&!spOpen()&&!inChips&&window.scrollY<=0&&e.touches.length===1;
 },{passive:true});
 
 addEventListener('touchmove',e=>{
   if(mode==='full'||spOpen()||inChips)return;
+
   const dy=e.touches[0].clientY-sy;
+
   if(pulling&&dy>0){
     if(window.scrollY>0)pulling=false;
     else{
@@ -3300,6 +3377,11 @@ addEventListener('touchmove',e=>{
     }
     return;
   }
+
+  const atTop=window.scrollY<=0;
+  const atBottom=window.scrollY+innerHeight>=document.documentElement.scrollHeight-1;
+
+  if(e.cancelable&&((activeTab!=='home'&&atTop&&dy>0)||(atBottom&&dy<0)))e.preventDefault();
 },{passive:false});
 
 function touchDone(e){
@@ -3308,6 +3390,7 @@ function touchDone(e){
     if(t.clientX-sx>70&&Math.abs(t.clientY-sy)<70)goBack();
   }
   edge=false;
+
   if(pulling){
     pulling=false;
     if(pdy>=55)doRefresh();
@@ -3315,15 +3398,18 @@ function touchDone(e){
   }
   pdy=0;
 }
+
 addEventListener('touchend',touchDone,{passive:true});
 addEventListener('touchcancel',touchDone,{passive:true});
 
+/* ---------- STORAGE USAGE ---------- */
 const fmtB=n=>{
   if(!Number.isFinite(n)||n<=0)return '0 MB';
   if(n>=1073741824)return (n/1073741824).toFixed(2)+' GB';
   if(n>=1048576)return (n/1048576).toFixed(1)+' MB';
   return Math.max(1,Math.round(n/1024))+' KB';
 };
+
 const songTotal=s=>s.songBytes+s.artBytes+s.other;
 
 async function storageStats(){
@@ -3379,6 +3465,456 @@ async function refreshStorage(){
   }
 }
 
+/* ---------- REMOVE SONGS (frees phone storage) ---------- */
+let rmSel=new Set();
+function rmUpdate(){
+  const n=getLoc().length;
+  $('rmInfo').textContent=n?(rmSel.size+' selected of '+n):'No imported songs.';
+  $('rmDel').disabled=!rmSel.size;
+  $('rmAll').textContent=(n&&rmSel.size===n)?'Deselect all':'Select all';
+  $('rmAll').disabled=!n;
+}
+function openRemove(){
+  const L=getLoc(),box=$('rmList');
+  rmSel=new Set();
+  box.innerHTML='';
+  L.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='pitem';
+    const n=document.createElement('span');
+    n.textContent=v.title||'Untitled';
+    const c=document.createElement('small');
+    b.append(n,c);
+    b.onclick=()=>{
+      if(rmSel.has(v.videoId)){rmSel.delete(v.videoId);b.classList.remove('sel')}
+      else{rmSel.add(v.videoId);b.classList.add('sel')}
+      rmUpdate();
+    };
+    b.dataset.id=v.videoId;
+    box.appendChild(b);
+    idbGet(v.videoId).then(bl=>{if(bl&&bl.size)c.textContent=fmtB(bl.size)}).catch(()=>{});
+  });
+  rmUpdate();
+  $('rmSheet').hidden=false;
+}
+$('bkManage').onclick=openRemove;
+$('rmClose').onclick=()=>{$('rmSheet').hidden=true};
+$('rmSheet').addEventListener('click',e=>{if(e.target.id==='rmSheet')$('rmSheet').hidden=true});
+$('rmAll').onclick=()=>{
+  const L=getLoc(),all=L.length&&rmSel.size===L.length;
+  rmSel=new Set(all?[]:L.map(v=>v.videoId));
+  document.querySelectorAll('#rmList .pitem').forEach(b=>b.classList.toggle('sel',rmSel.has(b.dataset.id)));
+  rmUpdate();
+};
+$('rmDel').onclick=async()=>{
+  const ids=[...rmSel];
+  if(!ids.length)return;
+  if(!confirm('Delete '+ids.length+' song(s) from this phone? This frees the storage and cannot be undone.'))return;
+  $('rmDel').disabled=true;$('rmAll').disabled=true;
+  const set=new Set(ids);
+  if(queue[idx]&&set.has(queue[idx].videoId))closePlayer();
+  for(let i=0;i<ids.length;i++){
+    $('rmInfo').textContent='Deleting '+(i+1)+' / '+ids.length+'…';
+    await idbDel(ids[i]).catch(()=>{});
+    await idbDel('art_'+ids[i]).catch(()=>{});
+    delete ARTC[ids[i]];delete MP[ids[i]];delete tintCache[ids[i]];
+  }
+  const keep=x=>!set.has(x.videoId);
+  setLoc(getLoc().filter(keep));
+  LS.set('sf_liked_songs',getLiked().filter(keep));
+  LS.set('sf_history',getHist().filter(keep));
+  setPL(getPL().map(p=>({...p,songs:p.songs.filter(keep)})));
+  renderLib();
+  if(offMode)renderOfflineHome();
+  await refreshStorage();
+  openRemove();
+};
+
+/* ---------- BACKUP & RESTORE (original quality, one file) ----------
+   File format .sfbak:  "SFBK2\n" then repeated entries:
+   [4 bytes header length][header JSON][raw bytes]
+   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
+const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
+let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
+
+function bkEntry(head,body){
+  const h=BK_ENC.encode(JSON.stringify(head));
+  const l=new Uint8Array(4);
+  new DataView(l.buffer).setUint32(0,h.length);
+  return [l,h,body];
+}
+
+function bkInfo(t){$('bkInfo').textContent=t||''}
+
+const bkSInfo=t=>{$('bkSInfo').textContent=t||''};
+let bkSel=new Set(),bkSizes={},bkReady=null;
+
+function bkText(){
+  const n=getLoc().length;
+  let tot=0;bkSel.forEach(id=>{tot+=bkSizes[id]||0});
+  bkSInfo(n?(bkSel.size+' of '+n+' selected · '+fmtB(tot)+(tot>1.2e9?'. Big file: if saving fails, select fewer songs and make more than one backup.':'')):'No imported songs.');
+}
+function bkUpdate(){
+  const n=getLoc().length;
+  bkReady=null;bkQ=null;
+  $('bkGo').textContent='Save to file';
+  $('bkGo').disabled=!bkSel.size||bkBusy;
+  $('bkAll').textContent=(n&&bkSel.size===n)?'Deselect all':'Select all';
+  $('bkAll').disabled=!n||bkBusy;
+  bkText();
+}
+
+function openBackupPicker(){
+  if(bkBusy)return;
+  const L=getLoc(),box=$('bkList');
+  bkSel=new Set();bkSizes={};bkReady=null;bkQ=null;
+  box.innerHTML='';
+  L.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='pitem';b.dataset.id=v.videoId;
+    const n=document.createElement('span');
+    n.textContent=v.title||'Untitled';
+    const c=document.createElement('small');
+    b.append(n,c);
+    b.onclick=()=>{
+      if(bkBusy)return;
+      if(bkSel.has(v.videoId)){bkSel.delete(v.videoId);b.classList.remove('sel')}
+      else{bkSel.add(v.videoId);b.classList.add('sel')}
+      bkUpdate();
+    };
+    box.appendChild(b);
+    idbGet(v.videoId).then(bl=>{
+      if(bl&&bl.size){bkSizes[v.videoId]=bl.size;c.textContent=fmtB(bl.size);bkText()}
+    }).catch(()=>{});
+  });
+  bkUpdate();
+  $('bkSheet').hidden=false;
+}
+
+function bkFileName(L,stamp){
+  const clean=t=>(t||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,40);
+  const first=clean(L[0]&&L[0].title)||'Songs';
+  const base=L.length>1?first+' +'+(L.length-1)+' songs':first;
+  return base+' '+stamp+'.sfbak';
+}
+
+async function buildBackup(ids){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  const set=new Set(ids);
+  const L=getLoc().filter(v=>set.has(v.videoId));
+  const meta={
+    liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),
+    settings:S,local:L,lyoff:LS.get('sf_lyoff',{}),photo:PHOTO,t:Date.now()
+  };
+  const mb=BK_ENC.encode(JSON.stringify(meta));
+  const parts=[BK_ENC.encode('SFBK2\n'),...bkEntry({k:'meta',n:mb.length},mb)];
+  let done=0;
+  for(const v of L){
+    bkSInfo('Preparing '+(++done)+' / '+L.length+'…');
+    const blob=await idbGet(v.videoId);
+    if(!blob)continue;
+    parts.push(...bkEntry({k:'file',id:v.videoId,n:blob.size,type:blob.type||''},blob));
+    const art=await idbGet('art_'+v.videoId);
+    if(typeof art==='string'&&art){
+      const ab=BK_ENC.encode(art);
+      parts.push(...bkEntry({k:'art',id:v.videoId,n:ab.length},ab));
+    }
+  }
+  const d=new Date(),z=x=>String(x).padStart(2,'0');
+  return {
+    blob:new Blob(parts,{type:'application/octet-stream'}),
+    name:bkFileName(L,d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())),
+    count:L.length
+  };
+}
+
+async function bkDeliver(b,auto){
+  const f=new File([b.blob],b.name,{type:'application/octet-stream'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      await navigator.share({files:[f],title:b.name});
+      bkSInfo('Done. Keep this file in Files or Google Drive.');
+      return 'done';
+    }
+  }catch(e){
+    if(e&&e.name==='AbortError')return 'cancel';
+    if(auto)return 'retry';
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b.blob);
+  a.download=b.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+  bkSInfo('File downloaded to your Downloads / Files.');
+  return 'done';
+}
+
+const BK_EXT={'audio/mpeg':'mp3','audio/mp3':'mp3','audio/mp4':'m4a','audio/x-m4a':'m4a','audio/m4a':'m4a','audio/aac':'aac','audio/wav':'wav','audio/x-wav':'wav','audio/flac':'flac','audio/x-flac':'flac','audio/ogg':'ogg','audio/opus':'opus'};
+const bkClean=t=>(t||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+
+async function buildAudio(ids){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  const set=new Set(ids),L=getLoc().filter(v=>set.has(v.videoId));
+  const files=[],used={};
+  let done=0,size=0;
+  for(const v of L){
+    bkSInfo('Preparing '+(++done)+' / '+L.length+'…');
+    const blob=await idbGet(v.videoId);
+    if(!blob)continue;
+    const ext=v.ext||BK_EXT[blob.type]||'mp3';
+    const base=bkClean(v.title)||'Song';
+    let n=base,k=1;
+    while(used[n.toLowerCase()])n=base+' ('+(++k)+')';
+    used[n.toLowerCase()]=1;
+    files.push(new File([blob],n+'.'+ext,{type:blob.type||'audio/mpeg'}));
+    size+=blob.size;
+  }
+  if(!files.length)throw new Error('No song files found.');
+  return {files,count:files.length,size};
+}
+
+let bkQ=null;
+
+function bkDownload(f){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(f);
+  a.download=f.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+}
+
+function bkLabel(q){
+  $('bkGo').textContent=q.i===0?'Tap to save':'Save next ('+(q.i+1)+'/'+q.files.length+')';
+}
+
+/* One song per tap: the phone's save sheet only handles a single file reliably. */
+async function bkSaveOne(auto){
+  const q=bkQ;
+  if(!q)return;
+  const f=q.files[q.i],N=q.files.length;
+  let r='done';
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f]});
+    else bkDownload(f);
+  }catch(e){
+    if(e&&e.name==='AbortError')r='cancel';
+    else if(auto)r='retry';
+    else bkDownload(f);
+  }
+  if(r==='done'){
+    q.i++;
+    if(q.i>=N){
+      bkQ=null;
+      $('bkGo').textContent='Save to file';
+      bkSInfo(f.name.toLowerCase().endsWith('.zip')?'Done. Open the zip in Files to get every song, or use Import songs and pick the zip.':'Done. '+N+' song(s) saved.');
+      return;
+    }
+    bkLabel(q);
+    bkSInfo('Saved '+q.i+' of '+N+'. Tap "Save next" for: '+q.files[q.i].name);
+  }else{
+    bkLabel(q);
+    bkSInfo('Tap to save: '+f.name+' ('+(q.i+1)+' of '+N+')');
+  }
+}
+
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+async function crc32Blob(blob){
+  let c=0xFFFFFFFF;
+  const CH=4*1048576;
+  for(let o=0;o<blob.size;o+=CH){
+    const b=new Uint8Array(await blob.slice(o,o+CH).arrayBuffer());
+    for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);
+  }
+  return (c^0xFFFFFFFF)>>>0;
+}
+
+/* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
+async function buildZip(files){
+  const parts=[],cds=[];
+  let off=0,i=0;
+  const d=new Date();
+  const dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF;
+  const dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+  for(const f of files){
+    bkSInfo('Packing '+(++i)+' / '+files.length+'…');
+    const nm=BK_ENC.encode(f.name),crc=await crc32Blob(f),sz=f.size;
+    if(sz>=0xFFFFFFFF||off>=0xFFFFFFFF)throw new Error('Too big for one zip. Use "One by one" or select fewer songs.');
+    const lh=new Uint8Array(30),v=new DataView(lh.buffer);
+    v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,0x0800,true);v.setUint16(8,0,true);
+    v.setUint16(10,dt,true);v.setUint16(12,dd,true);v.setUint32(14,crc,true);v.setUint32(18,sz,true);v.setUint32(22,sz,true);
+    v.setUint16(26,nm.length,true);v.setUint16(28,0,true);
+    parts.push(lh,nm,f);
+    const ch=new Uint8Array(46),c=new DataView(ch.buffer);
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);
+    c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);
+    c.setUint16(28,nm.length,true);c.setUint16(30,0,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);
+    c.setUint32(38,0,true);c.setUint32(42,off,true);
+    cds.push(ch,nm);
+    off+=30+nm.length+sz;
+  }
+  let cdSize=0;
+  cds.forEach(x=>{cdSize+=x.length});
+  const end=new Uint8Array(22),e=new DataView(end.buffer);
+  e.setUint32(0,0x06054b50,true);e.setUint16(4,0,true);e.setUint16(6,0,true);
+  e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);
+  e.setUint32(12,cdSize,true);e.setUint32(16,off,true);e.setUint16(20,0,true);
+  return new Blob([...parts,...cds,end],{type:'application/zip'});
+}
+
+async function bkStart(mode){
+  if(bkBusy)return;
+  if(bkQ){await bkSaveOne(false);return}
+  const ids=[...bkSel];
+  if(!ids.length)return;
+  bkBusy=true;
+  $('bkGo').disabled=true;$('bkAll').disabled=true;
+  let res=null,zip=null;
+  try{
+    res=await buildAudio(ids);
+    if(mode==='zip'&&res.count>1)zip=await buildZip(res.files);
+  }catch(e){
+    bkSInfo('Failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'));
+    res=null;
+  }
+  bkBusy=false;
+  $('bkAll').disabled=false;
+  $('bkGo').disabled=!bkSel.size;
+  if(!res)return;
+  if(zip){
+    const f=new File([zip],'SoundFlow songs '+res.count+'.zip',{type:'application/zip'});
+    bkQ={files:[f],i:0};
+    bkSInfo('Ready: one zip with '+res.count+' songs, '+fmtB(zip.size)+'.');
+  }else{
+    bkQ={files:res.files,i:0};
+    bkSInfo('Ready: '+res.count+' song(s), '+fmtB(res.size)+'.');
+  }
+  await bkSaveOne(true);
+}
+$('bkGo').onclick=()=>bkStart('zip');
+
+
+$('bkMake').onclick=openBackupPicker;
+$('bkClose').onclick=()=>{if(!bkBusy)$('bkSheet').hidden=true};
+$('bkSheet').addEventListener('click',e=>{if(e.target.id==='bkSheet'&&!bkBusy)$('bkSheet').hidden=true});
+$('bkAll').onclick=()=>{
+  if(bkBusy)return;
+  const L=getLoc(),all=L.length&&bkSel.size===L.length;
+  bkSel=new Set(all?[]:L.map(v=>v.videoId));
+  document.querySelectorAll('#bkList .pitem').forEach(b=>b.classList.toggle('sel',bkSel.has(b.dataset.id)));
+  bkUpdate();
+};
+
+$('bkRestore').onclick=()=>$('locIn').click();
+
+const uniq=(a=[],b=[])=>{
+  const m=new Set();
+  return [...(a||[]),...(b||[])].filter(x=>x&&x.videoId&&!m.has(x.videoId)&&m.add(x.videoId));
+};
+
+function applyMeta(d,okIds){
+  LS.set('sf_liked_songs',uniq(getLiked(),d.liked));
+  LS.set('sf_history',uniq(getHist(),d.hist).slice(0,50));
+  const P=getPL();
+  (d.pl||[]).forEach(c=>{
+    const l=P.find(x=>x.id===c.id);
+    if(l)l.songs=uniq(l.songs,c.songs);else P.push(c);
+  });
+  setPL(P);
+  LS.set('sf_recent',[...new Set([...getRecent(),...(d.recent||[])])].slice(0,8));
+  if(d.local){
+    const cur=getLoc(),have=new Set(cur.map(x=>x.videoId));
+    d.local.forEach(x=>{if(x&&x.videoId&&!have.has(x.videoId)&&(!okIds||okIds.has(x.videoId)))cur.push(x)});
+    setLoc(cur);
+  }
+  if(d.lyoff)LS.set('sf_lyoff',{...getOffs(),...d.lyoff});
+  if(d.photo)LS.set('sf_bg_photo',d.photo);
+  if(d.settings){S={...DEF,...d.settings};save()}
+}
+
+$('bkIn').onchange=async e=>{
+  const fl=[...(e.target.files||[])];
+  e.target.value='';
+  const f=fl[0];
+  if(!f||bkBusy)return;
+  const isAud=x=>(x.type||'').startsWith('audio/')||/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(x.name);
+  if(fl.every(isAud)){
+    bkBusy=true;
+    $('bkMake').disabled=true;$('bkRestore').disabled=true;
+    bkInfo('Adding '+fl.length+' song(s) to My Files…');
+    try{await importFiles(fl);bkInfo('Done. '+fl.length+' song(s) added to Library → My Files.')}
+    catch(err){bkInfo('Could not add songs: '+((err&&err.message)||'error'))}
+    bkBusy=false;
+    $('bkMake').disabled=false;$('bkRestore').disabled=false;
+    return;
+  }
+  bkBusy=true;
+  $('bkMake').disabled=true;$('bkRestore').disabled=true;
+  try{
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
+    const magic=BK_DEC.decode(await u8(f,0,6));
+    if(magic.startsWith('SFBK2')){
+      let pos=6,meta=null,files=0,failed=0;
+      const okIds=new Set(),size=f.size;
+      while(pos+4<=size){
+        const hl=new DataView(await f.slice(pos,pos+4).arrayBuffer()).getUint32(0);
+        pos+=4;
+        const h=JSON.parse(BK_DEC.decode(await u8(f,pos,hl)));
+        pos+=hl;
+        const end=pos+h.n;
+        if(end>size)throw new Error('The backup file is incomplete or damaged.');
+        if(h.k==='meta'){
+          meta=JSON.parse(BK_DEC.decode(await u8(f,pos,h.n)));
+        }else if(h.k==='file'){
+          bkInfo('Restoring song '+(files+failed+1)+(meta&&meta.local?' / '+meta.local.length:'')+'…');
+          try{
+            await idbPut(h.id,f.slice(pos,end,h.type||'audio/mpeg'));
+            okIds.add(h.id);files++;
+          }catch(err){failed++}
+        }else if(h.k==='art'){
+          try{await idbPut('art_'+h.id,BK_DEC.decode(await u8(f,pos,h.n)))}catch(err){}
+        }
+        pos=end;
+        refreshStorage();
+      }
+      if(!meta)throw new Error('The backup file has no data.');
+      applyMeta(meta,okIds);
+      bkInfo('Restored '+files+' songs in original quality'+(failed?' ('+failed+' could not be saved: storage full)':'')+'. Reloading…');
+    }else{
+      const d=JSON.parse(await f.text());
+      applyMeta(d,null);
+      bkInfo('Restored favourites, playlists and settings. Reloading…');
+    }
+    setTimeout(()=>location.reload(),1200);
+  }catch(err){
+    bkInfo('Restore failed: '+((err&&err.message)||'invalid backup file.'));
+    $('bkMake').disabled=false;$('bkRestore').disabled=false;
+    bkBusy=false;
+    refreshStorage();
+  }
+};
+
+/* ---------- OFFLINE (service worker) ---------- */
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
+addEventListener('online',()=>{
+  if(offMode)leaveOfflineHome();
+  else if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
+});
+
+/* ---------- INIT ---------- */
+buildSettingsUI();
+apply();
+icons();
+setProg(0);
+renderLib();
+renderRecent();
+refreshStorage();
+if(navigator.onLine)loadHomeMore();else renderOfflineHome();
+
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
 document.querySelectorAll('.spb .sec').forEach(sec=>{
   const h=sec.querySelector('h3');
   if(!h)return;
@@ -3389,6 +3925,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   });
 });
 
+/* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
 (function(){
   const CFG={
     apiKey:"AIzaSyBEbe08tF-kLx_NMjK4U9x38Nf54_MXLH4",
@@ -3403,6 +3940,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 
   const info=t=>{$('gInfo').textContent=t};
 
+  /* Show Gmail name, email and profile photo in the account card */
   function renderAcct(u){
     $('gIn').hidden=!!u;
     $('gOut').hidden=!u;
@@ -3493,12 +4031,24 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     try{await auth.signInWithPopup(p)}
     catch(e){
       if(e.code==='auth/popup-closed-by-user')return;
+      if(e.code==='auth/unauthorized-domain')return info('Add your site domain in Firebase → Authentication → Settings → Authorized domains');
       try{await auth.signInWithRedirect(p)}catch(err){info('Login error: '+(err.code||err.message))}
     }
   };
   $('gOut').onclick=()=>{if(auth)auth.signOut()};
 })();
 
+/* =====================================================================
+   LIQUID GLASS TOUCH ENGINE
+   Touch any glass control (cards, tabs, chips, player buttons, settings
+   buttons...) and it behaves like a drop of water:
+   1. swells up under your finger
+   2. follows your finger a little (and stretches)
+   3. shows a moving light reflection + glass rim
+   4. sends out two water ripple rings from the touch point
+   5. icons bend like under water for a moment
+   6. wobbles like jelly when you let go
+   ===================================================================== */
 (function(){
   const SEL='.card,.chip,.nb,.opt,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.acct,.pv,.sw button,.sw label,.lyadj button,#yfs';
   const dm=$('lqDisp'),tb=$('lqTurb');
@@ -3508,6 +4058,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   const off=()=>document.documentElement.dataset.anim==='off';
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
+  /* water bend on the icons (shared SVG filter, animated by script) */
   function wobble(el,amp){
     if(!dm||!tb)return;
     if(wobEl&&wobEl!==el)wobEl.classList.remove('lqw');
@@ -3537,6 +4088,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     el.style.setProperty('--ly',(st.y-r.top)+'px');
   }
 
+  /* swell + follow the finger */
   function applyShape(st){
     const r=st.r,el=st.el;
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -3566,6 +4118,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   function engage(st){
     if(st.fx)return;
     const el=st.el;
+    /* finish any older effect on the same element */
     clearTimeout(el._lqT);
     if(el._lqA){try{el._lqA.cancel()}catch(e){}el._lqA=null}
     el.querySelectorAll(':scope>.lq-fx').forEach(n=>n.remove());
@@ -3588,6 +4141,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     wobble(el,clamp(Math.min(r.width,r.height)*.14,2,7));
   }
 
+  /* let go: jelly wobble, then clean up */
   function release(st){
     const el=st.el,fx=st.fx,r=st.r;
     if(!fx)return;
@@ -3659,6 +4213,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     P.delete(e.pointerId);
     clearTimeout(st.tm);
     cancelAnimationFrame(st.raf);
+    /* very quick tap on a big card: still play the effect once */
     if(!st.fx&&!cancel&&e.type==='pointerup')engage(st);
     release(st);
   }
@@ -3671,5 +4226,3 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
 </script>
 </body>
 </html>
-
-```
