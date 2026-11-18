@@ -192,10 +192,10 @@ body.dragging #topfade{opacity:0}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 
 /* VIDEO CONTAINER FIX:
-   True 16:9 container with rounded mask; keep iframe at native 16:9 without setSize distortion */
+   True 16:9 container with rounded mask; scale iframe to completely fill without any black bars */
 #yt{position:fixed;right:0;bottom:0;width:320px;height:180px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
-#yt.vid{z-index:10001;opacity:1;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.45);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0);pointer-events:auto}
-#yt iframe,#ytp{position:absolute!important;top:50%!important;left:50%!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;display:block!important;transform:translate(-50%,-50%) scale(1.02)!important;object-fit:cover!important}
+#yt.vid{z-index:10001;opacity:1;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.45);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0);pointer-events:auto;display:flex;align-items:center;justify-content:center}
+#yt iframe,#ytp{position:absolute!important;top:50%!important;left:50%!important;width:177.77% !important;height:100% !important;min-width:100%!important;min-height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;display:block!important;transform:translate(-50%,-50%)!important;object-fit:cover!important}
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
@@ -1978,21 +1978,9 @@ function syncVideo(){
   const r=az.getBoundingClientRect();
   if(!r.width||!r.height)return;
 
-  const isSideBySide=(innerWidth>innerHeight&&innerHeight<=650)||innerWidth>=860;
-  const maxW=isSideBySide?Math.min(r.width,680):Math.min(r.width,520);
-  const targetW=Math.min(maxW,r.width);
-  const targetH=r.height;
-  
-  let vw, vh;
-  if (targetW / targetH > 16 / 9) {
-    vh = targetH;
-    vw = Math.round(vh * 16 / 9);
-  } else {
-    vw = targetW;
-    vh = Math.round(vw * 9 / 16);
-  }
-
-  const vl=Math.round(r.left+(r.width-vw)/2);
+  const vw=Math.round(r.width);
+  const vh=Math.round(vw*9/16);
+  const vl=Math.round(r.left);
   const vt=Math.round(r.top+(r.height-vh)/2);
 
   box.style.right='auto';box.style.bottom='auto';
