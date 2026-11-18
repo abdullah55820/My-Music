@@ -1713,6 +1713,20 @@ on('yfs',()=>{
   syncVideo();
   pushLayer(()=>{vidFS=false;syncVideo()});
 });
+/* iPhone landscape: YouTube's iframe adds the notch safe-area padding inside the player, which pushes the video aside.
+   Make the iframe wider by that amount and shift it back so the video fills the box exactly. */
+function ifCss(scale){
+  let L=0,R=0;
+  try{
+    const p=document.createElement('div');
+    p.style.cssText='position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)';
+    document.body.appendChild(p);
+    const cs=getComputedStyle(p);
+    L=parseFloat(cs.paddingLeft)||0;R=parseFloat(cs.paddingRight)||0;
+    p.remove();
+  }catch(e){}
+  return 'position:absolute;left:'+(-L)+'px;top:0;border:0;max-width:none;width:'+(1920+L+R)+'px;height:1080px;transform-origin:'+L+'px 0;transform:scale('+scale+')';
+}
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
@@ -1739,7 +1753,7 @@ function syncVideo(){
     box.classList.add('vid');
     
     const f=box.querySelector('iframe');
-    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
+    if(f)f.style.cssText=ifCss(bw/1920);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -1757,7 +1771,7 @@ function syncVideo(){
   box.classList.add('vid');
   /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
-  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
+  if(fr)fr.style.cssText=ifCss(sz/1920);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
