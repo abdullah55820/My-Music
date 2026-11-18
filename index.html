@@ -280,57 +280,98 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #rmList .pitem small,#bkList .pitem small{flex-shrink:0}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
-/* ===== LANDSCAPE PLAYER (Apple Music style) ===== */
-@media (orientation:landscape) and (max-height:600px){
-  .player{padding:calc(env(safe-area-inset-top) + 2px) calc(env(safe-area-inset-right) + 30px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 30px)}
-  .grab{height:20px}
-  .grab span{width:40px;height:4px}
+/* =====================================================================
+   DESKTOP MODE (copied from Org): bottom controller card, video + playlist on the right
+   ===================================================================== */
+.dktop,.dkvol,#dvSec{display:none}
+@keyframes dkspin{to{rotate:360deg}}
+@keyframes dkpulse{0%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}100%{opacity:1;transform:scale(1)}}
+@media(min-width:769px){
+  .player{padding:0}
+  .player .grab{position:absolute;left:18px;top:14px;width:56px;height:30px;border-radius:20px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);cursor:pointer}
+  .player .grab span{width:22px;height:4px}
 
-  /* 2 columns: cover on the left, everything else on the right */
-  .pc{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) min(44vw,calc(100dvh - 64px));
-    grid-template-rows:auto 1fr auto auto;
-    column-gap:clamp(24px,5vw,48px);
-    row-gap:0;
-    padding-top:6px;
-    padding-bottom:0;
-    align-items:stretch;
-  }
-  .az{grid-column:2;grid-row:1/5}
-  .pc>div:nth-child(2){grid-column:1;grid-row:1;align-self:start;padding-top:8px}
-  .ctr{grid-column:1;grid-row:2;align-self:center;gap:clamp(36px,9vw,70px)}
-  .opts{
-    grid-column:1;grid-row:3;align-self:end;
-    background:none;border:0;padding:0;
-    backdrop-filter:none;-webkit-backdrop-filter:none;
-    margin-bottom:4px;
-  }
-  .lyadj{position:static;grid-column:1;grid-row:4;display:none;height:34px;margin-top:2px}
-  .lyadj.show{display:flex}
+  /* controller card */
+  .pc{--dkw:min(560px,70vw);position:absolute;flex:none;bottom:65px;left:calc(50% - var(--dkw)/2);width:var(--dkw);margin:0;padding:14px 22px 12px;display:grid;grid-template-columns:84px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:12px;row-gap:8px;align-items:center;transition:left .35s cubic-bezier(.2,.8,.2,1),width .35s ease}
+  .pc::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:42px;background:rgba(20,20,20,.35);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 50px rgba(0,0,0,.45);pointer-events:none}
+  body.dks .pc{--dkw:min(699px,47.84vw);left:40px}
 
-  /* title / artist */
-  .meta{margin-bottom:6px}
-  .meta h3{font-size:19px;margin-bottom:3px}
-  .meta p{font-size:16px}
-  .like{width:38px;height:38px}
-  .like svg{width:24px;height:24px}
+  /* cover = spinning disc */
+  .az{grid-column:1;grid-row:1;width:84px;height:84px;flex:none;container-type:normal;position:relative}
+  .art{position:relative;width:84px;height:84px;border-radius:50%;border:1px solid rgba(255,255,255,.3);box-shadow:none;animation:dkspin 8s linear infinite;transition:none}
+  .art.paused{transform:none;box-shadow:none;animation-play-state:paused}
+  .art::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:16px;border-radius:50%;background:rgba(20,20,20,.85);border:2px solid rgba(255,255,255,.3);transform:translate(-50%,-50%);z-index:2}
+  .az.vid .art,.az.lyon .art{visibility:visible!important}
+
+  /* title / artist / seek / time */
+  .pc>div:not(.az):not(.lyadj){grid-column:2;grid-row:1;min-width:0}
+  .meta{margin-bottom:0;gap:8px}
+  .meta h3{font-size:16px;font-weight:700;margin:0 0 2px;letter-spacing:.2px}
+  .meta p{font-size:12px;color:rgba(255,255,255,.65)}
+  .like{width:28px;height:28px}
+  .like svg{width:20px;height:20px}
+  .player input.seek{height:20px;margin:2px 0 0}
+  .trow{margin-top:0;font-size:11px}
 
   /* controls */
-  .cb{width:52px;height:52px}
-  .cb svg{width:38px;height:38px}
-  .cb.big{width:72px;height:72px}
-  .cb.big svg{width:58px;height:58px}
+  .ctr{grid-column:3;grid-row:1;gap:8px;justify-content:flex-end}
+  .cb{width:34px;height:34px}
+  .cb svg{width:22px;height:22px}
+  .cb.big{width:44px;height:44px;border-radius:50%;background:#fff;color:#000;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+  .cb.big svg{width:20px;height:20px}
+  .dkvol{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);padding:4px 6px;border-radius:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .dkvol button{width:28px;height:28px;display:grid;place-items:center;color:#fff}
+  .dkvol button svg{width:20px;height:20px;fill:#fff}
+  .dkvw{width:0;overflow:hidden;opacity:0;display:flex;align-items:center;transition:width .28s cubic-bezier(.2,.8,.2,1),opacity .2s}
+  .dkvw.on{width:55px;opacity:1;margin-left:2px}
+  .dkvw input{-webkit-appearance:none;appearance:none;width:55px;height:3.5px;margin:0;padding:0;background:rgba(255,255,255,.3);border-radius:10px;outline:none;cursor:pointer}
+  .dkvw input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 5px rgba(0,0,0,.5)}
+  .dkvw input::-moz-range-thumb{width:10px;height:10px;border:0;border-radius:50%;background:#fff}
 
-  /* bottom icon row */
-  .opt{height:42px;max-width:46px}
-  .opt svg{width:22px;height:22px}
+  /* option row (shuffle / repeat / lyrics / video / sleep / playlist / share) */
+  .opts{grid-column:1/-1;grid-row:2;padding:3px 8px;border-radius:22px}
+  .opt{height:36px;max-width:44px}
+  .opt svg{width:20px;height:20px}
 
-  /* lyrics fill the cover area instead of the whole screen */
-  .lyr{left:0;right:0;top:0;bottom:0;padding:14px 12px 28px;font-size:17px;border-radius:14px}
-  .lyr .now{font-size:20px}
-  .lyr div{margin:9px 0}
+  /* top widgets: BD time + playlist button */
+  .dktop{display:flex;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:6;flex-direction:column;align-items:center;gap:8px;transition:left .35s cubic-bezier(.2,.8,.2,1)}
+  body.dks .dktop{left:calc(40px + min(349.5px,23.92vw))}
+  .dkbd,.dkplb{padding:5px 12px;border-radius:20px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.9);font-size:11px;font-weight:600;letter-spacing:.3px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;gap:6px}
+  .dkplb{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+  .dkplb:active{transform:scale(.95)}
+  .dkplb svg{width:14px;height:14px;fill:#fff}
+  .dkdot{width:7px;height:7px;background:#ff3b30;border-radius:50%;box-shadow:0 0 8px #ff3b30;animation:dkpulse 1.5s infinite}
+  body.dkv .dkplb{display:none}
+
+  /* right side: video + playlist (also used for the plain playlist view) */
+  #dvSec{display:flex;flex-direction:column;position:fixed;top:4vh;right:4vw;width:min(620px,42vw);height:92dvh;z-index:2;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility .3s}
+  body.dkv #dvSec,body.dkq #dvSec{opacity:1;visibility:visible}
+  #dvFrame{display:none;aspect-ratio:16/9;width:100%;flex-shrink:0;border-radius:18px;background:#000;border:1px solid rgba(255,255,255,.25);box-shadow:0 25px 50px rgba(0,0,0,.7)}
+  body.dkv #dvFrame{display:block}
+  #dvList{flex:1;min-height:100px;margin-top:0;padding:7px;display:flex;flex-direction:column;overflow:hidden;border-radius:15px;background:rgba(20,20,20,.52);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(25px) saturate(150%);-webkit-backdrop-filter:blur(25px) saturate(150%);box-shadow:0 15px 40px rgba(0,0,0,.55);pointer-events:auto}
+  body.dkv #dvList{margin-top:10px}
+  .dvh{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);padding:6px 8px 8px;border-bottom:1px solid rgba(255,255,255,.13);margin-bottom:5px;flex-shrink:0}
+  .dvl{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin}
+  .dvi{display:flex;align-items:center;gap:10px;padding:6px;border-radius:12px;cursor:pointer;color:#fff}
+  .dvi:hover{background:rgba(255,255,255,.1)}
+  .dvi.cur{background:rgba(255,255,255,.2)}
+  .dvi img{width:64px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#222}
+  .dvt{flex:1;min-width:0}
+  .dvt b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dvt span{display:block;margin-top:2px;font-size:11px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* lyrics = right-hand panel */
+  body.dkl .lyr{position:fixed;left:auto;right:4vw;top:4vh;bottom:auto;width:min(620px,42vw);height:92dvh;padding:40px 28px 70px;border-radius:18px;background:rgba(20,20,20,.35);border:1px solid rgba(255,255,255,.18)}
+  body.dkl .lyadj:not(.kb){position:fixed;left:auto;right:4vw;bottom:calc(4vh + 12px);width:min(620px,42vw)}
 }
+@media(min-width:769px) and (max-height:800px){
+  #dvSec{top:3vh;height:94dvh}
+  body.dkl .lyr{top:3vh;height:94dvh}
+}
+@media(min-width:769px) and (max-height:640px){
+  .pc{bottom:24px}
+}
+@supports (-webkit-touch-callout:none){.dkvol{display:none!important}}
 </style>
 </head>
 <body>
@@ -436,6 +477,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <button class="cb" id="prevBtn" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6v12L2 12zM21 6v12l-9-6z"/></svg></button>
       <button class="cb big" id="playBtn" type="button" aria-label="Play or pause"><svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
       <button class="cb" id="nextBtn" type="button" aria-label="Next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6v12l9-6zM13 6v12l9-6z"/></svg></button>
+      <div class="dkvol" id="dkVol">
+        <button id="volBtn" type="button" aria-label="Volume"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
+        <div class="dkvw" id="volW"><input type="range" id="volR" min="0" max="100" value="100" aria-label="Volume"></div>
+      </div>
     </div>
     <div class="opts">
       <button class="opt" id="shBtn" type="button" aria-label="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
@@ -456,6 +501,18 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <button id="lyMinus" type="button" aria-label="Lyrics delay">&minus;</button>
       <span><input id="lyOffIn" type="text" value="0.0" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Lyrics sync seconds"></span>
       <button id="lyPlus" type="button" aria-label="Lyrics earlier">+</button>
+    </div>
+  </div>
+
+  <div class="dktop" id="dkTop">
+    <div class="dkbd"><span>BD</span><span class="dkdot"></span><span id="dkTime">--:--:-- --</span></div>
+    <button class="dkplb" id="dkPl" type="button"><svg viewBox="0 0 24 24"><path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/></svg><span>Playlist</span></button>
+  </div>
+  <div id="dvSec">
+    <div id="dvFrame"></div>
+    <div id="dvList">
+      <div class="dvh">Playlist Songs</div>
+      <div class="dvl" id="dvLs"></div>
     </div>
   </div>
 </section>
@@ -982,7 +1039,7 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     height:'200',width:'200',
-    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0,modestbranding:1,iv_load_policy:3},
+    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
         apiReady=true;
@@ -1696,6 +1753,7 @@ function syncLy(c){
 
 on('lyBtn',()=>{
   if(!lyOn&&vidMode)setVid(false);
+  if(!lyOn)dkList=false;
   lyOn=!lyOn;
   $('lyr').hidden=!lyOn;
   $('lyAdj').classList.toggle('show',lyOn);
@@ -1703,34 +1761,97 @@ on('lyBtn',()=>{
   $('az').classList.toggle('lyon',lyOn);
   $('lyBtn').classList.toggle('on',lyOn);
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
+  syncDesk();
 });
 
 /* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
 let vidMode=false,vidFS=false;
+
+/* ---------- DESKTOP MODE (from Org) ---------- */
+const DESK=matchMedia('(min-width:769px)');
+let dkList=false,dkKey='',dkVolSet=false,dkVol=100;
+
+function syncDesk(){
+  const d=DESK.matches&&mode==='full';
+  const vOn=d&&vidMode&&!isLoc()&&idx>=0;
+  const lOn=d&&lyOn&&!vOn;
+  const qOn=d&&dkList&&!vOn&&!lyOn;
+  const c=document.body.classList;
+  c.toggle('dkv',vOn);
+  c.toggle('dkl',lOn);
+  c.toggle('dkq',qOn);
+  c.toggle('dks',vOn||lOn||qOn);
+  if(vOn||qOn)renderDkList();
+}
+
+function renderDkList(){
+  const L=$('dvLs');
+  const n=queue.length;
+  const key=n+'|'+(n?queue[0].videoId:'')+'|'+(n?queue[n-1].videoId:'');
+  if(key!==dkKey){
+    dkKey=key;
+    L.textContent='';
+    const fr=document.createDocumentFragment();
+    queue.forEach((v,i)=>{
+      const d=document.createElement('div');
+      d.className='dvi';
+      d.dataset.i=i;
+      const im=document.createElement('img');
+      im.loading='lazy';im.alt='';im.src=thumbOf(v);
+      const t=document.createElement('div');
+      t.className='dvt';
+      const a=document.createElement('b');
+      a.textContent=v.title||'Unknown Song';
+      const b=document.createElement('span');
+      b.textContent=v.author||(v.local?'My Files':'YouTube');
+      t.append(a,b);
+      d.append(im,t);
+      fr.append(d);
+    });
+    L.append(fr);
+  }
+  const old=L.querySelector('.dvi.cur');
+  if(old)old.classList.remove('cur');
+  const cur=L.children[idx];
+  if(cur){cur.classList.add('cur');cur.scrollIntoView({block:'nearest'})}
+}
+
+$('dvLs').addEventListener('click',e=>{
+  const d=e.target.closest('.dvi');
+  if(d)playAt(+d.dataset.i);
+});
+
+$('dkPl').addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  if(vidMode)return;
+  dkList=!dkList;
+  if(dkList&&lyOn)$('lyBtn').click();
+  syncDesk();
+});
+
+function dkApplyVol(){
+  if(!dkVolSet)return;
+  try{if(apiReady&&yt&&yt.setVolume)yt.setVolume(dkVol)}catch(e){}
+  try{au.volume=dkVol/100}catch(e){}
+}
+$('volBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();$('volW').classList.toggle('on')});
+$('volR').addEventListener('input',e=>{dkVol=+e.target.value;dkVolSet=true;dkApplyVol()});
+
+function dkClock(){
+  if(!DESK.matches||!document.body.classList.contains('fp'))return;
+  $('dkTime').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).format(new Date());
+}
+setInterval(dkClock,1000);
 on('yfs',()=>{
   if(vidFS){history.back();return}
   vidFS=true;
   syncVideo();
   pushLayer(()=>{vidFS=false;syncVideo()});
 });
-/* iPhone landscape: YouTube's iframe adds the notch safe-area padding inside the player, which pushes the video aside.
-   Make the iframe wider by that amount and shift it back so the video fills the box exactly. */
-function ifCss(sz){
-  /* Real-size iframe, no transform (same as a normal embed): nothing for iOS to shift */
-  return 'position:absolute;left:0;top:0;border:0;max-width:none;transform:none;width:'+sz+'px;height:'+(sz*9/16)+'px';
-}
-/* In landscape, while the video is on screen, drop viewport-fit=cover so the iframe gets no safe-area padding
-   (that padding is what pushed the video sideways). Restored as soon as the video is off. */
-function setViewportCover(on){
-  try{
-    const m=document.querySelector('meta[name=viewport]');
-    const c='width=device-width,initial-scale=1'+(on?',viewport-fit=cover':'');
-    if(m&&m.getAttribute('content')!==c)m.setAttribute('content',c);
-  }catch(e){}
-}
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
+  syncDesk();
   az.classList.toggle('vid',show);
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
@@ -1754,13 +1875,25 @@ function syncVideo(){
     box.classList.add('vid');
     
     const f=box.querySelector('iframe');
-    if(f)f.style.cssText=ifCss(bw);
+    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     return;
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
+  if(DESK.matches){
+    const fr0=$('dvFrame').getBoundingClientRect();
+    box.style.right='auto';box.style.bottom='auto';
+    box.style.left=fr0.left+'px';box.style.top=fr0.top+'px';
+    box.style.width=fr0.width+'px';box.style.height=fr0.height+'px';
+    box.style.borderRadius='18px';
+    box.classList.add('vid');
+    const fx=box.querySelector('iframe');
+    if(fx)fx.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(fr0.width/1920)+')';
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    return;
+  }
   const r=az.getBoundingClientRect();
   const sz=Math.min(r.width,r.height,520);
   box.style.right='auto';box.style.bottom='auto';
@@ -1772,13 +1905,14 @@ function syncVideo(){
   box.classList.add('vid');
   /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
-  if(fr)fr.style.cssText=ifCss(sz);
+  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
 /* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
+  if(on)dkList=false;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
 }
@@ -1813,6 +1947,7 @@ function setInfo(v){
     });
   }
   if(lyOn)loadLyrics(v);
+  dkApplyVol();
   syncVideo();
 }
 
@@ -1830,6 +1965,7 @@ function showFull(){
   $('mini').classList.remove('visible');
   $('player').classList.add('active');
   if(queue[idx])setTint(queue[idx]);
+  syncDesk();
   setTimeout(syncVideo,540);
   pushLayer(()=>{
     mode='mini';
@@ -2143,7 +2279,7 @@ const pl=$('player');
 
 pl.addEventListener('touchstart',e=>{
   ts=false;drag=false;
-  if(mode!=='full'||e.target.closest('button:not(.grab),input,.lyr'))return;
+  if(mode!=='full'||e.target.closest('button:not(.grab),input,.lyr,.dvl'))return;
   tx=e.touches[0].clientX;
   ty=e.touches[0].clientY;
   tt=Date.now();
@@ -2152,7 +2288,7 @@ pl.addEventListener('touchstart',e=>{
 
 pl.addEventListener('touchmove',e=>{
   if(mode!=='full')return;
-  if(e.target.closest('.lyr'))return;
+  if(e.target.closest('.lyr,.dvl'))return;
   if(e.cancelable)e.preventDefault();
   if(!ts)return;
 
