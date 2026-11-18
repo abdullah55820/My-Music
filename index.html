@@ -1116,10 +1116,10 @@ const isLoc=()=>!!(queue[idx]&&queue[idx].local);
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
-const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+const seekT=t=>{if(isLoc())au.currentTime=t;else if(apiReady&&typeof yt.seekTo==='function')yt.seekTo(t,true)};
 let userWant=false;
-const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
-const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
+const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady&&typeof yt.pauseVideo==='function')yt.pauseVideo()}catch(e){}};
+const resumeAny=()=>{try{if(isLoc())au.play().catch(()=>{});else if(apiReady&&typeof yt.playVideo==='function')yt.playVideo()}catch(e){}};
 const isSil()=>au.src.startsWith('data:');
 
 async function loadLocal(v){
@@ -1178,19 +1178,21 @@ const PLAY='<path d="M7 4v16l13-8z"/>';
 const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 window.onYouTubeIframeAPIReady=()=>{
-  yt=new YT.Player('ytp',{
-    height:'1080',width:'1920',
-    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
-    events:{
-      onReady:()=>{
-        apiReady=true;
-        syncVideo();
-        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
-      },
-      onStateChange:onState,
-      onError:onYtError
-    }
-  });
+  try{
+    yt=new YT.Player('ytp',{
+      height:'1080',width:'1920',
+      playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
+      events:{
+        onReady:()=>{
+          apiReady=true;
+          syncVideo();
+          if(pending){const id=pending;pending=null;try{yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}catch(e){}}
+        },
+        onStateChange:onState,
+        onError:onYtError
+      }
+    });
+  }catch(e){apiReady=false;}
 };
 
 (function(){
@@ -1337,12 +1339,12 @@ function toggle(){
     playing=false;icons();
     $('art').classList.add('paused');
     stopT();
-    yt.pauseVideo();
+    try{yt.pauseVideo()}catch(e){}
   }else{
     userWant=true;
     playing=true;icons();
     $('art').classList.remove('paused');
-    yt.playVideo();
+    try{yt.playVideo()}catch(e){}
   }
 }
 
@@ -2027,7 +2029,7 @@ function closePlayer(){
   $('mini').classList.remove('visible');
   stopT();
   apply();
-  if(apiReady)yt.stopVideo();
+  if(apiReady&&typeof yt.stopVideo==='function')yt.stopVideo();
   try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
   try{ka.pause();if('mediaSession' in navigator)navigator.mediaSession.metadata=null}catch(e){}
@@ -2060,8 +2062,9 @@ function playAt(i,list){
 
   try{au.pause()}catch(e){}
   msMode(false);
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
-  else pending=v.videoId;
+  if(apiReady&&typeof yt.loadVideoById==='function'){
+    try{yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'})}catch(e){pending=v.videoId;}
+  }else pending=v.videoId;
 }
 
 const SLEEPS=[0,15,30,60];
@@ -2984,8 +2987,8 @@ async function unzipStored(f){
     if((flags&8)||method!==0)throw new Error('This zip is compressed. Open it in Files first, then import the songs.');
     const name=dec.decode(new Uint8Array(await f.slice(pos+30,pos+30+nl).arrayBuffer())).split('/').pop();
     const ds=pos+30+nl+el;
-    const ext=(name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'';
-    out.push(new File([f.slice(ds,ds+csz)],name,{type:ZIP_TYPE[ext.toLowerCase()]||'audio/mpeg'}));
+    const ext=(name.match(/\.([A-Za-z0-9]+)$/)[1]||'').toLowerCase();
+    out.push(new File([f.slice(ds,ds+csz)],name,{type:ZIP_TYPE[ext]||'audio/mpeg'}));
     pos=ds+csz;
   }
   return out;
