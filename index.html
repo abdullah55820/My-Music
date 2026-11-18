@@ -141,8 +141,7 @@ body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
 body.dragging #topfade{opacity:0}
 .grab{position:relative;z-index:3;width:100%;height:30px;display:grid;place-items:center;flex-shrink:0}
 .grab span{width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
-/* Player content: one centred column (same design on phone, tablet and desktop) */
-.pc{position:relative;z-index:2;width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(8px,1.5vh,16px);flex:1;min-height:0;padding-top:var(--pcpad);padding-bottom:clamp(52px,7vh,72px)}
+.pc{position:relative;z-index:2;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:clamp(8px,1.5vh,16px);flex:1;min-height:0;padding-top:var(--pcpad);padding-bottom:clamp(52px,7vh,72px)}
 .az{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
 .art{width:min(100cqw,100cqh,520px);aspect-ratio:1;overflow:hidden;border-radius:14px;background:#222;box-shadow:0 20px 55px rgba(0,0,0,.5);transition:transform .5s,box-shadow .5s;flex-shrink:0}
 .art.paused{transform:scale(.84);box-shadow:0 10px 28px rgba(0,0,0,.35)}
@@ -395,7 +394,143 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* icons bend like they are under water for a moment */
 .lqw>svg,.lqw>span,.lqw>.fempty{filter:url(#lqWater)}
-</style>
+
+
+/* =====================================================================
+   DESKTOP PLAYER  (mouse + wide screen only, matches the reference picture)
+   Left  : cover art / YouTube video, centred vertically
+   Right : title + artist + heart, seek bar (with dot), prev/play/next,
+           option bar, lyrics-sync pill. Whole group centred next to the art.
+   Phones / tablets (touch) keep the normal portrait player layout.
+   ===================================================================== */
+@media (min-width:900px) and (hover:hover) and (pointer:fine){
+  .player{
+    padding:calc(env(safe-area-inset-top) + 8px) 48px 28px;
+  }
+  .grab{height:22px;min-height:22px;cursor:grab}
+  .grab span{width:52px;height:5px}
+
+  .pc{
+    display:grid;
+    max-width:1280px;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    /* rows: spacer | title+seek | controls | options | sync pill | spacer */
+    grid-template-rows:minmax(0,1fr) auto auto auto 46px minmax(0,1fr);
+    column-gap:clamp(40px,5vw,88px);
+    row-gap:clamp(14px,2.2vh,26px);
+    padding:0;
+    align-items:center;
+    align-content:stretch;
+  }
+
+  /* LEFT: art / video */
+  .az{
+    grid-column:1;grid-row:1 / 7;
+    width:100%;height:100%;min-height:0;
+    overflow:hidden;contain:layout paint;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .art{
+    width:min(100cqw,100cqh,640px);
+    max-width:100%;max-height:100%;
+    border-radius:18px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45)!important;
+  }
+  #yt.vid{border-radius:0;overflow:visible;background:#000;box-shadow:none!important}
+  #yt.vid iframe{display:block;border:0}
+
+  /* RIGHT: title / artist / heart / seek bar */
+  .pc>div:nth-child(2){
+    grid-column:2;grid-row:2;
+    align-self:center;width:100%;min-width:0;
+    display:grid;grid-template-rows:auto auto auto;
+    row-gap:10px;padding:0;
+  }
+  .meta{width:100%;min-width:0;margin:0;display:flex;align-items:flex-start;gap:16px}
+  .meta>div{flex:1;min-width:0}
+  .meta h3{
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    max-height:2.4em;margin:0 0 6px;overflow:hidden;text-overflow:ellipsis;
+    overflow-wrap:anywhere;white-space:normal;
+    font-size:clamp(24px,2.6vw,34px);line-height:1.2;
+  }
+  .meta p{margin:0;font-size:clamp(15px,1.5vw,19px);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .like{width:46px;height:46px;flex-shrink:0;cursor:pointer;transition:transform .15s}
+  .like:hover{transform:scale(1.12)}
+  .like svg{width:30px;height:30px}
+
+  .player input.seek{height:24px;margin:0}
+  .seek::-webkit-slider-runnable-track{height:6px}
+  .seek::-moz-range-track{height:6px}
+  .seek::-webkit-slider-thumb{width:16px;height:16px;margin-top:-5px;border-radius:50%;background:#fff;opacity:1;box-shadow:0 1px 6px rgba(0,0,0,.45)}
+  .seek::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;opacity:1;box-shadow:0 1px 6px rgba(0,0,0,.45)}
+  .trow{margin-top:0;font-size:14px}
+
+  /* RIGHT: prev / play / next */
+  .ctr{
+    grid-column:2;grid-row:3;
+    justify-content:center;align-self:center;
+    gap:clamp(36px,5vw,64px);padding:2px 0;z-index:4;
+  }
+  .cb{width:72px;height:72px;cursor:pointer;transition:transform .15s,background .2s}
+  .cb:hover{transform:scale(1.08)}
+  .cb:active{transform:scale(.96)}
+  .cb svg{width:34px;height:34px;pointer-events:none}
+  .cb.big{width:96px;height:96px}
+  .cb.big svg{width:56px;height:56px}
+
+  /* RIGHT: option bar */
+  .opts{
+    grid-column:2;grid-row:4;
+    align-self:center;width:100%;
+    display:flex;align-items:center;justify-content:space-around;
+    gap:10px;padding:10px 14px;margin:6px 0 0;z-index:4;border-radius:36px;
+  }
+  .opt{height:56px;max-width:64px;cursor:pointer}
+  .opt:not(.on):hover{background:rgba(255,255,255,.16)}
+  .opt svg{width:24px;height:24px;pointer-events:none}
+
+  /* lyrics-sync pill: glass, centred under the option bar */
+  .lyadj,.lyadj.show{
+    position:relative;
+    grid-column:2;grid-row:5;
+    justify-self:center;align-self:center;
+    left:auto;right:auto;top:auto;bottom:auto;transform:none;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:max-content;min-width:190px;height:46px;min-height:46px;
+    padding:0 8px;border-radius:24px;color:#fff;
+    background:rgba(255,255,255,calc(var(--gaf)*.24));
+    border:1px solid var(--rim);box-shadow:none;
+    -webkit-backdrop-filter:blur(var(--gb)) saturate(160%);
+    backdrop-filter:blur(var(--gb)) saturate(160%);
+    z-index:5;
+  }
+  .lyadj{visibility:hidden}
+  .lyadj.show{visibility:visible}
+  .lyadj button{
+    display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;
+    border-radius:50%;color:#fff;background:transparent;border:0;
+    font-size:19px;font-weight:800;line-height:1;cursor:pointer;
+  }
+  .lyadj button:hover{background:rgba(255,255,255,.18)}
+  .lyadj button:active{background:#fff;color:#111}
+  .lyadj span{min-width:0;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .lyadj input{
+    width:52px;height:28px;padding:0;margin:0;border:0;border-radius:9px;
+    background:transparent;color:inherit;text-align:center;font-size:14px;font-weight:700;
+    font-family:inherit;font-variant-numeric:tabular-nums;outline:0;
+    -webkit-appearance:none;appearance:none;user-select:text;-webkit-user-select:text;
+  }
+  .lyadj input:focus{background:rgba(255,255,255,.15)}
+  .lyadj.kb{
+    position:fixed;left:50%;right:auto;top:auto;bottom:auto;transform:translateX(-50%);
+    width:auto;height:46px;min-height:46px;z-index:10001;
+  }
+
+  /* lyrics fill the left column (same box as the art) */
+  .lyr{left:0;right:0;top:0;padding:24px 22px 40px;font-size:clamp(18px,1.7vw,24px)}
+  .lyr .now{font-size:clamp(22px,2vw,28px)}
+}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -1835,8 +1970,10 @@ function syncVideo(){
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
-  /* Fit a true 16:9 video in the middle of the cover area (same spot as the album art, max 520px wide). */
-  const vw=Math.min(r.width,r.height*16/9,520),vh=vw*9/16;
+  /* Fit a true 16:9 video in the middle of the left column.
+     On desktop it can use the full column width (no 520px cap), same spot as the album art. */
+  const land=matchMedia('(min-width:900px) and (hover:hover) and (pointer:fine)').matches;
+  const vw=Math.min(r.width,r.height*16/9,land?9999:520),vh=vw*9/16;
   const vl=r.left+(r.width-vw)/2,vt=r.top+(r.height-vh)/2;
   box.style.right='auto';box.style.bottom='auto';
   box.style.left=vl+'px';box.style.top=vt+'px';
@@ -2232,7 +2369,8 @@ pl.addEventListener('touchstart',e=>{
 pl.addEventListener('touchmove',e=>{
   if(mode!=='full')return;
   if(e.target.closest('.lyr'))return;
-  /* Do not cancel touch movement that began on a player button or input. */
+  /* Do not cancel touch movement that began on a player button or input.
+     The old order prevented iOS from completing some button taps. */
   if(!ts)return;
   if(e.cancelable)e.preventDefault();
 
