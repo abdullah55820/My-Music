@@ -280,56 +280,40 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 #rmList .pitem small,#bkList .pitem small{flex-shrink:0}
 #rmList .pitem.sel,#bkList .pitem.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
-/* ===== LANDSCAPE PLAYER (Apple Music style) ===== */
+/* ---------- LANDSCAPE PLAYER: controls on the left, cover / video / lyrics on the right ---------- */
 @media (orientation:landscape) and (max-height:600px){
-  .player{padding:calc(env(safe-area-inset-top) + 2px) calc(env(safe-area-inset-right) + 30px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 30px)}
+  .player{
+    padding-left:calc(env(safe-area-inset-left) + 24px);
+    padding-right:calc(env(safe-area-inset-right) + 24px);
+    padding-top:calc(env(safe-area-inset-top) + 4px);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 8px);
+  }
   .grab{height:20px}
-  .grab span{width:40px;height:4px}
-
-  /* 2 columns: cover on the left, everything else on the right */
   .pc{
     display:grid;
-    grid-template-columns:minmax(0,1fr) min(44vw,calc(100dvh - 64px));
-    grid-template-rows:auto 1fr auto auto;
-    column-gap:clamp(24px,5vw,48px);
-    row-gap:0;
-    padding-top:6px;
-    padding-bottom:0;
-    align-items:stretch;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:1fr auto auto auto 1fr;
+    column-gap:28px;
+    row-gap:10px;
+    padding-top:0;
+    padding-bottom:52px;
   }
-  .az{grid-column:2;grid-row:1/5}
-  .pc>div:nth-child(2){grid-column:1;grid-row:1;align-self:start;padding-top:8px}
-  .ctr{grid-column:1;grid-row:2;align-self:center;gap:clamp(36px,9vw,70px)}
-  .opts{
-    grid-column:1;grid-row:3;align-self:end;
-    background:none;border:0;padding:0;
-    backdrop-filter:none;-webkit-backdrop-filter:none;
-    margin-bottom:4px;
-  }
-  .lyadj{position:static;grid-column:1;grid-row:4;display:none;height:34px;margin-top:2px}
-  .lyadj.show{display:flex}
-
-  /* title / artist */
+  .pc>.az{grid-column:2;grid-row:1/6;min-height:0;height:100%}
+  .pc>div:nth-child(2){grid-column:1;grid-row:2}
+  .pc>.ctr{grid-column:1;grid-row:3;gap:clamp(24px,6vw,44px)}
+  .pc>.opts{grid-column:1;grid-row:4}
+  .pc>.lyadj{left:0;right:calc(50% + 14px)}
   .meta{margin-bottom:6px}
   .meta h3{font-size:19px;margin-bottom:3px}
-  .meta p{font-size:16px}
-  .like{width:38px;height:38px}
-  .like svg{width:24px;height:24px}
-
-  /* controls */
+  .meta p{font-size:15px}
   .cb{width:52px;height:52px}
   .cb svg{width:38px;height:38px}
-  .cb.big{width:72px;height:72px}
-  .cb.big svg{width:58px;height:58px}
-
-  /* bottom icon row */
-  .opt{height:42px;max-width:46px}
-  .opt svg{width:22px;height:22px}
-
-  /* lyrics fill the cover area instead of the whole screen */
-  .lyr{left:0;right:0;top:0;bottom:0;padding:14px 12px 28px;font-size:17px;border-radius:14px}
-  .lyr .now{font-size:20px}
-  .lyr div{margin:9px 0}
+  .cb.big{width:66px;height:66px}
+  .cb.big svg{width:52px;height:52px}
+  .opt{height:42px}
+  .opt svg{width:20px;height:20px}
+  .lyr{left:0;right:0;top:0;bottom:0;padding:16px 10px 40px;font-size:18px}
+  .lyr .now{font-size:21px}
 }
 </style>
 </head>
@@ -1713,25 +1697,9 @@ on('yfs',()=>{
   syncVideo();
   pushLayer(()=>{vidFS=false;syncVideo()});
 });
-/* iPhone landscape: YouTube's iframe adds the notch safe-area padding inside the player, which pushes the video aside.
-   Make the iframe wider by that amount and shift it back so the video fills the box exactly. */
-function ifCss(sz){
-  /* 1920x1080 player scaled down: YouTube shows its small desktop UI and picks high quality */
-  return 'position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
-}
-/* In landscape, while the video is on screen, drop viewport-fit=cover so the iframe gets no safe-area padding
-   (that padding is what pushed the video sideways). Restored as soon as the video is off. */
-function setViewportCover(on){
-  try{
-    const m=document.querySelector('meta[name=viewport]');
-    const c='width=device-width,initial-scale=1'+(on?',viewport-fit=cover':'');
-    if(m&&m.getAttribute('content')!==c)m.setAttribute('content',c);
-  }catch(e){}
-}
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
-  setViewportCover(!(show&&innerWidth>innerHeight));
   az.classList.toggle('vid',show);
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
@@ -1755,7 +1723,7 @@ function syncVideo(){
     box.classList.add('vid');
     
     const f=box.querySelector('iframe');
-    if(f)f.style.cssText=ifCss(bw);
+    if(f)f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(bw/1920)+')';
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -1773,7 +1741,7 @@ function syncVideo(){
   box.classList.add('vid');
   /* YouTube picks quality from the player size, so render a 1920x1080 player and scale it down to fit */
   const fr=box.querySelector('iframe');
-  if(fr)fr.style.cssText=ifCss(sz);
+  if(fr)fr.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+(sz/1920)+')';
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
