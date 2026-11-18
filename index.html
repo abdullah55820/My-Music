@@ -193,11 +193,10 @@ body.dragging #topfade{opacity:0}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 
 /* VIDEO CONTAINER FIX:
-   Native 100% width/height iframe inside a true 16:9 container with rounded mask.
-   Eliminates the right-side black bar and left-side shift on all devices & desktop! */
-#yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
+   True 16:9 container with rounded mask; keep iframe at native 16:9 without setSize distortion */
+#yt{position:fixed;right:0;bottom:0;width:320px;height:180px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
 #yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.45);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0);pointer-events:auto}
-#yt iframe,#ytp{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;display:block!important;transform:none!important}
+#yt iframe,#ytp{position:absolute!important;top:0!important;left:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;display:block!important;transform:none!important}
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
 #yfs svg{width:19px;height:19px}
 #yfs .i2{display:none}
@@ -1953,7 +1952,49 @@ function syncVideo(){
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     box.style.transform='';box.style.background='';box.style.borderRadius='';
     $('yfs').hidden=true;
-    if(apiReady&&yt&&yt.setSize)try{yt.setSize(200,200)}catch(e){}
+    return;
+  }
+
+  /* Fullscreen Video */
+  if(vidFS){
+    const W=innerWidth,H=innerHeight,por=H>W,lg=por?H:W,sh=por?W:H;
+    const bw=Math.round(Math.min(lg,sh*16/9)),bh=Math.round(bw*9/16);
+    box.style.right='auto';box.style.bottom='auto';
+    box.style.left=Math.round(W/2-bw/2)+'px';
+    box.style.top=Math.round(H/2-bh/2)+'px';
+    box.style.width=bw+'px';
+    box.style.height=bh+'px';
+    box.style.transform=por?'rotate(90deg)':'';
+    box.style.background='#000';box.style.borderRadius='0';
+    box.classList.add('vid');
+    if(apiReady&&yt)try{yt.setPlaybackQuality('hd1080')}catch(e){}
+    const b=$('yfs');b.hidden=false;b.classList.add('x');
+    b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
+    return;
+  }
+
+  /* Inline Video inside Left Column / Art Area */
+  box.style.transform='';box.style.background='';box.style.borderRadius='';
+  $('yfs').hidden=true;
+  const r=az.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+
+  const isSideBySide=(innerWidth>innerHeight&&innerHeight<=650)||innerWidth>=860;
+  const maxW=isSideBySide?Math.min(r.width,680):Math.min(r.width,520);
+  const vw=Math.round(Math.min(maxW,r.height*16/9));
+  const vh=Math.round(vw*9/16);
+  const vl=Math.round(r.left+(r.width-vw)/2);
+  const vt=Math.round(r.top+(r.height-vh)/2);
+
+  box.style.right='auto';box.style.bottom='auto';
+  box.style.left=vl+'px';
+  box.style.top=vt+'px';
+  box.style.width=vw+'px';
+  box.style.height=vh+'px';
+  box.classList.add('vid');
+
+  if(apiReady&&yt)try{yt.setPlaybackQuality('hd1080')}catch(e){}
+}
     return;
   }
 
