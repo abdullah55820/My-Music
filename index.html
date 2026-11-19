@@ -195,7 +195,7 @@ body.dragging #topfade{opacity:0}
 /* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
 #yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
 #ytp{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
-#yt.vid iframe{position:absolute!important;inset:0!important;left:0!important;top:0!important;width:100%!important;height:100%!important;display:block;border:0;max-width:none!important;transform:none!important;transform-origin:0 0!important}
+#yt.vid iframe{position:absolute!important;left:0!important;top:0!important;display:block;border:0;max-width:none!important;transform-origin:0 0!important}
 #yt.vid{pointer-events:auto}
 /* blocks taps on the YouTube title / channel / share strip so it can't open YouTube */
 #yfs{position:fixed;z-index:10003;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.25)}
@@ -2024,10 +2024,9 @@ let vidMode=false,vidFS=false;
 function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
-  if(isDesk()){
-    f.style.cssText='position:absolute;inset:0;left:0;top:0;border:0;max-width:none;width:100%;height:100%;transform:none;transform-origin:0 0';
-    return;
-  }
+  /* Keep YouTube's internal player at its native 16:9 size on every device.
+     Scale the complete iframe from its top-left corner into the video box.
+     This avoids the iOS desktop-site renderer leaving a black strip on one side. */
   f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
 }
 on('yfs',()=>{
