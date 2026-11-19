@@ -4343,5 +4343,74 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   addEventListener('pointercancel',e=>up(e,true),{passive:true});
 })();
 </script>
+<!-- IPHONE VIDEO FIX: paste this whole block right before </body> (after the last </script>) -->
+<style>
+:root[data-ios] #yt.vid{
+  border-radius:0!important;
+  overflow:visible!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  isolation:auto!important;will-change:auto!important;
+  transform:none;
+  background:#000
+}
+:root[data-ios] #yt.vid iframe{display:block;border:0}
+</style>
+<script>
+(function(){
+  var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!IOS)return;
+  document.documentElement.dataset.ios='1';
+
+  /* iPhone: same as PC. No scaled 1920x1080 frame, no mask, no clip.
+     The frame is sized straight to the video box in whole pixels. */
+  window.ytFrame=function(){
+    var box=document.getElementById('yt'),f=box&&box.querySelector('iframe');
+    if(!f)return;
+    if(box.classList.contains('vid')){
+      ['left','top','width','height'].forEach(function(p){
+        var v=parseFloat(box.style[p]);
+        if(isFinite(v))box.style[p]=Math.round(v)+'px';
+      });
+    }
+    var w=box.offsetWidth,h=box.offsetHeight;
+    f.style.cssText='position:absolute;left:0;top:0;margin:0;padding:0;border:0;display:block;max-width:none;transform:none;width:'+w+'px;height:'+h+'px';
+  };
+})();
+</script>
+   <!-- IPHONE VIDEO FIX: paste this whole block right before </body> (after the last </script>) -->
+<style>
+:root[data-ios] #yt.vid{
+  border-radius:0!important;
+  overflow:visible!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  isolation:auto!important;will-change:auto!important;
+  transform:none;
+  background:#000
+}
+:root[data-ios] #yt.vid iframe{display:block;border:0}
+</style>
+<script>
+(function(){
+  var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!IOS)return;
+  document.documentElement.dataset.ios='1';
+
+  /* iPhone: same as PC. No scaled 1920x1080 frame, no mask, no clip.
+     The frame is sized straight to the video box in whole pixels. */
+  window.ytFrame=function(){
+    var box=document.getElementById('yt'),f=box&&box.querySelector('iframe');
+    if(!f)return;
+    if(box.classList.contains('vid')){
+      ['left','top','width','height'].forEach(function(p){
+        var v=parseFloat(box.style[p]);
+        if(isFinite(v))box.style[p]=Math.round(v)+'px';
+      });
+    }
+    var w=box.offsetWidth,h=box.offsetHeight;
+    f.style.cssText='position:absolute;left:0;top:0;margin:0;padding:0;border:0;display:block;max-width:none;transform:none;width:'+w+'px;height:'+h+'px';
+  };
+})();
+</script>
+
 </body>
 </html>
