@@ -2586,7 +2586,7 @@ const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 
 const D={
   home:{videos:[],busy:false,ctl:null,cap:100},
-  search:{videos:[],page:1,query:'',busy:false,ctl:null}
+  search:{videos:[],page:1,query:'',busy:false,ctl:null,cap:100,autoTimer:null}
 };
 
 let activeTab='home';
@@ -2909,18 +2909,20 @@ let offMode=false;
 
 function homeCheck(){
   const st=D.home;
-  if(offMode||st.busy)return;
+  if(offMode||st.busy||activeTab!=='home')return;
 
-  /* Start fetching the next 100-song batch BEFORE the current batch runs out.
-     Keep roughly 24 songs as a safety buffer so loading can happen in advance. */
-  if(st.videos.length >= Math.max(1, st.cap - 24)){
-    st.cap += 100;
+  // Keep filling the current batch in the background (up to 100 songs).
+  if(st.videos.length < st.cap){
     loadHomeMore();
     return;
   }
 
-  /* Continue filling the current batch in the background. */
-  if(st.videos.length < st.cap && st.videos.length) loadHomeMore();
+  // Only unlock the next 100 when the user is actually scrolling near the end.
+  const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
+  if(st.videos.length>=st.cap && remaining < AHEAD){
+    st.cap += 100;
+    loadHomeMore();
+  }
 }
 setInterval(homeCheck,600);
 let hcRaf=0;
@@ -3005,7 +3007,7 @@ function doSearch(term){
 
   const st=D.search;
   if(st.ctl)st.ctl.abort();
-  st.ctl=null;st.busy=false;st.videos=[];st.page=1;st.query=term;
+  st.ctl=null;st.busy=false;st.videos=[];st.page=1;st.query=term;st.cap=100;if(st.autoTimer)clearTimeout(st.autoTimer);
 
   q.value=term;
   $('clearQ').hidden=false;
@@ -3068,12 +3070,21 @@ async function loadSearch(term,page,append){
   $('searchStatus').textContent=st.videos.length+' Songs';
   $('searchMore').hidden=!data.length&&!fresh.length;
   $('searchMore').disabled=false;
+
+  // Automatically fetch the rest of this 100-song batch in the background.
+  if(data.length && st.videos.length < st.cap){
+    st.autoTimer=setTimeout(()=>{
+      if(st.query===term&&!st.busy&&st.videos.length<st.cap){
+        loadSearch(term,st.page+1,true);
+      }
+    },80);
+  }
 }
 
 function clearSearch(){
   const st=D.search;
   if(st.ctl)st.ctl.abort();
-  st.ctl=null;st.busy=false;st.videos=[];st.query='';st.page=1;
+  st.ctl=null;st.busy=false;st.videos=[];st.query='';st.page=1;st.cap=100;if(st.autoTimer)clearTimeout(st.autoTimer);
 
   q.value='';
   $('clearQ').hidden=true;
@@ -3089,30 +3100,57 @@ function clearSearch(){
 
 $('sForm').addEventListener('submit',e=>{e.preventDefault();doSearch(q.value)});
 
-let sugT=null;
+let sugT=null,sugCtl=null,sugLast='';
 q.addEventListener('input',()=>{
   $('clearQ').hidden=!q.value;
   clearTimeout(sugT);
+  if(sugCtl)sugCtl.abort();
   const t=q.value.trim();
   if(t.length<2){renderRecent();return}
-  sugT=setTimeout(()=>showSug(t),250);
+  // Show matching local recent terms immediately, then fetch live suggestions.
+  showRecentMatches(t);
+  sugT=setTimeout(()=>showSug(t),90);
 });
 
-async function showSug(t){
-  /* Show matching recent-search suggestions immediately while typing. */
-  if(q.value.trim()!==t)return;
+function showRecentMatches(t){
   const box=$('recent');
   const matches=getRecent().filter(x=>x.toLowerCase().includes(t.toLowerCase()));
   box.innerHTML='';
   box.hidden=!matches.length||!$('searchGrid').hidden;
   matches.forEach(term=>{
     const b=document.createElement('button');
-    b.type='button'; b.className='chip'; b.textContent=term;
+    b.type='button';b.className='chip';b.textContent=term;
     b.onclick=()=>doSearch(term);
     box.appendChild(b);
   });
 }
 
+async function showSug(t){
+  if(q.value.trim()!==t||t.length<2)return;
+  if(sugCtl)sugCtl.abort();
+  const ctl=new AbortController();sugCtl=ctl;
+  try{
+    const r=await fetch(`${SEARCH_API}?suggest=${encodeURIComponent(t)}`,{
+      signal:ctl.signal,headers:{Accept:'application/json'},cache:'no-store'
+    });
+    if(!r.ok)return;
+    const items=await r.json();
+    if(ctl.signal.aborted||q.value.trim()!==t||!Array.isArray(items))return;
+    const box=$('recent');
+    const recent=getRecent().filter(x=>x.toLowerCase().includes(t.toLowerCase()));
+    const all=[...new Set([...items,...recent])].slice(0,8);
+    box.innerHTML='';
+    box.hidden=!all.length||!$('searchGrid').hidden;
+    all.forEach(term=>{
+      const b=document.createElement('button');
+      b.type='button';b.className='chip';b.textContent=term;
+      b.onclick=()=>doSearch(term);
+      box.appendChild(b);
+    });
+  }catch(e){
+    if(e.name!=='AbortError')console.warn('Suggestion lookup:',e);
+  }
+}
 $('clearQ').onclick=clearSearch;
 $('searchMore').onclick=()=>{
   const s=D.search;
@@ -3120,17 +3158,23 @@ $('searchMore').onclick=()=>{
 };
 
 const searchSentinel=$('searchSentinel');
+function searchCheck(){
+  const s=D.search;
+  if(activeTab!=='search'||!s.query||s.busy)return;
+  if(s.videos.length<s.cap)return; // finish current 100-song batch first
+  const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
+  if(remaining< AHEAD){
+    s.cap+=100;
+    loadSearch(s.query,s.page+1,true);
+  }
+}
 if('IntersectionObserver' in window){
   const searchPager=new IntersectionObserver(entries=>{
-    if(entries.some(e=>e.isIntersecting)){
-      const s=D.search;
-      if(activeTab==='search'&&s.query&&!s.busy&&s.videos.length){
-        loadSearch(s.query,s.page+1,true);
-      }
-    }
-  },{rootMargin:'1800px 0px'});
+    if(entries.some(e=>e.isIntersecting))searchCheck();
+  },{rootMargin:'0px 0px 900px 0px'});
   searchPager.observe(searchSentinel);
 }
+addEventListener('scroll',()=>{if(activeTab==='search')searchCheck()},{passive:true});
 
 /* ---------- LIBRARY ---------- */
 const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>';
