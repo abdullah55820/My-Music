@@ -1259,7 +1259,7 @@ au.addEventListener('ended',()=>{
   if(!isLoc())return;
   playing=false;icons();stopT();
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
-  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
+  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos&&queue!==playlistSongs)return;
   next();
 });
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
@@ -1336,7 +1336,7 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){try{ka.pause()}catch(e){}return}
+    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos&&queue!==playlistSongs){try{ka.pause()}catch(e){}return}
     next();
   }
 }
@@ -1819,27 +1819,14 @@ function setTint(v){
   }
 }
 
-/* ---------- LYRICS (LRCLIB) ---------- */
+/* ---------- LYRICS (REMOTE SERVICE DISABLED) ---------- */
 let lyOn=false,lyLines=null,lyCur=-1;
 const LY={};
 const cleanTitle=t=>(t||'').replace(/\(.*?\)|\[.*?\]|official|video|lyrical|lyrics|audio|full song|\bhd\b|\b4k\b|\|.*$/gi,' ').replace(/\s+/g,' ').trim();
 const wordsOf=t=>(t||'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(w=>w.length>1);
 
-async function lrcQuery(q){
-  const r=await fetch('https://lrclib.net/api/search?q='+encodeURIComponent(q));
-  const d=await r.json();
-  return Array.isArray(d)?d.filter(x=>x.syncedLyrics||x.plainLyrics):[];
-}
-
-async function lrcGet(track,artist,dur){
-  try{
-    const u='https://lrclib.net/api/get?track_name='+encodeURIComponent(track)+'&artist_name='+encodeURIComponent(artist)+(dur>0?'&duration='+Math.round(dur):'');
-    const r=await fetch(u);
-    if(!r.ok)return null;
-    const d=await r.json();
-    return (d&&(d.syncedLyrics||d.plainLyrics))?d:null;
-  }catch(e){return null}
-}
+async function lrcQuery(q){ return []; }
+async function lrcGet(track,artist,dur){ return null; }
 
 function bestLyric(list,v,dur,onlySynced){
   const hay=new Set(wordsOf((v.title||'')+' '+(v.author||'')));
@@ -1892,7 +1879,7 @@ async function loadLyrics(v){
   lyLines=null;lyCur=-1;
   showOff();
   box.style.whiteSpace='';
-  box.textContent='Loading lyrics…';
+  box.textContent='Lyrics service is disabled';
   if(LY[id]===undefined){
     try{
       const dur=await getDur(v);
@@ -2588,12 +2575,7 @@ $('likeBtn').addEventListener('click',e=>{
 });
 
 /* ---------- SONGS ---------- */
-const instances=[
-  'https://inv.nadeko.net',
-  'https://invidious.nerdvpn.de',
-  'https://yt.chocolatemoo53.com',
-  'https://invidious.tiekoetter.com'
-];
+const instances=[]; // Only the personal playlist endpoint is retained.
 
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 
@@ -2647,30 +2629,8 @@ function card(v,i,list,rm){
 }
 
 async function fetchSongs(q,page,ctl,list=instances,strict=false){
-  const requests=list.map(base=>{
-    const c=new AbortController();
-    const onAb=()=>c.abort();
-    ctl.signal.addEventListener('abort',onAb);
-    const tm=setTimeout(()=>c.abort(),6000);
-
-    return fetch(
-      `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
-      {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
-    ).then(r=>{
-      if(!r.ok)throw new Error('Server error');
-      return r.json();
-    }).then(data=>{
-      if(!Array.isArray(data))throw new Error('Invalid response');
-      const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
-      if(strict&&!out.length)throw new Error('Empty');
-      return out;
-    }).finally(()=>{
-      clearTimeout(tm);
-      ctl.signal.removeEventListener('abort',onAb);
-    });
-  });
-
-  try{return await Promise.any(requests)}catch(e){return null}
+  // No external search API is used in this build.
+  return null;
 }
 
 const shuffle=a=>{
@@ -2740,49 +2700,6 @@ async function fillGroupRaw(g,ctl){
   return true;
 }
 
-
-let playlistMode=false;
-let playlistSongs=[];
-const MY_PLAYLIST_ID='PLbvY05KVYwoo';
-const MY_PLAYLIST_API='https://abdullah55.vercel.app/api/playlist?list='+encodeURIComponent(MY_PLAYLIST_ID);
-
-const playlistChip=document.createElement('button');
-playlistChip.type='button';
-playlistChip.className='chip';
-playlistChip.textContent='Playlist';
-playlistChip.addEventListener('click',loadPersonalPlaylist);
-
-async function loadPersonalPlaylist(){
-  if(playlistMode){window.scrollTo({top:0,behavior:'smooth'});return}
-  if(typeof saveChip==='function')saveChip();
-  playlistMode=true;
-  playlistChip.classList.add('on');
-  document.querySelectorAll('#chips .chip').forEach(b=>{if(b!==playlistChip)b.classList.remove('on')});
-  const st=D.home;
-  if(st.ctl)st.ctl.abort();
-  st.busy=false;
-  const grid=$('homeGrid');
-  grid.replaceChildren();
-  st.videos=[];
-  $('homeStatus').textContent='Loading playlist…';
-  try{
-    const response=await fetch(MY_PLAYLIST_API,{cache:'no-store'});
-    if(!response.ok)throw new Error('Playlist API error '+response.status);
-    const data=await response.json();
-    if(!Array.isArray(data)||!data.length)throw new Error('Playlist is empty or unavailable');
-    playlistSongs=data.filter(v=>v&&v.videoId).map(v=>({...v}));
-    st.videos=playlistSongs;
-    playlistSongs.forEach((v,i)=>grid.appendChild(card(v,i,playlistSongs)));
-    $('homeStatus').textContent=playlistSongs.length+' Songs · My Playlist';
-    window.scrollTo({top:0,behavior:'smooth'});
-  }catch(err){
-    console.error('SoundFlow playlist:',err);
-    playlistSongs=[];
-    $('homeStatus').textContent='Playlist unavailable';
-    grid.innerHTML='<div class="empty g">Could not load your YouTube playlist.<br>Check that api/playlist.py is deployed, then try again.</div>';
-  }
-}
-
 const CHIPS=[
   ['All',null],['T-Series',[7]],['Bangla',[1]],['Trending',[5]],['Hindi',[0]],
   ['Sony Music',[8]],['YRF',[9]],['Zee Music',[10]],['Saregama',[11]],
@@ -2790,6 +2707,10 @@ const CHIPS=[
   ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15]]
 ];
 let chip=0;
+let playlistMode=false;
+let playlistSongs=[];
+const MY_PLAYLIST_ID='PLbvY05KVYwoo';
+const MY_PLAYLIST_API='https://abdullah55.vercel.app/api/playlist?list='+encodeURIComponent(MY_PLAYLIST_ID);
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
 
 const CACHE={};
@@ -2823,16 +2744,54 @@ function restoreChip(i){
   return true;
 }
 
+// Personal YouTube playlist chip (kept separate from discovery categories).
+const playlistChip=document.createElement('button');
+playlistChip.type='button';
+playlistChip.className='chip';
+playlistChip.textContent='Playlist';
+playlistChip.onclick=loadPersonalPlaylist;
+$('chips').appendChild(playlistChip);
+
+async function loadPersonalPlaylist(){
+  if(playlistMode){window.scrollTo({top:0,behavior:'smooth'});return}
+  if(!playlistMode)saveChip();
+  playlistMode=true;
+  playlistChip.classList.add('on');
+  document.querySelectorAll('#chips .chip').forEach(b=>{if(b!==playlistChip)b.classList.remove('on')});
+  const st=D.home;
+  if(st.ctl)st.ctl.abort();
+  st.busy=false;
+  const grid=$('homeGrid');
+  grid.replaceChildren();
+  st.videos=[];
+  $('homeStatus').textContent='Loading playlist…';
+  try{
+    const response=await fetch(MY_PLAYLIST_API,{cache:'no-store'});
+    if(!response.ok)throw new Error('Playlist API error '+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data)||!data.length)throw new Error('Playlist is empty or unavailable');
+    playlistSongs=data.filter(v=>v&&v.videoId).map(v=>({...v}));
+    st.videos=playlistSongs;
+    playlistSongs.forEach((v,i)=>grid.appendChild(card(v,i,playlistSongs)));
+    $('homeStatus').textContent=playlistSongs.length+' Songs · My Playlist';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(err){
+    playlistSongs=[];
+    $('homeStatus').textContent='Playlist unavailable';
+    grid.innerHTML='<div class="empty g">Could not load your YouTube playlist.<br>Check that the Vercel playlist API is deployed, then try again.</div>';
+  }
+}
+
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
   b.type='button';
   b.className='chip'+(i===0?' on':'');
   b.textContent=c[0];
   b.onclick=()=>{
+    if(chip===i&&!playlistMode)return;
+    if(!playlistMode)saveChip();
     playlistMode=false;
     playlistChip.classList.remove('on');
-    if(chip===i)return;
-    saveChip();
     chip=i;
     if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
@@ -2841,7 +2800,6 @@ CHIPS.forEach((c,i)=>{
   };
   $('chips').appendChild(b);
 });
-$('chips').appendChild(playlistChip);
 
 /* PC: mouse wheel over the chip row scrolls it sideways */
 document.querySelectorAll('.chips').forEach(ch=>{
@@ -3165,27 +3123,8 @@ q.addEventListener('input',()=>{
 });
 
 async function showSug(t){
-  const ctl=new AbortController();
-  setTimeout(()=>ctl.abort(),3000);
-  try{
-    const list=await Promise.any(instances.map(b=>
-      fetch(`${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}`,{signal:ctl.signal})
-        .then(r=>{if(!r.ok)throw 0;return r.json()})
-        .then(d=>d.suggestions||[])
-    ));
-    if(q.value.trim()!==t)return;
-    const box=$('recent');
-    box.innerHTML='';
-    box.hidden=!list.length;
-    list.slice(0,8).forEach(x=>{
-      const b=document.createElement('button');
-      b.type='button';
-      b.className='chip';
-      b.textContent=x;
-      b.onclick=()=>doSearch(x);
-      box.appendChild(b);
-    });
-  }catch(e){}
+  // Search suggestions are disabled because external search APIs were removed.
+  renderRecent();
 }
 
 $('clearQ').onclick=clearSearch;
@@ -3467,6 +3406,8 @@ document.querySelectorAll('.nb').forEach(b=>{
 
 /* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
+  playlistMode=false;
+  playlistChip.classList.remove('on');
   const st=D.home;
   if(st.ctl)st.ctl.abort();
   if(!navigator.onLine){renderOfflineHome();return Promise.resolve()}
@@ -4098,117 +4039,15 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   });
 });
 
-/* ---------- FIREBASE SYNC + ACCOUNT CARD ---------- */
+/* ---------- LOCAL-ONLY ACCOUNT CARD ---------- */
 (function(){
-  const CFG={
-    apiKey:"AIzaSyBEbe08tF-kLx_NMjK4U9x38Nf54_MXLH4",
-    authDomain:"soundflow-37b28.firebaseapp.com",
-    projectId:"soundflow-37b28",
-    storageBucket:"soundflow-37b28.firebasestorage.app",
-    messagingSenderId:"133876585541",
-    appId:"1:133876585541:web:33be86e76dd04a29a5ff2c"
-  };
-  const SYNC=['sf_liked_songs','sf_history','sf_playlists','sf_recent','sf_settings_v3'];
-  let user=null,auth=null,db=null,pushT=null,pulling=false;
-
-  const info=t=>{$('gInfo').textContent=t};
-
-  /* Show Gmail name, email and profile photo in the account card */
-  function renderAcct(u){
-    $('gIn').hidden=!!u;
-    $('gOut').hidden=!u;
-    $('acName').textContent=u?(u.displayName||(u.email||'').split('@')[0]||'SoundFlow user'):'Guest';
-    $('acMail').textContent=u?(u.email||''):'Not signed in';
-
-    const im=$('acImg'),av=$('acAv');
-    im.onerror=()=>{im.hidden=true;im.removeAttribute('src');av.classList.remove('has')};
-    if(u&&u.photoURL){
-      im.src=u.photoURL;
-      im.hidden=false;
-      av.classList.add('has');
-    }else{
-      im.hidden=true;
-      im.removeAttribute('src');
-      av.classList.remove('has');
-    }
-    info('');
-  }
-
-  const _set=LS.set;
-  LS.set=(k,v)=>{
-    const ok=_set(k,v);
-    if(ok&&user&&!pulling&&SYNC.includes(k)){clearTimeout(pushT);pushT=setTimeout(push,1500)}
-    return ok;
-  };
-
-  function push(){
-    if(!user||!db)return;
-    db.collection('users').doc(user.uid).set({
-      liked:getLiked().filter(x=>!x.local),hist:getHist().filter(x=>!x.local),pl:getPL().map(p=>({...p,songs:p.songs.filter(x=>!x.local)})),recent:getRecent(),settings:S,t:Date.now()
-    }).catch(e=>info('Sync error: '+(e.code||e.message)));
-  }
-
-  const uni=(a=[],b=[])=>{
-    const m=new Set();
-    return [...a,...b].filter(x=>x&&x.videoId&&!m.has(x.videoId)&&m.add(x.videoId));
-  };
-
-  async function pull(){
-    try{
-      const snap=await db.collection('users').doc(user.uid).get();
-      const d=snap.exists?snap.data():{};
-      pulling=true;
-      LS.set('sf_liked_songs',uni(getLiked(),d.liked));
-      LS.set('sf_history',uni(getHist(),d.hist).slice(0,50));
-      const P=getPL();
-      (d.pl||[]).forEach(c=>{
-        const l=P.find(x=>x.id===c.id);
-        if(l)l.songs=uni(l.songs,c.songs);else P.push(c);
-      });
-      setPL(P);
-      LS.set('sf_recent',[...new Set([...getRecent(),...(d.recent||[])])].slice(0,8));
-      if(d.settings){S={...DEF,...d.settings};save()}
-      pulling=false;
-      apply();renderLib();renderRecent();
-      push();
-    }catch(e){
-      pulling=false;
-      info('Sync error: '+(e.code||e.message));
-    }
-  }
-
-  const base='https://www.gstatic.com/firebasejs/10.12.2/';
-  const load=f=>new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src=base+f;s.onload=res;s.onerror=rej;
-    document.head.appendChild(s);
-  });
-
-  load('firebase-app-compat.js')
-    .then(()=>Promise.all([load('firebase-auth-compat.js'),load('firebase-firestore-compat.js')]))
-    .then(()=>{
-      firebase.initializeApp(CFG);
-      auth=firebase.auth();
-      db=firebase.firestore();
-      auth.onAuthStateChanged(async u=>{
-        user=u;
-        renderAcct(u);
-        if(u)await pull();
-      });
-    })
-    .catch(()=>info('Could not load Firebase. Check internet.'));
-
-  $('gIn').onclick=async()=>{
-    if(!auth)return info('Please wait…');
-    const p=new firebase.auth.GoogleAuthProvider();
-    try{await auth.signInWithPopup(p)}
-    catch(e){
-      if(e.code==='auth/popup-closed-by-user')return;
-      if(e.code==='auth/unauthorized-domain')return info('Add your site domain in Firebase → Authentication → Settings → Authorized domains');
-      try{await auth.signInWithRedirect(p)}catch(err){info('Login error: '+(err.code||err.message))}
-    }
-  };
-  $('gOut').onclick=()=>{if(auth)auth.signOut()};
+  const info=$('gInfo');
+  if(info)info.textContent='Cloud sync is disabled';
+  if($('gIn'))$('gIn').hidden=true;
+  if($('gOut'))$('gOut').hidden=true;
+  if($('acName'))$('acName').textContent='Guest';
+  if($('acMail'))$('acMail').textContent='Saved on this device';
+  if($('acImg'))$('acImg').hidden=true;
 })();
 
 /* =====================================================================
