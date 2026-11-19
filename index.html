@@ -4343,34 +4343,5 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   addEventListener('pointercancel',e=>up(e,true),{passive:true});
 })();
 </script>
-   <!-- IPHONE TEST: paste this whole block right AFTER the last fix block, before </body>. Delete it when we are done. -->
-<div id="dbg" style="position:fixed;left:6px;bottom:6px;z-index:20000;max-width:70vw;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.78);color:#7CFC00;font:10px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all"></div>
-<div id="dbgp" style="position:fixed;left:-999px;top:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);visibility:hidden"></div>
-<script>
-(function(){
-  var d=document.getElementById('dbg'),p=document.getElementById('dbgp');
-  d.onclick=function(){d.hidden=true};
-  var r=function(x){return x?Math.round(x.width)+'x'+Math.round(x.height)+' @'+Math.round(x.left)+','+Math.round(x.top):'-'};
-  function run(){
-    try{
-      var cs=getComputedStyle(p),vv=window.visualViewport;
-      var box=document.getElementById('yt'),f=box&&box.querySelector('iframe');
-      var m=document.querySelector('meta[name=viewport]');
-      d.textContent=
-        'safe L'+cs.paddingLeft+' R'+cs.paddingRight+' T'+cs.paddingTop+' B'+cs.paddingBottom+
-        '\ninner '+innerWidth+'x'+innerHeight+'  screen '+screen.width+'x'+screen.height+
-        '\ndpr '+devicePixelRatio+'  zoom '+(vv?vv.scale.toFixed(2)+' off '+Math.round(vv.offsetLeft)+','+Math.round(vv.offsetTop):'-')+
-        '\nscroll '+Math.round(scrollX)+','+Math.round(scrollY)+
-        '\nios '+(document.documentElement.dataset.ios||'no')+'  desk '+matchMedia('(hover:hover) and (pointer:fine)').matches+
-        '\nbox '+(box?box.className+' '+getComputedStyle(box).position+' '+r(box.getBoundingClientRect()):'-')+
-        '\niframe '+(f?r(f.getBoundingClientRect())+' css '+f.style.width+'/'+f.style.height:'-')+
-        '\nmeta '+(m?m.getAttribute('content'):'-')+
-        '\n(tap here to hide)';
-    }catch(e){d.textContent='test error: '+e.message}
-  }
-  setInterval(run,500);run();
-})();
-</script>
-
 </body>
 </html>
