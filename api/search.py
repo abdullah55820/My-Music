@@ -13,8 +13,7 @@ LOG = logging.getLogger("soundflow-search")
 logging.basicConfig(level=logging.INFO)
 
 MAX_QUERY_LENGTH = 200
-MAX_PAGE = 20
-RESULTS_PER_PAGE = 20
+RESULTS_PER_PAGE = 100
 
 _YTMUSIC = None
 _YTMUSIC_DISABLED = False
@@ -49,7 +48,6 @@ def normalize_entry(entry):
     elif video_id.startswith("https://youtu.be/"):
         video_id = video_id.rsplit("/", 1)[-1].split("?", 1)[0]
 
-    # YouTube video IDs are exactly 11 URL-safe characters.
     if len(video_id) != 11 or not all(
         c.isascii() and (c.isalnum() or c in "_-") for c in video_id
     ):
@@ -83,20 +81,18 @@ def normalize_entry(entry):
     if published is not None:
         result["published"] = published
 
-    # Preserve normal YouTube artwork as a fallback.
     thumbnails = entry.get("thumbnails") or []
     if thumbnails:
         result["videoThumbnails"] = [
             {"quality": "maxres" if i == len(thumbnails) - 1 else "high", "url": t.get("url")}
             for i, t in enumerate(thumbnails) if isinstance(t, dict) and t.get("url")
         ]
-
     return result
 
 
 def search_youtube(query, page):
     start = (page - 1) * RESULTS_PER_PAGE + 1
-    search_term = "ytsearch{}:{}".format(RESULTS_PER_PAGE, query)
+    search_term = "ytsearch{}:{}".format(start + RESULTS_PER_PAGE - 1, query)
 
     options = {
         "quiet": True,
@@ -130,8 +126,6 @@ def search_youtube(query, page):
         if normalized:
             results.append(normalized)
 
-    # Add YouTube Music album artwork when its song result has the same video ID.
-    # If YT Music is temporarily unavailable, keep the regular yt-dlp results.
     add_youtube_music_artwork(query, results, page)
     return results
 
@@ -188,17 +182,14 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            page = int(raw_page)
+            page = max(1, int(raw_page))
         except (TypeError, ValueError):
             page = 1
-
-        page = max(1, min(page, MAX_PAGE))
 
         try:
             results = search_youtube(query, page)
             json_response(self, 200, results)
         except Exception as exc:
-            # Keep the response useful while logging the full traceback in Vercel.
             LOG.exception("SoundFlow YouTube search failed")
             json_response(self, 502, {
                 "error": "YouTube search failed.",
