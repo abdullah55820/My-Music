@@ -192,8 +192,8 @@ body.dragging #topfade{opacity:0}
 .mc svg{width:24px;height:24px}
 .nav.g,.mini.g{box-shadow:0 1px 4px rgba(0,0,0,.18);contain:paint}
 #yt{position:fixed;right:0;bottom:0;width:200px;height:200px;z-index:-2;opacity:.01;pointer-events:none;overflow:hidden}
-/* No rounded clip / overflow clip on the video box: iOS clips the video layer wrongly with them (left black bar) */
-#yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
+/* Keep the video layer free of mask and GPU transforms; iOS Safari can offset YouTube's internal video layer when composited. */
+#yt.vid{z-index:10001;opacity:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:none;isolation:auto}
 #ytp{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
 #yt.vid iframe{position:absolute!important;left:0!important;top:0!important;display:block;border:0;max-width:none!important;transform-origin:0 0!important}
 #yt.vid{pointer-events:auto}
