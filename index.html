@@ -4411,6 +4411,32 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   };
 })();
 </script>
+<!-- IPHONE VIDEO FIX 2: paste this whole block right AFTER the first fix block, before </body> -->
+<style>
+:root[data-ios] #yt.vid{position:absolute!important}
+</style>
+<script>
+(function(){
+  if(!document.documentElement.dataset.ios)return;
+  var first=window.ytFrame;
 
+  /* iPhone: the video box scrolls with the page (absolute) instead of
+     floating above it (fixed), because iOS misplaces video inside fixed boxes. */
+  window.ytFrame=function(){
+    var box=document.getElementById('yt');
+    if(box&&box.classList.contains('vid')){
+      var l=parseFloat(box.style.left),t=parseFloat(box.style.top);
+      if(isFinite(l))box.style.left=Math.round(l+(window.scrollX||0))+'px';
+      if(isFinite(t))box.style.top=Math.round(t+(window.scrollY||0))+'px';
+    }
+    if(first)first.apply(this,arguments);
+  };
+
+  addEventListener('scroll',function(){
+    var box=document.getElementById('yt');
+    if(box&&box.classList.contains('vid')&&typeof syncVideo==='function')syncVideo();
+  },{passive:true});
+})();
+</script>
 </body>
 </html>
