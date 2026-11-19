@@ -2759,20 +2759,45 @@ async function fillGroup(g,ctl){
   finally{g.busy=false}
 }
 
+/* songs already shown on the home page (kept across refreshes) + songs that belong to Trending */
+const RS_KEY='sf_recent_shown',TR_KEY='sf_trend_ids';
+let recentArr=LS.get(RS_KEY,[]);if(!Array.isArray(recentArr))recentArr=[];
+const recentSet=new Set(recentArr);
+let trendArr=LS.get(TR_KEY,[]);if(!Array.isArray(trendArr))trendArr=[];
+const trendIds=new Set(trendArr);
+function markShown(id){
+  if(recentSet.has(id))return;
+  recentSet.add(id);recentArr.push(id);
+  if(recentArr.length>700)recentSet.delete(recentArr.shift());
+  clearTimeout(markShown.t);markShown.t=setTimeout(()=>LS.set(RS_KEY,recentArr),800);
+}
+function markTrend(id){
+  if(trendIds.has(id))return;
+  trendIds.add(id);trendArr.push(id);
+  if(trendArr.length>500)trendIds.delete(trendArr.shift());
+  clearTimeout(markTrend.t);markTrend.t=setTimeout(()=>LS.set(TR_KEY,trendArr),800);
+}
+
 async function fillGroupRaw(g,ctl){
-  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
-  const page=(g.pg[q]||0)+1;
-  const data=await fetchSongs(q,page,ctl);
-
-  if(data===null)return false;
-
-  g.pg[q]=page;
-  data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.f&&!g.f.test(v.author||''))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
-    g.buf.push(v);
-  });
+  let usable=[],fresh=[];
+  /* if a page only has songs already shown, try another page / query (up to 3 times) */
+  for(let k=0;k<3&&!fresh.length;k++){
+    const q=g.qs[Math.floor(Math.random()*g.qs.length)];
+    let page=(g.pg[q]||0)+1;
+    if(page>10)page=1+Math.floor(Math.random()*3);
+    const data=await fetchSongs(q,page,ctl);
+    if(data===null){if(k===0)return false;break}
+    g.pg[q]=page;
+    if(g===GROUPS[TREND_G])data.forEach(v=>markTrend(v.videoId));
+    usable=data.filter(v=>{
+      if(seen.has(v.videoId))return false;
+      if(g.f&&!g.f.test(v.author||''))return false;
+      if(g.buf.some(b=>b.videoId===v.videoId))return false;
+      return true;
+    });
+    fresh=usable.filter(v=>!recentSet.has(v.videoId));
+  }
+  (fresh.length?fresh:usable).forEach(v=>g.buf.push(v));
   shuffle(g.buf);
   return true;
 }
@@ -2785,7 +2810,7 @@ const CHIPS=[
 ];
 let chip=0;
 const TREND_G=5; /* Trending group: only shown in the Trending chip, never in All */
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G);
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G&&i!==FORYOU);
 
 const CACHE={};
 
@@ -2813,7 +2838,7 @@ function restoreChip(i){
   st.videos=[];
   st.cap=100;
   seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
+  GROUPS.forEach(g=>{g.buf=[];g.busy=false}); /* page numbers are kept, so a refresh moves on to new songs */
   window.scrollTo(0,0);
   return true;
 }
@@ -2862,7 +2887,7 @@ function takeSong(){
     gs.forEach(g=>{
       for(let i=0;i<g.buf.length;i++){
         const v=g.buf[i];
-        if(seen.has(v.videoId)){g.buf.splice(i,1);i--;continue}
+        if(seen.has(v.videoId)||(chip===0&&trendIds.has(v.videoId))){g.buf.splice(i,1);i--;continue}
         if(!ban.has(authKey(v))){pool.push({g,i});break}
       }
     });
@@ -2931,6 +2956,7 @@ async function loadHomeMore(){
       const v=takeSong();
       if(!v)break;
       seen.add(v.videoId);
+      markShown(v.videoId);
       st.videos.push(v);
       grid.appendChild(card(v,st.videos.length-1,st.videos));
       added++;
@@ -3525,7 +3551,7 @@ function refreshHome(){
   if(CHIPS[chip][0]==='For You')buildForYou();
 
   GROUPS.forEach((g,i)=>{
-    if(i!==FORYOU){g.buf=[];g.pg={}}
+    if(i!==FORYOU){g.buf=[]}
     g.busy=false;
   });
 
