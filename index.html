@@ -608,6 +608,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   /* video: no mask / extra layer, so no seam line */
   #yt.vid{-webkit-mask-image:none;mask-image:none;transform:none;isolation:auto;will-change:auto}
 }
+
+/* iPhone Video Fix = Direct: no clip / mask layers around the video box */
+:root[data-vfix=direct] #yt.vid{-webkit-mask-image:none;mask-image:none;border-radius:0;overflow:visible;isolation:auto;transform:none}
 </style>
 </head>
 <body>
@@ -798,6 +801,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
       <div class="row"><div><b>Data Saver</b></div></div>
       <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
+      <div class="row"><div><b>iPhone Video Fix</b></div></div>
+      <div class="seg" data-k="vfix"><button data-v="auto">Auto</button><button data-v="direct">Direct</button><button data-v="old">Old</button></div>
       <div class="row"><div><b>Tab Bar</b></div></div>
       <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
     </div>
@@ -928,7 +933,7 @@ function goBack(){
 addEventListener('keydown',e=>{if(e.key==='Escape')goBack()});
 
 /* ---------- SETTINGS ---------- */
-const DEF={theme:'system',accent:'#0a84ff',preset:'auto',gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',lyEn:'system',lyBn:'system'};
+const DEF={theme:'system',accent:'#0a84ff',preset:'auto',gb:20,ga:55,r:16,cols:2,photoTop:'',bgBlur:0,bgDim:0,thumb:'round',anim:'on',labels:'on',font:'system',saver:'off',vfix:'auto',lyEn:'system',lyBn:'system'};
 
 const LYEN={
   system:'-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif',
@@ -1021,6 +1026,7 @@ function apply(){
   d.dataset.anim=S.anim;
   d.dataset.labels=S.labels;
   d.dataset.font=S.font;
+  d.dataset.vfix=S.vfix;
   st.setProperty('--lyen',LYEN[S.lyEn]||LYEN.system);
   st.setProperty('--lybn',LYBN[S.lyBn]||LYBN.system);
   st.setProperty('--bgfilter',(+S.bgBlur>0)?`blur(${+S.bgBlur}px)`:'none');
@@ -1057,6 +1063,7 @@ function apply(){
   if(PHOTO)pt.style.backgroundImage=`url("${PHOTO}")`;
   $('photoDel').hidden=!PHOTO;
   $('photoPick').textContent=PHOTO?'Change my photo':'Use my photo';
+  try{syncVideo()}catch(e){}
 }
 
 darkMQ.addEventListener('change',()=>{if(S.theme==='system')apply()});
@@ -2009,14 +2016,36 @@ on('lyBtn',()=>{
 let vidMode=false,vidFS=false;
 /* Phones: the YouTube iframe is always 1920x1080; only the CSS scale changes.
    PC: the iframe simply fills the video box (no scale), which removes the horizontal seam line. */
-function ytFrame(sc){
+/* iPhone landscape: the notch side areas (safe area) leak into the YouTube iframe and push the
+   picture sideways. In "Auto" mode the iframe layout box is kept inside the safe area (not 1920 wide),
+   so the leak cannot happen. "Direct" = iframe sized exactly to the box. "Old" = previous behaviour. */
+let _probe=null;
+function safeIns(){
+  try{
+    if(!_probe){
+      _probe=document.createElement('div');
+      _probe.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+      document.body.appendChild(_probe);
+    }
+    const c=getComputedStyle(_probe);
+    return {t:parseFloat(c.paddingTop)||0,r:parseFloat(c.paddingRight)||0,b:parseFloat(c.paddingBottom)||0,l:parseFloat(c.paddingLeft)||0};
+  }catch(e){return {t:0,r:0,b:0,l:0}}
+}
+function ytFrame(sc,vw,left){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
-  if(isDesk()){
+  const m=S.vfix;
+  if(isDesk()||m==='direct'){
     f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:100%;height:100%;transform:none';
     return;
   }
-  f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+  let VW=1920;
+  if(m!=='old'&&vw){
+    const ins=safeIns();
+    if(ins.l>0||ins.r>0)VW=Math.max(vw,Math.min(1920,innerWidth-ins.r-(left||0)));
+  }
+  const s=vw?vw/VW:sc;
+  f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:'+VW+'px;height:'+(VW*9/16)+'px;transform-origin:0 0;transform:scale('+s+')';
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
@@ -2027,7 +2056,8 @@ on('yfs',()=>{
 function syncVideo(){
   const box=$('yt'),az=$('az');
   const dk=isDesk();
-  const R=x=>dk?Math.round(x):x;
+  const flat=dk||S.vfix==='direct';
+  const R=x=>flat?Math.round(x):x;
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
   az.classList.toggle('vid',show);
   $('vdBtn').classList.toggle('on',vidMode);
@@ -2051,7 +2081,7 @@ function syncVideo(){
     box.style.background='#000';box.style.borderRadius='0';
     box.classList.add('vid');
 
-    ytFrame(bw/1920);
+    ytFrame(bw/1920,bw,W/2-bw/2);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
     try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
@@ -2070,7 +2100,7 @@ function syncVideo(){
   box.classList.add('vid');
   /* Phones: the player is laid out at a real 1920x1080 size and scaled down to the box.
      PC: the iframe is sized straight to the box. */
-  ytFrame(vw/1920);
+  ytFrame(vw/1920,vw,vl);
   try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
