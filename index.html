@@ -213,6 +213,7 @@ body.dragging #yt.vid{opacity:0}
 .opt.dis{opacity:.35}
 .sp{position:fixed;inset:0;z-index:12000;display:flex;flex-direction:column;background:var(--spbg);backdrop-filter:blur(34px) saturate(170%);-webkit-backdrop-filter:blur(34px) saturate(170%);transform:translate3d(100%,0,0);visibility:hidden;transition:transform .35s cubic-bezier(.3,.8,.3,1),visibility .35s;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .sp.open{transform:translate3d(0,0,0);visibility:visible}
+.sp::before{content:"";position:absolute;left:0;right:0;top:0;height:90px;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,var(--sptop,transparent),transparent)}
 .sp.no-transition{transition:none!important}
 .sph{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 10px) 12px 8px}
 .sph h2{margin:0;font-size:18px;font-weight:800}
@@ -917,6 +918,20 @@ function setThemeColor(col,paintBody=true){
   document.body.style.backgroundColor=paintBody?col:'';
 }
 
+/* Top status-bar colour: while the Profile page is open it must match the dark glass layer, so no bright patch shows */
+let lastTop='rgb(34,34,34)',lastDark=true;
+function spTop(col,dark){
+  const m=col.match(/\d+/g);if(!m)return col;
+  const o=dark?[0,0,0]:[242,242,247],a=.55;
+  return `rgb(${m.slice(0,3).map((v,i)=>Math.round(v*(1-a)+o[i]*a)).join(',')})`;
+}
+function syncTop(){
+  if(mode==='full')return;
+  const dim=spTop(lastTop,lastDark);
+  document.documentElement.style.setProperty('--sptop',dim);
+  setThemeColor(document.body.classList.contains('spo')?dim:lastTop,false);
+}
+
 const LS={
   get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},
@@ -1047,7 +1062,8 @@ function apply(){
     st.backgroundSize='cover';
     st.backgroundPosition='center';
     st.backgroundRepeat='no-repeat';
-    setThemeColor(topDim,false);
+    lastTop=topDim;lastDark=dark;
+    syncTop();
   }
 
   document.querySelectorAll('.seg[data-k]').forEach(g=>{
@@ -1181,6 +1197,7 @@ function closeProfileNative(){
   sp.classList.add('no-transition');
   document.body.classList.remove('spo');
   sp.classList.remove('open');
+  syncTop();
   requestAnimationFrame(()=>requestAnimationFrame(()=>sp.classList.remove('no-transition')));
 }
 
@@ -1190,6 +1207,7 @@ function openProfile(){
   $('sp').classList.remove('no-transition');
   $('sp').classList.add('open');
   document.body.classList.add('spo');
+  syncTop();
   refreshStorage();
   pushLayer(()=>{
     if(!profileClosingByButton)closeProfileNative();
@@ -1201,6 +1219,7 @@ $('spBack').onclick=()=>{
   if(!spOpen())return;
   profileClosingByButton=true;
   document.body.classList.remove('spo');
+  syncTop();
   $('sp').classList.remove('open');
   history.back();
 };
