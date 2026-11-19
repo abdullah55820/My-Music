@@ -1,7 +1,9 @@
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote
 import json
 import logging
+import json as json_module
+import urllib.request
 import yt_dlp
 
 try:
@@ -13,7 +15,7 @@ LOG = logging.getLogger("soundflow-search")
 logging.basicConfig(level=logging.INFO)
 
 MAX_QUERY_LENGTH = 200
-RESULTS_PER_PAGE = 100
+RESULTS_PER_PAGE = 30
 
 _YTMUSIC = None
 _YTMUSIC_DISABLED = False
@@ -162,6 +164,22 @@ def add_youtube_music_artwork(query, results, page):
         LOG.warning("YouTube Music artwork lookup failed; using YouTube thumbnails", exc_info=True)
 
 
+def search_suggestions(query):
+    """Fetch live YouTube autocomplete suggestions for the search box."""
+    url = (
+        "https://suggestqueries.google.com/complete/search"
+        "?client=firefox&ds=yt&q=" + quote(query)
+    )
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+    with urllib.request.urlopen(request, timeout=3) as response:
+        payload = json_module.loads(response.read().decode("utf-8"))
+    suggestions = payload[1] if isinstance(payload, list) and len(payload) > 1 else []
+    return [clean_text(item) for item in suggestions if clean_text(item)][:8]
+
+
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         json_response(self, 200, {"ok": True})
@@ -170,8 +188,20 @@ class handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
 
+        suggestion_query = clean_text((params.get("suggest") or [""])[0])
+        if suggestion_query:
+            if len(suggestion_query) > MAX_QUERY_LENGTH:
+                json_response(self, 400, {"error": "Search query is too long."})
+                return
+            try:
+                json_response(self, 200, search_suggestions(suggestion_query))
+            except Exception:
+                LOG.warning("Suggestion lookup failed", exc_info=True)
+                json_response(self, 200, [])
+            return
+
         query = clean_text((params.get("q") or [""])[0])
-        raw_page = clean_text((params.get("page") or ["1"])[0], "1")
+        raw_page = clean_text((params.get("page") or ["1"])[0])
 
         if not query:
             json_response(self, 400, {"error": "Missing search query. Use ?q=Song+name"})
