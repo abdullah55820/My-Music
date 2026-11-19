@@ -1259,7 +1259,7 @@ au.addEventListener('ended',()=>{
   if(!isLoc())return;
   playing=false;icons();stopT();
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
-  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos&&queue!==playlistSongs)return;
+  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
   next();
 });
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
@@ -1336,7 +1336,7 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos&&queue!==playlistSongs){try{ka.pause()}catch(e){}return}
+    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){try{ka.pause()}catch(e){}return}
     next();
   }
 }
@@ -2740,6 +2740,49 @@ async function fillGroupRaw(g,ctl){
   return true;
 }
 
+
+let playlistMode=false;
+let playlistSongs=[];
+const MY_PLAYLIST_ID='PLbvY05KVYwoo';
+const MY_PLAYLIST_API='https://abdullah55.vercel.app/api/playlist?list='+encodeURIComponent(MY_PLAYLIST_ID);
+
+const playlistChip=document.createElement('button');
+playlistChip.type='button';
+playlistChip.className='chip';
+playlistChip.textContent='Playlist';
+playlistChip.addEventListener('click',loadPersonalPlaylist);
+
+async function loadPersonalPlaylist(){
+  if(playlistMode){window.scrollTo({top:0,behavior:'smooth'});return}
+  if(typeof saveChip==='function')saveChip();
+  playlistMode=true;
+  playlistChip.classList.add('on');
+  document.querySelectorAll('#chips .chip').forEach(b=>{if(b!==playlistChip)b.classList.remove('on')});
+  const st=D.home;
+  if(st.ctl)st.ctl.abort();
+  st.busy=false;
+  const grid=$('homeGrid');
+  grid.replaceChildren();
+  st.videos=[];
+  $('homeStatus').textContent='Loading playlist…';
+  try{
+    const response=await fetch(MY_PLAYLIST_API,{cache:'no-store'});
+    if(!response.ok)throw new Error('Playlist API error '+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data)||!data.length)throw new Error('Playlist is empty or unavailable');
+    playlistSongs=data.filter(v=>v&&v.videoId).map(v=>({...v}));
+    st.videos=playlistSongs;
+    playlistSongs.forEach((v,i)=>grid.appendChild(card(v,i,playlistSongs)));
+    $('homeStatus').textContent=playlistSongs.length+' Songs · My Playlist';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(err){
+    console.error('SoundFlow playlist:',err);
+    playlistSongs=[];
+    $('homeStatus').textContent='Playlist unavailable';
+    grid.innerHTML='<div class="empty g">Could not load your YouTube playlist.<br>Check that api/playlist.py is deployed, then try again.</div>';
+  }
+}
+
 const CHIPS=[
   ['All',null],['T-Series',[7]],['Bangla',[1]],['Trending',[5]],['Hindi',[0]],
   ['Sony Music',[8]],['YRF',[9]],['Zee Music',[10]],['Saregama',[11]],
@@ -2747,10 +2790,6 @@ const CHIPS=[
   ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15]]
 ];
 let chip=0;
-let playlistMode=false;
-let playlistSongs=[];
-const MY_PLAYLIST_ID='PLbvY05KVYwoo';
-const MY_PLAYLIST_API='https://abdullah55.vercel.app/api/playlist?list='+encodeURIComponent(MY_PLAYLIST_ID);
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
 
 const CACHE={};
@@ -2784,54 +2823,16 @@ function restoreChip(i){
   return true;
 }
 
-// Personal YouTube playlist chip (kept separate from discovery categories).
-const playlistChip=document.createElement('button');
-playlistChip.type='button';
-playlistChip.className='chip';
-playlistChip.textContent='Playlist';
-playlistChip.onclick=loadPersonalPlaylist;
-$('chips').appendChild(playlistChip);
-
-async function loadPersonalPlaylist(){
-  if(playlistMode){window.scrollTo({top:0,behavior:'smooth'});return}
-  if(!playlistMode)saveChip();
-  playlistMode=true;
-  playlistChip.classList.add('on');
-  document.querySelectorAll('#chips .chip').forEach(b=>{if(b!==playlistChip)b.classList.remove('on')});
-  const st=D.home;
-  if(st.ctl)st.ctl.abort();
-  st.busy=false;
-  const grid=$('homeGrid');
-  grid.replaceChildren();
-  st.videos=[];
-  $('homeStatus').textContent='Loading playlist…';
-  try{
-    const response=await fetch(MY_PLAYLIST_API,{cache:'no-store'});
-    if(!response.ok)throw new Error('Playlist API error '+response.status);
-    const data=await response.json();
-    if(!Array.isArray(data)||!data.length)throw new Error('Playlist is empty or unavailable');
-    playlistSongs=data.filter(v=>v&&v.videoId).map(v=>({...v}));
-    st.videos=playlistSongs;
-    playlistSongs.forEach((v,i)=>grid.appendChild(card(v,i,playlistSongs)));
-    $('homeStatus').textContent=playlistSongs.length+' Songs · My Playlist';
-    window.scrollTo({top:0,behavior:'smooth'});
-  }catch(err){
-    playlistSongs=[];
-    $('homeStatus').textContent='Playlist unavailable';
-    grid.innerHTML='<div class="empty g">Could not load your YouTube playlist.<br>Check that the Vercel playlist API is deployed, then try again.</div>';
-  }
-}
-
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
   b.type='button';
   b.className='chip'+(i===0?' on':'');
   b.textContent=c[0];
   b.onclick=()=>{
-    if(chip===i&&!playlistMode)return;
-    if(!playlistMode)saveChip();
     playlistMode=false;
     playlistChip.classList.remove('on');
+    if(chip===i)return;
+    saveChip();
     chip=i;
     if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
     document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
@@ -2840,6 +2841,7 @@ CHIPS.forEach((c,i)=>{
   };
   $('chips').appendChild(b);
 });
+$('chips').appendChild(playlistChip);
 
 /* PC: mouse wheel over the chip row scrolls it sideways */
 document.querySelectorAll('.chips').forEach(ch=>{
@@ -3465,8 +3467,6 @@ document.querySelectorAll('.nb').forEach(b=>{
 
 /* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
-  playlistMode=false;
-  playlistChip.classList.remove('on');
   const st=D.home;
   if(st.ctl)st.ctl.abort();
   if(!navigator.onLine){renderOfflineHome();return Promise.resolve()}
