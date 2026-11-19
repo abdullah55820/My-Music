@@ -126,7 +126,7 @@ def search_youtube(query, page):
         if normalized:
             results.append(normalized)
 
-    add_youtube_music_artwork(query, results, page)
+    # Return YouTube results immediately; avoid a second synchronous artwork API call.
     return results
 
 
