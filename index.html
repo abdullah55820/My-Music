@@ -8,6 +8,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SoundFlow — Music</title>
+<script>
+/* Own app identity (id / scope / start_url = this exact folder), so a notification or Now Playing tap
+   opens THIS app and not another web app on the same domain */
+(function(){try{
+  var base=location.origin+location.pathname.replace(/[^\/]*$/,'');
+  var m={name:'SoundFlow',short_name:'SoundFlow',id:base,start_url:base,scope:base,display:'standalone',orientation:'any',background_color:'#000000',theme_color:'#1e3a8a'};
+  var l=document.createElement('link');l.rel='manifest';
+  l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+  document.head.appendChild(l);
+}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@700&family=Hind+Siliguri:wght@600;700&family=Noto+Serif+Bengali:wght@600;700&family=Baloo+Da+2:wght@600;700&family=Galada&family=Atma:wght@600;700&display=swap" rel="stylesheet">
@@ -4100,7 +4111,7 @@ $('bkIn').onchange=async e=>{
 };
 
 /* ---------- OFFLINE (service worker) ---------- */
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{scope:'./'}).then(r=>{try{r.update()}catch(e){}}).catch(()=>{}));
 addEventListener('online',()=>{
   if(offMode)leaveOfflineHome();
   else if(!D.home.videos.length&&!D.home.busy)loadHomeMore();
@@ -4550,7 +4561,6 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     if(!b)return;
     b.click();
     try{b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}
-    try{$('homeGrid').animate([{opacity:.25,transform:'translateX('+(dx<0?36:-36)+'px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.3,1)'})}catch(_){}
   },{passive:true});
 })();
 </script>
