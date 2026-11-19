@@ -141,7 +141,7 @@ svg{display:block}
 .nb{flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:28px;color:var(--muted);transition:.25s}
 .nb svg{width:23px;height:23px}
 .nb span{font-size:10px;font-weight:650}
-.nb.active{color:var(--accent);background:var(--accent-soft)}
+.nb.active{color:var(--accent);background:linear-gradient(145deg,rgba(255,255,255,.28),rgba(255,255,255,.06)),color-mix(in srgb,var(--accent) 34%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,rgba(255,255,255,.3)),inset 0 2px 6px rgba(255,255,255,.3)}
 body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 body.fp #topbar,body.fp .page,body.fp #bg,body.fp #bgDim{visibility:hidden}
 body.spo #topbar,body.spo .page{visibility:hidden}
@@ -629,11 +629,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 }
 
 /* ---------- SWIPE EXTRAS ---------- */
-#nav{touch-action:none;-webkit-user-select:none;user-select:none}
+#nav,#nav *{touch-action:none}
+#nav{-webkit-user-select:none;user-select:none}
 .nav .nb{z-index:1}
 .navblob{position:absolute;top:6px;left:0;height:54px;width:0;border-radius:28px;pointer-events:none;z-index:0;opacity:0;
-  background:linear-gradient(145deg,rgba(255,255,255,.36),rgba(255,255,255,.08)),var(--accent-soft);
-  border:1px solid var(--rim);box-shadow:inset 0 2px 5px rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.18);
+  background:linear-gradient(145deg,rgba(255,255,255,.28),rgba(255,255,255,.06)),color-mix(in srgb,var(--accent) 34%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 55%,rgba(255,255,255,.3));box-shadow:inset 0 2px 6px rgba(255,255,255,.3),0 4px 14px rgba(0,0,0,.18);
   transition:transform .42s cubic-bezier(.34,1.45,.64,1),width .35s cubic-bezier(.34,1.45,.64,1),opacity .2s;will-change:transform,width}
 .navblob.on{opacity:1}
 .navblob.drag{transition:opacity .2s,width .15s}
@@ -2783,7 +2784,8 @@ const CHIPS=[
   ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15,16,17]]
 ];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
+const TREND_G=5; /* Trending group: only shown in the Trending chip, never in All */
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G);
 
 const CACHE={};
 
@@ -4459,6 +4461,8 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     blob.style.width=w+'px';
     blob.style.transform='translate3d('+left+'px,0,0)';
   }
+  nav.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
+  nav.addEventListener('touchstart',e=>{if(e.cancelable&&e.touches.length>1)e.preventDefault()},{passive:false});
   nav.addEventListener('pointerdown',e=>{
     if(e.pointerType==='mouse'&&e.button!==0)return;
     nd={id:e.pointerId,x0:e.clientX,drag:false,t:null};
@@ -4466,7 +4470,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   nav.addEventListener('pointermove',e=>{
     if(!nd||e.pointerId!==nd.id)return;
     if(!nd.drag){
-      if(Math.abs(e.clientX-nd.x0)<8)return;
+      if(Math.abs(e.clientX-nd.x0)<5)return;
       nd.drag=true;
       try{nav.setPointerCapture(e.pointerId)}catch(_){}
       nav.classList.add('dragging');
