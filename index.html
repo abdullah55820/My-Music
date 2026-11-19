@@ -138,7 +138,7 @@ body.fp.dragging #topbar,body.fp.dragging .page,body.fp.dragging #bg,body.fp.dra
 body.fp.dragging .nav{opacity:1;visibility:visible}
 .player{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);overflow:hidden;overscroll-behavior:none;background:#161618;isolation:isolate;visibility:hidden;pointer-events:none;transform:translateY(100%);transform-origin:50% 100%;will-change:transform;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s}
 .player.active{visibility:visible;pointer-events:auto;transform:none;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s}
-.pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(55px);transform:translateZ(0) scale(1.3);pointer-events:none}
+.pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(80px) saturate(190%);-webkit-filter:blur(80px) saturate(190%);transform:translateZ(0) scale(1.3);pointer-events:none}
 .pshade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));pointer-events:none}
 #topfade{position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 46px);z-index:10000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%)}
 body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
@@ -616,6 +616,19 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   /* video: no mask / extra layer, so no seam line */
   #yt.vid{-webkit-mask-image:none;mask-image:none;transform:none;isolation:auto;will-change:auto}
 }
+
+/* ---------- SWIPE EXTRAS ---------- */
+#nav{touch-action:none;-webkit-user-select:none;user-select:none}
+.nav .nb{z-index:1}
+.navblob{position:absolute;top:6px;left:0;height:54px;width:0;border-radius:28px;pointer-events:none;z-index:0;opacity:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.36),rgba(255,255,255,.08)),var(--accent-soft);
+  border:1px solid var(--rim);box-shadow:inset 0 2px 5px rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.18);
+  transition:transform .42s cubic-bezier(.34,1.45,.64,1),width .35s cubic-bezier(.34,1.45,.64,1),opacity .2s;will-change:transform,width}
+.navblob.on{opacity:1}
+.navblob.drag{transition:opacity .2s,width .15s}
+.nav.dragging .nb.active{background:none}
+.nav.dragging .nb.hov{color:var(--accent)}
+.sp.swiping{transition:none!important}
 </style>
 </head>
 <body>
@@ -4411,6 +4424,134 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   addEventListener('pointermove',move,{passive:true});
   addEventListener('pointerup',e=>up(e,false),{passive:true});
   addEventListener('pointercancel',e=>up(e,true),{passive:true});
+})();
+/* =====================================================================
+   SWIPE EXTRAS
+   1. Bottom bar: slide a finger along it, a liquid bubble follows and the tab under it opens
+   2. Settings: swipe right to go back
+   3. Home: swipe left / right to change the chip
+   ===================================================================== */
+(function(){
+  const nav=$('nav');
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  /* ---- 1. bottom bar ---- */
+  const blob=document.createElement('i');blob.className='navblob';nav.prepend(blob);
+  let nd=null,noClick=0;
+  const btns=()=>[...nav.querySelectorAll('.nb')];
+  const nearest=x=>{let best=null,bd=1e9;btns().forEach(b=>{const r=b.getBoundingClientRect(),d=Math.abs(x-(r.left+r.width/2));if(d<bd){bd=d;best=b}});return best};
+  function place(b,x){
+    const nr=nav.getBoundingClientRect(),br=b.getBoundingClientRect();
+    const w=br.width*(x==null?1:1.14);
+    let left=x==null?br.left-nr.left:x-nr.left-w/2;
+    left=clamp(left,3,nr.width-w-3);
+    blob.style.width=w+'px';
+    blob.style.transform='translate3d('+left+'px,0,0)';
+  }
+  nav.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    nd={id:e.pointerId,x0:e.clientX,drag:false,t:null};
+  },{passive:true});
+  nav.addEventListener('pointermove',e=>{
+    if(!nd||e.pointerId!==nd.id)return;
+    if(!nd.drag){
+      if(Math.abs(e.clientX-nd.x0)<8)return;
+      nd.drag=true;
+      try{nav.setPointerCapture(e.pointerId)}catch(_){}
+      nav.classList.add('dragging');
+      blob.classList.add('on','drag');
+      const cur=nav.querySelector('.nb.active');
+      place(cur,nd.x0);
+      void blob.offsetWidth;
+    }
+    const b=nearest(e.clientX);
+    btns().forEach(x=>x.classList.toggle('hov',x===b));
+    nd.t=b;
+    place(b,e.clientX);
+  },{passive:true});
+  function end(e,cancel){
+    if(!nd||e.pointerId!==nd.id)return;
+    const d=nd;nd=null;
+    try{nav.releasePointerCapture(e.pointerId)}catch(_){}
+    if(!d.drag)return;
+    noClick=Date.now()+450;
+    const b=cancel?nav.querySelector('.nb.active'):(d.t||nearest(e.clientX));
+    blob.classList.remove('drag');
+    place(b);
+    const tab=b.dataset.tab;
+    if(!cancel){
+      if(tab==='profile')openProfile();
+      else if(tab!==activeTab)setTab(tab);
+    }
+    const fin=nav.querySelector('.nb.active');
+    setTimeout(()=>{
+      place(fin);
+      btns().forEach(x=>x.classList.remove('hov'));
+      setTimeout(()=>{nav.classList.remove('dragging');blob.classList.remove('on')},380);
+    },cancel?0:120);
+  }
+  nav.addEventListener('pointerup',e=>end(e,false),{passive:true});
+  nav.addEventListener('pointercancel',e=>end(e,true),{passive:true});
+  nav.addEventListener('click',e=>{if(Date.now()<noClick){e.stopPropagation();e.preventDefault()}},true);
+
+  /* ---- 2. settings: swipe right = back ---- */
+  const sp=$('sp');
+  let sw=null;
+  sp.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||!sp.classList.contains('open')){sw=null;return}
+    const t=e.touches[0],tg=e.target;
+    if(tg.closest&&tg.closest('input[type=range],input[type=color],.pcard,.psheet')){sw=null;return}
+    sw={x:t.clientX,y:t.clientY,dx:0,on:false,t:Date.now()};
+  },{passive:true});
+  sp.addEventListener('touchmove',e=>{
+    if(!sw)return;
+    const t=e.touches[0],dx=t.clientX-sw.x,dy=t.clientY-sw.y;
+    if(!sw.on){
+      if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){sw=null;return}
+      if(dx>12&&dx>Math.abs(dy)*1.4){sw.on=true;sp.classList.add('swiping')}
+      else return;
+    }
+    sw.dx=Math.max(0,dx);
+    sp.style.transform='translate3d('+sw.dx+'px,0,0)';
+    if(e.cancelable)e.preventDefault();
+  },{passive:false});
+  function swEnd(cancel){
+    if(!sw)return;
+    const s=sw;sw=null;
+    if(!s.on)return;
+    sp.classList.remove('swiping');
+    const v=s.dx/Math.max(1,Date.now()-s.t);
+    const go=!cancel&&(s.dx>innerWidth*.3||(v>.5&&s.dx>50));
+    sp.style.transform='';
+    if(go)$('spBack').onclick();
+  }
+  sp.addEventListener('touchend',()=>swEnd(false),{passive:true});
+  sp.addEventListener('touchcancel',()=>swEnd(true),{passive:true});
+
+  /* ---- 3. home: swipe left / right = next / previous chip ---- */
+  let hs=null;
+  document.addEventListener('touchstart',e=>{
+    hs=null;
+    if(e.touches.length!==1||activeTab!=='home'||mode==='full'||spOpen())return;
+    const tg=e.target;
+    if(!tg.closest||!tg.closest('#homePage,#homeBar')||tg.closest('#chips'))return;
+    const t=e.touches[0];
+    if(t.clientX<22||t.clientX>innerWidth-22)return;
+    hs={x:t.clientX,y:t.clientY,t:Date.now()};
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!hs)return;
+    const s=hs;hs=null;
+    const t=e.changedTouches[0],dx=t.clientX-s.x,dy=t.clientY-s.y;
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-s.t>800)return;
+    const n=dx<0?chip+1:chip-1;
+    if(n<0||n>=CHIPS.length)return;
+    const b=$('chips').children[n];
+    if(!b)return;
+    b.click();
+    try{b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}
+    try{$('homeGrid').animate([{opacity:.25,transform:'translateX('+(dx<0?36:-36)+'px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.3,1)'})}catch(_){}
+  },{passive:true});
 })();
 </script>
 </body>
