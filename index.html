@@ -2820,7 +2820,7 @@ function takeSong(){
   return null;
 }
 
-const AHEAD=6000;
+const AHEAD=80;
 
 function keepFilling(){if(!D.home.busy&&!offMode&&D.home.videos.length<D.home.cap)loadHomeMore()}
 
@@ -2919,7 +2919,7 @@ function homeCheck(){
 
   // Only unlock the next 100 when the user is actually scrolling near the end.
   const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
-  if(st.videos.length>=st.cap && remaining < AHEAD){
+  if(st.videos.length>=st.cap && window.scrollY>0 && remaining <= AHEAD){
     st.cap += 100;
     loadHomeMore();
   }
@@ -3163,7 +3163,7 @@ function searchCheck(){
   if(activeTab!=='search'||!s.query||s.busy)return;
   if(s.videos.length<s.cap)return; // finish current 100-song batch first
   const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
-  if(remaining< AHEAD){
+  if(window.scrollY>0 && remaining <= AHEAD){
     s.cap+=100;
     loadSearch(s.query,s.page+1,true);
   }
@@ -3171,7 +3171,7 @@ function searchCheck(){
 if('IntersectionObserver' in window){
   const searchPager=new IntersectionObserver(entries=>{
     if(entries.some(e=>e.isIntersecting))searchCheck();
-  },{rootMargin:'0px 0px 900px 0px'});
+  },{rootMargin:'0px'});
   searchPager.observe(searchSentinel);
 }
 addEventListener('scroll',()=>{if(activeTab==='search')searchCheck()},{passive:true});
