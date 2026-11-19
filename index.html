@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1e3a8a">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +25,10 @@
 <style>
 :root{--lyen:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;--lybn:"Bangla Sangam MN","Noto Sans Bengali",sans-serif;color-scheme:dark;--bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--text:#fff;--muted:#a1a1a8;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.16);--glass:rgba(28,28,30,.55);--spbg:rgba(0,0,0,.55);--gb:20px;--r:16px;--cols:2;--gborder:rgba(255,255,255,.16);--gshadow:rgba(0,0,0,.45);--bgdim:0;--pcpad:clamp(12px,2.5vh,30px)}
 :root[data-theme=light]{color-scheme:light;--bg:#f2f2f7;--surface:#fff;--surface-2:#e5e5ea;--text:#000;--muted:#6c6c70;--gborder:rgba(255,255,255,.8);--gshadow:rgba(30,40,80,.18)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html,body{touch-action:manipulation}
+input,textarea,[contenteditable=true]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img{-webkit-user-drag:none}
 html{background:var(--bg);overscroll-behavior-y:none}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100dvh;overscroll-behavior:none}
 button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
@@ -4550,10 +4553,17 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   nav.addEventListener('touchend',e=>{const t=e.changedTouches[0];endD(t?t.clientX:0,false)},{passive:true});
   nav.addEventListener('touchcancel',e=>{const t=e.changedTouches[0];endD(t?t.clientX:0,true)},{passive:true});
   /* mouse (PC) */
-  nav.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0){startD(e.clientX,'m');try{nav.setPointerCapture(e.pointerId)}catch(_){}}},{passive:true});
-  nav.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')moveD(e.clientX)},{passive:true});
-  nav.addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')endD(e.clientX,false)},{passive:true});
+  nav.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0)startD(e.clientX,'m')},{passive:true});
+  addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')moveD(e.clientX)},{passive:true});
+  addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')endD(e.clientX,false)},{passive:true});
   nav.addEventListener('click',e=>{if(Date.now()<noClick){e.stopPropagation();e.preventDefault()}},true);
+
+  /* no zoom (double tap / pinch), no text selection or copy menu except in input boxes */
+  const isField=t=>t&&t.closest&&t.closest('input,textarea,[contenteditable=true]');
+  ['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
+  document.addEventListener('contextmenu',e=>{if(!isField(e.target))e.preventDefault()});
+  document.addEventListener('selectstart',e=>{if(!isField(e.target))e.preventDefault()});
+  document.addEventListener('dblclick',e=>{if(!isField(e.target))e.preventDefault()});
 
   /* ---- 2. settings: swipe right = back ---- */
   const sp=$('sp');
