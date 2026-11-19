@@ -15,13 +15,14 @@
 :root{--lyen:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;--lybn:"Bangla Sangam MN","Noto Sans Bengali",sans-serif;color-scheme:dark;--bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--text:#fff;--muted:#a1a1a8;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.16);--glass:rgba(28,28,30,.55);--spbg:rgba(0,0,0,.55);--gb:20px;--r:16px;--cols:2;--gborder:rgba(255,255,255,.16);--gshadow:rgba(0,0,0,.45);--bgdim:0;--pcpad:clamp(12px,2.5vh,30px)}
 :root[data-theme=light]{color-scheme:light;--bg:#f2f2f7;--surface:#fff;--surface-2:#e5e5ea;--text:#000;--muted:#6c6c70;--gborder:rgba(255,255,255,.8);--gshadow:rgba(30,40,80,.18)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg);overscroll-behavior-y:none}
+html{background:var(--bg);overscroll-behavior-y:none;overflow-x:hidden}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100dvh;overscroll-behavior:none}
 button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 [hidden]{display:none!important}
 svg{display:block}
 .g{background:var(--glass);border:1px solid var(--gborder);backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);box-shadow:0 8px 24px var(--gshadow)}
-#bg,#bgDim{position:fixed;left:-60px;right:-60px;top:-120px;bottom:-120px;z-index:-1}
+#bgwrap{position:fixed;left:0;right:0;top:-120px;bottom:-120px;overflow:hidden;z-index:-1;pointer-events:none}
+#bg,#bgDim{position:absolute;left:-60px;right:-60px;top:0;bottom:0}
 #bg{background-color:var(--bg);background-size:cover;background-position:center;background-repeat:no-repeat;filter:var(--bgfilter,none);-webkit-filter:var(--bgfilter,none);transform:translateZ(0)}
 #bgDim{background:rgba(0,0,0,var(--bgdim));pointer-events:none}
 #topbar{position:relative}
@@ -619,8 +620,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </filter>
   </defs>
 </svg>
+<div id="bgwrap" aria-hidden="true">
 <div id="bg" aria-hidden="true"></div>
 <div id="bgDim" aria-hidden="true"></div>
+</div>
 
 <div id="topbar">
   <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
@@ -3036,7 +3039,7 @@ async function loadSearch(term,page,append){
 
   if(!append){
     st.videos=[];
-    grid.innerHTML='<div class="empty g">Searching…</div>';
+    grid.innerHTML='';
   }
 
   const data=await fetchSongs(term,page,ctl);
