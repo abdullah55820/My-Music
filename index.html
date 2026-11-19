@@ -1215,6 +1215,7 @@ $('spBack').onclick=()=>{
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 
 const seek=$('seek');
+const PLAYLIST_ID='PLbvY05KVYwoo';
 /* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
 const au=new Audio();
 au.preload='auto';
@@ -1292,12 +1293,13 @@ window.onYouTubeIframeAPIReady=()=>{
     /* Phones: the player always stays 1920x1080 and is only scaled with CSS.
        PC: the iframe is sized directly to the video box (no scale), so there is no seam line. */
     height:'1080',width:'1920',
-    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
+    playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0,listType:'playlist',list:PLAYLIST_ID},
     events:{
       onReady:()=>{
         apiReady=true;
         syncVideo();
         if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
+        setTimeout(loadPlaylistSongs,250);
       },
       onStateChange:onState,
       onError:onYtError
@@ -2589,13 +2591,6 @@ $('likeBtn').addEventListener('click',e=>{
 });
 
 /* ---------- SONGS ---------- */
-const instances=[
-  'https://inv.nadeko.net',
-  'https://invidious.nerdvpn.de',
-  'https://yt.chocolatemoo53.com',
-  'https://invidious.tiekoetter.com'
-];
-
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 
 const D={
@@ -2647,32 +2642,7 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchSongs(q,page,ctl,list=instances,strict=false){
-  const requests=list.map(base=>{
-    const c=new AbortController();
-    const onAb=()=>c.abort();
-    ctl.signal.addEventListener('abort',onAb);
-    const tm=setTimeout(()=>c.abort(),6000);
-
-    return fetch(
-      `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`,
-      {signal:c.signal,headers:{Accept:'application/json'},cache:'no-store'}
-    ).then(r=>{
-      if(!r.ok)throw new Error('Server error');
-      return r.json();
-    }).then(data=>{
-      if(!Array.isArray(data))throw new Error('Invalid response');
-      const out=data.filter(v=>v&&v.type==='video'&&v.videoId&&(!v.published||v.published>=MIN_TS));
-      if(strict&&!out.length)throw new Error('Empty');
-      return out;
-    }).finally(()=>{
-      clearTimeout(tm);
-      ctl.signal.removeEventListener('abort',onAb);
-    });
-  });
-
-  try{return await Promise.any(requests)}catch(e){return null}
-}
+async function fetchSongs(){return [];} // Search is performed only inside the loaded playlist.
 
 const shuffle=a=>{
   for(let i=a.length-1;i>0;i--){
@@ -2682,307 +2652,90 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   All includes every category. South Indian is kept as one combined group. */
-const GROUPS=[
-  [6,['Latest Hindi new songs 2026','Hindi new songs 2026','Bollywood latest songs 2026','Latest Bollywood songs','Hindi romantic new songs']],
-  [6,['Latest Bangla new songs 2026','Bangla new songs 2026','Bengali latest songs','Kolkata Bangla new songs','Bangladesh latest Bangla songs','Bangla movie new songs']],
-  [2.5,['Latest Punjabi new songs 2026','Punjabi new songs 2026','Latest Punjabi hits','Punjabi romantic new songs']],
-  [2.5,['Latest South Indian new songs 2026','South Indian new songs Tamil Telugu Malayalam Kannada','Tamil Telugu Malayalam Kannada latest movie songs','South Indian movie new songs','Latest Tamil Telugu Malayalam songs']],
-  [1.5,['Latest Pakistani new songs 2026','Pakistani new songs','Coke Studio Pakistan latest songs','Pakistani drama OST new songs']],
-  [3,['Trending new songs 2026','Latest trending songs','Top trending music videos 2026','Viral new songs 2026']],
-  [1,['Latest new songs 2026','New songs this week 2026']],
-  [1.5,['T-Series latest new songs 2026','T-Series new Hindi songs','T-Series latest songs']],
-  [1,['Sony Music India latest new songs 2026','Sony Music India new songs','Sony Music latest songs']],
-  [1,['YRF latest new songs 2026','YRF new songs','Yash Raj Films latest songs']],
-  [1,['Zee Music latest new songs 2026','Zee Music Company new songs','Zee Music latest songs']],
-  [1,['Saregama latest new songs 2026','Saregama new songs','Saregama latest songs']],
-  [1,['Tips Official latest new songs 2026','Tips new songs','Tips Official latest songs']],
-  [1,['Eros Now latest new songs 2026','Eros Now new songs','Eros Now Music latest songs']],
-  [1,['Speed Records latest new songs 2026','Speed Records new Punjabi songs','Speed Records latest songs']],
-  [1,['Latest Nepali new songs 2026','Nepali new songs','Nepali latest songs 2026']]
-].map(([weight,qs,f])=>({qs,buf:[],pg:{},weight,f}));
-
-const FORYOU=6;
-
-function buildForYou(){
-  const c={};
-  [...getLiked(),...getHist()].forEach(v=>{if(v.author&&!v.local)c[v.author]=(c[v.author]||0)+1});
-  const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
-  const g=GROUPS[FORYOU];
-  g.qs=a.length?a.map(x=>x+' latest songs'):['Latest new songs 2026','Trending songs 2026'];
-  g.buf=[];
-  g.pg={};
-}
-
-async function fillGroup(g,ctl){
-  if(g.busy)return true;
-  g.busy=true;
-  try{return await fillGroupRaw(g,ctl)}
-  finally{g.busy=false}
-}
-
-async function fillGroupRaw(g,ctl){
-  const q=g.qs[Math.floor(Math.random()*g.qs.length)];
-  const page=(g.pg[q]||0)+1;
-  const few=activeGroups().length<6;
-  const data=await fetchSongs(q,page,ctl,few?instances.slice():shuffle(instances.slice()).slice(0,2),few);
-
-  if(data===null)return false;
-
-  g.pg[q]=page;
-  data.forEach(v=>{
-    if(seen.has(v.videoId))return;
-    if(g.f&&!g.f.test(v.author||''))return;
-    if(g.buf.some(b=>b.videoId===v.videoId))return;
-    g.buf.push(v);
-  });
-  shuffle(g.buf);
-  return true;
-}
-
-const CHIPS=[
-  ['All',null],['T-Series',[7]],['Bangla',[1]],['Trending',[5]],['Hindi',[0]],
-  ['Sony Music',[8]],['YRF',[9]],['Zee Music',[10]],['Saregama',[11]],
-  ['Tips',[12]],['Eros Now',[13]],['Speed Records',[14]],
-  ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15]]
-];
+/* ---------- USER YOUTUBE PLAYLIST ONLY ---------- */
+const GROUPS=[];
+const FORYOU=0;
+function buildForYou(){}
+const CHIPS=[['My Playlist',null]];
 let chip=0;
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS;
-
+const activeGroups=()=>[];
 const CACHE={};
+let playlistLoaded=false,playlistLoading=false;
 
-function saveChip(){
-  CACHE[chip]={videos:D.home.videos,nodes:[...$('homeGrid').children],seen,scroll:window.scrollY,cap:D.home.cap};
-}
-
-function restoreChip(i){
-  const st=D.home,grid=$('homeGrid'),c=CACHE[i];
-
-  if(st.ctl)st.ctl.abort();
-  st.busy=false;
-  grid.replaceChildren();
-
-  if(c&&c.videos.length){
-    st.videos=c.videos;
-    st.cap=c.cap||100;
-    seen=c.seen;
-    grid.append(...c.nodes);
-    $('homeStatus').textContent=c.videos.length+' Songs';
-    window.scrollTo(0,c.scroll);
-    return false;
-  }
-
-  st.videos=[];
-  st.cap=100;
-  seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.pg={};g.busy=false});
-  window.scrollTo(0,0);
-  return true;
-}
-
-CHIPS.forEach((c,i)=>{
-  const b=document.createElement('button');
-  b.type='button';
-  b.className='chip'+(i===0?' on':'');
-  b.textContent=c[0];
-  b.onclick=()=>{
-    if(chip===i)return;
-    saveChip();
-    chip=i;
-    if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
-    document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
-    if(restoreChip(i))loadHomeMore();
-    else keepFilling();
-  };
-  $('chips').appendChild(b);
-});
-
-/* PC: mouse wheel over the chip row scrolls it sideways */
-document.querySelectorAll('.chips').forEach(ch=>{
-  ch.addEventListener('wheel',e=>{
-    if(!isDesk())return;
-    if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&ch.scrollWidth>ch.clientWidth){
-      e.preventDefault();
-      ch.scrollLeft+=e.deltaY;
-    }
-  },{passive:false});
-});
+function saveChip(){}
+function restoreChip(){return false}
+function takeSong(){return null}
 
 const authKey=v=>((v&&v.author)||'').toLowerCase().trim();
-
-function takeSong(){
-  const st=D.home;
-  const gs=activeGroups().filter(g=>g.buf.length);
-  if(!gs.length)return null;
-
-  const last=st.videos.slice(-14).map(authKey).reverse();
-
-  for(const w of [14,8,4,2,0]){
-    const ban=new Set(last.slice(0,w));
-    const pool=[];
-
-    gs.forEach(g=>{
-      for(let i=0;i<g.buf.length;i++){
-        const v=g.buf[i];
-        if(seen.has(v.videoId)){g.buf.splice(i,1);i--;continue}
-        if(!ban.has(authKey(v))){pool.push({g,i});break}
-      }
-    });
-
-    if(pool.length){
-      const total=pool.reduce((a,p)=>a+p.g.weight,0);
-      let pick=pool[0];
-      pool.forEach(p=>{
-        p.g.cr=(p.g.cr||0)+p.g.weight;
-        if(p.g.cr>pick.g.cr)pick=p;
-      });
-      pick.g.cr-=total;
-      return pick.g.buf.splice(pick.i,1)[0];
-    }
-  }
-  return null;
-}
-
 const AHEAD=6000;
-
-function keepFilling(){if(!D.home.busy&&!offMode&&D.home.videos.length<D.home.cap)loadHomeMore()}
-
-async function loadHomeMore(){
-  const st=D.home;
-  if(st.busy||offMode)return;
-  if(st.videos.length>=st.cap)return;
-  st.busy=true;
-
-  const ctl=new AbortController();
-  st.ctl=ctl;
-
-  const stat=$('homeStatus'),grid=$('homeGrid');
-  if(!st.videos.length)stat.textContent='Loading music…';
-
-  let added=0,failed=false;
-  if(!navigator.onLine&&!st.videos.length)failed=true;
-
-  for(let attempt=0;attempt<6&&added<24&&st.videos.length<st.cap&&!ctl.signal.aborted&&!failed;attempt++){
-    const need=activeGroups().filter(g=>g.buf.length<4);
-    let ok=0;
-
-    if(need.length){
-      const all=Promise.all(need.map(g=>fillGroup(g,ctl)));
-      let poll;
-      const first=!st.videos.length;
-      const t0=Date.now();
-      const minGroups=Math.min(3,activeGroups().length);
-      const enough=new Promise(r=>{
-        poll=setInterval(()=>{
-          if(ctl.signal.aborted){r('abort');return}
-          if(!first)return;
-          const gs=activeGroups().filter(g=>g.buf.length);
-          const n=gs.reduce((a,g)=>a+g.buf.length,0);
-          if((n>=12&&gs.length>=minGroups)||(n>0&&Date.now()-t0>1500))r('fast');
-        },60);
-      });
-      const res=await Promise.race([all,enough,new Promise(r=>setTimeout(()=>r(null),4000))]);
-      clearInterval(poll);
-
-      if(ctl.signal.aborted)break;
-
-      ok=Array.isArray(res)?res.filter(Boolean).length:(activeGroups().some(g=>g.buf.length)?1:0);
-    }
-
-    while(added<24&&st.videos.length<st.cap){
-      const v=takeSong();
-      if(!v)break;
-      seen.add(v.videoId);
-      st.videos.push(v);
-      grid.appendChild(card(v,st.videos.length-1,st.videos));
-      added++;
-    }
-
-    if(added>=8)break;
-
-    if(!ok&&!added){
-      if(attempt>=5)failed=true;
-      else await new Promise(r=>setTimeout(r,500*(attempt+1)));
-    }
-  }
-
-  if(st.ctl!==ctl||ctl.signal.aborted)return;
-
-  st.busy=false;
-
-  if(failed&&!st.videos.length&&(!navigator.onLine||getLoc().length)){
-    renderOfflineHome();
-    return;
-  }
-
-  if(failed&&!st.videos.length){
-    stat.textContent='Connection unavailable';
-    grid.innerHTML=`<div class="empty g">Unable to load music.<br>Check your internet connection and try again.<br><br><button class="sb p" id="homeRetry" type="button">Retry</button> <button class="sb" id="homeLoc" type="button">My Files</button></div>`;
-    $('homeRetry').onclick=()=>{grid.innerHTML='';loadHomeMore()};
-    $('homeLoc').onclick=()=>{setTab('library');openFolder('loc')};
-    return;
-  }
-
-  stat.textContent=st.videos.length+' Songs';
-  if(added>0)keepFilling();
-}
-
-/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
-function homeCheck(){
-  const st=D.home;
-  if(offMode||st.busy)return;
-  if(st.videos.length<st.cap){
-    if(st.videos.length)loadHomeMore();
-    return;
-  }
-  if(activeTab==='home'&&mode!=='full'&&st.videos.length){
-    const rem=document.documentElement.scrollHeight-(scrollY+innerHeight);
-    if(rem<2500){st.cap+=100;loadHomeMore()}
-  }
-}
-setInterval(homeCheck,600);
-let hcRaf=0;
-addEventListener('scroll',()=>{if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;homeCheck()})},{passive:true});
+function keepFilling(){}
 
-/* ---------- OFFLINE HOME: imported songs ---------- */
-function renderOfflineHome(){
-  offMode=true;
-  const st=D.home;
-  if(st.ctl)st.ctl.abort();
-  st.busy=false;
+function renderPlaylistError(message){
   const grid=$('homeGrid');
-  grid.replaceChildren();
-  $('chips').hidden=true;
-  const songs=getLoc();
-  $('homeStatus').textContent=songs.length+(songs.length===1?' Song':' Songs')+' · Offline';
-  if(!songs.length){
-    grid.innerHTML='<div class="empty g">You are offline.<br>No imported songs yet.<br><br><button class="sb p" id="homeLoc2" type="button">Open My Files</button></div>';
-    $('homeLoc2').onclick=()=>{setTab('library');openFolder('loc')};
-    return;
-  }
-  songs.forEach((v,i)=>grid.appendChild(card(v,i,songs)));
+  grid.innerHTML=`<div class="empty g">${message||'Unable to load your YouTube playlist.'}<br><br><button class="sb p" id="playlistRetry" type="button">Retry</button></div>`;
+  $('playlistRetry').onclick=()=>{playlistLoaded=false;loadPlaylistSongs(true)};
 }
 
-function leaveOfflineHome(){
-  if(!offMode)return;
-  offMode=false;
-  $('chips').hidden=false;
-  const st=D.home,grid=$('homeGrid');
-  grid.replaceChildren();
-  if(st.videos.length){
-    st.videos.forEach((v,i)=>grid.appendChild(card(v,i,st.videos)));
-    $('homeStatus').textContent=st.videos.length+' Songs';
-    keepFilling();
-  }else{
-    $('homeStatus').textContent='Loading music…';
-    loadHomeMore();
+async function getPlaylistInfo(id){
+  try{
+    const url='https://www.youtube.com/oembed?url='+encodeURIComponent('https://www.youtube.com/watch?v='+id)+'&format=json';
+    const r=await fetch(url,{cache:'force-cache'});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    return {videoId:id,title:d.title||'YouTube video',author:d.author_name||'YouTube',lengthSeconds:0};
+  }catch(e){
+    return {videoId:id,title:'Playlist song',author:'YouTube',lengthSeconds:0};
   }
 }
 
-addEventListener('offline',renderOfflineHome);
+async function loadPlaylistSongs(force=false){
+  if(playlistLoading|| (playlistLoaded&&!force))return;
+  playlistLoading=true;
+  playlistLoaded=false;
+  const grid=$('homeGrid'),st=D.home;
+  st.busy=true;
+  if(force){st.videos=[];grid.replaceChildren();}
+  $('homeStatus').textContent='Loading your playlist…';
+  try{
+    let ids=[];
+    for(let n=0;n<12&&!ids.length;n++){
+      try{ids=yt&&typeof yt.getPlaylist==='function'?(yt.getPlaylist()||[]):[]}catch(e){}
+      if(!ids.length)await new Promise(r=>setTimeout(r,500));
+    }
+    ids=[...new Set(ids.filter(Boolean))];
+    if(!ids.length)throw new Error('The playlist could not be read. Make sure it is public or unlisted.');
+    const videos=await Promise.all(ids.map(getPlaylistInfo));
+    st.videos=videos;
+    st.cap=videos.length;
+    grid.replaceChildren();
+    videos.forEach((v,i)=>grid.appendChild(card(v,i,st.videos)));
+    $('homeStatus').textContent=videos.length+' Playlist Songs';
+    playlistLoaded=true;
+  }catch(e){
+    renderPlaylistError(e.message||'Could not load the playlist.');
+  }finally{
+    st.busy=false;
+    playlistLoading=false;
+  }
+}
+
+function loadHomeMore(){
+  if(playlistLoaded||playlistLoading)return;
+  if(yt&&apiReady)loadPlaylistSongs();
+  else $('homeStatus').textContent='Connecting to YouTube…';
+}
+
+function refreshHome(){
+  playlistLoaded=false;
+  playlistLoading=false;
+  D.home.videos=[];
+  $('homeGrid').replaceChildren();
+  return loadPlaylistSongs(true);
+}
+
+$('chips').innerHTML='<button class="chip on" type="button">My Playlist</button>';
 
 /* ---------- SEARCH ---------- */
 const q=$('q');
@@ -3044,52 +2797,20 @@ function doSearch(term){
 
 async function loadSearch(term,page,append){
   const st=D.search;
-  if(st.ctl)st.ctl.abort();
   st.busy=true;
-
-  const ctl=new AbortController();
-  st.ctl=ctl;
-
   const grid=$('searchGrid');
   $('searchMore').hidden=true;
-
-  if(!append){
-    st.videos=[];
-    grid.innerHTML='<div class="empty g">Searching…</div>';
-  }
-
-  const data=await fetchSongs(term,page,ctl);
-
-  if(st.ctl!==ctl||ctl.signal.aborted)return;
-
+  const q0=term.trim().toLowerCase();
+  const found=D.home.videos.filter(v=>`${v.title||''} ${v.author||''}`.toLowerCase().includes(q0));
+  st.videos=found;
+  st.page=1;
+  grid.innerHTML='';
+  found.forEach((v,i)=>grid.appendChild(card(v,i,found)));
+  if(!found.length)grid.innerHTML='<div class="empty g">No matching songs in your playlist.</div>';
+  $('searchStatus').textContent=found.length+' Playlist Songs';
   st.busy=false;
-
-  if(data===null){
-    if(!append)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
-    $('searchStatus').textContent='Connection error';
-    $('searchMore').hidden=!append;
-    $('searchMore').disabled=false;
-    return;
-  }
-
-  if(!append)grid.innerHTML='';
-
-  const ids=new Set(st.videos.map(v=>v.videoId));
-  const fresh=data.filter(v=>!ids.has(v.videoId));
-
-  fresh.forEach(v=>{
-    st.videos.push(v);
-    grid.appendChild(card(v,st.videos.length-1,st.videos));
-  });
-
-  st.page=page;
-
-  if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
-
-  $('searchStatus').textContent=st.videos.length+' Songs';
-  $('searchMore').hidden=!data.length&&!fresh.length;
-  $('searchMore').disabled=false;
 }
+
 
 function clearSearch(){
   const st=D.search;
@@ -3119,29 +2840,7 @@ q.addEventListener('input',()=>{
   sugT=setTimeout(()=>showSug(t),250);
 });
 
-async function showSug(t){
-  const ctl=new AbortController();
-  setTimeout(()=>ctl.abort(),3000);
-  try{
-    const list=await Promise.any(instances.map(b=>
-      fetch(`${b}/api/v1/search/suggestions?q=${encodeURIComponent(t)}`,{signal:ctl.signal})
-        .then(r=>{if(!r.ok)throw 0;return r.json()})
-        .then(d=>d.suggestions||[])
-    ));
-    if(q.value.trim()!==t)return;
-    const box=$('recent');
-    box.innerHTML='';
-    box.hidden=!list.length;
-    list.slice(0,8).forEach(x=>{
-      const b=document.createElement('button');
-      b.type='button';
-      b.className='chip';
-      b.textContent=x;
-      b.onclick=()=>doSearch(x);
-      box.appendChild(b);
-    });
-  }catch(e){}
-}
+function showSug(){renderRecent();}
 
 $('clearQ').onclick=clearSearch;
 $('searchMore').onclick=()=>{
@@ -3422,27 +3121,13 @@ document.querySelectorAll('.nb').forEach(b=>{
 
 /* ---------- HOME REFRESH + PULL TO REFRESH ---------- */
 function refreshHome(){
-  const st=D.home;
-  if(st.ctl)st.ctl.abort();
-  if(!navigator.onLine){renderOfflineHome();return Promise.resolve()}
   offMode=false;
   $('chips').hidden=false;
-  st.cap=100;
-
-  st.busy=false;
-  st.videos=[];
-  $('homeGrid').innerHTML='';
-  seen.clear();
-
-  Object.keys(CACHE).forEach(k=>delete CACHE[k]);
-  if(CHIPS[chip][0]==='For You')buildForYou();
-
-  GROUPS.forEach((g,i)=>{
-    if(i!==FORYOU){g.buf=[];g.pg={}}
-    g.busy=false;
-  });
-
-  return loadHomeMore();
+  D.home.ctl?.abort();
+  D.home.busy=false;
+  D.home.videos=[];
+  $('homeGrid').replaceChildren();
+  return loadPlaylistSongs(true);
 }
 
 const ptr=$('ptr'),homeEl=$('homePage'),hdrEl=$('topbar');
