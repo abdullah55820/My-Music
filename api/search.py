@@ -1,98 +1,158 @@
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse, parse_qs
 import json
-import re
+import logging
 import yt_dlp
 
-MAX_QUERY = 160
-MAX_PAGE = 5
-PAGE_SIZE = 20
+LOG = logging.getLogger("soundflow-search")
+logging.basicConfig(level=logging.INFO)
+
+MAX_QUERY_LENGTH = 200
+MAX_PAGE = 20
+RESULTS_PER_PAGE = 20
 
 
-def clean_text(value, limit=300):
-    if not isinstance(value, str):
-        return ""
-    return value.strip()[:limit]
+def json_response(handler, status, payload):
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    handler.send_response(status)
+    handler.send_header("Content-Type", "application/json; charset=utf-8")
+    handler.send_header("Cache-Control", "no-store, max-age=0")
+    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+    handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Content-Length", str(len(body)))
+    handler.end_headers()
+    handler.wfile.write(body)
+
+
+def clean_text(value, fallback=""):
+    if value is None:
+        return fallback
+    return str(value).strip()
+
+
+def normalize_entry(entry):
+    if not isinstance(entry, dict):
+        return None
+
+    video_id = clean_text(entry.get("id") or entry.get("url"))
+    if video_id.startswith("https://www.youtube.com/watch?v="):
+        video_id = video_id.split("v=", 1)[1].split("&", 1)[0]
+    elif video_id.startswith("https://youtu.be/"):
+        video_id = video_id.rsplit("/", 1)[-1].split("?", 1)[0]
+
+    # YouTube video IDs are exactly 11 URL-safe characters.
+    if len(video_id) != 11 or not all(
+        c.isascii() and (c.isalnum() or c in "_-") for c in video_id
+    ):
+        return None
+
+    title = clean_text(entry.get("title"), "Untitled")
+    author = clean_text(
+        entry.get("channel") or entry.get("uploader") or entry.get("creator"),
+        "YouTube"
+    )
+
+    duration = entry.get("duration")
+    try:
+        duration = max(0, int(float(duration))) if duration is not None else 0
+    except (TypeError, ValueError, OverflowError):
+        duration = 0
+
+    timestamp = entry.get("release_timestamp") or entry.get("timestamp")
+    try:
+        published = int(timestamp) if timestamp is not None else None
+    except (TypeError, ValueError, OverflowError):
+        published = None
+
+    result = {
+        "type": "video",
+        "videoId": video_id,
+        "title": title,
+        "author": author,
+        "lengthSeconds": duration,
+    }
+    if published is not None:
+        result["published"] = published
+
+    return result
+
+
+def search_youtube(query, page):
+    start = (page - 1) * RESULTS_PER_PAGE + 1
+    search_term = "ytsearch{}:{}".format(RESULTS_PER_PAGE, query)
+
+    options = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extract_flat": "in_playlist",
+        "ignoreerrors": True,
+        "noplaylist": False,
+        "playliststart": start,
+        "playlistend": start + RESULTS_PER_PAGE - 1,
+        "socket_timeout": 15,
+        "retries": 1,
+        "extractor_retries": 1,
+        "cachedir": False,
+        "logger": LOG,
+    }
+
+    with yt_dlp.YoutubeDL(options) as ydl:
+        info = ydl.extract_info(search_term, download=False)
+
+    if not info:
+        return []
+
+    entries = info.get("entries") if isinstance(info, dict) else None
+    if entries is None:
+        entries = [info]
+
+    results = []
+    for entry in entries:
+        normalized = normalize_entry(entry)
+        if normalized:
+            results.append(normalized)
+
+    return results
 
 
 class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        json_response(self, 200, {"ok": True})
+
     def do_GET(self):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
-        query = clean_text((params.get("q") or [""])[0], MAX_QUERY)
-        try:
-            page = int((params.get("page") or ["1"])[0])
-        except (TypeError, ValueError):
-            page = 1
-        page = max(1, min(page, MAX_PAGE))
+
+        query = clean_text((params.get("q") or [""])[0])
+        raw_page = clean_text((params.get("page") or ["1"])[0], "1")
 
         if not query:
-            return self._send(400, {"error": "Missing search query", "items": []})
-        if len(query) < 2:
-            return self._send(200, [])
-        if re.search(r"[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f]", query):
-            return self._send(400, {"error": "Invalid query", "items": []})
+            json_response(self, 400, {"error": "Missing search query. Use ?q=Song+name"})
+            return
 
-        # yt-dlp searches YouTube directly; no Invidious instance or API key.
-        # Ask for enough entries to reach the requested page, then return 20.
-        count = page * PAGE_SIZE
-        options = {
-            "quiet": True,
-            "no_warnings": True,
-            "skip_download": True,
-            "extract_flat": "in_playlist",
-            "ignoreerrors": True,
-            "socket_timeout": 12,
-            "playlistend": count,
-            "noplaylist": False,
-            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
-        }
+        if len(query) > MAX_QUERY_LENGTH:
+            json_response(self, 400, {"error": "Search query is too long."})
+            return
+
         try:
-            with yt_dlp.YoutubeDL(options) as ydl:
-                result = ydl.extract_info(f"ytsearch{count}:{query}", download=False)
-            entries = (result or {}).get("entries") or []
-            start = (page - 1) * PAGE_SIZE
-            output = []
-            for item in entries[start:start + PAGE_SIZE]:
-                if not item:
-                    continue
-                video_id = item.get("id")
-                if not video_id:
-                    url = item.get("url") or ""
-                    match = re.search(r"(?:v=|youtu\\.be/)([A-Za-z0-9_-]{11})", url)
-                    video_id = match.group(1) if match else None
-                if not video_id or not re.fullmatch(r"[A-Za-z0-9_-]{11}", str(video_id)):
-                    continue
-                timestamp = item.get("timestamp")
-                if timestamp is None:
-                    upload_date = item.get("upload_date")
-                    if upload_date and len(str(upload_date)) == 8:
-                        try:
-                            from datetime import datetime
-                            timestamp = int(datetime.strptime(str(upload_date), "%Y%m%d").timestamp())
-                        except ValueError:
-                            timestamp = None
-                output.append({
-                    "type": "video",
-                    "videoId": video_id,
-                    "title": clean_text(item.get("title"), 500) or "Untitled",
-                    "author": clean_text(item.get("uploader") or item.get("channel") or item.get("channel_id"), 200) or "YouTube",
-                    "lengthSeconds": int(item.get("duration") or 0),
-                    "published": int(timestamp) if timestamp else None,
-                    "videoThumbnails": [],
-                })
-            return self._send(200, output)
-        except Exception as exc:
-            # Do not expose internal paths or full exception details to browsers.
-            print("yt-dlp search failed:", repr(exc))
-            return self._send(502, {"error": "YouTube search is temporarily unavailable. Please try again."})
+            page = int(raw_page)
+        except (TypeError, ValueError):
+            page = 1
 
-    def _send(self, status, payload):
-        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        page = max(1, min(page, MAX_PAGE))
+
+        try:
+            results = search_youtube(query, page)
+            json_response(self, 200, results)
+        except Exception as exc:
+            # Keep the response useful while logging the full traceback in Vercel.
+            LOG.exception("SoundFlow YouTube search failed")
+            json_response(self, 502, {
+                "error": "YouTube search failed.",
+                "detail": str(exc)[:500]
+            })
+
+    def log_message(self, fmt, *args):
+        LOG.info("%s - %s", self.address_string(), fmt % args)
