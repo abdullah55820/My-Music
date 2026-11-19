@@ -4,12 +4,20 @@ import json
 import logging
 import yt_dlp
 
+try:
+    from ytmusicapi import YTMusic
+except Exception:
+    YTMusic = None
+
 LOG = logging.getLogger("soundflow-search")
 logging.basicConfig(level=logging.INFO)
 
 MAX_QUERY_LENGTH = 200
 MAX_PAGE = 20
 RESULTS_PER_PAGE = 20
+
+_YTMUSIC = None
+_YTMUSIC_DISABLED = False
 
 
 def json_response(handler, status, payload):
@@ -75,6 +83,14 @@ def normalize_entry(entry):
     if published is not None:
         result["published"] = published
 
+    # Preserve normal YouTube artwork as a fallback.
+    thumbnails = entry.get("thumbnails") or []
+    if thumbnails:
+        result["videoThumbnails"] = [
+            {"quality": "maxres" if i == len(thumbnails) - 1 else "high", "url": t.get("url")}
+            for i, t in enumerate(thumbnails) if isinstance(t, dict) and t.get("url")
+        ]
+
     return result
 
 
@@ -114,7 +130,42 @@ def search_youtube(query, page):
         if normalized:
             results.append(normalized)
 
+    # Add YouTube Music album artwork when its song result has the same video ID.
+    # If YT Music is temporarily unavailable, keep the regular yt-dlp results.
+    add_youtube_music_artwork(query, results, page)
     return results
+
+
+def add_youtube_music_artwork(query, results, page):
+    global _YTMUSIC, _YTMUSIC_DISABLED
+    if not results or page != 1 or YTMusic is None or _YTMUSIC_DISABLED:
+        return
+
+    try:
+        if _YTMUSIC is None:
+            _YTMUSIC = YTMusic()
+
+        songs = _YTMUSIC.search(query, filter="songs", limit=RESULTS_PER_PAGE)
+        artwork_by_id = {}
+        for song in songs or []:
+            if not isinstance(song, dict):
+                continue
+            video_id = clean_text(song.get("videoId"))
+            thumbs = song.get("thumbnails") or []
+            urls = [t.get("url") for t in thumbs if isinstance(t, dict) and t.get("url")]
+            if video_id and urls:
+                artwork_by_id[video_id] = [
+                    {"quality": "high", "url": urls[0]},
+                    {"quality": "maxres", "url": urls[-1]},
+                ]
+
+        for result in results:
+            music_art = artwork_by_id.get(result.get("videoId"))
+            if music_art:
+                result["videoThumbnails"] = music_art
+                result["artworkSource"] = "youtube-music"
+    except Exception:
+        LOG.warning("YouTube Music artwork lookup failed; using YouTube thumbnails", exc_info=True)
 
 
 class handler(BaseHTTPRequestHandler):
