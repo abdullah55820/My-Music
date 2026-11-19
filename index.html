@@ -2024,10 +2024,10 @@ let vidMode=false,vidFS=false;
 function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
-  /* Keep YouTube's internal player at its native 16:9 size on every device.
-     Scale the complete iframe from its top-left corner into the video box.
-     This avoids the iOS desktop-site renderer leaving a black strip on one side. */
-  f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
+  /* Size the YouTube iframe directly to its visible box.
+     Avoid transform-scaling a 1920x1080 iframe: iOS Safari Desktop Site
+     can leave a residual black strip when the transformed layer is clipped. */
+  f.style.cssText='position:absolute!important;left:0!important;top:0!important;right:0!important;bottom:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;min-width:0!important;border:0!important;margin:0!important;padding:0!important;transform:none!important;transform-origin:0 0!important';
 }
 on('yfs',()=>{
   if(vidFS){history.back();return}
