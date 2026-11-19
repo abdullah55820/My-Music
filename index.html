@@ -15,14 +15,13 @@
 :root{--lyen:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;--lybn:"Bangla Sangam MN","Noto Sans Bengali",sans-serif;color-scheme:dark;--bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--text:#fff;--muted:#a1a1a8;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.16);--glass:rgba(28,28,30,.55);--spbg:rgba(0,0,0,.55);--gb:20px;--r:16px;--cols:2;--gborder:rgba(255,255,255,.16);--gshadow:rgba(0,0,0,.45);--bgdim:0;--pcpad:clamp(12px,2.5vh,30px)}
 :root[data-theme=light]{color-scheme:light;--bg:#f2f2f7;--surface:#fff;--surface-2:#e5e5ea;--text:#000;--muted:#6c6c70;--gborder:rgba(255,255,255,.8);--gshadow:rgba(30,40,80,.18)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg);overscroll-behavior-y:none;overflow-x:hidden}
+html{background:var(--bg);overscroll-behavior-y:none}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100dvh;overscroll-behavior:none}
 button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 [hidden]{display:none!important}
 svg{display:block}
 .g{background:var(--glass);border:1px solid var(--gborder);backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);box-shadow:0 8px 24px var(--gshadow)}
-#bgwrap{position:fixed;left:0;right:0;top:-120px;bottom:-120px;overflow:hidden;z-index:-1;pointer-events:none}
-#bg,#bgDim{position:absolute;left:-60px;right:-60px;top:0;bottom:0}
+#bg,#bgDim{position:fixed;left:-60px;right:-60px;top:-120px;bottom:-120px;z-index:-1}
 #bg{background-color:var(--bg);background-size:cover;background-position:center;background-repeat:no-repeat;filter:var(--bgfilter,none);-webkit-filter:var(--bgfilter,none);transform:translateZ(0)}
 #bgDim{background:rgba(0,0,0,var(--bgdim));pointer-events:none}
 #topbar{position:relative}
@@ -59,6 +58,10 @@ svg{display:block}
 .chips .chip{background:var(--glass);border:1px solid var(--gborder);backdrop-filter:blur(var(--gb)) saturate(180%);-webkit-backdrop-filter:blur(var(--gb)) saturate(180%);transition:background .25s,color .25s}
 .chips .chip.on{color:var(--accent);background:linear-gradient(var(--accent-soft),var(--accent-soft)),var(--glass)}
 .chip .x{margin-left:8px;opacity:.7;font-size:15px;line-height:1}
+#recent{flex-direction:column;align-items:stretch;gap:6px;margin:0 0 12px;padding:0;overflow:visible;touch-action:auto;scroll-behavior:auto}
+#recent .chip{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 16px;border-radius:16px;font-size:14px;text-align:left}
+#recent .chip .x{margin-left:12px;padding:0 4px;font-size:20px}
+.xbtn.cw{width:auto;padding:0 14px;border-radius:17px;font-size:13px;font-weight:650;display:flex;align-items:center}
 #topbar .g{box-shadow:none}
 .opts{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:24px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
 .opt{position:relative;width:auto;flex:1 1 0;max-width:50px;min-width:0;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;transition:background .2s,color .2s,transform .15s}
@@ -620,10 +623,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </filter>
   </defs>
 </svg>
-<div id="bgwrap" aria-hidden="true">
 <div id="bg" aria-hidden="true"></div>
 <div id="bgDim" aria-hidden="true"></div>
-</div>
 
 <div id="topbar">
   <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
@@ -645,6 +646,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <form class="sbox g" id="sForm">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
       <input id="q" type="search" placeholder="Songs, artists..." autocomplete="off" enterkeyhint="search">
+      <button class="xbtn cw" id="clearRecent" type="button" aria-label="Clear recent searches" hidden>Clear</button>
       <button class="xbtn" id="clearQ" type="button" aria-label="Clear search" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
@@ -2033,7 +2035,7 @@ function syncVideo(){
   const dk=isDesk();
   const R=x=>dk?Math.round(x):x;
   const show=vidMode&&mode==='full'&&!isLoc()&&idx>=0;
-  az.classList.toggle('vid',show);
+  az.classList.toggle('vid',vidMode&&!isLoc()&&idx>=0);
   $('vdBtn').classList.toggle('on',vidMode);
   $('vdBtn').classList.toggle('dis',isLoc());
   if(!show){
@@ -2994,15 +2996,14 @@ function renderRecent(){
     b.onclick=()=>doSearch(t);
     box.appendChild(b);
   });
-  if(r.length){
-    const c=document.createElement('button');
-    c.type='button';
-    c.className='chip';
-    c.textContent='Clear';
-    c.onclick=()=>{LS.del('sf_recent');renderRecent()};
-    box.appendChild(c);
-  }
+  syncClr();
 }
+function syncClr(){
+  const has=!!q.value;
+  $('clearQ').hidden=!has;
+  $('clearRecent').hidden=has||!getRecent().length;
+}
+$('clearRecent').onclick=()=>{LS.del('sf_recent');renderRecent()};
 
 function doSearch(term){
   term=term.trim();
@@ -3013,7 +3014,7 @@ function doSearch(term){
   st.ctl=null;st.busy=false;st.videos=[];st.page=1;st.query=term;st.cap=100;if(st.autoTimer)clearTimeout(st.autoTimer);
 
   q.value=term;
-  $('clearQ').hidden=false;
+  $('clearQ').hidden=false;$('clearRecent').hidden=true;
   q.blur();
 
   $('searchHeading').hidden=false;
@@ -3105,7 +3106,7 @@ $('sForm').addEventListener('submit',e=>{e.preventDefault();doSearch(q.value)});
 
 let sugT=null,sugCtl=null,sugLast='';
 q.addEventListener('input',()=>{
-  $('clearQ').hidden=!q.value;
+  syncClr();
   clearTimeout(sugT);
   if(sugCtl)sugCtl.abort();
   const t=q.value.trim();
@@ -3515,7 +3516,7 @@ addEventListener('touchstart',e=>{
   sy=t.clientY;
 
   edge=sx<24&&!spOpen();
-  inChips=!!(e.target.closest&&e.target.closest('.chips'));
+  inChips=!!(e.target.closest&&e.target.closest('.chips:not(#recent)'));
   pdy=0;
 
   pulling=activeTab==='home'&&mode!=='full'&&!refreshing&&!spOpen()&&!inChips&&window.scrollY<=0&&e.touches.length===1;
