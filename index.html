@@ -2910,14 +2910,17 @@ let offMode=false;
 function homeCheck(){
   const st=D.home;
   if(offMode||st.busy)return;
-  if(st.videos.length<st.cap){
-    if(st.videos.length)loadHomeMore();
+
+  /* Start fetching the next 100-song batch BEFORE the current batch runs out.
+     Keep roughly 24 songs as a safety buffer so loading can happen in advance. */
+  if(st.videos.length >= Math.max(1, st.cap - 24)){
+    st.cap += 100;
+    loadHomeMore();
     return;
   }
-  if(activeTab==='home'&&mode!=='full'&&st.videos.length){
-    const rem=document.documentElement.scrollHeight-(scrollY+innerHeight);
-    if(rem<2500){st.cap+=100;loadHomeMore()}
-  }
+
+  /* Continue filling the current batch in the background. */
+  if(st.videos.length < st.cap && st.videos.length) loadHomeMore();
 }
 setInterval(homeCheck,600);
 let hcRaf=0;
@@ -3125,7 +3128,7 @@ if('IntersectionObserver' in window){
         loadSearch(s.query,s.page+1,true);
       }
     }
-  },{rootMargin:'900px 0px'});
+  },{rootMargin:'1800px 0px'});
   searchPager.observe(searchSentinel);
 }
 
