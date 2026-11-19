@@ -29,6 +29,12 @@
 html,body{touch-action:manipulation}
 input,textarea,[contenteditable=true]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 img{-webkit-user-drag:none}
+.lyr,.lyr *,.lyprev,.lyprev *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+.sbox input,.lsb input,.pnew input,.lyadj input{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+.chcfg .row{margin:8px 0}
+.chcfg .row b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chcfg .btnrow{margin:0;flex-wrap:nowrap;flex-shrink:0;gap:6px}
+.chcfg .sb{min-height:34px;padding:0 11px;border-radius:10px}
 html{background:var(--bg);overscroll-behavior-y:none}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100dvh;overscroll-behavior:none}
 button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
@@ -865,6 +871,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <h3>Glass Effect</h3>
       <div class="row"><div><b>Blur Strength</b></div><input type="range" data-k="gb" min="0" max="40"></div>
       <div class="row"><div><b>Transparency</b></div><input type="range" data-k="ga" min="10" max="90"></div>
+    </div>
+
+    <div class="sec g">
+      <h3>Home Chips</h3>
+      <p class="stnote" style="margin:0 0 6px">Change the order with the arrows, or hide chips you do not use.</p>
+      <div class="chcfg" id="chipCfg"></div>
+      <div class="btnrow"><button class="sb" id="chipReset" type="button">Reset</button></div>
     </div>
 
     <div class="sec g" id="bkSec">
@@ -2866,22 +2879,84 @@ function restoreChip(i){
   return true;
 }
 
+const chipBtns=[];
+(function(){
+  let c=LS.get('sf_chip_cfg',null);
+  const n=CHIPS.length;
+  let order=(c&&Array.isArray(c.order))?c.order.filter(i=>Number.isInteger(i)&&i>=0&&i<n):[];
+  order=order.filter((v,k)=>order.indexOf(v)===k);
+  for(let k=0;k<n;k++)if(!order.includes(k))order.push(k);
+  let hidden=(c&&Array.isArray(c.hidden))?c.hidden.filter(i=>i>=0&&i<n):[];
+  if(hidden.length>=n)hidden=[];
+  window.chipCfg={order,hidden};
+})();
+const chipVisible=()=>chipCfg.order.filter(i=>!chipCfg.hidden.includes(i));
+const saveChipCfg=()=>LS.set('sf_chip_cfg',chipCfg);
+function renderChips(){
+  const box=$('chips');
+  box.replaceChildren();
+  chipVisible().forEach(i=>box.appendChild(chipBtns[i]));
+  chipBtns.forEach((b,j)=>b.classList.toggle('on',j===chip));
+}
 CHIPS.forEach((c,i)=>{
   const b=document.createElement('button');
   b.type='button';
-  b.className='chip'+(i===0?' on':'');
+  b.className='chip';
   b.textContent=c[0];
   b.onclick=()=>{
     if(chip===i)return;
     saveChip();
     chip=i;
     if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
-    document.querySelectorAll('#chips .chip').forEach((x,j)=>x.classList.toggle('on',j===i));
+    chipBtns.forEach((x,j)=>x.classList.toggle('on',j===i));
     if(restoreChip(i))loadHomeMore();
     else keepFilling();
   };
-  $('chips').appendChild(b);
+  chipBtns.push(b);
 });
+if(chipCfg.hidden.includes(chip)){
+  chip=chipVisible()[0];
+  if(CHIPS[chip][0]==='For You')buildForYou();
+}
+renderChips();
+
+/* Settings: order / show-hide the home chips */
+function buildChipList(){
+  const box=$('chipCfg');
+  if(!box)return;
+  box.innerHTML='';
+  const vis=chipVisible();
+  chipCfg.order.forEach((idx,pos)=>{
+    const row=document.createElement('div');row.className='row';
+    const nm=document.createElement('b');nm.textContent=CHIPS[idx][0];
+    const bt=document.createElement('div');bt.className='btnrow';
+    const mk=(txt,cls,fn,dis)=>{const x=document.createElement('button');x.type='button';x.className='sb'+(cls?' '+cls:'');x.textContent=txt;x.disabled=!!dis;x.onclick=fn;bt.appendChild(x)};
+    const move=d=>{
+      const o=chipCfg.order,t=pos+d;
+      if(t<0||t>=o.length)return;
+      [o[pos],o[t]]=[o[t],o[pos]];
+      saveChipCfg();renderChips();buildChipList();
+    };
+    mk('▲','',()=>move(-1),pos===0);
+    mk('▼','',()=>move(1),pos===chipCfg.order.length-1);
+    const hid=chipCfg.hidden.includes(idx);
+    mk(hid?'Hidden':'Shown',hid?'':'p',()=>{
+      if(hid)chipCfg.hidden=chipCfg.hidden.filter(x=>x!==idx);
+      else{
+        if(chipVisible().length<=1)return;
+        chipCfg.hidden.push(idx);
+        if(chip===idx){const v=chipVisible()[0];renderChips();chipBtns[v].click()}
+      }
+      saveChipCfg();renderChips();buildChipList();
+    },!hid&&vis.length<=1);
+    row.append(nm,bt);box.appendChild(row);
+  });
+}
+buildChipList();
+$('chipReset').onclick=()=>{
+  chipCfg.order=CHIPS.map((_,i)=>i);chipCfg.hidden=[];
+  saveChipCfg();renderChips();buildChipList();
+};
 
 /* PC: mouse wheel over the chip row scrolls it sideways */
 document.querySelectorAll('.chips').forEach(ch=>{
@@ -3369,8 +3444,8 @@ async function importFiles(files){
     try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
     list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true,ext:((f.name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'').toLowerCase()});
     added++;
-    setLoc(list);
-    refreshStorage();
+    if(added%5===0)setLoc(list);
+    await new Promise(r=>setTimeout(r,0));
   }
   setLoc(list);
   renderLib();
@@ -4446,6 +4521,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     if(e.pointerType==='mouse'&&e.button!==0)return;
     if(off())return;
     const t=e.target;
+    if(t&&t.closest&&t.closest('input,textarea'))return;
     const el=t&&t.closest?t.closest(SEL):null;
     if(!el||el.disabled||P.has(e.pointerId))return;
     const r=el.getBoundingClientRect();
@@ -4559,7 +4635,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   nav.addEventListener('click',e=>{if(Date.now()<noClick){e.stopPropagation();e.preventDefault()}},true);
 
   /* no zoom (double tap / pinch), no text selection or copy menu except in input boxes */
-  const isField=t=>t&&t.closest&&t.closest('input,textarea,[contenteditable=true]');
+  const isField=t=>t&&t.closest&&t.closest('input,textarea,[contenteditable=true],.lyr,.lyprev');
   ['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
   document.addEventListener('contextmenu',e=>{if(!isField(e.target))e.preventDefault()});
   document.addEventListener('selectstart',e=>{if(!isField(e.target))e.preventDefault()});
@@ -4626,9 +4702,9 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     const s=hs;hs=null;
     const t=e.changedTouches[0],dx=t.clientX-s.x,dy=t.clientY-s.y;
     if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-s.t>800)return;
-    const n=dx<0?chip+1:chip-1;
-    if(n<0||n>=CHIPS.length)return;
-    const b=$('chips').children[n];
+    const vis=chipVisible(),pos=vis.indexOf(chip),np=dx<0?pos+1:pos-1;
+    if(pos<0||np<0||np>=vis.length)return;
+    const b=chipBtns[vis[np]];
     if(!b)return;
     b.click();
     try{b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}
