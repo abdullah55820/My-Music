@@ -149,7 +149,7 @@ body.fp.dragging #topbar,body.fp.dragging .page,body.fp.dragging #bg,body.fp.dra
 body.fp.dragging .nav{opacity:1;visibility:visible}
 .player{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);overflow:hidden;overscroll-behavior:none;background:#161618;isolation:isolate;visibility:hidden;pointer-events:none;transform:translateY(100%);transform-origin:50% 100%;will-change:transform;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s}
 .player.active{visibility:visible;pointer-events:auto;transform:none;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s}
-.pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(80px) saturate(190%);-webkit-filter:blur(80px) saturate(190%);transform:translateZ(0) scale(1.3);pointer-events:none}
+.pbg{position:absolute;left:-150px;top:-150px;width:calc(100% + 300px);height:calc(100% + 300px);z-index:0;object-fit:cover;filter:blur(80px) saturate(190%) brightness(.78);-webkit-filter:blur(80px) saturate(190%) brightness(.78);transform:translateZ(0) scale(1.3);pointer-events:none}
 .pshade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.1) 20%,rgba(0,0,0,.32) 48%,rgba(0,0,0,.6) 75%,rgba(0,0,0,.8));pointer-events:none}
 #topfade{position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 46px);z-index:10000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(to bottom,var(--pt,#161618) 0,var(--pt,#161618) env(safe-area-inset-top),transparent 100%)}
 body.fp #topfade{opacity:1;visibility:visible;transition:opacity .25s}
@@ -638,7 +638,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   transition:transform .42s cubic-bezier(.34,1.45,.64,1),width .35s cubic-bezier(.34,1.45,.64,1),opacity .2s;will-change:transform,width}
 .navblob.on{opacity:1}
 .navblob.drag{transition:opacity .2s,width .15s}
-.nav.dragging .nb.active{background:none}
+.nav.dragging .nb.active{background:none!important;box-shadow:none!important}
 .nav.dragging .nb.hov{color:var(--accent)}
 .sp.swiping{transition:none!important}
 </style>
@@ -4461,36 +4461,28 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     blob.style.width=w+'px';
     blob.style.transform='translate3d('+left+'px,0,0)';
   }
-  nav.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
-  nav.addEventListener('touchstart',e=>{if(e.cancelable&&e.touches.length>1)e.preventDefault()},{passive:false});
-  nav.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='mouse'&&e.button!==0)return;
-    nd={id:e.pointerId,x0:e.clientX,drag:false,t:null};
-  },{passive:true});
-  nav.addEventListener('pointermove',e=>{
-    if(!nd||e.pointerId!==nd.id)return;
+  const startD=(x,id)=>{nd={id:id,x0:x,drag:false,t:null}};
+  const moveD=(x)=>{
+    if(!nd)return;
     if(!nd.drag){
-      if(Math.abs(e.clientX-nd.x0)<5)return;
+      if(Math.abs(x-nd.x0)<5)return;
       nd.drag=true;
-      try{nav.setPointerCapture(e.pointerId)}catch(_){}
       nav.classList.add('dragging');
       blob.classList.add('on','drag');
-      const cur=nav.querySelector('.nb.active');
-      place(cur,nd.x0);
+      place(nav.querySelector('.nb.active'),nd.x0);
       void blob.offsetWidth;
     }
-    const b=nearest(e.clientX);
-    btns().forEach(x=>x.classList.toggle('hov',x===b));
+    const b=nearest(x);
+    btns().forEach(h=>h.classList.toggle('hov',h===b));
     nd.t=b;
-    place(b,e.clientX);
-  },{passive:true});
-  function end(e,cancel){
-    if(!nd||e.pointerId!==nd.id)return;
+    place(b,x);
+  };
+  function endD(x,cancel){
+    if(!nd)return;
     const d=nd;nd=null;
-    try{nav.releasePointerCapture(e.pointerId)}catch(_){}
     if(!d.drag)return;
     noClick=Date.now()+450;
-    const b=cancel?nav.querySelector('.nb.active'):(d.t||nearest(e.clientX));
+    const b=cancel?nav.querySelector('.nb.active'):(d.t||nearest(x));
     blob.classList.remove('drag');
     place(b);
     const tab=b.dataset.tab;
@@ -4501,12 +4493,19 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     const fin=nav.querySelector('.nb.active');
     setTimeout(()=>{
       place(fin);
-      btns().forEach(x=>x.classList.remove('hov'));
+      btns().forEach(h=>h.classList.remove('hov'));
       setTimeout(()=>{nav.classList.remove('dragging');blob.classList.remove('on')},380);
     },cancel?0:120);
   }
-  nav.addEventListener('pointerup',e=>end(e,false),{passive:true});
-  nav.addEventListener('pointercancel',e=>end(e,true),{passive:true});
+  /* touch (phones): touch events are the most reliable for a horizontal drag */
+  nav.addEventListener('touchstart',e=>{if(e.touches.length===1)startD(e.touches[0].clientX,'t');else nd=null},{passive:true});
+  nav.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault();if(nd&&e.touches[0])moveD(e.touches[0].clientX)},{passive:false});
+  nav.addEventListener('touchend',e=>{const t=e.changedTouches[0];endD(t?t.clientX:0,false)},{passive:true});
+  nav.addEventListener('touchcancel',e=>{const t=e.changedTouches[0];endD(t?t.clientX:0,true)},{passive:true});
+  /* mouse (PC) */
+  nav.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0){startD(e.clientX,'m');try{nav.setPointerCapture(e.pointerId)}catch(_){}}},{passive:true});
+  nav.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')moveD(e.clientX)},{passive:true});
+  nav.addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&nd&&nd.id==='m')endD(e.clientX,false)},{passive:true});
   nav.addEventListener('click',e=>{if(Date.now()<noClick){e.stopPropagation();e.preventDefault()}},true);
 
   /* ---- 2. settings: swipe right = back ---- */
