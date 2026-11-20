@@ -2591,9 +2591,19 @@ function msMode(local){
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
-  h('seekbackward',null);
-  h('seekforward',null);
-  h('seekto',null);
+  /* Keep iOS Control Center's native 10-second skip buttons functional. */
+  h('seekbackward',e=>{
+    try{const offset=Number(e&&e.seekOffset)||10;seekT(Math.max(0,curT()-offset));posState();}
+    catch(err){}
+  });
+  h('seekforward',e=>{
+    try{const offset=Number(e&&e.seekOffset)||10,d=durT();seekT(d>0?Math.min(d,curT()+offset):curT()+offset);posState();}
+    catch(err){}
+  });
+  h('seekto',e=>{
+    try{if(e&&Number.isFinite(e.seekTime)){const d=durT();seekT(d>0?Math.max(0,Math.min(d,e.seekTime)):Math.max(0,e.seekTime));posState();}}
+    catch(err){}
+  });
   if(local===false){
     try{MS.playbackState=playing?'playing':'paused'}catch(e){}
   }
