@@ -1416,13 +1416,18 @@ function onState(e){
     $('art').classList.add('paused');
     stopT();
   }else if(st===YT.PlayerState.ENDED){
-    const token=++endedAdvanceToken;
+    /* Advance immediately from the ENDED event. Deferring this with setTimeout
+       can lose the callback when iOS backgrounds/suspends Safari. */
+    ++endedAdvanceToken;
     playing=false;
     userWant=false;
     icons();stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
-    setTimeout(()=>{if(token===endedAdvanceToken&&!playing)next()},80);
+    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){
+      try{ka.pause()}catch(e){}
+      return;
+    }
+    next();
   }
 }
 
@@ -1435,7 +1440,7 @@ function onYtError(){
 
 function icons(){
   $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
-  try{if('mediaSession' in navigator&&(idx<0||isLoc()))navigator.mediaSession.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
+  try{if(MS)MS.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
 }
 
 const fmt=s=>{
@@ -2564,27 +2569,21 @@ function posState(){
 
 let msLocal=null;
 function msMode(local){
-  if(!MS||msLocal===local)return;
-  const wasLocal=msLocal===true;
+  if(!MS)return;
   msLocal=local;
   const h=(a,f)=>{try{MS.setActionHandler(a,f)}catch(e){}};
-  if(local){
-    h('play',()=>{resumeAny()});
-    h('pause',()=>{pauseAny()});
-    h('previoustrack',()=>prev());
-    h('nexttrack',()=>next());
-    h('seekbackward',null);
-    h('seekforward',null);
-    h('seekto',d=>{
-      if(d&&d.seekTime!=null&&canPlay()){
-        seekT(d.seekTime);
-        lastPS=0;
-        setTimeout(posState,250);
-      }
-    });
-  }else{
-    ['play','pause','previoustrack','nexttrack','seekbackward','seekforward','seekto'].forEach(a=>h(a,null));
-    if(wasLocal){try{MS.metadata=null;MS.playbackState='none'}catch(e){}}
+  /* Keep the normal Lock Screen / Control Centre transport controls available
+     for both YouTube and local tracks. Do not replace the system's forward/
+     rewind seeking controls with custom handlers. */
+  h('play',()=>resumeAny());
+  h('pause',()=>pauseAny());
+  h('previoustrack',()=>prev());
+  h('nexttrack',()=>next());
+  h('seekbackward',null);
+  h('seekforward',null);
+  h('seekto',null);
+  if(local===false){
+    try{MS.playbackState=playing?'playing':'paused'}catch(e){}
   }
 }
 
