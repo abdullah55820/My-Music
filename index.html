@@ -1399,6 +1399,23 @@ window.onYouTubeIframeAPIReady=()=>{
 })();
 
 let endedAdvanceToken=0;
+let autoNextBusy=false;
+function advanceAfterEnd(){
+  if(autoNextBusy)return;
+  autoNextBusy=true;
+  playing=false;userWant=false;
+  icons();stopT();
+  if(rep===2){
+    try{yt.seekTo(0,true);yt.playVideo();}catch(e){}
+    setTimeout(()=>{autoNextBusy=false},1200);
+    return;
+  }
+  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){
+    try{ka.pause()}catch(e){}
+    return;
+  }
+  Promise.resolve(next()).finally(()=>{setTimeout(()=>{autoNextBusy=false},1200)});
+}
 function onState(e){
   if(isLoc())return;
   const st=e.data;
@@ -1424,15 +1441,7 @@ function onState(e){
     /* Advance immediately from the ENDED event. Deferring this with setTimeout
        can lose the callback when iOS backgrounds/suspends Safari. */
     ++endedAdvanceToken;
-    playing=false;
-    userWant=false;
-    icons();stopT();
-    if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){
-      try{ka.pause()}catch(e){}
-      return;
-    }
-    next();
+    advanceAfterEnd();
   }
 }
 
@@ -1462,6 +1471,10 @@ function tick(){
   if(!canPlay()||seeking)return;
   try{
     const c=curT(),d=durT();
+    if(!isLoc()&&playing&&userWant&&d>0&&c>=d-0.45&&!autoNextBusy){
+      advanceAfterEnd();
+      return;
+    }
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
@@ -2325,6 +2338,7 @@ function playAt(i,list){
 
   idx=i;
   playing=false;
+  autoNextBusy=false;
   ++endedAdvanceToken;
   const tok=++playTok;
 
@@ -2597,7 +2611,8 @@ function msMode(local){
     if(!isLoc()&&apiReady){
       try{
         const d=durT(),c=curT();
-        if(d>0&&c>=d-1.5){next();return;}
+        const ended=yt.getPlayerState&&yt.getPlayerState()===YT.PlayerState.ENDED;
+        if(ended||(d>0&&c>=d-3)){advanceAfterEnd();return;}
       }catch(e){}
     }
     resumeAny();
