@@ -6,8 +6,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -20,41 +22,90 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # Android SDK Installation
       - name: Setup Android SDK
+        shell: bash
         run: |
+          set -e
+
           SDK_DIR="$HOME/android-sdk"
+
           mkdir -p "$SDK_DIR/cmdline-tools"
-          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmdline-tools.zip
+
+          curl -fSL \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+            -o cmdline-tools.zip
+
           unzip -q cmdline-tools.zip -d "$SDK_DIR/cmdline-tools"
-          mv "$SDK_DIR/cmdline-tools/cmdline-tools" "$SDK_DIR/cmdline-tools/latest"
+
+          mv "$SDK_DIR/cmdline-tools/cmdline-tools" \
+             "$SDK_DIR/cmdline-tools/latest"
+
           rm cmdline-tools.zip
-          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
-          echo "$SDK_DIR/cmdline-tools/latest/bin:$SDK_DIR/platform-tools" >> $GITHUB_PATH
-          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
-          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
+          # Android SDK environment
+          echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
+
+          echo "$SDK_DIR/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_DIR/platform-tools" >> "$GITHUB_PATH"
+
+          # Install SDK packages
+          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses \
+            >/dev/null 2>&1 || true
+
+          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+
+          # Bubblewrap SDK validation fix
+          mkdir -p "$SDK_DIR/bin"
+
+          echo "Android SDK structure:"
+          ls -la "$SDK_DIR"
+
+      # Install Bubblewrap
       - name: Install Bubblewrap
-        run: npm install -g @bubblewrap/cli
+        run: |
+          npm install -g @bubblewrap/cli
+          bubblewrap --version
 
+      # Create Signing Keystore
       - name: Create Signing Keystore
         run: |
-          keytool -genkeypair -v \
-            -keystore android.keystore \
-            -alias android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass 123456 \
-            -keypass 123456 \
-            -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
+          if [ ! -f android.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore android.keystore \
+              -alias android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass 123456 \
+              -keypass 123456 \
+              -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
+          fi
 
+      # Configure Bubblewrap
       - name: Configure Bubblewrap & TWA Manifest
+        shell: bash
         run: |
-          JDK_DIR="$(dirname "$(dirname "$(readlink -f "$(which java)")")")"
+          set -e
+
           SDK_DIR="$HOME/android-sdk"
+          JDK_DIR="$JAVA_HOME"
+
           mkdir -p "$HOME/.bubblewrap"
-          printf '{\n  "jdkPath": "%s",\n  "androidSdkPath": "%s"\n}\n' "$JDK_DIR" "$SDK_DIR" > "$HOME/.bubblewrap/config.json"
+
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JDK_DIR",
+            "androidSdkPath": "$SDK_DIR"
+          }
+          EOF
+
+          echo "Bubblewrap configuration:"
+          cat "$HOME/.bubblewrap/config.json"
 
           cat << 'EOF' > twa-manifest.json
           {
@@ -97,12 +148,15 @@ jobs:
           }
           EOF
 
+      # Build APK
       - name: Build SoundFlow Signed APK
         run: |
           printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
 
+      # Upload APK
       - name: Upload SoundFlow APK
         uses: actions/upload-artifact@v4
         with:
           name: SoundFlow-APK
           path: app-release-signed.apk
+          if-no-files-found: error
