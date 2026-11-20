@@ -844,20 +844,14 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="row"><div><b>Songs per Row</b></div></div>
       <div class="seg" data-k="cols"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button></div>
       <div class="row"><div><b>Corner Roundness</b></div><input type="range" data-k="r" min="6" max="30"></div>
-    </div>
-
-    <div class="sec g">
-      <h3>Style</h3>
       <div class="row"><div><b>Thumbnail Shape</b></div></div>
       <div class="seg" data-k="thumb"><button data-v="round">Rounded</button><button data-v="square">Square</button></div>
       <div class="row"><div><b>Animations</b></div></div>
       <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
       <div class="row"><div><b>Font</b></div></div>
       <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
-      <div class="row"><div><b>Data Saver</b></div></div>
-      <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
-      <div class="row"><div><b>Tab Bar</b></div></div>
-      <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
+      <div class="row"><div><b>Glass Blur Strength</b></div><input type="range" data-k="gb" min="0" max="40"></div>
+      <div class="row"><div><b>Glass Transparency</b></div><input type="range" data-k="ga" min="10" max="90"></div>
     </div>
 
     <div class="sec g">
@@ -879,12 +873,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="row"><div><b>Background Blur</b></div><input type="range" data-k="bgBlur" min="0" max="30"></div>
       <div class="row"><div><b>Background Darkness</b></div><input type="range" data-k="bgDim" min="0" max="80"></div>
       <input type="file" id="photoIn" accept="image/*" hidden>
-    </div>
-
-    <div class="sec g">
-      <h3>Glass Effect</h3>
-      <div class="row"><div><b>Blur Strength</b></div><input type="range" data-k="gb" min="0" max="40"></div>
-      <div class="row"><div><b>Transparency</b></div><input type="range" data-k="ga" min="10" max="90"></div>
     </div>
 
     <div class="sec g">
@@ -1039,6 +1027,7 @@ const PRESETS=[
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
 let S={...DEF,...LS.get('sf_settings_v3',{})};
+S.saver='off';S.labels='on'; /* Data Saver and Tab Bar mode were removed from Settings */
 let PHOTO=LS.get('sf_bg_photo',null);
 
 const save=()=>LS.set('sf_settings_v3',S);
@@ -4669,18 +4658,16 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   let on=LS.get('sf_haptic','on')!=='off';
   const lab=document.createElement('label');
   lab.setAttribute('aria-hidden','true');
-  lab.style.cssText='position:fixed;left:-120px;top:-120px;width:40px;height:20px;opacity:0;pointer-events:none';
+  lab.style.display='none';
   const inp=document.createElement('input');
   inp.type='checkbox';inp.setAttribute('switch','');inp.tabIndex=-1;
-  lab.appendChild(inp);document.body.appendChild(lab);
+  lab.appendChild(inp);document.head.appendChild(lab);
   let last=0;
   window.haptic=function(ms){
     if(!on)return;
     const n=Date.now();if(n-last<35)return;last=n;
-    try{
-      if(navigator.vibrate){navigator.vibrate(ms||8);return}
-      lab.click(); /* iPhone (iOS 18+): switch toggle gives a real tap */
-    }catch(e){}
+    try{if(navigator.vibrate)navigator.vibrate(ms||8)}catch(e){}
+    try{lab.click()}catch(e){} /* iPhone: toggling a switch gives a real tap (must run inside a tap/click) */
   };
   const SELH='.nb,.chip,.cb,.opt,.like,.mc,.sb,.ibtn,.xbtn,.back,.seg button,.pitem,.eyeb,.dh,.card,.load,.lyadj button,#yfs,.lclr,.pill';
   document.addEventListener('click',e=>{
