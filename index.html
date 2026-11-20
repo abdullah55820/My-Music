@@ -8,8 +8,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SoundFlow — Music</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+/* Own app identity (id / scope / start_url = this exact folder), so a notification or Now Playing tap
+   opens THIS app and not another web app on the same domain */
+(function(){try{
+  var base=location.origin+location.pathname.replace(/[^\/]*$/,'');
+  var m={name:'SoundFlow',short_name:'SoundFlow',id:base,start_url:base,scope:base,display:'standalone',orientation:'any',background_color:'#000000',theme_color:'#1e3a8a'};
+  var l=document.createElement('link');l.rel='manifest';
+  l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+  document.head.appendChild(l);
+}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@700&family=Hind+Siliguri:wght@600;700&family=Noto+Serif+Bengali:wght@600;700&family=Baloo+Da+2:wght@600;700&family=Galada&family=Atma:wght@600;700&display=swap" rel="stylesheet">
@@ -656,7 +665,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nav.dragging .nb.active{background:none!important;box-shadow:none!important}
 .nav.dragging .nb.hov{color:var(--accent)}
 .sp.swiping{transition:none!important}
-.page.dsheet{z-index:3;background:var(--spsheet,#111);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 </style>
 </head>
 <body>
@@ -1072,7 +1080,6 @@ function apply(){
     st.setProperty('--gaf',(S.ga/100).toFixed(2));
   }
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
-  st.setProperty('--spsheet',`rgba(${dark?'8,8,10':'242,242,247'},.95)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols===4?1:S.cols);
@@ -1369,6 +1376,7 @@ window.onYouTubeIframeAPIReady=()=>{
     events:{
       onReady:()=>{
         apiReady=true;
+        try{yt.setPlaybackQuality('hd1080')}catch(e){}
         syncVideo();
         if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
       },
@@ -1385,6 +1393,7 @@ window.onYouTubeIframeAPIReady=()=>{
   document.head.appendChild(s);
 })();
 
+let endedAdvanceToken=0;
 function onState(e){
   if(isLoc())return;
   const st=e.data;
@@ -1392,7 +1401,8 @@ function onState(e){
     errCount=0;
     userWant=true;
     playing=true;
-    if(vidMode){try{yt.setPlaybackQuality('hd1080')}catch(e){}}
+    try{if(MS)MS.playbackState='playing'}catch(e){}
+    try{yt.setPlaybackQuality('hd1080')}catch(e){}
     clearTimeout(onState.pt);onState.pt=setTimeout(preloadNext,2500);
     kaClaim();
     icons();
@@ -1402,17 +1412,20 @@ function onState(e){
     /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
+    try{if(MS)MS.playbackState='paused'}catch(e){}
     try{ka.pause()}catch(e){}
     icons();
     $('art').classList.add('paused');
     stopT();
   }else if(st===YT.PlayerState.ENDED){
+    const token=++endedAdvanceToken;
     playing=false;
-    icons();
-    stopT();
+    userWant=false;
+    try{if(MS)MS.playbackState='paused'}catch(e){}
+    icons();stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){try{ka.pause()}catch(e){}return}
-    next();
+    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
+    setTimeout(()=>{if(token===endedAdvanceToken&&!playing)next()},80);
   }
 }
 
@@ -1425,7 +1438,7 @@ function onYtError(){
 
 function icons(){
   $('playIcon').innerHTML=$('mIcon').innerHTML=playing?PAUSE:PLAY;
-  try{if('mediaSession' in navigator&&(idx<0||isLoc()))navigator.mediaSession.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
+  try{if(MS)MS.playbackState=idx<0?'none':(playing?'playing':'paused')}catch(e){}
 }
 
 const fmt=s=>{
@@ -1771,8 +1784,19 @@ function hydrateLoc(v,im,t,a){
 
 function thumbOf(v){
   if(v.local)return ARTC[v.videoId]||fallbackArt(v);
-  const t=v.videoThumbnails||[];
-  return(t.find(x=>x.quality==='maxres')||t.find(x=>x.quality==='high')||t.find(x=>x.quality==='medium')||t[0]||{}).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
+  return `https://i.ytimg.com/vi/${v.videoId}/maxresdefault.jpg`;
+}
+function setSharpThumb(img,id){
+  if(!img||!id)return;
+  const candidates=[
+    `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/sddefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
+  ];
+  let n=0;
+  img.onerror=()=>{if(++n<candidates.length)img.src=candidates[n];else img.onerror=null};
+  img.src=candidates[0];
 }
 
 function fbThumb(im,id){
@@ -1788,7 +1812,11 @@ function fbThumb(im,id){
 function setPlayerBg(v){
   const id=v.videoId;
   /* the background is blurred anyway, so a small picture is enough: loads and paints much faster */
-  const urls=v.local?[thumbOf(v)]:[`https://i.ytimg.com/vi/${id}/mqdefault.jpg`,thumbOf(v),`https://i.ytimg.com/vi/${id}/hqdefault.jpg`];
+  const urls=v.local?[thumbOf(v)]:[
+    `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/sddefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+  ];
   let n=0;
   const im=new Image();
   im.onload=()=>{if(queue[idx]&&queue[idx].videoId===id)$('pBg').src=im.src};
@@ -2195,13 +2223,8 @@ function paintInfoFast(v){
   $('pArtist').textContent=$('mArtist').textContent=v.author||(v.local?'My Files':'YouTube');
   const hi=thumbOf(v);
   if(v.local){pT.src=mT.src=hi;return}
-  const mq=`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
-  pT.src=mT.src=mq;
-  if(hi!==mq){
-    const im=new Image();
-    im.onload=()=>{if(queue[idx]&&queue[idx].videoId===id)pT.src=mT.src=hi};
-    im.src=hi;
-  }
+  setSharpThumb(pT,id);
+  setSharpThumb(mT,id);
 }
 function paintInfoHeavy(v){
   setPlayerBg(v);
@@ -2274,7 +2297,7 @@ function closePlayer(){
   resetProg();
 }
 
-const ytQ=()=>(typeof vidMode!=='undefined'&&vidMode)?'hd1080':'medium'; /* audio mode does not need a 1080p stream to start */
+const ytQ=()=>'hd1080'; /* request HD for both audio and video playback */
 const PRE=new Set();
 function preloadNext(){
   try{
@@ -2295,6 +2318,7 @@ function playAt(i,list){
 
   idx=i;
   playing=false;
+  ++endedAdvanceToken;
   const tok=++playTok;
 
   /* 1) title + cover change instantly */
@@ -2525,7 +2549,8 @@ async function updateMedia(v){
     mk([{src:u,sizes:'512x512',type:(u.match(/^data:([^;]+)/)||[])[1]||'image/jpeg'}]);
     return;
   }
-  return;
+  const art=await bestYtArt(id);
+  mk(art);
 }
 
 let lastPS=0;
@@ -2542,28 +2567,20 @@ function posState(){
 
 let msLocal=null;
 function msMode(local){
-  if(!MS||msLocal===local)return;
-  const wasLocal=msLocal===true;
-  msLocal=local;
+  if(!MS)return;
+  msLocal=!!local;
   const h=(a,f)=>{try{MS.setActionHandler(a,f)}catch(e){}};
-  if(local){
-    h('play',()=>{resumeAny()});
-    h('pause',()=>{pauseAny()});
-    h('previoustrack',()=>prev());
-    h('nexttrack',()=>next());
-    h('seekbackward',null);
-    h('seekforward',null);
-    h('seekto',d=>{
-      if(d&&d.seekTime!=null&&canPlay()){
-        seekT(d.seekTime);
-        lastPS=0;
-        setTimeout(posState,250);
-      }
-    });
-  }else{
-    ['play','pause','previoustrack','nexttrack','seekbackward','seekforward','seekto'].forEach(a=>h(a,null));
-    if(wasLocal){try{MS.metadata=null;MS.playbackState='none'}catch(e){}}
-  }
+  h('play',()=>resumeAny());
+  h('pause',()=>pauseAny());
+  h('previoustrack',()=>prev());
+  h('nexttrack',()=>next());
+  h('seekbackward',d=>{if(apiReady)seekT(Math.max(0,curT()-(d&&d.seekOffset||10)))});
+  h('seekforward',d=>{if(apiReady)seekT(Math.min(durT()||Infinity,curT()+(d&&d.seekOffset||10)))});
+  h('seekto',d=>{
+    if(d&&d.seekTime!=null&&canPlay()){
+      seekT(d.seekTime);lastPS=0;setTimeout(posState,250);
+    }else if(d&&d.seekTime!=null&&apiReady)seekT(d.seekTime);
+  });
 }
 
 on('playBtn',toggle);
@@ -2732,8 +2749,10 @@ function card(v,i,list,rm){
   const im=document.createElement('img');
   im.className='thumb';
   im.loading='lazy';
-  if(!v.local)fbThumb(im,v.videoId);
-  im.src=(S.saver==='on'&&!v.local)?`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`:thumbOf(v);
+  if(!v.local){
+    if(S.saver==='on')im.src=`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`;
+    else setSharpThumb(im,v.videoId);
+  }else im.src=thumbOf(v);
   im.alt='';
 
   const t=document.createElement('div');
@@ -4764,8 +4783,8 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   sp.addEventListener('touchcancel',()=>swEnd(true),{passive:true});
 
   /* ---- 2b. library folder + search page: swipe right = back ---- */
-  function pageBack(page,canBack,doBack,peek){
-    let st=null,undo=null;
+  function pageBack(page,canBack,doBack){
+    let st=null;
     page.addEventListener('touchstart',e=>{
       st=null;
       if(e.touches.length!==1||!canBack())return;
@@ -4780,30 +4799,13 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       const t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
       if(!st.on){
         if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){st=null;return}
-        if(dx>14&&dx>Math.abs(dy)*1.4){
-          st.on=true;
-          st.sy=window.scrollY;
-          try{undo=peek?peek():null}catch(_){undo=null}
-          const wr=page.firstElementChild;
-          page.style.transition='none';page.style.willChange='transform';
-          page.style.position='fixed';page.style.left='0';page.style.top='0';page.style.width='100%';page.style.height='100%';page.style.overflow='hidden';
-          if(wr)wr.style.transform='translateY('+(-st.sy)+'px)';
-          page.classList.add('dsheet');
-        }else return;
+        if(dx>14&&dx>Math.abs(dy)*1.4){st.on=true;page.style.transition='none';page.style.willChange='transform'}
+        else return;
       }
       st.dx=Math.max(0,dx);
       page.style.transform='translate3d('+st.dx+'px,0,0)';
       if(e.cancelable)e.preventDefault();
     },{passive:false});
-    const finish=(restore,sy)=>{
-      page.style.transition='none';page.style.transform='';page.style.willChange='';
-      ['position','left','top','width','height','overflow'].forEach(k=>page.style[k]='');
-      const wr=page.firstElementChild;if(wr)wr.style.transform='';
-      page.classList.remove('dsheet');
-      if(restore)window.scrollTo(0,sy);
-      if(undo){try{undo()}catch(_){}undo=null}
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
-    };
     const end=cancel=>{
       if(!st)return;
       const x=st;st=null;
@@ -4813,59 +4815,22 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       if(go){
         page.style.transition='transform .2s ease-out';
         page.style.transform='translate3d('+innerWidth+'px,0,0)';
-        setTimeout(()=>{doBack();setTimeout(()=>finish(false),140)},200);
+        setTimeout(()=>{
+          page.style.transition='none';page.style.transform='';page.style.willChange='';
+          doBack();
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
+        },200);
       }else{
         page.style.transition='transform .25s cubic-bezier(.3,.8,.3,1)';
         page.style.transform='';
-        setTimeout(()=>finish(true,x.sy),260);
+        setTimeout(()=>{page.style.transition='';page.style.willChange=''},260);
       }
     };
     page.addEventListener('touchend',()=>end(false),{passive:true});
     page.addEventListener('touchcancel',()=>end(true),{passive:true});
   }
-
-  /* what is shown behind the library page: the Library folder list */
-  function peekLibraryRoot(){
-    const c=$('libraryPage').cloneNode(true);
-    c.removeAttribute('id');
-    c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-    c.querySelectorAll('input[type=file]').forEach(n=>n.remove());
-    const PL=getPL(),noop=()=>{};
-    c.querySelector('.back').hidden=true;
-    c.querySelector('h2').textContent='Library';
-    c.querySelector('.status').textContent=(3+PL.length)+' Folders';
-    c.querySelector('.lbar').hidden=true;
-    const gs=c.querySelectorAll('.grid');
-    gs[1].hidden=true;gs[0].hidden=false;gs[0].innerHTML='';
-    gs[0].appendChild(folderCard('Favourites',getLiked(),noop,HEART));
-    gs[0].appendChild(folderCard('Recently Played',getHist(),noop,CLOCK));
-    gs[0].appendChild(folderCard('My Files',getLoc(),noop,FILEI));
-    PL.forEach(x=>gs[0].appendChild(folderCard(x.name,x.songs,noop,LISTI)));
-    c.classList.add('active');
-    c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    document.body.appendChild(c);
-    return ()=>c.remove();
-  }
-
-  /* what is shown behind the search page: the tab you came from */
-  function peekPrevTab(from){
-    from=from||'search';
-    const t=window.prevTab&&window.prevTab!==from?window.prevTab:'home';
-    const el=$(t+'Page'),hb=$('homeBar');
-    const was=el.classList.contains('active');
-    el.classList.add('active');
-    el.style.cssText+=';position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    if(t==='home')hb.hidden=false;
-    return ()=>{
-      ['position','left','top','width','height','overflow','zIndex','pointerEvents'].forEach(k=>el.style[k]='');
-      if(!was&&activeTab!==t)el.classList.remove('active');
-      hb.hidden=activeTab!=='home';
-    };
-  }
-  pageBack($('libraryPage'),()=>activeTab==='library'&&!spOpen()&&mode!=='full',
-    ()=>{if(!$('libBack').hidden)$('libBack').click();else setTab(window.prevTab&&window.prevTab!=='library'?window.prevTab:'home')},
-    ()=>$('libBack').hidden?peekPrevTab('library'):peekLibraryRoot());
-  pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'),peekPrevTab);
+  pageBack($('libraryPage'),()=>activeTab==='library'&&!$('libBack').hidden&&!spOpen()&&mode!=='full',()=>$('libBack').click());
+  pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'));
 
   /* ---- 3. home: swipe left / right = next / previous chip ---- */
   let hs=null;
