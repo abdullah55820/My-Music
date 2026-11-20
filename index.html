@@ -31,6 +31,19 @@ input,textarea,[contenteditable=true]{-webkit-user-select:text;user-select:text;
 img{-webkit-user-drag:none}
 .lyr,.lyr *,.lyprev,.lyprev *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .sbox input,.lsb input,.pnew input,.lyadj input{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+#libraryPage .pill{cursor:pointer}
+.lclr{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:var(--surface-2);color:var(--text);margin-right:-4px}
+.lclr svg{width:11px;height:11px}
+.eyeb{width:38px;height:36px;display:grid;place-items:center;border-radius:10px;color:var(--accent);flex-shrink:0}
+.eyeb.off{color:var(--muted)}
+.eyeb svg{width:22px;height:22px}
+.eyeb .sl{display:none}
+.eyeb.off .sl{display:block}
+.dh{width:38px;height:36px;display:grid;place-items:center;border-radius:10px;color:var(--muted);flex-shrink:0;touch-action:none;cursor:grab}
+.dh svg{width:20px;height:20px}
+.chcfg .row.drag{position:relative;z-index:5;background:var(--surface-2);border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:none}
+.chcfg .row{border-radius:14px;padding:0 4px 0 8px}
+.chcfg .row.hid b{opacity:.45}
 .chcfg .row{margin:8px 0}
 .chcfg .row b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chcfg .btnrow{margin:0;flex-wrap:nowrap;flex-shrink:0;gap:6px}
@@ -713,7 +726,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     </div>
     <div class="lbar" id="lbar" hidden>
       <div class="seg g" id="libSort"><button data-v="new" class="on">Newest</button><button data-v="az">A–Z</button></div>
-      <label class="lsb g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="libQ" type="search" placeholder="Search" autocomplete="off" enterkeyhint="search"></label>
+      <label class="lsb g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="libQ" type="search" placeholder="Search" autocomplete="off" enterkeyhint="search"><button class="lclr" id="libClr" type="button" hidden aria-label="Clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></label>
       <button class="ibtn g" id="locAdd" type="button" hidden aria-label="Add songs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <button class="ibtn g dl" id="plDel" type="button" hidden aria-label="Delete playlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
     </div>
@@ -2921,26 +2934,20 @@ if(chipCfg.hidden.includes(chip)){
 renderChips();
 
 /* Settings: order / show-hide the home chips */
+const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="sl" d="M4 4l16 16"/></svg>';
+const GRIP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>';
 function buildChipList(){
   const box=$('chipCfg');
   if(!box)return;
   box.innerHTML='';
-  const vis=chipVisible();
-  chipCfg.order.forEach((idx,pos)=>{
-    const row=document.createElement('div');row.className='row';
+  chipCfg.order.forEach(idx=>{
+    const hid=chipCfg.hidden.includes(idx);
+    const row=document.createElement('div');row.className='row'+(hid?' hid':'');row.dataset.idx=idx;
     const nm=document.createElement('b');nm.textContent=CHIPS[idx][0];
     const bt=document.createElement('div');bt.className='btnrow';
-    const mk=(txt,cls,fn,dis)=>{const x=document.createElement('button');x.type='button';x.className='sb'+(cls?' '+cls:'');x.textContent=txt;x.disabled=!!dis;x.onclick=fn;bt.appendChild(x)};
-    const move=d=>{
-      const o=chipCfg.order,t=pos+d;
-      if(t<0||t>=o.length)return;
-      [o[pos],o[t]]=[o[t],o[pos]];
-      saveChipCfg();renderChips();buildChipList();
-    };
-    mk('▲','',()=>move(-1),pos===0);
-    mk('▼','',()=>move(1),pos===chipCfg.order.length-1);
-    const hid=chipCfg.hidden.includes(idx);
-    mk(hid?'Hidden':'Shown',hid?'':'p',()=>{
+    const eye=document.createElement('button');eye.type='button';eye.className='eyeb'+(hid?' off':'');eye.innerHTML=EYE;
+    eye.setAttribute('aria-label',hid?'Show':'Hide');
+    eye.onclick=()=>{
       if(hid)chipCfg.hidden=chipCfg.hidden.filter(x=>x!==idx);
       else{
         if(chipVisible().length<=1)return;
@@ -2948,7 +2955,33 @@ function buildChipList(){
         if(chip===idx){const v=chipVisible()[0];renderChips();chipBtns[v].click()}
       }
       saveChipCfg();renderChips();buildChipList();
-    },!hid&&vis.length<=1);
+    };
+    const dh=document.createElement('div');dh.className='dh';dh.innerHTML=GRIP;dh.setAttribute('aria-label','Hold and drag');
+    dh.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      e.preventDefault();
+      try{dh.setPointerCapture(e.pointerId)}catch(_){}
+      let sy=e.clientY;
+      row.classList.add('drag');
+      const mv=ev=>{
+        row.style.transform='translateY('+(ev.clientY-sy)+'px)';
+        const c=row.getBoundingClientRect(),mid=c.top+c.height/2;
+        const nx=row.nextElementSibling,pv=row.previousElementSibling;
+        let moved=false;
+        const t0=row.offsetTop;
+        if(nx){const r=nx.getBoundingClientRect();if(mid>r.top+r.height/2){box.insertBefore(nx,row);moved=true}}
+        if(!moved&&pv){const r=pv.getBoundingClientRect();if(mid<r.top+r.height/2){box.insertBefore(row,pv);moved=true}}
+        if(moved){sy+=row.offsetTop-t0;row.style.transform='translateY('+(ev.clientY-sy)+'px)'}
+      };
+      const up=()=>{
+        dh.removeEventListener('pointermove',mv);dh.removeEventListener('pointerup',up);dh.removeEventListener('pointercancel',up);
+        row.classList.remove('drag');row.style.transform='';
+        chipCfg.order=[...box.children].map(r=>+r.dataset.idx);
+        saveChipCfg();renderChips();buildChipList();
+      };
+      dh.addEventListener('pointermove',mv);dh.addEventListener('pointerup',up);dh.addEventListener('pointercancel',up);
+    });
+    bt.append(eye,dh);
     row.append(nm,bt);box.appendChild(row);
   });
 }
@@ -3457,7 +3490,7 @@ $('locIn').onchange=e=>{const files=[...(e.target.files||[])];e.target.value='';
 
 let libSort='new';
 let libQ='';
-function resetLibQ(){libQ='';const i=$('libQ');if(i)i.value=''}
+function resetLibQ(){libQ='';const i=$('libQ');if(i)i.value='';const c=$('libClr');if(c)c.hidden=true}
 
 function openFolder(kind){
   libView=kind;
@@ -3539,9 +3572,9 @@ function renderLib(){
   $('libTitle').textContent=fav?'Favourites':hist?'Recently Played':loc?'My Files':pl?pl.name:'Library';
   $('libStatus').textContent=inner?songs.length+' Songs':(3+PL.length)+' Folders';
 
-  if(loc){
+  if(loc&&!qs){
     const shown=songs.length;
-    storageStats().then(s=>{if(libView==='loc')$('libStatus').textContent=shown+' Songs · '+fmtB(songTotal(s))});
+    storageStats().then(s=>{if(libView==='loc'&&!libQ.trim())$('libStatus').textContent=shown+' Songs · '+fmtB(songTotal(s))});
   }
 
   if(!inner){
@@ -3574,7 +3607,27 @@ function renderLib(){
   songs.forEach((v,i)=>g.appendChild(card(v,i,songs,rm)));
 }
 
-$('libQ').addEventListener('input',e=>{libQ=e.target.value;renderLib()});
+let libQT=0;
+const libClr=$('libClr');
+$('libQ').addEventListener('input',e=>{
+  libQ=e.target.value;
+  libClr.hidden=!libQ;
+  clearTimeout(libQT);
+  libQT=setTimeout(renderLib,140);
+});
+libClr.addEventListener('pointerdown',e=>e.preventDefault());
+libClr.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  clearTimeout(libQT);
+  $('libQ').value='';libQ='';libClr.hidden=true;
+  renderLib();
+  $('libQ').focus();
+});
+/* tap the arrow OR the title to go back out of a folder */
+document.querySelector('#libraryPage .pill').addEventListener('click',e=>{
+  if($('libBack').hidden||e.target.closest('#libBack'))return;
+  history.back();
+});
 $('libQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}});
 
 $('libSort').addEventListener('click',e=>{
@@ -4647,7 +4700,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   sp.addEventListener('touchstart',e=>{
     if(e.touches.length!==1||!sp.classList.contains('open')){sw=null;return}
     const t=e.touches[0],tg=e.target;
-    if(tg.closest&&tg.closest('input[type=range],input[type=color],.pcard,.psheet')){sw=null;return}
+    if(tg.closest&&tg.closest('input[type=range],input[type=color],.pcard,.psheet,.dh')){sw=null;return}
     sw={x:t.clientX,y:t.clientY,dx:0,on:false,t:Date.now()};
   },{passive:true});
   sp.addEventListener('touchmove',e=>{
