@@ -43,14 +43,12 @@ jobs:
 
           rm cmdline-tools.zip
 
-          # Android SDK environment
           echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
 
           echo "$SDK_DIR/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$SDK_DIR/platform-tools" >> "$GITHUB_PATH"
 
-          # Install SDK packages
           yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses \
             >/dev/null 2>&1 || true
 
@@ -59,11 +57,9 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-          # Bubblewrap SDK validation fix
           mkdir -p "$SDK_DIR/bin"
 
-          echo "Android SDK structure:"
-          ls -la "$SDK_DIR"
+          echo "Android SDK setup completed."
 
       # Install Bubblewrap
       - name: Install Bubblewrap
@@ -73,6 +69,7 @@ jobs:
 
       # Create Signing Keystore
       - name: Create Signing Keystore
+        shell: bash
         run: |
           if [ ! -f android.keystore ]; then
             keytool -genkeypair -v \
@@ -86,7 +83,7 @@ jobs:
               -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
           fi
 
-      # Configure Bubblewrap
+      # Configure Bubblewrap & TWA Manifest
       - name: Configure Bubblewrap & TWA Manifest
         shell: bash
         run: |
@@ -150,8 +147,11 @@ jobs:
 
       # Build APK
       - name: Build SoundFlow Signed APK
+        shell: bash
         run: |
-          printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
+          set -o pipefail
+
+          printf "n\n123456\n123456\n" | bubblewrap build --skipPwaValidation
 
       # Upload APK
       - name: Upload SoundFlow APK
