@@ -50,15 +50,6 @@ jobs:
 
       - name: Generate SoundFlow TWA Config
         run: |
-          JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
-          mkdir -p $HOME/.bubblewrap
-          cat << EOF > $HOME/.bubblewrap/config.json
-          {
-            "jdkPath": "$JDK_DIR",
-            "androidSdkPath": "$HOME/android-sdk"
-          }
-          EOF
-
           cat << 'EOF' > twa-manifest.json
           {
             "packageId": "com.soundflow.app",
@@ -102,7 +93,15 @@ jobs:
 
       - name: Build SoundFlow Signed APK
         run: |
-          yes | bubblewrap update || true
+          printf "n\nn\n" | bubblewrap update || true
+          JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
+          mkdir -p $HOME/.bubblewrap
+          cat << EOF > $HOME/.bubblewrap/config.json
+          {
+            "jdkPath": "$JDK_DIR",
+            "androidSdkPath": "$HOME/android-sdk"
+          }
+          EOF
           printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
 
       - name: Upload SoundFlow APK
