@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Android SDK Installation
+      # Android SDK Setup
       - name: Setup Android SDK
         shell: bash
         run: |
@@ -43,21 +43,27 @@ jobs:
 
           rm cmdline-tools.zip
 
+          # Android SDK paths
           echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
 
           echo "$SDK_DIR/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$SDK_DIR/platform-tools" >> "$GITHUB_PATH"
 
-          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses \
+          # Bubblewrap requires SDK/bin/sdkmanager
+          ln -s "$SDK_DIR/cmdline-tools/latest/bin" "$SDK_DIR/bin"
+
+          # Accept licenses
+          yes | "$SDK_DIR/bin/sdkmanager" \
+            --sdk_root="$SDK_DIR" --licenses \
             >/dev/null 2>&1 || true
 
-          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" \
+          # Install Android packages
+          "$SDK_DIR/bin/sdkmanager" \
+            --sdk_root="$SDK_DIR" \
             "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
-
-          mkdir -p "$SDK_DIR/bin"
+            "platforms;android-35" \
+            "build-tools;36.1.0"
 
           echo "Android SDK setup completed."
 
@@ -65,7 +71,6 @@ jobs:
       - name: Install Bubblewrap
         run: |
           npm install -g @bubblewrap/cli
-          bubblewrap --version
 
       # Create Signing Keystore
       - name: Create Signing Keystore
@@ -83,7 +88,7 @@ jobs:
               -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
           fi
 
-      # Configure Bubblewrap & TWA Manifest
+      # Configure Bubblewrap
       - name: Configure Bubblewrap & TWA Manifest
         shell: bash
         run: |
@@ -104,6 +109,7 @@ jobs:
           echo "Bubblewrap configuration:"
           cat "$HOME/.bubblewrap/config.json"
 
+          # Create TWA Manifest
           cat << 'EOF' > twa-manifest.json
           {
             "packageId": "com.soundflow.app",
@@ -151,7 +157,7 @@ jobs:
         run: |
           set -o pipefail
 
-          printf "n\n123456\n123456\n" | bubblewrap build --skipPwaValidation
+          printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
 
       # Upload APK
       - name: Upload SoundFlow APK
