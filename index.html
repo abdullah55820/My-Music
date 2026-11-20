@@ -616,12 +616,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* =====================================================================
    DESKTOP / PC  (mouse + big screen)
-   1. Home / Search / Library fill the whole screen width: with 2 or 3
-      songs per row the cards become big and match the screen.
-   2. Player has a visible arrow at the top. Click it, or drag the player
-      down with the mouse, to shrink it to the mini card.
-   3. Video: no scaled 1920x1080 iframe and no mask on a PC, so the
-      horizontal line in the middle of the video is gone.
    ===================================================================== */
 @media (hover:hover) and (pointer:fine){
   :root{--dp:clamp(16px,2.5vw,48px)}
@@ -952,7 +946,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 <script>
 const $=id=>document.getElementById(id);
-const on=(id,fn)=>$(id).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
+const on=(id,fn)=>{const el=$(id);if(el)el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()})};
 
 /* PC / mouse detection (same rule as the CSS desktop block) */
 const deskMQ=matchMedia('(hover:hover) and (pointer:fine)');
@@ -966,11 +960,10 @@ function setThemeColor(col,paintBody=true){
   document.body.style.backgroundColor=paintBody?col:'';
 }
 
-/* Top status-bar colour: while the Profile page is open it must match the dark glass layer, so no bright patch shows */
 let lastTop='rgb(34,34,34)',lastDark=true;
 function spTop(col,dark){
   const m=col.match(/\d+/g);if(!m)return col;
-  return col; /* same colour as the home page, so the status bar blends in */
+  return col;
 }
 function syncTop(){
   if(mode==='full')return;
@@ -1023,7 +1016,7 @@ const PRESETS=[
 const ACCENTS=['#0a84ff','#ff2d55','#30d158','#ff9f0a','#bf5af2','#64d2ff'];
 
 let S={...DEF,...LS.get('sf_settings_v3',{})};
-S.saver='off';S.labels='on'; /* Data Saver and Tab Bar mode were removed from Settings */
+S.saver='off';S.labels='on';
 let PHOTO=LS.get('sf_bg_photo',null);
 
 const save=()=>LS.set('sf_settings_v3',S);
@@ -1123,8 +1116,10 @@ function apply(){
   document.querySelectorAll('#presets .pv').forEach(p=>p.classList.toggle('on',p.dataset.i===String(S.preset)));
 
   const pt=$('photoTile');
-  pt.hidden=!PHOTO;
-  if(PHOTO)pt.style.backgroundImage=`url("${PHOTO}")`;
+  if(pt){
+    pt.hidden=!PHOTO;
+    if(PHOTO)pt.style.backgroundImage=`url("${PHOTO}")`;
+  }
   $('photoDel').hidden=!PHOTO;
   $('photoPick').textContent=PHOTO?'Change my photo':'Use my photo';
 }
@@ -1244,7 +1239,6 @@ function markNav(){
   const t=spOpen()?'profile':activeTab;
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
 }
-/* leave Settings because another tab was chosen in the bottom bar */
 function closeProfileForNav(){
   if(!spOpen())return false;
   profileClosingByButton=true;
@@ -1311,7 +1305,6 @@ const seekT=t=>{
   if(isLoc())au.currentTime=target;
   else if(apiReady&&yt)yt.seekTo(target,true);
 };
-/* userWant = user wants music playing (used to keep playback/auto-next alive in background/lockscreen) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
 const resumeAny=()=>{userWant=true;try{if(isLoc())au.play().catch(()=>{});else if(apiReady)yt.playVideo()}catch(e){}};
@@ -1375,8 +1368,6 @@ const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
-    /* Phones: the player always stays 1920x1080 and is only scaled with CSS.
-       PC: the iframe is sized directly to the video box (no scale), so there is no seam line. */
     height:'1080',width:'1920',
     playerVars:{autoplay:1,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
@@ -1414,8 +1405,6 @@ function onState(e){
     $('art').classList.remove('paused');
     startT();
   }else if(st===YT.PlayerState.PAUSED){
-    /* When locked/backgrounded, iOS/Android often pause the iframe right at the end of a track
-       or when transitioning between tracks. Check if we are at the end or transitioning before accepting pause. */
     const c=curT(),d=durT();
     if(userWant&&d>0&&c>=d-2){
       onState({data:YT.PlayerState.ENDED});
@@ -1437,7 +1426,6 @@ function onState(e){
       if(st===YT.PlayerState.CUED){try{yt.playVideo()}catch(err){}}
     }
   }else if(st===YT.PlayerState.ENDED){
-    /* Advance immediately from the ENDED event while keeping the audio session alive */
     const tok=++endedAdvanceToken;
     playing=false;
     icons();stopT();
@@ -1487,7 +1475,6 @@ function tick(){
     if(lyOn&&lyLines)syncLy(c);
     if(d>0){const p=c/d*100;seek.value=p;setProg(p)}
     posState();
-    /* Backup end-of-track detector for background/lockscreen when YT ENDED event is throttled */
     if(!isLoc()&&userWant&&d>2&&c>=d-0.45&&Date.now()-lastTrackStart>3000){
       onState({data:YT.PlayerState.ENDED});
     }
@@ -1497,7 +1484,6 @@ function tick(){
 function startT(){stopT();tick();timer=setInterval(tick,250)}
 function stopT(){clearInterval(timer);timer=null}
 
-/* Keep checking track end even if main timer is throttled in background */
 setInterval(()=>{
   if(idx<0||!userWant||isLoc()||!apiReady)return;
   try{
@@ -1511,7 +1497,6 @@ setInterval(()=>{
   }catch(e){}
 },1000);
 
-/* When returning from lock screen / background, ensure next song plays if track ended while suspended */
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&userWant&&idx>=0&&!isLoc()&&apiReady){
     try{
@@ -1597,7 +1582,6 @@ function toggle(){
     return;
   }
   if(!apiReady)return;
-  /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
     playing=false;icons();
@@ -1613,9 +1597,9 @@ function toggle(){
   }
 }
 
-/* ---------- LOCAL SONG COVER + TAGS (embedded art, original quality) ---------- */
-const ARTC={};      /* local id -> cover data URL ('' = song has no cover) */
-const MP={};        /* local id -> metadata promise */
+/* ---------- LOCAL SONG COVER + TAGS ---------- */
+const ARTC={};
+const MP={};
 const FB={};
 function fallbackArt(v){
   const s=(v.title||'')+(v.author||'');
@@ -1875,7 +1859,6 @@ function fbThumb(im,id){
 
 function setPlayerBg(v){
   const id=v.videoId;
-  /* the background is blurred anyway, so a small picture is enough: loads and paints much faster */
   const urls=v.local?[thumbOf(v)]:[
     `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
     `https://i.ytimg.com/vi/${id}/sddefault.jpg`,
@@ -2118,7 +2101,6 @@ function showOff(){
   if(i&&document.activeElement!==i)i.value=fmtOff(curOff());
 }
 
-/* Type the sync value yourself. Only the sync bar floats above the keyboard; the player never resizes. */
 (function(){
   const i=$('lyOffIn'),bar=$('lyAdj'),vv=window.visualViewport;
   const commit=()=>{
@@ -2185,10 +2167,8 @@ on('lyBtn',()=>{
   if(lyOn&&queue[idx])loadLyrics(queue[idx]);
 });
 
-/* ---------- VIDEO TOGGLE (video shows in place of the cover) ---------- */
+/* ---------- VIDEO TOGGLE ---------- */
 let vidMode=false,vidFS=false;
-/* Phones: the YouTube iframe is always 1920x1080; only the CSS scale changes.
-   PC: the iframe simply fills the video box (no scale), which removes the horizontal seam line. */
 function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
@@ -2228,7 +2208,6 @@ function syncVideo(){
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
-  /* own fullscreen: the video box fills the screen (rotated in portrait on phones), no native iOS fullscreen, so no pause */
   if(vidFS){
     const W=innerWidth,H=innerHeight,por=H>W&&!dk,lg=por?H:W,sh=por?W:H;
     const bw=R(Math.min(lg,sh*16/9)),bh=R(bw*9/16);
@@ -2247,8 +2226,6 @@ function syncVideo(){
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
   const r=az.getBoundingClientRect();
-  /* Fit a true 16:9 video in the middle of the left column.
-     In landscape it can use the full column width (no 520px cap), same spot as the album art. */
   const land=innerWidth>innerHeight;
   const vw=R(Math.min(r.width,r.height*16/9,land?9999:520)),vh=R(vw*9/16);
   const vl=R(r.left+(r.width-vw)/2),vt=R(r.top+(r.height-vh)/2);
@@ -2256,31 +2233,22 @@ function syncVideo(){
   box.style.left=vl+'px';box.style.top=vt+'px';
   box.style.width=vw+'px';box.style.height=vh+'px';
   box.classList.add('vid');
-  /* Phones: the player is laid out at a real 1920x1080 size and scaled down to the box.
-     PC: the iframe is sized straight to the box. */
   ytFrame(vw/1920);
   try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
 }
 
-/* Video sizing only: changing video/fullscreen layout must never change playback state. */
 function setVid(on){
   vidMode=on;
   if(on&&lyOn)$('lyBtn').click();
   syncVideo();
-  /* layout can still be settling for a moment, so measure again */
   if(on)[80,250,600].forEach(t=>setTimeout(syncVideo,t));
 }
 on('vdBtn',()=>{if(isLoc())return;setVid(!vidMode)});
 const syncVideoLater=()=>[60,300,700].forEach(t=>setTimeout(syncVideo,t));
 addEventListener('orientationchange',syncVideoLater);
 addEventListener('resize',()=>{syncVideo();syncVideoLater()});
-/* any size change of the art/video column keeps the video exactly in place */
 try{new ResizeObserver(()=>{if(vidMode)syncVideo()}).observe($('az'))}catch(e){}
 
-/* The fullscreen close control only exits the fullscreen video layout.
-   It does not call pauseVideo(), playVideo(), or toggle the song state. */
-
-/* instant part: title, artist and cover show at once (small cover first, sharp one when it arrives) */
 function paintInfoFast(v){
   const id=v.videoId,pT=$('pThumb'),mT=$('mThumb');
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
@@ -2361,7 +2329,7 @@ function closePlayer(){
   resetProg();
 }
 
-const ytQ=()=>'hd1080'; /* request HD for both audio and video playback */
+const ytQ=()=>'hd1080';
 const PRE=new Set();
 function preloadNext(){
   try{
@@ -2388,13 +2356,11 @@ function playAt(i,list){
   ++endedAdvanceToken;
   const tok=++playTok;
 
-  /* 1) title + cover change instantly */
   if(mode==='closed')showFull();
   setInfo(v);
   resetProg();
   icons();
 
-  /* Start or switch the track immediately inside the call stack (important for background/lockscreen auto-next) */
   if(v.local){
     pending=null;
     msMode(true);
@@ -2413,7 +2379,6 @@ function playAt(i,list){
     }else pending=v.videoId;
   }
 
-  /* 2) heavier visual / metadata work right after */
   setTimeout(()=>{
     if(tok!==playTok)return;
     paintInfoHeavy(v);
@@ -2582,8 +2547,6 @@ on('slBtn',()=>{
 const prev=()=>{if(queue.length&&idx>=0)playAt((idx-1+queue.length)%queue.length)};
 
 /* ---------- LOCK SCREEN / CONTROL CENTRE ---------- */
-/* A silent looping track makes the phone treat THIS page as the player while a YouTube song plays,
-   so the lock screen shows our title/cover and our prev / next / seek buttons, and keeps JS alive in background. */
 const MS='mediaSession' in navigator?navigator.mediaSession:null;
 const ka=new Audio();
 ka.loop=true;
@@ -2606,11 +2569,8 @@ function kaPlay(){
   }
 }
 function kaClaim(){
-  /* Keep a real, silent media element active while the YouTube iframe plays.
-     This gives iOS/Android a background audio session to keep the page alive across song transitions. */
   if(!isLoc()&&(playing||userWant))kaPlay();
 }
-/* Use timeupdate on the silent audio loop as an unthrottled background heartbeat */
 ka.addEventListener('timeupdate',()=>{
   if(isLoc()||!userWant||idx<0||!apiReady)return;
   try{
@@ -2679,7 +2639,6 @@ function msMode(local){
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
-  /* Keep iOS Control Center's native 10-second skip buttons functional. */
   h('seekbackward',e=>{
     try{const offset=Number(e&&e.seekOffset)||10;seekT(curT()-offset);posState();}
     catch(err){}
@@ -2765,7 +2724,7 @@ function endDrag(e){
 pl.addEventListener('touchend',endDrag,{passive:true});
 pl.addEventListener('touchcancel',endDrag,{passive:true});
 
-/* ---------- MOUSE SWIPE (PC): drag the player down with the mouse to shrink it ---------- */
+/* ---------- MOUSE SWIPE (PC) ---------- */
 let mdn=false,mdrag=false,mx=0,my=0,mt0=0,mSupp=false;
 
 pl.addEventListener('mousedown',e=>{
@@ -2798,7 +2757,6 @@ addEventListener('mouseup',e=>{
   mdn=false;
   if(!mdrag)return;
   mdrag=false;
-  /* stop the click that follows the drag from hitting the arrow / buttons */
   mSupp=true;
   setTimeout(()=>{mSupp=false},80);
 
@@ -2919,8 +2877,6 @@ const shuffle=a=>{
   return a;
 };
 
-/* ---------- MUSIC GROUPS: [weight, queries] ----------
-   All includes every category. South Indian is kept as one combined group. */
 const GROUPS=[
   [6,['Latest Hindi new songs 2026','Hindi new songs 2026','Bollywood latest songs 2026','Latest Bollywood songs','Hindi romantic new songs']],
   [6,['Latest Bangla new songs 2026','Bangla new songs 2026','Bengali latest songs','Kolkata Bangla new songs','Bangladesh latest Bangla songs','Bangla movie new songs']],
@@ -2961,7 +2917,6 @@ async function fillGroup(g,ctl){
   finally{g.busy=false}
 }
 
-/* songs already shown on the home page (kept across refreshes) + songs that belong to Trending */
 const RS_KEY='sf_recent_shown',TR_KEY='sf_trend_ids';
 let recentArr=LS.get(RS_KEY,[]);if(!Array.isArray(recentArr))recentArr=[];
 const recentSet=new Set(recentArr);
@@ -2982,7 +2937,6 @@ function markTrend(id){
 
 async function fillGroupRaw(g,ctl){
   let usable=[],fresh=[];
-  /* if a page only has songs already shown, try another page / query (up to 3 times) */
   for(let k=0;k<3&&!fresh.length;k++){
     const q=g.qs[Math.floor(Math.random()*g.qs.length)];
     let page=(g.pg[q]||0)+1;
@@ -3011,7 +2965,7 @@ const CHIPS=[
   ['Punjabi',[2]],['Pakistani',[4]],['South India',[3]],['For You',[FORYOU]],['Nepali',[15,16,17]]
 ];
 let chip=0;
-const TREND_G=5; /* Trending group: only shown in the Trending chip, never in All */
+const TREND_G=5;
 const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G&&i!==FORYOU);
 
 const CACHE={};
@@ -3040,7 +2994,7 @@ function restoreChip(i){
   st.videos=[];
   st.cap=100;
   seen=new Set();
-  GROUPS.forEach(g=>{g.buf=[];g.busy=false}); /* page numbers are kept, so a refresh moves on to new songs */
+  GROUPS.forEach(g=>{g.buf=[];g.busy=false});
   window.scrollTo(0,0);
   return true;
 }
@@ -3144,7 +3098,6 @@ $('chipReset').onclick=()=>{
   saveChipCfg();renderChips();buildChipList();
 };
 
-/* PC: mouse wheel over the chip row scrolls it sideways */
 document.querySelectorAll('.chips').forEach(ch=>{
   ch.addEventListener('wheel',e=>{
     if(!isDesk())return;
@@ -3275,20 +3228,17 @@ async function loadHomeMore(){
   if(added>0)keepFilling();
 }
 
-/* Home loads 100 songs at a time. When you scroll close to the end of the loaded songs, the next 100 start loading. */
 let offMode=false;
 
 function homeCheck(){
   const st=D.home;
   if(offMode||st.busy||activeTab!=='home')return;
 
-  // Keep filling the current batch in the background (up to 100 songs).
   if(st.videos.length < st.cap){
     loadHomeMore();
     return;
   }
 
-  // Only unlock the next 100 when the user is actually scrolling near the end.
   const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
   if(st.videos.length>=st.cap && window.scrollY>0 && remaining <= AHEAD){
     st.cap += 100;
@@ -3299,7 +3249,7 @@ setInterval(homeCheck,600);
 let hcRaf=0;
 addEventListener('scroll',()=>{if(!hcRaf)hcRaf=requestAnimationFrame(()=>{hcRaf=0;homeCheck()})},{passive:true});
 
-/* ---------- OFFLINE HOME: imported songs ---------- */
+/* ---------- OFFLINE HOME ---------- */
 function renderOfflineHome(){
   offMode=true;
   const st=D.home;
@@ -3441,7 +3391,6 @@ async function loadSearch(term,page,append){
   $('searchMore').hidden=!data.length&&!fresh.length;
   $('searchMore').disabled=false;
 
-  // Automatically fetch the rest of this 100-song batch in the background.
   if(data.length && st.videos.length < st.cap){
     st.autoTimer=setTimeout(()=>{
       if(st.query===term&&!st.busy&&st.videos.length<st.cap){
@@ -3477,7 +3426,6 @@ q.addEventListener('input',()=>{
   if(sugCtl)sugCtl.abort();
   const t=q.value.trim();
   if(t.length<2){renderRecent();return}
-  // Show matching local recent terms immediately, then fetch live suggestions.
   showRecentMatches(t);
   sugT=setTimeout(()=>showSug(t),90);
 });
@@ -3531,7 +3479,7 @@ const searchSentinel=$('searchSentinel');
 function searchCheck(){
   const s=D.search;
   if(activeTab!=='search'||!s.query||s.busy)return;
-  if(s.videos.length<s.cap)return; // finish current 100-song batch first
+  if(s.videos.length<s.cap)return;
   const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
   if(window.scrollY>0 && remaining <= AHEAD){
     s.cap+=100;
@@ -3551,7 +3499,7 @@ const HEART='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 8.7c0 5
 const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>';
 const FILEI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 const LISTI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-/* ---------- MY FILES (stored on this phone, play offline) ---------- */
+
 const IDB={
   db:null,
   open(){
@@ -3777,7 +3725,6 @@ libClr.addEventListener('click',e=>{
   renderLib();
   $('libQ').focus();
 });
-/* tap the arrow OR the title to go back out of a folder */
 document.querySelector('#libraryPage .pill').addEventListener('click',e=>{
   if($('libBack').hidden||e.target.closest('#libBack'))return;
   history.back();
@@ -4014,7 +3961,7 @@ async function refreshStorage(){
   }
 }
 
-/* ---------- REMOVE SONGS (frees phone storage) ---------- */
+/* ---------- REMOVE SONGS ---------- */
 let rmSel=new Set();
 function rmUpdate(){
   const n=getLoc().length;
@@ -4079,10 +4026,7 @@ $('rmDel').onclick=async()=>{
   openRemove();
 };
 
-/* ---------- BACKUP & RESTORE (original quality, one file) ----------
-   File format .sfbak:  "SFBK2\n" then repeated entries:
-   [4 bytes header length][header JSON][raw bytes]
-   entry kinds: meta (all lists + settings), file (original song bytes), art (cover) */
+/* ---------- BACKUP & RESTORE ---------- */
 const BK_ENC=new TextEncoder(),BK_DEC=new TextDecoder();
 let bkBlob=null,bkName='soundflow-backup.sfbak',bkBusy=false;
 
@@ -4138,66 +4082,6 @@ function openBackupPicker(){
   });
   bkUpdate();
   $('bkSheet').hidden=false;
-}
-
-function bkFileName(L,stamp){
-  const clean=t=>(t||'').replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,40);
-  const first=clean(L[0]&&L[0].title)||'Songs';
-  const base=L.length>1?first+' +'+(L.length-1)+' songs':first;
-  return base+' '+stamp+'.sfbak';
-}
-
-async function buildBackup(ids){
-  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-  const set=new Set(ids);
-  const L=getLoc().filter(v=>set.has(v.videoId));
-  const meta={
-    liked:getLiked(),hist:getHist(),pl:getPL(),recent:getRecent(),
-    settings:S,local:L,lyoff:LS.get('sf_lyoff',{}),photo:PHOTO,t:Date.now()
-  };
-  const mb=BK_ENC.encode(JSON.stringify(meta));
-  const parts=[BK_ENC.encode('SFBK2\n'),...bkEntry({k:'meta',n:mb.length},mb)];
-  let done=0;
-  for(const v of L){
-    bkSInfo('Preparing '+(++done)+' / '+L.length+'…');
-    const blob=await idbGet(v.videoId);
-    if(!blob)continue;
-    parts.push(...bkEntry({k:'file',id:v.videoId,n:blob.size,type:blob.type||''},blob));
-    const art=await idbGet('art_'+v.videoId);
-    if(typeof art==='string'&&art){
-      const ab=BK_ENC.encode(art);
-      parts.push(...bkEntry({k:'art',id:v.videoId,n:ab.length},ab));
-    }
-  }
-  const d=new Date(),z=x=>String(x).padStart(2,'0');
-  return {
-    blob:new Blob(parts,{type:'application/octet-stream'}),
-    name:bkFileName(L,d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())),
-    count:L.length
-  };
-}
-
-async function bkDeliver(b,auto){
-  const f=new File([b.blob],b.name,{type:'application/octet-stream'});
-  try{
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      await navigator.share({files:[f],title:b.name});
-      bkSInfo('Done. Keep this file in Files or Google Drive.');
-      return 'done';
-    }
-  }catch(e){
-    if(e&&e.name==='AbortError')return 'cancel';
-    if(auto)return 'retry';
-  }
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b.blob);
-  a.download=b.name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-  bkSInfo('File downloaded to your Downloads / Files.');
-  return 'done';
 }
 
 const BK_EXT={'audio/mpeg':'mp3','audio/mp3':'mp3','audio/mp4':'m4a','audio/x-m4a':'m4a','audio/m4a':'m4a','audio/aac':'aac','audio/wav':'wav','audio/x-wav':'wav','audio/flac':'flac','audio/x-flac':'flac','audio/ogg':'ogg','audio/opus':'opus'};
@@ -4334,7 +4218,6 @@ async function restoreBackup(file){
         if(songs%4===0)await new Promise(r=>setTimeout(r,0));
       }
     }else if(head[0]==='{'){
-      /* also accepts an older JSON backup file if someone saved one */
       meta=JSON.parse(await file.text());
     }else{
       throw new Error('This is not a SoundFlow backup file.');
@@ -4382,8 +4265,8 @@ $('bkIn').onchange=async e=>{
   else await importFiles(files);
 };
 
-/* ---------- GOOGLE ACCOUNT (optional, just shows your name & photo) ---------- */
-const GOOGLE_CLIENT_ID=''; /* optional: paste your Google OAuth Client ID here to enable sign in */
+/* ---------- GOOGLE ACCOUNT ---------- */
+const GOOGLE_CLIENT_ID='';
 let gUser=LS.get('sf_google_user',null);
 
 function renderGoogle(){
@@ -4435,7 +4318,7 @@ $('gIn').onclick=()=>{
   document.head.appendChild(s);
 };
 
-/* ---------- COLLAPSIBLE SETTINGS SECTIONS ---------- */
+/* ---------- COLLAPSIBLE SETTINGS ---------- */
 document.querySelectorAll('#sp .sec').forEach(sec=>{
   const h=sec.querySelector('h3');
   if(!h)return;
@@ -4443,7 +4326,7 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
   h.onclick=()=>sec.classList.toggle('open');
 });
 
-/* ---------- LIQUID GLASS: touch feels like real water ---------- */
+/* ---------- LIQUID GLASS ---------- */
 (function(){
   const SEL='.card,.chip,.nb,.cb,.ib,.ibtn,.like,.mc,.sb,.gbtn,.pitem,.load,.xbtn,.back,.seg button,.sbox,.lsb,.pv,.sw button,.sw label,.lyadj button,.acct';
   const NO='input,textarea,select,[contenteditable=true]';
@@ -4543,14 +4426,13 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
   window.addEventListener('scroll',()=>{if(cur)up()},{passive:true});
 })();
 
-/* ---------- SWIPE GESTURES (nav blob + Settings swipe-back + tabs) ---------- */
+/* ---------- SWIPE GESTURES ---------- */
 (function(){
   const nav=$('nav'),sp=$('sp');
   if(!nav)return;
   const tabs=[...nav.querySelectorAll('.nb')];
   const ORDER=tabs.map(b=>b.dataset.tab);
 
-  /* sliding liquid glass pill inside the bottom bar */
   const blob=document.createElement('div');
   blob.className='navblob';
   nav.prepend(blob);
@@ -4569,7 +4451,6 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
   addEventListener('resize',()=>snapBlob(activeBtn(),true));
   new MutationObserver(()=>snapBlob(activeBtn(),false)).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});
 
-  /* hold and slide across the bottom bar to glide between tabs */
   let nd=false,nMoved=false,nPid=null,nSx=0,nSy=0,nOff=0,nBw=0,nHov=null;
   nav.addEventListener('pointerdown',e=>{
     if(e.button!==0&&e.pointerType==='mouse')return;
@@ -4622,7 +4503,6 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
   nav.addEventListener('pointerup',endNav,true);
   nav.addEventListener('pointercancel',endNav,true);
 
-  /* 1. Swipe right from the left edge of Settings to slide back */
   let sDrag=false,sSx=0,sSy=0,sT0=0,sDx=0;
   sp.addEventListener('touchstart',e=>{
     if(!spOpen()||e.touches.length!==1)return;
@@ -4672,7 +4552,6 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
   sp.addEventListener('touchend',endSp,{passive:true});
   sp.addEventListener('touchcancel',endSp,{passive:true});
 
-  /* 2. Swipe left / right anywhere on a page to switch tabs smoothly */
   let pDrag=false,pSx=0,pSy=0,pT0=0,pDir=0,pDx=0;
   function curPage(){return spOpen()?sp:$(activeTab+'Page')}
   function canPageSwipe(target){
@@ -4685,7 +4564,7 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
     pDrag=false;pDir=0;pDx=0;
     if(e.touches.length!==1||sDrag||!canPageSwipe(e.target))return;
     const t=e.touches[0];
-    if(t.clientX<26)return; /* left-edge back gesture handles this */
+    if(t.clientX<26)return;
     pSx=t.clientX;pSy=t.clientY;pT0=Date.now();pDrag=true;
   },{passive:true});
 
@@ -4735,15 +4614,17 @@ document.querySelectorAll('#sp .sec').forEach(sec=>{
 })();
 
 /* ---------- START ---------- */
-buildSettingsUI();
-apply();
-renderRecent();
-renderLib();
-refreshStorage();
-if(!navigator.onLine)renderOfflineHome();
-else loadHomeMore();
+try{
+  buildSettingsUI();
+  apply();
+  renderRecent();
+  renderLib();
+  refreshStorage();
+  if(!navigator.onLine)renderOfflineHome();
+  else loadHomeMore();
+}catch(e){
+  console.error('SoundFlow startup error:',e);
+}
 </script>
 </body>
 </html>
-
-```
