@@ -168,7 +168,6 @@ svg{display:block}
 body.fp .nav{opacity:0;visibility:hidden;pointer-events:none}
 body.fp #topbar,body.fp .page,body.fp #bg,body.fp #bgDim{visibility:hidden}
 body.spo #topbar,body.spo .page{visibility:hidden}
-body.spo.spswipe #topbar,body.spo.spswipe .page.active{visibility:visible}
 body.fp.dragging #topbar,body.fp.dragging .page,body.fp.dragging #bg,body.fp.dragging #bgDim{visibility:visible}
 body.fp.dragging .nav{opacity:1;visibility:visible}
 .player{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 24px calc(env(safe-area-inset-bottom) + 18px);overflow:hidden;overscroll-behavior:none;background:#161618;isolation:isolate;visibility:hidden;pointer-events:none;transform:translateY(100%);transform-origin:50% 100%;will-change:transform;transition:transform .5s cubic-bezier(.32,.72,0,1),visibility 0s .5s}
@@ -665,7 +664,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nav.dragging .nb.active{background:none!important;box-shadow:none!important}
 .nav.dragging .nb.hov{color:var(--accent)}
 .sp.swiping{transition:none!important}
-.page.dsheet{z-index:3;background:var(--spsheet,#111);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 </style>
 </head>
 <body>
@@ -884,6 +882,12 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="btnrow"><button class="sb" id="chipReset" type="button">Reset</button></div>
     </div>
 
+    <div class="sec g">
+      <h3>Haptic Feedback</h3>
+      <div class="seg" id="hapSeg"><button type="button" data-v="on" class="on">On</button><button type="button" data-v="off">Off</button></div>
+      <p class="stnote">A light tap feeling when you press buttons, tabs and chips. Works on phones that allow it.</p>
+    </div>
+
     <div class="sec g" id="bkSec">
       <h3>Backup &amp; Storage</h3>
       <div class="strow"><b>Imported songs</b><span id="stSongs">0</span></div>
@@ -1081,7 +1085,6 @@ function apply(){
     st.setProperty('--gaf',(S.ga/100).toFixed(2));
   }
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
-  st.setProperty('--spsheet',`rgba(${dark?'8,8,10':'242,242,247'},.95)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols===4?1:S.cols);
@@ -3682,7 +3685,6 @@ $('libBack').onclick=()=>history.back();
 /* ---------- NAVIGATION ---------- */
 function setTab(t){
   if(activeTab===t)return;
-  window.prevTab=activeTab;
   activeTab=t;
 
   ['home','search','library'].forEach(n=>$(n+'Page').classList.toggle('active',n===t));
@@ -4651,6 +4653,37 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   addEventListener('pointerup',e=>up(e,false),{passive:true});
   addEventListener('pointercancel',e=>up(e,true),{passive:true});
 })();
+/* ---------- HAPTIC FEEDBACK ---------- */
+(function(){
+  let on=LS.get('sf_haptic','on')!=='off';
+  const lab=document.createElement('label');
+  lab.setAttribute('aria-hidden','true');
+  lab.style.display='none';
+  const inp=document.createElement('input');
+  inp.type='checkbox';inp.setAttribute('switch','');inp.tabIndex=-1;
+  lab.appendChild(inp);document.head.appendChild(lab);
+  let last=0;
+  window.haptic=function(ms){
+    if(!on)return;
+    const n=Date.now();if(n-last<35)return;last=n;
+    try{if(navigator.vibrate)navigator.vibrate(ms||8)}catch(e){}
+    try{lab.click()}catch(e){} /* iPhone: toggling a switch gives a real tap (must run inside a tap/click) */
+  };
+  const SELH='.nb,.chip,.cb,.opt,.like,.mc,.sb,.ibtn,.xbtn,.back,.seg button,.pitem,.eyeb,.dh,.card,.load,.lyadj button,#yfs,.lclr,.pill';
+  document.addEventListener('click',e=>{
+    const t=e.target;
+    if(t&&t.closest&&t.closest(SELH))window.haptic();
+  },true);
+  const seg=$('hapSeg');
+  const paint=()=>seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='on')===on));
+  seg.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    on=b.dataset.v==='on';LS.set('sf_haptic',on?'on':'off');paint();
+    if(on)setTimeout(()=>window.haptic(),30);
+  });
+  paint();
+})();
+
 /* =====================================================================
    SWIPE EXTRAS
    1. Bottom bar: slide a finger along it, a liquid bubble follows and the tab under it opens
@@ -4686,6 +4719,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       void blob.offsetWidth;
     }
     const b=nearest(x);
+    if(nd.t!==b&&window.haptic)window.haptic(6);
     btns().forEach(h=>h.classList.toggle('hov',h===b));
     nd.t=b;
     place(b,x);
@@ -4741,7 +4775,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     const t=e.touches[0],dx=t.clientX-sw.x,dy=t.clientY-sw.y;
     if(!sw.on){
       if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){sw=null;return}
-      if(dx>12&&dx>Math.abs(dy)*1.4){sw.on=true;sp.classList.add('swiping');document.body.classList.add('spswipe')}
+      if(dx>12&&dx>Math.abs(dy)*1.4){sw.on=true;sp.classList.add('swiping')}
       else return;
     }
     sw.dx=Math.max(0,dx);
@@ -4756,125 +4790,22 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     const v=s.dx/Math.max(1,Date.now()-s.t);
     const go=!cancel&&(s.dx>innerWidth*.3||(v>.5&&s.dx>50));
     if(go){
+      if(window.haptic)window.haptic();
       sp.style.transition='transform .2s ease-out';
       sp.style.transform='translate3d('+innerWidth+'px,0,0)';
       setTimeout(()=>{
         sp.style.transition='none';sp.style.opacity='0';sp.style.transform='';
         $('spBack').onclick();
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{sp.style.transition='';sp.style.opacity='';document.body.classList.remove('spswipe')}));
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{sp.style.transition='';sp.style.opacity=''}));
       },200);
     }else{
       sp.style.transition='transform .25s cubic-bezier(.3,.8,.3,1)';
       sp.style.transform='';
-      setTimeout(()=>{sp.style.transition='';document.body.classList.remove('spswipe')},260);
+      setTimeout(()=>{sp.style.transition=''},260);
     }
   }
   sp.addEventListener('touchend',()=>swEnd(false),{passive:true});
   sp.addEventListener('touchcancel',()=>swEnd(true),{passive:true});
-
-  /* ---- 2b. library folder + search page: swipe right = back ---- */
-  function pageBack(page,canBack,doBack,peek){
-    let st=null,undo=null;
-    page.addEventListener('touchstart',e=>{
-      st=null;
-      if(e.touches.length!==1||!canBack())return;
-      const tg=e.target;
-      if(tg.closest&&tg.closest('input,textarea,.seg,#chips,.chips,.lbar'))return;
-      const t=e.touches[0];
-      if(t.clientX<14)return;
-      st={x:t.clientX,y:t.clientY,dx:0,on:false,t:Date.now()};
-    },{passive:true});
-    page.addEventListener('touchmove',e=>{
-      if(!st)return;
-      const t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
-      if(!st.on){
-        if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){st=null;return}
-        if(dx>14&&dx>Math.abs(dy)*1.4){
-          st.on=true;
-          st.sy=window.scrollY;
-          try{undo=peek?peek():null}catch(_){undo=null}
-          const wr=page.firstElementChild;
-          page.style.transition='none';page.style.willChange='transform';
-          page.style.position='fixed';page.style.left='0';page.style.top='0';page.style.width='100%';page.style.height='100%';page.style.overflow='hidden';
-          if(wr)wr.style.transform='translateY('+(-st.sy)+'px)';
-          page.classList.add('dsheet');
-        }else return;
-      }
-      st.dx=Math.max(0,dx);
-      page.style.transform='translate3d('+st.dx+'px,0,0)';
-      if(e.cancelable)e.preventDefault();
-    },{passive:false});
-    const finish=(restore,sy)=>{
-      page.style.transition='none';page.style.transform='';page.style.willChange='';
-      ['position','left','top','width','height','overflow'].forEach(k=>page.style[k]='');
-      const wr=page.firstElementChild;if(wr)wr.style.transform='';
-      page.classList.remove('dsheet');
-      if(restore)window.scrollTo(0,sy);
-      if(undo){try{undo()}catch(_){}undo=null}
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
-    };
-    const end=cancel=>{
-      if(!st)return;
-      const x=st;st=null;
-      if(!x.on)return;
-      const v=x.dx/Math.max(1,Date.now()-x.t);
-      const go=!cancel&&(x.dx>innerWidth*.3||(v>.5&&x.dx>50));
-      if(go){
-        page.style.transition='transform .2s ease-out';
-        page.style.transform='translate3d('+innerWidth+'px,0,0)';
-        setTimeout(()=>{doBack();setTimeout(()=>finish(false),140)},200);
-      }else{
-        page.style.transition='transform .25s cubic-bezier(.3,.8,.3,1)';
-        page.style.transform='';
-        setTimeout(()=>finish(true,x.sy),260);
-      }
-    };
-    page.addEventListener('touchend',()=>end(false),{passive:true});
-    page.addEventListener('touchcancel',()=>end(true),{passive:true});
-  }
-
-  /* what is shown behind the library page: the Library folder list */
-  function peekLibraryRoot(){
-    const c=$('libraryPage').cloneNode(true);
-    c.removeAttribute('id');
-    c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-    c.querySelectorAll('input[type=file]').forEach(n=>n.remove());
-    const PL=getPL(),noop=()=>{};
-    c.querySelector('.back').hidden=true;
-    c.querySelector('h2').textContent='Library';
-    c.querySelector('.status').textContent=(3+PL.length)+' Folders';
-    c.querySelector('.lbar').hidden=true;
-    const gs=c.querySelectorAll('.grid');
-    gs[1].hidden=true;gs[0].hidden=false;gs[0].innerHTML='';
-    gs[0].appendChild(folderCard('Favourites',getLiked(),noop,HEART));
-    gs[0].appendChild(folderCard('Recently Played',getHist(),noop,CLOCK));
-    gs[0].appendChild(folderCard('My Files',getLoc(),noop,FILEI));
-    PL.forEach(x=>gs[0].appendChild(folderCard(x.name,x.songs,noop,LISTI)));
-    c.classList.add('active');
-    c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    document.body.appendChild(c);
-    return ()=>c.remove();
-  }
-
-  /* what is shown behind the search page: the tab you came from */
-  function peekPrevTab(from){
-    from=from||'search';
-    const t=window.prevTab&&window.prevTab!==from?window.prevTab:'home';
-    const el=$(t+'Page'),hb=$('homeBar');
-    const was=el.classList.contains('active');
-    el.classList.add('active');
-    el.style.cssText+=';position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    if(t==='home')hb.hidden=false;
-    return ()=>{
-      ['position','left','top','width','height','overflow','zIndex','pointerEvents'].forEach(k=>el.style[k]='');
-      if(!was&&activeTab!==t)el.classList.remove('active');
-      hb.hidden=activeTab!=='home';
-    };
-  }
-  pageBack($('libraryPage'),()=>activeTab==='library'&&!spOpen()&&mode!=='full',
-    ()=>{if(!$('libBack').hidden)$('libBack').click();else setTab(window.prevTab&&window.prevTab!=='library'?window.prevTab:'home')},
-    ()=>$('libBack').hidden?peekPrevTab('library'):peekLibraryRoot());
-  pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'),peekPrevTab);
 
   /* ---- 3. home: swipe left / right = next / previous chip ---- */
   let hs=null;
@@ -4896,6 +4827,7 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
     if(pos<0||np<0||np>=vis.length)return;
     const b=chipBtns[vis[np]];
     if(!b)return;
+    if(window.haptic)window.haptic();
     b.click();
     try{b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}
   },{passive:true});
