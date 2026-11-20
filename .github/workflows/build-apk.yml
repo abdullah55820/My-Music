@@ -9,6 +9,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
 
@@ -84,7 +85,11 @@ jobs:
             --sdk_root="$SDK_DIR" \
             "platform-tools" \
             "platforms;android-34" \
-            "build-tools;34.0.0"
+            "platforms;android-35" \
+            "platforms;android-36" \
+            "build-tools;34.0.0" \
+            "build-tools;35.0.0" \
+            "build-tools;36.0.0"
 
           # Verify Installation
           test -f "$SDK_DIR/platforms/android-34/android.jar"
@@ -96,15 +101,19 @@ jobs:
           echo "Android SDK installed successfully!"
 
 
-      # 5. Install Bubblewrap
+      # 5. Install Bubblewrap (do NOT run bubblewrap here, it asks questions)
       - name: Install Bubblewrap
         run: |
+          set -e
+
           npm install -g @bubblewrap/cli
 
-          bubblewrap --version
+          command -v bubblewrap
+
+          echo "Bubblewrap installed!"
 
 
-      # 6. Configure Bubblewrap
+      # 6. Configure Bubblewrap (must exist before any bubblewrap command)
       - name: Configure Bubblewrap
         run: |
           set -e
@@ -125,6 +134,8 @@ jobs:
 
           echo "Android SDK: $SDK_DIR"
           echo "Java: $JDK_DIR"
+
+          cat "$HOME/.bubblewrap/config.json"
 
 
       # 7. Setup Signing Keystore
@@ -157,7 +168,7 @@ jobs:
               -validity 10000 \
               -storepass "$STORE_PASS" \
               -keypass "$KEY_PASS" \
-              -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
+              -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, ST=Riyadh, C=SA"
 
           fi
 
@@ -244,6 +255,10 @@ jobs:
 
           java -version
 
+          echo "Checking Bubblewrap config..."
+
+          test -f "$HOME/.bubblewrap/config.json"
+
           echo "Checking Keystore..."
 
           test -f android.keystore
@@ -261,8 +276,21 @@ jobs:
         run: |
           set -e
 
-          printf "%s\n%s\n" "$STORE_PASS" "$KEY_PASS" | \
-            bubblewrap build --skipPwaValidation
+          # Passwords for bubblewrap (env vars + stdin file as backup)
+          export BUBBLEWRAP_KEYSTORE_PASSWORD="$STORE_PASS"
+          export BUBBLEWRAP_KEY_PASSWORD="$KEY_PASS"
+
+          printf "%s\n%s\n" "$STORE_PASS" "$KEY_PASS" > "$RUNNER_TEMP/pass.txt"
+
+          echo "Generating Android project..."
+
+          bubblewrap update --skipVersionUpgrade < "$RUNNER_TEMP/pass.txt"
+
+          echo "Building APK..."
+
+          bubblewrap build --skipPwaValidation < "$RUNNER_TEMP/pass.txt"
+
+          rm -f "$RUNNER_TEMP/pass.txt"
 
           echo "APK Build completed!"
 
