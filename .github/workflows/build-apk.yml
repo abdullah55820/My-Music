@@ -22,50 +22,64 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Android SDK Setup
+      # Android SDK Installation
       - name: Setup Android SDK
         shell: bash
         run: |
           set -e
 
-          SDK_DIR="$HOME/android-sdk"
+          SDK_REAL="$HOME/android-sdk"
+          SDK_BW="$HOME/bubblewrap-android-sdk"
 
-          mkdir -p "$SDK_DIR/cmdline-tools"
+          mkdir -p "$SDK_REAL/cmdline-tools"
 
           curl -fSL \
             https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
             -o cmdline-tools.zip
 
-          unzip -q cmdline-tools.zip -d "$SDK_DIR/cmdline-tools"
+          unzip -q cmdline-tools.zip -d "$SDK_REAL/cmdline-tools"
 
-          mv "$SDK_DIR/cmdline-tools/cmdline-tools" \
-             "$SDK_DIR/cmdline-tools/latest"
+          mv "$SDK_REAL/cmdline-tools/cmdline-tools" \
+             "$SDK_REAL/cmdline-tools/latest"
 
           rm cmdline-tools.zip
 
-          # Android SDK paths
-          echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
+          # Real Android SDK paths
+          echo "ANDROID_HOME=$SDK_REAL" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_REAL" >> "$GITHUB_ENV"
 
-          echo "$SDK_DIR/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$SDK_DIR/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_REAL/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_REAL/platform-tools" >> "$GITHUB_PATH"
 
-          # Bubblewrap requires SDK/bin/sdkmanager
-          ln -s "$SDK_DIR/cmdline-tools/latest/bin" "$SDK_DIR/bin"
+          # Use the REAL sdkmanager path
+          SDKMANAGER="$SDK_REAL/cmdline-tools/latest/bin/sdkmanager"
 
-          # Accept licenses
-          yes | "$SDK_DIR/bin/sdkmanager" \
-            --sdk_root="$SDK_DIR" --licenses \
+          # Accept Android licenses
+          yes | "$SDKMANAGER" \
+            --sdk_root="$SDK_REAL" --licenses \
             >/dev/null 2>&1 || true
 
-          # Install Android packages
-          "$SDK_DIR/bin/sdkmanager" \
-            --sdk_root="$SDK_DIR" \
+          # Install required packages
+          "$SDKMANAGER" \
+            --sdk_root="$SDK_REAL" \
             "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;36.1.0"
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
-          echo "Android SDK setup completed."
+          # Create separate Bubblewrap SDK structure
+          mkdir -p "$SDK_BW/bin"
+
+          ln -s "$SDK_REAL/platform-tools" "$SDK_BW/platform-tools"
+          ln -s "$SDK_REAL/platforms" "$SDK_BW/platforms"
+          ln -s "$SDK_REAL/build-tools" "$SDK_BW/build-tools"
+          ln -s "$SDK_REAL/licenses" "$SDK_BW/licenses"
+          ln -s "$SDK_REAL/cmdline-tools" "$SDK_BW/cmdline-tools"
+
+          echo "ANDROID SDK installation completed."
+          echo "Real SDK: $SDK_REAL"
+          echo "Bubblewrap SDK: $SDK_BW"
+
+          ls -la "$SDK_BW"
 
       # Install Bubblewrap
       - name: Install Bubblewrap
@@ -94,7 +108,7 @@ jobs:
         run: |
           set -e
 
-          SDK_DIR="$HOME/android-sdk"
+          SDK_BW="$HOME/bubblewrap-android-sdk"
           JDK_DIR="$JAVA_HOME"
 
           mkdir -p "$HOME/.bubblewrap"
@@ -102,14 +116,14 @@ jobs:
           cat > "$HOME/.bubblewrap/config.json" <<EOF
           {
             "jdkPath": "$JDK_DIR",
-            "androidSdkPath": "$SDK_DIR"
+            "androidSdkPath": "$SDK_BW"
           }
           EOF
 
           echo "Bubblewrap configuration:"
           cat "$HOME/.bubblewrap/config.json"
 
-          # Create TWA Manifest
+          # TWA Manifest
           cat << 'EOF' > twa-manifest.json
           {
             "packageId": "com.soundflow.app",
