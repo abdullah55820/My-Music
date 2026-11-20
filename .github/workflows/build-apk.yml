@@ -2,6 +2,9 @@ name: Build SoundFlow APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -11,90 +14,102 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 20
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      # Android SDK Setup
-      - name: Setup Android SDK
+      - name: Install Android SDK
         shell: bash
         run: |
           set -e
 
-          SDK_REAL="$HOME/android-sdk"
-          SDK_BW="$HOME/bubblewrap-android-sdk"
+          SDK_DIR="$HOME/android-sdk"
+          mkdir -p "$SDK_DIR/cmdline-tools"
 
-          mkdir -p "$SDK_REAL/cmdline-tools"
+          cd "$HOME"
 
-          curl -fSL \
-            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
-            -o cmdline-tools.zip
+          curl -fL \
+            "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" \
+            -o android-tools.zip
 
-          unzip -q cmdline-tools.zip -d "$SDK_REAL/cmdline-tools"
+          unzip -q android-tools.zip
 
-          mv "$SDK_REAL/cmdline-tools/cmdline-tools" \
-             "$SDK_REAL/cmdline-tools/latest"
+          mkdir -p "$SDK_DIR/cmdline-tools/latest"
+          mv cmdline-tools/* "$SDK_DIR/cmdline-tools/latest/"
 
-          rm cmdline-tools.zip
+          rm -rf cmdline-tools android-tools.zip
 
-          SDKMANAGER="$SDK_REAL/cmdline-tools/latest/bin/sdkmanager"
+          # Bubblewrap expects sdkmanager at SDK_DIR/bin/sdkmanager
+          mkdir -p "$SDK_DIR/bin"
 
-          echo "ANDROID_HOME=$SDK_REAL" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDK_REAL" >> "$GITHUB_ENV"
+          cat > "$SDK_DIR/bin/sdkmanager" <<EOF
+          #!/bin/bash
+          exec "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_DIR" "\$@"
+          EOF
 
-          echo "$SDK_REAL/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$SDK_REAL/platform-tools" >> "$GITHUB_PATH"
+          chmod +x "$SDK_DIR/bin/sdkmanager"
 
-          # Accept licenses
-          "$SDKMANAGER" --sdk_root="$SDK_REAL" --licenses < /dev/null || true
+          echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
+          echo "$SDK_DIR/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_DIR/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
-          # Install Android packages
-          "$SDKMANAGER" \
-            --sdk_root="$SDK_REAL" \
+          yes | "$SDK_DIR/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+
+          "$SDK_DIR/bin/sdkmanager" \
             "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
+            "platforms;android-35" \
+            "build-tools;36.1.0"
 
-          # Create Bubblewrap SDK structure
-          mkdir -p "$SDK_BW/bin"
-
-          ln -s "$SDK_REAL/platform-tools" "$SDK_BW/platform-tools"
-          ln -s "$SDK_REAL/platforms" "$SDK_BW/platforms"
-          ln -s "$SDK_REAL/build-tools" "$SDK_BW/build-tools"
-          ln -s "$SDK_REAL/licenses" "$SDK_BW/licenses"
-          ln -s "$SDK_REAL/cmdline-tools" "$SDK_BW/cmdline-tools"
-
-          # Create sdkmanager wrapper
-          printf '#!/bin/bash\nexec "%s" --sdk_root="%s" "$@"\n' \
-            "$SDKMANAGER" "$SDK_REAL" \
-            > "$SDK_BW/bin/sdkmanager"
-
-          chmod 755 "$SDK_BW/bin/sdkmanager"
-
-          # Verify file exists
-          test -f "$SDK_BW/bin/sdkmanager"
-          test -x "$SDK_BW/bin/sdkmanager"
-
-          echo "Android SDK setup completed."
-
-      # Install Bubblewrap
       - name: Install Bubblewrap
         run: |
           npm install -g @bubblewrap/cli
+          bubblewrap --version
 
-      # Create Signing Keystore
-      - name: Create Signing Keystore
+      - name: Configure Bubblewrap
         shell: bash
         run: |
-          if [ ! -f android.keystore ]; then
-            keytool -genkeypair -v \
+          mkdir -p "$HOME/.bubblewrap"
+
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$HOME/android-sdk"
+          }
+          EOF
+
+          echo "Bubblewrap configuration:"
+          cat "$HOME/.bubblewrap/config.json"
+
+      - name: Check Android SDK
+        run: |
+          test -x "$HOME/android-sdk/bin/sdkmanager"
+          test -d "$HOME/android-sdk/platform-tools"
+          test -d "$HOME/android-sdk/platforms"
+          test -d "$HOME/android-sdk/build-tools/36.1.0"
+
+          bubblewrap doctor
+
+      - name: Prepare Signing Key
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -e
+
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore
+            echo "Existing signing key restored."
+          else
+            keytool -genkeypair \
+              -v \
               -keystore android.keystore \
               -alias android \
               -keyalg RSA \
@@ -103,107 +118,27 @@ jobs:
               -storepass 123456 \
               -keypass 123456 \
               -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
+
+            echo "WARNING: A temporary signing key was generated."
           fi
 
-      # Configure Bubblewrap
-      - name: Configure Bubblewrap & TWA Manifest
-        shell: bash
+      - name: Update Android Project
         run: |
-          set -e
+          bubblewrap update --skipVersionUpgrade
 
-          SDK_BW="$HOME/bubblewrap-android-sdk"
-          JDK_DIR="$JAVA_HOME"
-
-          mkdir -p "$HOME/.bubblewrap"
-
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {
-            "jdkPath": "$JDK_DIR",
-            "androidSdkPath": "$SDK_BW"
-          }
-          EOF
-
-          cat << 'EOF' > twa-manifest.json
-          {
-            "packageId": "com.soundflow.app",
-            "host": "abdullah55.vercel.app",
-            "name": "SoundFlow",
-            "launcherName": "SoundFlow",
-            "display": "standalone",
-            "themeColor": "#000000",
-            "navigationColor": "#000000",
-            "navigationColorDark": "#000000",
-            "navigationDividerColor": "#000000",
-            "navigationDividerColorDark": "#000000",
-            "backgroundColor": "#000000",
-            "enableNotifications": true,
-            "startUrl": "/",
-            "iconUrl": "https://abdullah55.vercel.app/icon-512.png",
-            "maskableIconUrl": "https://abdullah55.vercel.app/maskable-512.png",
-            "shortcuts": [],
-            "signingKey": {
-              "path": "./android.keystore",
-              "alias": "android"
-            },
-            "appVersionName": "1.0.0",
-            "appVersionCode": 1,
-            "generatorApp": "bubblewrap-cli",
-            "webManifestUrl": "https://abdullah55.vercel.app/manifest.webmanifest",
-            "fallbackType": "customtabs",
-            "features": {},
-            "alphaDependencies": {
-              "enabled": false
-            },
-            "enableSiteSettingsShortcut": true,
-            "isChromeOSOnly": false,
-            "isMetaQuest": false,
-            "fullScopeUrl": "https://abdullah55.vercel.app/",
-            "minSdkVersion": 21,
-            "orientation": "default",
-            "fingerprints": []
-          }
-          EOF
-
-      # Diagnose SDK before build
-      - name: Diagnose Android SDK
+      - name: Build Signed APK
         shell: bash
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: "123456"
+          BUBBLEWRAP_KEY_PASSWORD: "123456"
         run: |
-          echo "HOME=$HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          bubblewrap build --skipPwaValidation
 
-          echo "Bubblewrap SDK directory:"
-          ls -la "$HOME/bubblewrap-android-sdk/"
-
-          echo "Bin directory:"
-          ls -la "$HOME/bubblewrap-android-sdk/bin/"
-
-          echo "Checking sdkmanager:"
-          ls -l "$HOME/bubblewrap-android-sdk/bin/sdkmanager"
-
-          echo "Checking executable:"
-          test -x "$HOME/bubblewrap-android-sdk/bin/sdkmanager" \
-            && echo "EXECUTABLE: YES" \
-            || echo "EXECUTABLE: NO"
-
-          echo "Checking sdkmanager execution:"
-          "$HOME/bubblewrap-android-sdk/bin/sdkmanager" --version
-
-          echo "Bubblewrap config:"
-          cat "$HOME/.bubblewrap/config.json"
-
-      # Build APK
-      - name: Build SoundFlow Signed APK
-        shell: bash
-        run: |
-          set -o pipefail
-
-          printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
-
-      # Upload APK
       - name: Upload SoundFlow APK
         uses: actions/upload-artifact@v4
         with:
           name: SoundFlow-APK
-          path: app-release-signed.apk
-          if-no-files-found: error
+          path: |
+            app-release-signed.apk
+            app-release-bundle.aab
+          if-no-files-found: warn
