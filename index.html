@@ -665,7 +665,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nav.dragging .nb.active{background:none!important;box-shadow:none!important}
 .nav.dragging .nb.hov{color:var(--accent)}
 .sp.swiping{transition:none!important}
-.page.dsheet{position:relative;z-index:3;min-height:100vh;background:var(--spbg);-webkit-backdrop-filter:blur(34px) saturate(170%);backdrop-filter:blur(34px) saturate(170%);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
+.page.dsheet{z-index:3;background:var(--spsheet,#111);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 </style>
 </head>
 <body>
@@ -1081,6 +1081,7 @@ function apply(){
     st.setProperty('--gaf',(S.ga/100).toFixed(2));
   }
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
+  st.setProperty('--spsheet',`rgba(${dark?'8,8,10':'242,242,247'},.95)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols===4?1:S.cols);
@@ -4790,8 +4791,12 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
         if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){st=null;return}
         if(dx>14&&dx>Math.abs(dy)*1.4){
           st.on=true;
-          page.style.transition='none';page.style.willChange='transform';
+          st.sy=window.scrollY;
           try{undo=peek?peek():null}catch(_){undo=null}
+          const wr=page.firstElementChild;
+          page.style.transition='none';page.style.willChange='transform';
+          page.style.position='fixed';page.style.left='0';page.style.top='0';page.style.width='100%';page.style.height='100%';page.style.overflow='hidden';
+          if(wr)wr.style.transform='translateY('+(-st.sy)+'px)';
           page.classList.add('dsheet');
         }else return;
       }
@@ -4799,9 +4804,12 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       page.style.transform='translate3d('+st.dx+'px,0,0)';
       if(e.cancelable)e.preventDefault();
     },{passive:false});
-    const finish=()=>{
+    const finish=(restore,sy)=>{
       page.style.transition='none';page.style.transform='';page.style.willChange='';
+      ['position','left','top','width','height','overflow'].forEach(k=>page.style[k]='');
+      const wr=page.firstElementChild;if(wr)wr.style.transform='';
       page.classList.remove('dsheet');
+      if(restore)window.scrollTo(0,sy);
       if(undo){try{undo()}catch(_){}undo=null}
       requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
     };
@@ -4814,11 +4822,11 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       if(go){
         page.style.transition='transform .2s ease-out';
         page.style.transform='translate3d('+innerWidth+'px,0,0)';
-        setTimeout(()=>{doBack();setTimeout(finish,140)},200);
+        setTimeout(()=>{doBack();setTimeout(()=>finish(false),140)},200);
       }else{
         page.style.transition='transform .25s cubic-bezier(.3,.8,.3,1)';
         page.style.transform='';
-        setTimeout(finish,260);
+        setTimeout(()=>finish(true,x.sy),260);
       }
     };
     page.addEventListener('touchend',()=>end(false),{passive:true});
@@ -4849,8 +4857,9 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   }
 
   /* what is shown behind the search page: the tab you came from */
-  function peekPrevTab(){
-    const t=window.prevTab&&window.prevTab!=='search'?window.prevTab:'home';
+  function peekPrevTab(from){
+    from=from||'search';
+    const t=window.prevTab&&window.prevTab!==from?window.prevTab:'home';
     const el=$(t+'Page'),hb=$('homeBar');
     const was=el.classList.contains('active');
     el.classList.add('active');
@@ -4862,7 +4871,9 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       hb.hidden=activeTab!=='home';
     };
   }
-  pageBack($('libraryPage'),()=>activeTab==='library'&&!$('libBack').hidden&&!spOpen()&&mode!=='full',()=>$('libBack').click(),peekLibraryRoot);
+  pageBack($('libraryPage'),()=>activeTab==='library'&&!spOpen()&&mode!=='full',
+    ()=>{if(!$('libBack').hidden)$('libBack').click();else setTab(window.prevTab&&window.prevTab!=='library'?window.prevTab:'home')},
+    ()=>$('libBack').hidden?peekPrevTab('library'):peekLibraryRoot());
   pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'),peekPrevTab);
 
   /* ---- 3. home: swipe left / right = next / previous chip ---- */
