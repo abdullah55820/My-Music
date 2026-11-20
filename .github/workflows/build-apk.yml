@@ -20,6 +20,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Android SDK
+        run: |
+          SDK_DIR="$HOME/android-sdk"
+          mkdir -p "$SDK_DIR/cmdline-tools"
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d "$SDK_DIR/cmdline-tools"
+          mv "$SDK_DIR/cmdline-tools/cmdline-tools" "$SDK_DIR/cmdline-tools/latest"
+          rm cmdline-tools.zip
+          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
+          echo "$SDK_DIR/cmdline-tools/latest/bin:$SDK_DIR/platform-tools" >> $GITHUB_PATH
+          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
@@ -35,14 +49,15 @@ jobs:
             -keypass 123456 \
             -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
 
-      - name: Generate SoundFlow TWA Config
+      - name: Configure Bubblewrap & TWA Manifest
         run: |
-          JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
-          mkdir -p $HOME/.bubblewrap
-          cat << EOF > $HOME/.bubblewrap/config.json
+          JDK_DIR="$(dirname "$(dirname "$(readlink -f "$(which java)")")")"
+          SDK_DIR="$HOME/android-sdk"
+          mkdir -p "$HOME/.bubblewrap"
+          cat << EOF > "$HOME/.bubblewrap/config.json"
           {
             "jdkPath": "$JDK_DIR",
-            "androidSdkPath": ""
+            "androidSdkPath": "$SDK_DIR"
           }
           EOF
 
@@ -89,8 +104,7 @@ jobs:
 
       - name: Build SoundFlow Signed APK
         run: |
-          JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
-          printf "n\n%s\n%s\n123456\n123456\n" "$JDK_DIR" "$JDK_DIR" | bubblewrap build --skipPwaValidation
+          printf "123456\n123456\n" | bubblewrap build --skipPwaValidation
 
       - name: Upload SoundFlow APK
         uses: actions/upload-artifact@v4
