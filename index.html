@@ -665,7 +665,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .nav.dragging .nb.active{background:none!important;box-shadow:none!important}
 .nav.dragging .nb.hov{color:var(--accent)}
 .sp.swiping{transition:none!important}
-.page.dsheet{z-index:3;background:var(--spsheet,#111);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 </style>
 </head>
 <body>
@@ -1081,7 +1080,6 @@ function apply(){
     st.setProperty('--gaf',(S.ga/100).toFixed(2));
   }
   st.setProperty('--spbg',`rgba(${dark?'0,0,0':'242,242,247'},.55)`);
-  st.setProperty('--spsheet',`rgba(${dark?'8,8,10':'242,242,247'},.95)`);
   st.setProperty('--gb',S.gb+'px');
   st.setProperty('--r',S.r+'px');
   st.setProperty('--cols',S.cols===4?1:S.cols);
@@ -4773,8 +4771,8 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
   sp.addEventListener('touchcancel',()=>swEnd(true),{passive:true});
 
   /* ---- 2b. library folder + search page: swipe right = back ---- */
-  function pageBack(page,canBack,doBack,peek){
-    let st=null,undo=null;
+  function pageBack(page,canBack,doBack){
+    let st=null;
     page.addEventListener('touchstart',e=>{
       st=null;
       if(e.touches.length!==1||!canBack())return;
@@ -4789,30 +4787,13 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       const t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
       if(!st.on){
         if(Math.abs(dy)>14&&Math.abs(dy)>Math.abs(dx)){st=null;return}
-        if(dx>14&&dx>Math.abs(dy)*1.4){
-          st.on=true;
-          st.sy=window.scrollY;
-          try{undo=peek?peek():null}catch(_){undo=null}
-          const wr=page.firstElementChild;
-          page.style.transition='none';page.style.willChange='transform';
-          page.style.position='fixed';page.style.left='0';page.style.top='0';page.style.width='100%';page.style.height='100%';page.style.overflow='hidden';
-          if(wr)wr.style.transform='translateY('+(-st.sy)+'px)';
-          page.classList.add('dsheet');
-        }else return;
+        if(dx>14&&dx>Math.abs(dy)*1.4){st.on=true;page.style.transition='none';page.style.willChange='transform'}
+        else return;
       }
       st.dx=Math.max(0,dx);
       page.style.transform='translate3d('+st.dx+'px,0,0)';
       if(e.cancelable)e.preventDefault();
     },{passive:false});
-    const finish=(restore,sy)=>{
-      page.style.transition='none';page.style.transform='';page.style.willChange='';
-      ['position','left','top','width','height','overflow'].forEach(k=>page.style[k]='');
-      const wr=page.firstElementChild;if(wr)wr.style.transform='';
-      page.classList.remove('dsheet');
-      if(restore)window.scrollTo(0,sy);
-      if(undo){try{undo()}catch(_){}undo=null}
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
-    };
     const end=cancel=>{
       if(!st)return;
       const x=st;st=null;
@@ -4822,59 +4803,22 @@ document.querySelectorAll('.spb .sec').forEach(sec=>{
       if(go){
         page.style.transition='transform .2s ease-out';
         page.style.transform='translate3d('+innerWidth+'px,0,0)';
-        setTimeout(()=>{doBack();setTimeout(()=>finish(false),140)},200);
+        setTimeout(()=>{
+          page.style.transition='none';page.style.transform='';page.style.willChange='';
+          doBack();
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{page.style.transition=''}));
+        },200);
       }else{
         page.style.transition='transform .25s cubic-bezier(.3,.8,.3,1)';
         page.style.transform='';
-        setTimeout(()=>finish(true,x.sy),260);
+        setTimeout(()=>{page.style.transition='';page.style.willChange=''},260);
       }
     };
     page.addEventListener('touchend',()=>end(false),{passive:true});
     page.addEventListener('touchcancel',()=>end(true),{passive:true});
   }
-
-  /* what is shown behind the library page: the Library folder list */
-  function peekLibraryRoot(){
-    const c=$('libraryPage').cloneNode(true);
-    c.removeAttribute('id');
-    c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-    c.querySelectorAll('input[type=file]').forEach(n=>n.remove());
-    const PL=getPL(),noop=()=>{};
-    c.querySelector('.back').hidden=true;
-    c.querySelector('h2').textContent='Library';
-    c.querySelector('.status').textContent=(3+PL.length)+' Folders';
-    c.querySelector('.lbar').hidden=true;
-    const gs=c.querySelectorAll('.grid');
-    gs[1].hidden=true;gs[0].hidden=false;gs[0].innerHTML='';
-    gs[0].appendChild(folderCard('Favourites',getLiked(),noop,HEART));
-    gs[0].appendChild(folderCard('Recently Played',getHist(),noop,CLOCK));
-    gs[0].appendChild(folderCard('My Files',getLoc(),noop,FILEI));
-    PL.forEach(x=>gs[0].appendChild(folderCard(x.name,x.songs,noop,LISTI)));
-    c.classList.add('active');
-    c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    document.body.appendChild(c);
-    return ()=>c.remove();
-  }
-
-  /* what is shown behind the search page: the tab you came from */
-  function peekPrevTab(from){
-    from=from||'search';
-    const t=window.prevTab&&window.prevTab!==from?window.prevTab:'home';
-    const el=$(t+'Page'),hb=$('homeBar');
-    const was=el.classList.contains('active');
-    el.classList.add('active');
-    el.style.cssText+=';position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden;z-index:1;pointer-events:none';
-    if(t==='home')hb.hidden=false;
-    return ()=>{
-      ['position','left','top','width','height','overflow','zIndex','pointerEvents'].forEach(k=>el.style[k]='');
-      if(!was&&activeTab!==t)el.classList.remove('active');
-      hb.hidden=activeTab!=='home';
-    };
-  }
-  pageBack($('libraryPage'),()=>activeTab==='library'&&!spOpen()&&mode!=='full',
-    ()=>{if(!$('libBack').hidden)$('libBack').click();else setTab(window.prevTab&&window.prevTab!=='library'?window.prevTab:'home')},
-    ()=>$('libBack').hidden?peekPrevTab('library'):peekLibraryRoot());
-  pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'),peekPrevTab);
+  pageBack($('libraryPage'),()=>activeTab==='library'&&!$('libBack').hidden&&!spOpen()&&mode!=='full',()=>$('libBack').click());
+  pageBack($('searchPage'),()=>activeTab==='search'&&!spOpen()&&mode!=='full',()=>setTab(window.prevTab&&window.prevTab!=='search'?window.prevTab:'home'));
 
   /* ---- 3. home: swipe left / right = next / previous chip ---- */
   let hs=null;
