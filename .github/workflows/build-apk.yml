@@ -80,7 +80,8 @@ jobs:
 
       - name: Build SoundFlow Signed APK
         run: |
-          printf "n\n123456\n123456\n" | bubblewrap build --skipPwaValidation
+          JDK_DIR=$(dirname $(dirname $(readlink -f $(which java))))
+          printf "n\n%s\n123456\n123456\n" "$JDK_DIR" | bubblewrap build --skipPwaValidation
 
       - name: Upload SoundFlow APK
         uses: actions/upload-artifact@v4
