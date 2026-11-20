@@ -1,0 +1,93 @@
+name: Build SoundFlow APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Create Signing Keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass 123456 \
+            -keypass 123456 \
+            -dname "CN=SoundFlow, OU=App, O=SoundFlow, L=Riyadh, S=Riyadh, C=SA"
+
+      - name: Generate SoundFlow TWA Config
+        run: |
+          cat << 'EOF' > twa-manifest.json
+          {
+            "packageId": "com.soundflow.app",
+            "host": "abdullah55.vercel.app",
+            "name": "SoundFlow",
+            "launcherName": "SoundFlow",
+            "display": "standalone",
+            "themeColor": "#000000",
+            "navigationColor": "#000000",
+            "navigationColorDark": "#000000",
+            "navigationDividerColor": "#000000",
+            "navigationDividerColorDark": "#000000",
+            "backgroundColor": "#000000",
+            "enableNotifications": true,
+            "startUrl": "/",
+            "iconUrl": "https://abdullah55.vercel.app/icon-512.png",
+            "maskableIconUrl": "https://abdullah55.vercel.app/maskable-512.png",
+            "shortcuts": [],
+            "signingKey": {
+              "path": "./android.keystore",
+              "alias": "android"
+            },
+            "appVersionName": "1",
+            "appVersionCode": 1,
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://abdullah55.vercel.app/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://abdullah55.vercel.app/",
+            "minSdkVersion": 21,
+            "orientation": "default",
+            "fingerprints": []
+          }
+          EOF
+
+      - name: Build SoundFlow Signed APK
+        run: |
+          yes | bubblewrap update --manifest https://abdullah55.vercel.app/manifest.webmanifest
+          yes | bubblewrap build --skipPwaValidation
+
+      - name: Upload SoundFlow APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoundFlow-APK
+          path: app-release-signed.apk
