@@ -2575,7 +2575,19 @@ function msMode(local){
   /* Keep the normal Lock Screen / Control Centre transport controls available
      for both YouTube and local tracks. Do not replace the system's forward/
      rewind seeking controls with custom handlers. */
-  h('play',()=>resumeAny());
+  /* iOS may suspend Safari while a YouTube iframe reaches the end.
+     In that case ENDED can be delayed until the user presses Play on the
+     Lock Screen. Detect the ended position there and advance instead of
+     replaying the same finished video. */
+  h('play',()=>{
+    if(!isLoc()&&apiReady){
+      try{
+        const d=durT(),c=curT();
+        if(d>0&&c>=d-1.5){next();return;}
+      }catch(e){}
+    }
+    resumeAny();
+  });
   h('pause',()=>pauseAny());
   h('previoustrack',()=>prev());
   h('nexttrack',()=>next());
