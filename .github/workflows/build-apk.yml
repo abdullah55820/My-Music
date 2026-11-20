@@ -44,29 +44,25 @@ jobs:
 
           rm cmdline-tools.zip
 
-          # Real Android SDK paths
+          SDKMANAGER="$SDK_REAL/cmdline-tools/latest/bin/sdkmanager"
+
           echo "ANDROID_HOME=$SDK_REAL" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK_REAL" >> "$GITHUB_ENV"
 
           echo "$SDK_REAL/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$SDK_REAL/platform-tools" >> "$GITHUB_PATH"
 
-          # Use the REAL sdkmanager path
-          SDKMANAGER="$SDK_REAL/cmdline-tools/latest/bin/sdkmanager"
-
-          # Accept Android licenses
           yes | "$SDKMANAGER" \
             --sdk_root="$SDK_REAL" --licenses \
             >/dev/null 2>&1 || true
 
-          # Install required packages
           "$SDKMANAGER" \
             --sdk_root="$SDK_REAL" \
             "platform-tools" \
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-          # Create separate Bubblewrap SDK structure
+          # Create Bubblewrap SDK structure
           mkdir -p "$SDK_BW/bin"
 
           ln -s "$SDK_REAL/platform-tools" "$SDK_BW/platform-tools"
@@ -75,11 +71,18 @@ jobs:
           ln -s "$SDK_REAL/licenses" "$SDK_BW/licenses"
           ln -s "$SDK_REAL/cmdline-tools" "$SDK_BW/cmdline-tools"
 
-          echo "ANDROID SDK installation completed."
-          echo "Real SDK: $SDK_REAL"
-          echo "Bubblewrap SDK: $SDK_BW"
+          # Create sdkmanager wrapper
+          cat > "$SDK_BW/bin/sdkmanager" <<EOF
+          #!/bin/bash
+          exec "$SDKMANAGER" --sdk_root="$SDK_REAL" "\$@"
+          EOF
 
-          ls -la "$SDK_BW"
+          chmod +x "$SDK_BW/bin/sdkmanager"
+
+          # Verify sdkmanager
+          "$SDK_BW/bin/sdkmanager" --list >/dev/null
+
+          echo "Android SDK setup completed."
 
       # Install Bubblewrap
       - name: Install Bubblewrap
@@ -123,7 +126,6 @@ jobs:
           echo "Bubblewrap configuration:"
           cat "$HOME/.bubblewrap/config.json"
 
-          # TWA Manifest
           cat << 'EOF' > twa-manifest.json
           {
             "packageId": "com.soundflow.app",
