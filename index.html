@@ -1393,7 +1393,7 @@ window.onYouTubeIframeAPIReady=()=>{
       onReady:()=>{
         apiReady=true;
         syncVideo();
-        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
+        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
       },
       onStateChange:onState,
       onError:onYtError
@@ -1415,7 +1415,8 @@ function onState(e){
     errCount=0;
     userWant=true;
     playing=true;
-    try{yt.setPlaybackQuality('hd1080')}catch(e){}
+    if(vidMode){try{yt.setPlaybackQuality('hd1080')}catch(e){}}
+    clearTimeout(onState.pt);onState.pt=setTimeout(preloadNext,2500);
     kaClaim();
     icons();
     $('art').classList.remove('paused');
@@ -2154,7 +2155,7 @@ function syncVideo(){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     ytFrame(200/1920);
-    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -2172,7 +2173,7 @@ function syncVideo(){
     ytFrame(bw/1920);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
-    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
     return;
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
@@ -2189,7 +2190,7 @@ function syncVideo(){
   /* Phones: the player is laid out at a real 1920x1080 size and scaled down to the box.
      PC: the iframe is sized straight to the box. */
   ytFrame(vw/1920);
-  try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+  try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
 }
 
 /* Video sizing only: changing video/fullscreen layout must never change playback state. */
@@ -2282,15 +2283,16 @@ function closePlayer(){
   resetProg();
 }
 
+const ytQ=()=>(typeof vidMode!=='undefined'&&vidMode)?'hd1080':'medium'; /* audio mode does not need a 1080p stream to start */
 const PRE=new Set();
 function preloadNext(){
   try{
-    for(let k=1;k<=3;k++){
+    for(let k=1;k<=2;k++){
       const n=queue[(idx+k)%queue.length];
       if(!n||n.local||!n.videoId||PRE.has(n.videoId))continue;
       PRE.add(n.videoId);
       if(PRE.size>80)PRE.delete(PRE.values().next().value);
-      [thumbOf(n),`https://i.ytimg.com/vi/${n.videoId}/mqdefault.jpg`].forEach(u=>{const im=new Image();im.src=u});
+      const im=new Image();im.src=thumbOf(n);
     }
   }catch(e){}
 }
@@ -2300,13 +2302,22 @@ function playAt(i,list){
   if(!v||!v.videoId)return;
 
   idx=i;
-  addHist(v);
+  playing=false;
+
+  /* 1) start the song right away */
+  if(!v.local){
+    try{au.pause()}catch(e){}
+    msMode(false);
+    if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
+    else pending=v.videoId;
+  }
+
+  /* 2) then update the screen */
   if(mode==='closed')showFull();
   setInfo(v);
   resetProg();
-  playing=false;
   icons();
-  preloadNext();
+  setTimeout(()=>addHist(v),0);
 
   if(v.local){
     pending=null;
@@ -2314,14 +2325,7 @@ function playAt(i,list){
     try{ka.pause()}catch(e){}
     if(apiReady)try{yt.stopVideo()}catch(e){}
     loadLocal(v);
-    return;
   }
-
-  try{au.pause()}catch(e){}
-  msMode(false);
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
-  else pending=v.videoId;
-
 }
 
 const SLEEPS=[0,15,30,60];
