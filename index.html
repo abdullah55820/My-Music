@@ -52,6 +52,17 @@ svg{display:block}
 .hb{max-width:1050px;margin:auto;padding:0 16px}
 .hb .section{margin:8px 0 10px}
 .hb .chips{padding-bottom:12px}
+.asec{border-radius:calc(var(--r,16px) + 6px);padding:12px 0 12px 14px;margin:0 0 14px;overflow:hidden}
+.ahead{display:flex;align-items:center;gap:10px;padding-right:14px;margin-bottom:10px}
+.aav{width:40px;height:40px;border-radius:50%;object-fit:cover;background:rgba(128,128,128,.25);flex-shrink:0}
+.anm{flex:1;min-width:0;font-size:17px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asee{flex-shrink:0;color:var(--accent);font-size:13.5px;font-weight:700;padding:8px 2px}
+.chips.arow{margin:0;padding:0 14px 2px 0;gap:10px}
+.acard{flex:0 0 auto;width:136px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.acard img,.acard .ph{width:136px;height:76px;object-fit:cover;border-radius:12px;background:rgba(128,128,128,.22);display:block}
+.acard .t{margin-top:6px;font-size:12.5px;font-weight:650;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acard .s{margin-top:2px;font-size:11px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acard:active{transform:scale(.97)}
 .header{max-width:1050px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 4px}
 .brand{font-size:25px;font-weight:900;letter-spacing:-1px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
 .brand span{color:var(--accent)}
@@ -680,7 +691,10 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 </div>
 
 <main class="page active" id="homePage">
-  <div class="wrap"><div class="grid" id="homeGrid"></div><div id="sentinel"></div></div>
+  <div class="wrap">
+    <div id="homeBoxes"></div>
+    <div class="grid" id="homeGrid"></div><div id="sentinel"></div>
+  </div>
 </main>
 
 <main class="page" id="searchPage">
@@ -724,6 +738,23 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <div class="grid" id="libFolders"></div>
     <div class="grid" id="libGrid" hidden></div>
     <input type="file" id="locIn" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.zip,application/zip" multiple hidden>
+  </div>
+</main>
+
+<main class="page" id="artistPage">
+  <div class="wrap">
+    <div class="section">
+      <span class="pill g">
+        <button class="back" id="artBack" type="button" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+        </button>
+        <h2 id="artTitle">Artist</h2>
+      </span>
+      <span class="status g" id="artStatus">Loading…</span>
+    </div>
+    <div class="grid" id="artGrid"></div>
+    <div id="artSentinel" style="height:24px;width:100%"></div>
+    <button class="load g" id="artMore" type="button" hidden>Load More</button>
   </div>
 </main>
 
@@ -1244,7 +1275,7 @@ let profileClosingByButton=false;
 const spOpen=()=>$('sp').classList.contains('open');
 
 function markNav(){
-  const t=spOpen()?'profile':activeTab;
+  const t=spOpen()?'profile':(activeTab==='artist'?'home':activeTab);
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
 }
 /* leave Settings because another tab was chosen in the bottom bar */
@@ -1304,6 +1335,30 @@ const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null;
+/* The next and previous offline songs are read from storage ahead of time, so the lock-screen
+   next / previous buttons can start a song at once (no waiting that the phone may refuse in the background). */
+const LURL={};
+function keepLoc(ids){Object.keys(LURL).forEach(k=>{if(!ids.includes(k)){try{URL.revokeObjectURL(LURL[k])}catch(e){}delete LURL[k]}})}
+async function locUrl(id){
+  if(LURL[id])return LURL[id];
+  const blob=await idbGet(id);
+  if(!blob)return null;
+  return LURL[id]||(LURL[id]=URL.createObjectURL(blob));
+}
+let prefTimer=0;
+function prefetchLoc(){
+  clearTimeout(prefTimer);
+  prefTimer=setTimeout(()=>{
+    try{
+      const n=queue.length,cur=queue[idx];
+      if(!cur||!cur.local||n<2)return;
+      const ids=[cur.videoId];
+      [(idx+1)%n,(idx-1+n)%n].forEach(k=>{const v=queue[k];if(v&&v.local&&!ids.includes(v.videoId))ids.push(v.videoId)});
+      keepLoc(ids);
+      ids.slice(1).forEach(id=>locUrl(id).catch(()=>{}));
+    }catch(e){}
+  },1200);
+}
 const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
@@ -1318,19 +1373,22 @@ const isSil=()=>au.src.startsWith('data:');
 async function loadLocal(v){
   const id=v.videoId;
   try{
-    const blob=await idbGet(id);
+    const url=LURL[id]||await locUrl(id);
     if(!queue[idx]||queue[idx].videoId!==id)return;
-    if(!blob){onYtError();return}
-    if(locURL)URL.revokeObjectURL(locURL);
-    locURL=URL.createObjectURL(blob);
-    au.src=locURL;
-    await au.play();
+    if(!url){onYtError();return}
+    locURL=url;
+    au.src=url;
+    const pr=au.play();
+    if(pr&&pr.catch)pr.catch(()=>{au.addEventListener('canplay',()=>{au.play().catch(()=>{})},{once:true})});
+    prefetchLoc();
   }catch(e){}
 }
 
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   errCount=0;playing=true;icons();
+  /* a local song is really playing now: make sure the lock screen shows THIS song */
+  try{const cv=queue[idx];if(cv&&(!MS||!MS.metadata||MS.metadata.title!==(cv.title||'Unknown Song')))updateMedia(cv);localHandlers();lastPS=0;posState()}catch(e){}
   $('art').classList.remove('paused');
   startT();
 });
@@ -1344,7 +1402,7 @@ au.addEventListener('ended',()=>{
   if(!isLoc())return;
   playing=false;icons();stopT();
   if(rep===2){au.currentTime=0;au.play().catch(()=>{});return}
-  if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos)return;
+  if(!shuf&&idx>=queue.length-1&&!isLiveQ(queue))return;
   next();
 });
 au.addEventListener('durationchange',()=>{if(isLoc()&&!isSil()){lastPS=0;posState()}});
@@ -1371,7 +1429,13 @@ au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))on
 const PLAY='<path d="M7 4v16l13-8z"/>';
 const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
-window.onYouTubeIframeAPIReady=()=>{
+let ytMaking=false;
+/* The YouTube player is created when needed. While an offline song plays it is removed, so the phone's
+   lock screen / Control Centre cannot keep showing the old YouTube song. */
+function makeYT(){
+  if(apiReady||ytMaking||!(window.YT&&YT.Player))return;
+  ytMaking=true;
+  if(!$('ytp')){const d=document.createElement('div');d.id='ytp';$('yt').appendChild(d)}
   yt=new YT.Player('ytp',{
     /* Phones: the player always stays 1920x1080 and is only scaled with CSS.
        PC: the iframe is sized directly to the video box (no scale), so there is no seam line. */
@@ -1379,7 +1443,7 @@ window.onYouTubeIframeAPIReady=()=>{
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
-        apiReady=true;
+        apiReady=true;ytMaking=false;
         syncVideo();
         if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
       },
@@ -1387,7 +1451,14 @@ window.onYouTubeIframeAPIReady=()=>{
       onError:onYtError
     }
   });
-};
+}
+window.onYouTubeIframeAPIReady=makeYT;
+function dropYT(){
+  if(!apiReady||!yt)return;
+  try{yt.stopVideo()}catch(e){}
+  try{yt.destroy()}catch(e){}
+  yt=null;apiReady=false;ytMaking=false;
+}
 
 (function(){
   const s=document.createElement('script');
@@ -1421,7 +1492,7 @@ function onState(e){
     icons();
     stopT();
     if(rep===2){try{yt.seekTo(0,true);yt.playVideo()}catch(e){}return}
-    if(!shuf&&idx>=queue.length-1&&queue!==D.home.videos&&queue!==D.search.videos){try{ka.pause()}catch(e){}return}
+    if(!shuf&&idx>=queue.length-1&&!isLiveQ(queue)){try{ka.pause()}catch(e){}return}
     next();
   }
 }
@@ -2269,7 +2340,7 @@ function closePlayer(){
   stopT();
   apply();
   if(apiReady)yt.stopVideo();
-  try{au.pause();au.removeAttribute('src');au.load();if(locURL){URL.revokeObjectURL(locURL);locURL=null}}catch(e){}
+  try{au.pause();au.removeAttribute('src');au.load();locURL=null;keepLoc([])}catch(e){}
   pending=null;playing=false;idx=-1;queue=[];errCount=0;
   try{ka.pause();if('mediaSession' in navigator)navigator.mediaSession.metadata=null}catch(e){}
   icons();
@@ -2278,7 +2349,7 @@ function closePlayer(){
 }
 
 function playAt(i,list){
-  if(list)queue=(list===D.home.videos||list===D.search.videos)?list:list.slice();
+  if(list)queue=isLiveQ(list)?list:list.slice();
   const v=queue[i];
   if(!v||!v.videoId)return;
 
@@ -2294,7 +2365,10 @@ function playAt(i,list){
     pending=null;
     msMode(true);
     try{ka.pause()}catch(e){}
-    if(apiReady)try{yt.stopVideo()}catch(e){}
+    /* screen on: remove the YouTube player; screen locked: only stop it (a new player could not start in the background) */
+    if(document.hidden){try{if(apiReady)yt.stopVideo()}catch(e){}}
+    else dropYT();
+    updateMedia(v);
     loadLocal(v);
     return;
   }
@@ -2302,7 +2376,7 @@ function playAt(i,list){
   try{au.pause()}catch(e){}
   msMode(false);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
-  else pending=v.videoId;
+  else{pending=v.videoId;makeYT()}
 
 }
 
@@ -2318,13 +2392,16 @@ const next=async()=>{
     return;
   }
 
-  const live=queue===D.home.videos||queue===D.search.videos;
+  const live=isLiveQ(queue);
   if(live&&idx>=queue.length-1){
     const q0=queue,i0=idx,len=q0.length;
 
     if(q0===D.home.videos){
       if(D.home.videos.length>=D.home.cap)D.home.cap+=100;
       keepFilling();
+    }
+    else if(q0===ART.videos){
+      if(ART.query&&!ART.busy)loadArtist(ART.page+1,true);
     }
     else{
       const s=D.search;
@@ -2522,25 +2599,30 @@ function posState(){
 }
 
 let msLocal=null;
+function localHandlers(){
+  if(!MS)return;
+  const h=(a,f)=>{try{MS.setActionHandler(a,f)}catch(e){}};
+  h('play',()=>{resumeAny()});
+  h('pause',()=>{pauseAny()});
+  h('previoustrack',()=>prev());
+  h('nexttrack',()=>next());
+  h('seekbackward',null);
+  h('seekforward',null);
+  h('seekto',d=>{
+    if(d&&d.seekTime!=null&&canPlay()){
+      seekT(d.seekTime);
+      lastPS=0;
+      setTimeout(posState,250);
+    }
+  });
+}
 function msMode(local){
   if(!MS||msLocal===local)return;
   const wasLocal=msLocal===true;
   msLocal=local;
   const h=(a,f)=>{try{MS.setActionHandler(a,f)}catch(e){}};
   if(local){
-    h('play',()=>{resumeAny()});
-    h('pause',()=>{pauseAny()});
-    h('previoustrack',()=>prev());
-    h('nexttrack',()=>next());
-    h('seekbackward',null);
-    h('seekforward',null);
-    h('seekto',d=>{
-      if(d&&d.seekTime!=null&&canPlay()){
-        seekT(d.seekTime);
-        lastPS=0;
-        setTimeout(posState,250);
-      }
-    });
+    localHandlers();
   }else{
     ['play','pause','previoustrack','nexttrack','seekbackward','seekforward','seekto'].forEach(a=>h(a,null));
     if(wasLocal){try{MS.metadata=null;MS.playbackState='none'}catch(e){}}
@@ -2701,6 +2783,8 @@ const D={
   search:{videos:[],page:1,query:'',busy:false,ctl:null,cap:100,autoTimer:null}
 };
 
+const ART={videos:[],page:1,query:'',name:'',busy:false,ctl:null,cap:100,autoTimer:null,done:false};
+const isLiveQ=q=>q===D.home.videos||q===D.search.videos||q===ART.videos;
 let activeTab='home';
 let libView='folders';
 let seen=new Set();
@@ -2925,6 +3009,7 @@ CHIPS.forEach((c,i)=>{
     chip=i;
     if(CHIPS[i][0]==='For You'){delete CACHE[i];buildForYou()}
     chipBtns.forEach((x,j)=>x.classList.toggle('on',j===i));
+    $('homeBoxes').hidden=offMode||i!==0;
     if(restoreChip(i))loadHomeMore();
     else keepFilling();
   };
@@ -2935,6 +3020,151 @@ if(chipCfg.hidden.includes(chip)){
   if(CHIPS[chip][0]==='For You')buildForYou();
 }
 renderChips();
+
+
+/* ---------- HOME BOXES: artists / labels / languages -> a page with all their songs ---------- */
+const SECS=[
+  ['Arijit Singh'],['T-Series'],['Bangla Songs','Bangla songs'],['Habib Wahid'],['Atif Aslam'],
+  ['Shreya Ghoshal'],['Sonu Nigam'],['Kumar Sanu'],['Tahsan'],['Arman Alif']
+];
+const SEC_TTL=12*3600*1000,SEC_N=8;
+let artOpen=false,artSkip=false,artScroll=0;
+const secIO=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){secIO.unobserve(e.target);if(e.target._load)e.target._load()}
+}),{rootMargin:'300px 0px'}):null;
+/* each box: artist picture + name + "See all", and a few songs below. Songs load only when the box comes near the screen. */
+function buildSecs(force){
+  const box=$('homeBoxes');
+  box.replaceChildren();
+  SECS.forEach(([name,q0])=>{
+    const q=q0||(name+' songs'),key='sf_sec_'+name;
+    if(force)LS.del(key);
+    const sec=document.createElement('section');
+    sec.className='asec g';
+    sec.innerHTML='<div class="ahead"><img class="aav" alt="" hidden><span class="anm"></span><button class="asee" type="button">See all ›</button></div><div class="chips arow"></div>';
+    sec.querySelector('.anm').textContent=name;
+    sec.querySelector('.asee').onclick=()=>openArtist(name,q);
+    const row=sec.querySelector('.arow'),av=sec.querySelector('.aav');
+    const mq=v=>'https://i.ytimg.com/vi/'+v.videoId+'/mqdefault.jpg';
+    for(let k=0;k<4;k++){const ph=document.createElement('div');ph.className='acard';ph.innerHTML='<div class="ph"></div>';row.appendChild(ph)}
+    const paint=list=>{
+      row.replaceChildren();
+      if(!list.length){sec.hidden=true;return}
+      av.hidden=false;fbThumb(av,list[0].videoId);av.src=mq(list[0]);
+      list.forEach((v,i)=>{
+        const c=document.createElement('div');c.className='acard';c.tabIndex=0;
+        const im=document.createElement('img');im.loading='lazy';im.alt='';fbThumb(im,v.videoId);im.src=mq(v);
+        const t=document.createElement('div');t.className='t';t.textContent=v.title||'';
+        const a=document.createElement('div');a.className='s';a.textContent=v.author||'';
+        c.append(im,t,a);
+        c.onclick=()=>playAt(i,list);
+        c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();playAt(i,list)}};
+        row.appendChild(c);
+      });
+    };
+    sec._load=async()=>{
+      const c=LS.get(key,null);
+      if(c&&c.v&&c.v.length&&Date.now()-c.t<SEC_TTL){paint(c.v);return}
+      if(!navigator.onLine){sec.hidden=true;return}
+      const data=await fetchSongs(q,1,new AbortController());
+      if(!data||!data.length){if(!c)sec.hidden=true;else paint(c.v);return}
+      const list=data.slice(0,SEC_N).map(slim);
+      LS.set(key,{t:Date.now(),v:list});
+      paint(list);
+    };
+    box.appendChild(sec);
+    if(secIO)secIO.observe(sec);else sec._load();
+  });
+  box.hidden=chip!==0;
+}
+buildSecs(false);
+
+function openArtist(name,q){
+  if(artOpen)return;
+  if(ART.ctl)ART.ctl.abort();
+  clearTimeout(ART.autoTimer);
+  ART.videos=[];ART.page=1;ART.query=q;ART.name=name;ART.busy=false;ART.ctl=null;ART.cap=100;ART.done=false;
+  $('artTitle').textContent=name;
+  $('artStatus').textContent='Loading…';
+  $('artGrid').replaceChildren();
+  $('artMore').hidden=true;
+  artScroll=window.scrollY;
+  artOpen=true;activeTab='artist';
+  ['home','search','library'].forEach(n=>$(n+'Page').classList.remove('active'));
+  $('artistPage').classList.add('active');
+  $('homeBar').hidden=true;
+  markNav();
+  window.scrollTo(0,0);
+  pushLayer(()=>{if(artSkip){artSkip=false;return}closeArtistView(true)});
+  loadArtist(1,false);
+}
+function closeArtistView(restore){
+  if(!artOpen)return;
+  artOpen=false;
+  if(ART.ctl)ART.ctl.abort();
+  ART.busy=false;clearTimeout(ART.autoTimer);
+  $('artistPage').classList.remove('active');
+  activeTab='home';
+  $('homePage').classList.add('active');
+  $('homeBar').hidden=false;
+  markNav();
+  if(restore)window.scrollTo(0,artScroll);
+}
+$('artBack').onclick=()=>history.back();
+
+async function loadArtist(page,append){
+  const st=ART;
+  if(st.busy&&append)return;
+  if(st.ctl)st.ctl.abort();
+  st.busy=true;
+  const ctl=new AbortController();st.ctl=ctl;
+  const q=st.query,grid=$('artGrid');
+  $('artMore').hidden=true;
+
+  const data=await fetchSongs(q,page,ctl);
+  if(st.ctl!==ctl||ctl.signal.aborted)return;
+  st.busy=false;
+
+  if(data===null){
+    if(!st.videos.length)grid.innerHTML='<div class="empty g">Unable to connect. Please try again.</div>';
+    $('artStatus').textContent='Connection error';
+    $('artMore').hidden=false;$('artMore').disabled=false;
+    return;
+  }
+  if(!st.videos.length)grid.replaceChildren();
+
+  const ids=new Set(st.videos.map(v=>v.videoId));
+  const fresh=data.filter(v=>!ids.has(v.videoId));
+  fresh.forEach(v=>{
+    st.videos.push(v);
+    grid.appendChild(card(v,st.videos.length-1,st.videos));
+  });
+  st.page=page;
+  st.done=!data.length;
+  if(!st.videos.length)grid.innerHTML='<div class="empty g">No songs found.</div>';
+  $('artStatus').textContent=st.videos.length+' Songs';
+  $('artMore').hidden=st.done;
+  $('artMore').disabled=false;
+
+  /* load the rest of this batch of 100 songs in the background */
+  if(data.length&&st.videos.length<st.cap){
+    st.autoTimer=setTimeout(()=>{
+      if(artOpen&&st.query===q&&!st.busy&&st.videos.length<st.cap)loadArtist(st.page+1,true);
+    },80);
+  }
+}
+$('artMore').onclick=()=>{
+  if(ART.busy)return;
+  ART.cap=ART.videos.length+100;
+  loadArtist(ART.page+1,true);
+};
+function artCheck(){
+  if(!artOpen||ART.busy||ART.done)return;
+  if(ART.videos.length<ART.cap)return;
+  const remaining=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);
+  if(remaining<=AHEAD*3){ART.cap=ART.videos.length+100;loadArtist(ART.page+1,true)}
+}
+addEventListener('scroll',()=>{if(artOpen)artCheck()},{passive:true});
 
 /* Settings: order / show-hide the home chips */
 const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="sl" d="M4 4l16 16"/></svg>';
@@ -3158,6 +3388,7 @@ function renderOfflineHome(){
   const grid=$('homeGrid');
   grid.replaceChildren();
   $('chips').hidden=true;
+  $('homeBoxes').hidden=true;
   const songs=getLoc();
   $('homeStatus').textContent=songs.length+(songs.length===1?' Song':' Songs')+' · Offline';
   if(!songs.length){
@@ -3172,6 +3403,7 @@ function leaveOfflineHome(){
   if(!offMode)return;
   offMode=false;
   $('chips').hidden=false;
+  $('homeBoxes').hidden=chip!==0;
   const st=D.home,grid=$('homeGrid');
   grid.replaceChildren();
   if(st.videos.length){
@@ -3652,6 +3884,7 @@ $('libBack').onclick=()=>history.back();
 
 /* ---------- NAVIGATION ---------- */
 function setTab(t){
+  if(artOpen){closeArtistView(false);artSkip=true;history.back()}
   if(activeTab===t)return;
   activeTab=t;
 
@@ -3696,6 +3929,7 @@ function refreshHome(){
   if(!navigator.onLine){renderOfflineHome();return Promise.resolve()}
   offMode=false;
   $('chips').hidden=false;
+  buildSecs(true);
   st.cap=100;
 
   st.busy=false;
