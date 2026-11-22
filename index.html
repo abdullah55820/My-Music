@@ -64,8 +64,7 @@ svg{display:block}
 .arc .r{margin-top:1px;font-size:11.5px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #av{position:fixed;inset:0;z-index:8800;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:#161618;color:#fff}
 #av[hidden]{display:none}
-.avbg{position:fixed;inset:-40px;background-size:cover;background-position:center;filter:blur(46px) saturate(1.4);transform:translateZ(0);opacity:.75;pointer-events:none}
-.avbg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55) 60%,rgba(0,0,0,.8))}
+.avbg{position:fixed;inset:0;pointer-events:none}
 .avin{position:relative;padding:calc(env(safe-area-inset-top) + 14px) 16px 200px;max-width:560px;margin:auto;text-align:center}
 .avback{position:absolute;left:16px;top:calc(env(safe-area-inset-top) + 14px);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;z-index:2}
 .avback svg{width:22px;height:22px}
@@ -3086,22 +3085,15 @@ const ARTISTS=[
  {n:'Coke Studio Pakistani',r:'Music Show',w:'Coke Studio Pakistan',q:['Coke Studio Pakistan','Coke Studio Pakistan songs','Coke Studio Pakistan season','Coke Studio Pakistan hits']}
 ];
 const getFavArt=()=>LS.get('sf_fav_art',[]);
-let avOpen=false,avSkip=false,avA=null;
+let avOpen=false,avSkip=false,avA=null,avTheme='';
 const ARIMG=LS.get('sf_arimg',{});
 const initials=n=>n.replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'♪';
-function arPhoto(a,cb){
-  if(ARIMG[a.n]){cb(ARIMG[a.n]);return}
-  if(ARIMG[a.n]===0||!navigator.onLine)return;
-  fetch('https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(a.w)+'&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&origin=*')
-   .then(r=>r.json()).then(j=>{
-     const pg=j&&j.query&&j.query.pages&&Object.values(j.query.pages)[0];
-     const u=pg&&pg.thumbnail&&pg.thumbnail.source;
-     if(u){ARIMG[a.n]=u;LS.set('sf_arimg',ARIMG);cb(u)}
-   }).catch(()=>{});
-}
+const arHue=a=>ARTISTS.indexOf(a)*18+8;
+const hsl2hex=(h,sa,l)=>{sa/=100;l/=100;const k=n=>(n+h/30)%12,f=n=>l-sa*Math.min(l,1-l)*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return '#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')};
 function arFill(el,a){
+  const h=arHue(a);
   el.textContent=initials(a.n);
-  arPhoto(a,u=>{const im=new Image();im.alt='';im.onload=()=>{el.replaceChildren(im)};im.src=u});
+  el.style.background='linear-gradient(135deg,hsl('+h+',75%,58%),hsl('+(h+45)+',70%,38%))';
 }
 function arCard(a){
   const c=document.createElement('article');c.className='arc g';c.tabIndex=0;
@@ -3150,8 +3142,9 @@ function openAV(a){
   $('avNm').textContent=a.n;$('avRole').textContent=a.r;
   $('avList').replaceChildren();$('avSt').textContent='Loading…';
   const ph=$('avPh');arFill(ph,a);
-  const u=ARIMG[a.n];$('avBg').style.backgroundImage=u?'url("'+u+'")':'none';
-  if(!u)arPhoto(a,x=>{if(avA===a)$('avBg').style.backgroundImage='url("'+x+'")'});
+  const h=arHue(a);
+  $('avBg').style.background='linear-gradient(180deg,hsl('+h+',55%,30%) 0,hsl('+h+',40%,16%) 55%,#141416 100%)';
+  avTheme=hsl2hex(h,55,30);setThemeColor(avTheme,false);
   avHeart();
   $('av').hidden=false;$('av').scrollTop=0;avOpen=true;
   pushLayer(()=>{if(avSkip){avSkip=false;return}closeAV()});
@@ -3163,6 +3156,7 @@ function closeAV(){
   if(ART.ctl)ART.ctl.abort();
   ART.busy=false;
   $('av').hidden=true;
+  try{syncTop()}catch(e){}
 }
 $('avBack').onclick=()=>history.back();
 function avRow(v,i){
@@ -3173,9 +3167,14 @@ function avRow(v,i){
   const t=document.createElement('div');t.className='t';t.textContent=v.title||'Untitled';
   const a=document.createElement('div');a.className='a';a.textContent=v.author||'YouTube';
   d.append(t,a);r.append(im,d);
-  const go=()=>playAt(i,ART.videos);
+  const go=()=>playMini(i,ART.videos);
   r.onclick=go;r.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};
   return r;
+}
+function playMini(i,list){
+  const was=mode;
+  playAt(i,list);
+  if(was==='closed'&&mode==='full')setTimeout(()=>{if(mode==='full')history.back()},80);
 }
 /* one task = one search page; songs already seen are skipped, so nothing repeats */
 async function loadArtist(){
@@ -3213,11 +3212,11 @@ function avCheck(){
 }
 $('av').addEventListener('scroll',avCheck,{passive:true});
 $('avPlay').onclick=()=>{
-  const f=()=>playAt(0,ART.videos);
+  const f=()=>playMini(0,ART.videos);
   if(ART.videos.length)f();else ART.go=f;
 };
 $('avShuf').onclick=()=>{
-  const f=()=>{shuf=true;$('shBtn').classList.add('on');playAt(Math.floor(Math.random()*ART.videos.length),ART.videos)};
+  const f=()=>{shuf=true;$('shBtn').classList.add('on');playMini(Math.floor(Math.random()*ART.videos.length),ART.videos)};
   if(ART.videos.length)f();else ART.go=f;
 };
 
