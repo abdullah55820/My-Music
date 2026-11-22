@@ -693,7 +693,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
     </form>
-    <div class="chips" id="srcRow" style="margin:0 0 8px;padding:2px 0 4px"><button type="button" class="chip" id="srcYt">YouTube</button><button type="button" class="chip" id="srcAu">Audius</button></div>
     <div class="chips" id="recent" hidden></div>
     <div class="section" id="searchHeading" hidden>
       <span class="pill g"><h2>Results</h2></span>
@@ -845,7 +844,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
       <div class="row"><div><b>Font</b></div></div>
       <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
-      <div class="row"><div><b>Data Saver</b></div></div>
+      <div class="row"><div><b>Data Saver</b> (low quality, less data)</div></div>
       <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
       <div class="row"><div><b>Tab Bar</b></div></div>
       <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
@@ -1054,6 +1053,10 @@ addEventListener('resize',setRows);
 
 function apply(){
   const d=document.documentElement,st=d.style;
+  if(window._sv!==S.saver){
+    const first=window._sv===undefined;window._sv=S.saver;
+    if(!first)setTimeout(()=>{try{syncVideo();if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}},0);
+  }
   setRows();
 
   if(S.preset==='photo'&&!PHOTO)S.preset='auto';
@@ -1301,7 +1304,7 @@ const au=new Audio();
 au.preload='auto';
 au.setAttribute('playsinline','');
 let locURL=null;
-const isLoc=()=>{const v=queue[idx];return !!(v&&(v.local||v.aud))};
+const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
@@ -1322,15 +1325,6 @@ async function loadLocal(v){
     locURL=URL.createObjectURL(blob);
     au.src=locURL;
     await au.play();
-  }catch(e){}
-}
-
-/* Audius songs stream through the same <audio> element, so they keep playing with the screen locked */
-function loadAud(v){
-  try{
-    if(locURL){URL.revokeObjectURL(locURL);locURL=null}
-    au.src=`${auHost}/v1/tracks/${String(v.videoId).slice(3)}/stream?app_name=SoundFlow`;
-    au.play().catch(()=>{});
   }catch(e){}
 }
 
@@ -1387,7 +1381,7 @@ window.onYouTubeIframeAPIReady=()=>{
       onReady:()=>{
         apiReady=true;
         syncVideo();
-        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
+        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
       },
       onStateChange:onState,
       onError:onYtError
@@ -1409,7 +1403,7 @@ function onState(e){
     errCount=0;
     userWant=true;
     playing=true;
-    try{yt.setPlaybackQuality('hd1080')}catch(e){}
+    try{yt.setPlaybackQuality(ytQ())}catch(e){}
     kaClaim();
     icons();
     $('art').classList.remove('paused');
@@ -1786,14 +1780,13 @@ function hydrateLoc(v,im,t,a){
 }
 
 function thumbOf(v){
-  if(v.aud)return v.art||'logo.png';
   if(v.local)return ARTC[v.videoId]||fallbackArt(v);
+  if(S.saver==='on')return `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`;
   const t=v.videoThumbnails||[];
   return(t.find(x=>x.quality==='maxres')||t.find(x=>x.quality==='high')||t.find(x=>x.quality==='medium')||t[0]||{}).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
 
 function fbThumb(im,id){
-  if(String(id).startsWith('au_'))return;
   const list=[
     `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
     `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
@@ -1879,12 +1872,12 @@ function loadCorsImg(url){
 
 async function sampleTint(v){
   const id=v.videoId;
-  if(v.local||v.aud){
+  if(v.local){
     if(tintCache[id])return tintCache[id];
     try{
       const im=await loadCorsImg(thumbOf(v));
       const col=avgColor(im,im.naturalWidth,im.naturalHeight);
-      if(id in ARTC||v.aud)tintCache[id]=col;
+      if(id in ARTC)tintCache[id]=col;
       return col;
     }catch(e){return null}
   }
@@ -1960,7 +1953,7 @@ function bestLyric(list,v,dur,onlySynced){
 
 async function getDur(v){
   if(v.lengthSeconds>0)return v.lengthSeconds;
-  if(v.local||v.aud){
+  if(v.local){
     for(let i=0;i<24;i++){
       if(Number.isFinite(au.duration)&&au.duration>0)return au.duration;
       await new Promise(r=>setTimeout(r,250));
@@ -2114,11 +2107,18 @@ on('lyBtn',()=>{
 let vidMode=false,vidFS=false;
 /* Phones: the YouTube iframe is always 1920x1080; only the CSS scale changes.
    PC: the iframe simply fills the video box (no scale), which removes the horizontal seam line. */
+/* Data Saver: lowest video quality + a tiny player size (YouTube picks quality from the player size) */
+const ytQ=()=>S.saver==='on'?'tiny':'hd1080';
 function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
   if(isDesk()){
     f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:100%;height:100%;transform:none';
+    return;
+  }
+  if(S.saver==='on'){
+    const vis=sc*1920,W=vis<=260?256:480,H=Math.round(W*9/16);
+    f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:'+W+'px;height:'+H+'px;transform-origin:0 0;transform:scale('+(vis/W)+')';
     return;
   }
   f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
@@ -2149,7 +2149,7 @@ function syncVideo(){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     ytFrame(200/1920);
-    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -2167,7 +2167,7 @@ function syncVideo(){
     ytFrame(bw/1920);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
-    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
     return;
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
@@ -2184,7 +2184,7 @@ function syncVideo(){
   /* Phones: the player is laid out at a real 1920x1080 size and scaled down to the box.
      PC: the iframe is sized straight to the box. */
   ytFrame(vw/1920);
-  try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
+  try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
 }
 
 /* Video sizing only: changing video/fullscreen layout must never change playback state. */
@@ -2290,18 +2290,18 @@ function playAt(i,list){
   playing=false;
   icons();
 
-  if(v.local||v.aud){
+  if(v.local){
     pending=null;
     msMode(true);
     try{ka.pause()}catch(e){}
     if(apiReady)try{yt.stopVideo()}catch(e){}
-    if(v.aud)loadAud(v);else loadLocal(v);
+    loadLocal(v);
     return;
   }
 
   try{au.pause()}catch(e){}
   msMode(false);
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
+  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
   else pending=v.videoId;
 
 }
@@ -2347,7 +2347,7 @@ const next=async()=>{
 const getHist=()=>LS.get('sf_history',[]);
 function addHist(v){
   const h=getHist().filter(x=>x.videoId!==v.videoId);
-  h.unshift({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined,aud:v.aud||undefined,art:v.art||undefined});
+  h.unshift({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
   LS.set('sf_history',h.slice(0,50));
 }
 
@@ -2418,7 +2418,7 @@ on('plBtn',openSheet);
 /* ---------- SHARE ---------- */
 on('shareBtn',async()=>{
   const v=queue[idx];
-  if(!v||v.local||v.aud)return;
+  if(!v||v.local)return;
 
   const url='https://youtu.be/'+v.videoId;
   const btn=$('shareBtn');
@@ -2501,7 +2501,6 @@ async function updateMedia(v){
   if(!MS||typeof MediaMetadata==='undefined')return;
   const id=v.videoId,title=v.title||'Unknown Song',artist=v.author||(v.local?'My Files':'YouTube');
   const mk=art=>{try{MS.metadata=new MediaMetadata({title,artist,album:'SoundFlow',artwork:art})}catch(e){}};
-  if(v.aud){mk(v.art?[{src:v.art,sizes:'480x480',type:'image/jpeg'}]:[]);return}
   if(v.local){
     const u=ARTC[id]||fallbackArt(v);
     mk([{src:u,sizes:'512x512',type:(u.match(/^data:([^;]+)/)||[])[1]||'image/jpeg'}]);
@@ -2677,7 +2676,7 @@ pl.addEventListener('dragstart',e=>e.preventDefault());
 
 /* ---------- FAVOURITES ---------- */
 const getLiked=()=>LS.get('sf_liked_songs',[]);
-const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined,aud:v.aud||undefined,art:v.art||undefined});
+const slim=v=>({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
 
 $('likeBtn').addEventListener('click',e=>{
   e.stopPropagation();
@@ -2695,9 +2694,6 @@ $('likeBtn').addEventListener('click',e=>{
 
 /* ---------- SONGS (Vercel + yt-dlp backend) ---------- */
 const SEARCH_API='/api/search';
-let SRC=LS.get('sf_src','yt');
-const AU_HOSTS=['https://api.audius.co','https://discoveryprovider.audius.co'];
-let auHost=AU_HOSTS[0];
 const MIN_TS=Math.floor(Date.UTC(2010,0,1)/1000);
 
 const D={
@@ -2718,7 +2714,7 @@ function card(v,i,list,rm){
   im.className='thumb';
   im.loading='lazy';
   if(!v.local)fbThumb(im,v.videoId);
-  im.src=(S.saver==='on'&&!v.local&&!v.aud)?`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`:thumbOf(v);
+  im.src=(S.saver==='on'&&!v.local)?`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`:thumbOf(v);
   im.alt='';
 
   const t=document.createElement('div');
@@ -2749,30 +2745,7 @@ function card(v,i,list,rm){
   return c;
 }
 
-async function fetchAudius(term,page,ctl){
-  const lim=25,off=(page-1)*lim;
-  for(const h of [auHost,...AU_HOSTS.filter(x=>x!==auHost)]){
-    try{
-      const r=await fetch(`${h}/v1/tracks/search?query=${encodeURIComponent(term)}&limit=${lim}&offset=${off}&app_name=SoundFlow`,{signal:ctl.signal,headers:{Accept:'application/json'}});
-      if(!r.ok)throw new Error('Audius '+r.status);
-      const j=await r.json();
-      if(!j||!Array.isArray(j.data))throw new Error('Invalid Audius response');
-      auHost=h;
-      return j.data.filter(t=>t&&t.id&&t.is_streamable!==false).map(t=>({
-        type:'video',videoId:'au_'+t.id,aud:true,title:t.title,
-        author:(t.user&&t.user.name)||'Audius',lengthSeconds:t.duration||0,
-        art:(t.artwork&&(t.artwork['480x480']||t.artwork['1000x1000']||t.artwork['150x150']))||''
-      }));
-    }catch(e){
-      if(e.name==='AbortError')return null;
-      console.warn('Audius search:',e);
-    }
-  }
-  return null;
-}
-
 async function fetchSongs(q,page,ctl){
-  if(SRC==='au')return fetchAudius(q,page,ctl);
   try{
     const r=await fetch(`${SEARCH_API}?q=${encodeURIComponent(q)}&page=${page}`,{
       signal:ctl.signal,headers:{Accept:'application/json'},cache:'no-store'
@@ -2823,7 +2796,7 @@ const FORYOU=6;
 
 function buildForYou(){
   const c={};
-  [...getLiked(),...getHist()].forEach(v=>{if(v.author&&!v.local&&!v.aud)c[v.author]=(c[v.author]||0)+1});
+  [...getLiked(),...getHist()].forEach(v=>{if(v.author&&!v.local)c[v.author]=(c[v.author]||0)+1});
   const a=Object.keys(c).sort((x,y)=>c[y]-c[x]).slice(0,6);
   const g=GROUPS[FORYOU];
   g.qs=a.length?a.map(x=>x+' latest songs'):['Latest new songs 2026','Trending songs 2026'];
@@ -3373,7 +3346,6 @@ function showRecentMatches(t){
 }
 
 async function showSug(t){
-  if(SRC==='au')return;
   if(q.value.trim()!==t||t.length<2)return;
   if(sugCtl)sugCtl.abort();
   const ctl=new AbortController();sugCtl=ctl;
@@ -3400,19 +3372,6 @@ async function showSug(t){
   }
 }
 $('clearQ').onclick=clearSearch;
-function syncSrc(){
-  $('srcYt').classList.toggle('on',SRC!=='au');
-  $('srcAu').classList.toggle('on',SRC==='au');
-  q.placeholder=SRC==='au'?'Audius songs, artists...':'Songs, artists...';
-}
-['srcYt','srcAu'].forEach(id=>{$(id).onclick=()=>{
-  const n=id==='srcAu'?'au':'yt';
-  if(n===SRC)return;
-  SRC=n;LS.set('sf_src',n);syncSrc();
-  const t=q.value.trim();
-  if(t)doSearch(t);
-}});
-syncSrc();
 $('searchMore').onclick=()=>{
   const s=D.search;
   if(s.query&&!s.busy)loadSearch(s.query,s.page+1,true);
