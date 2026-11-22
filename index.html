@@ -1331,6 +1331,7 @@ async function loadLocal(v){
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   errCount=0;playing=true;icons();
+  try{const cv=queue[idx];if(cv)updateMedia(cv);if(MS)MS.playbackState='playing';lastPS=0;posState()}catch(e){}
   $('art').classList.remove('paused');
   startT();
 });
@@ -2205,20 +2206,36 @@ try{new ResizeObserver(()=>{if(vidMode)syncVideo()}).observe($('az'))}catch(e){}
 /* The fullscreen close control only exits the fullscreen video layout.
    It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
-function paintInfo(v){
-  $('pThumb').src=$('mThumb').src=thumbOf(v);
+/* instant part: title, artist and cover show at once (small cover first, sharp one when it arrives) */
+function paintInfoFast(v){
+  const id=v.videoId,pT=$('pThumb'),mT=$('mThumb');
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||(v.local?'My Files':'YouTube');
+  const hi=thumbOf(v);
+  if(v.local){pT.src=mT.src=hi;return}
+  const mq=`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+  pT.src=mT.src=mq;
+  if(hi!==mq){
+    const im=new Image();
+    im.onload=()=>{if(queue[idx]&&queue[idx].videoId===id)pT.src=mT.src=hi};
+    im.src=hi;
+  }
+}
+function paintInfoHeavy(v){
   setPlayerBg(v);
   setTint(v);
   updateMedia(v);
+}
+function paintInfo(v){
+  paintInfoFast(v);
+  paintInfoHeavy(v);
 }
 
 function setInfo(v){
   const id=v.videoId;
   if(!v.local){fbThumb($('pThumb'),id);fbThumb($('mThumb'),id)}
   $('likeBtn').classList.toggle('liked',getLiked().some(x=>x.videoId===id));
-  paintInfo(v);
+  paintInfoFast(v);
   if(v.local&&!(id in ARTC)){
     ensureMeta(v).then(()=>{
       if(!queue[idx]||queue[idx].videoId!==id)return;
@@ -2228,8 +2245,6 @@ function setInfo(v){
       paintInfo(v);
     });
   }
-  if(lyOn)loadLyrics(v);
-  syncVideo();
 }
 
 function resetPlayerStyles(){
@@ -2259,6 +2274,7 @@ function showFull(){
 }
 
 function closePlayer(){
+  playTok++;
   mode='closed';
   userWant=false;
   vidFS=false;
@@ -2277,33 +2293,42 @@ function closePlayer(){
   resetProg();
 }
 
+let playTok=0;
 function playAt(i,list){
   if(list)queue=(list===D.home.videos||list===D.search.videos)?list:list.slice();
   const v=queue[i];
   if(!v||!v.videoId)return;
 
   idx=i;
-  addHist(v);
+  playing=false;
+  const tok=++playTok;
+
+  /* 1) title + cover change instantly */
   if(mode==='closed')showFull();
   setInfo(v);
   resetProg();
-  playing=false;
   icons();
 
-  if(v.local){
-    pending=null;
-    msMode(true);
-    try{ka.pause()}catch(e){}
-    if(apiReady)try{yt.stopVideo()}catch(e){}
-    loadLocal(v);
-    return;
-  }
-
-  try{au.pause()}catch(e){}
-  msMode(false);
-  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
-  else pending=v.videoId;
-
+  /* 2) right after the screen has painted: start the song and do the heavier work */
+  requestAnimationFrame(()=>setTimeout(()=>{
+    if(tok!==playTok)return;
+    if(v.local){
+      pending=null;
+      msMode(true);
+      try{ka.pause()}catch(e){}
+      if(apiReady)try{yt.stopVideo()}catch(e){}
+      loadLocal(v);
+    }else{
+      try{au.pause()}catch(e){}
+      msMode(false);
+      if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
+      else pending=v.videoId;
+    }
+    paintInfoHeavy(v);
+    if(lyOn)loadLyrics(v);
+    syncVideo();
+    setTimeout(()=>addHist(v),0);
+  },0));
 }
 
 const SLEEPS=[0,15,30,60];
