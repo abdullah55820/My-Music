@@ -1331,7 +1331,7 @@ async function loadLocal(v){
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   errCount=0;playing=true;icons();
-  try{const cv=queue[idx];if(cv)updateMedia(cv);if(MS)MS.playbackState='playing';lastPS=0;posState()}catch(e){}
+  try{const cv=queue[idx];if(cv&&(!MS||!MS.metadata||MS.metadata.title!==(cv.title||'Unknown Song')))updateMedia(cv);lastPS=0;posState()}catch(e){}
   $('art').classList.remove('paused');
   startT();
 });
@@ -2323,14 +2323,19 @@ function playAt(i,list){
   resetProg();
   icons();
 
-  /* 2) right after the screen has painted: start the song and do the heavier work */
-  requestAnimationFrame(()=>setTimeout(()=>{
-    if(tok!==playTok)return;
+  /* 2) right after the screen has painted: start the song and do the heavier work.
+     With the screen locked / app in background the browser never runs animation frames,
+     so there the song must start immediately (lock-screen next, auto-advance). */
+  let started=false;
+  const start=()=>{
+    if(started||tok!==playTok)return;
+    started=true;
     if(v.local){
       pending=null;
       msMode(true);
       try{ka.pause()}catch(e){}
-      dropYT();
+      if(document.hidden){try{if(apiReady)yt.stopVideo()}catch(e){}}
+      else dropYT();
       loadLocal(v);
     }else{
       try{au.pause()}catch(e){}
@@ -2342,7 +2347,9 @@ function playAt(i,list){
     if(lyOn)loadLyrics(v);
     syncVideo();
     setTimeout(()=>addHist(v),0);
-  },0));
+  };
+  if(document.hidden)start();
+  else{requestAnimationFrame(()=>setTimeout(start,0));setTimeout(start,150)}
 }
 
 const SLEEPS=[0,15,30,60];
