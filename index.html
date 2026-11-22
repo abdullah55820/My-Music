@@ -97,9 +97,9 @@ svg{display:block}
 .section{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:7px 14px;border-radius:99px;min-width:0}
 .pill h2{margin:0;font-size:17px;font-weight:750;white-space:nowrap}
-.home-switch{gap:5px;padding:4px}
-.topTab{height:34px;padding:0 13px;border-radius:18px;font-size:15px;font-weight:750;color:var(--muted);white-space:nowrap}
-.topTab.on{color:var(--text);background:var(--surface-2);box-shadow:inset 0 1px 3px rgba(0,0,0,.16)}
+.home-switch{display:flex;align-items:center;gap:9px;padding:0;background:none;border:0;box-shadow:none}
+.topTab{height:40px;padding:7px 16px;border-radius:99px;font-size:15px;font-weight:750;color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.topTab.on{color:var(--text);background:var(--glass);box-shadow:inset 0 1px 3px rgba(255,255,255,.22),0 2px 8px rgba(0,0,0,.16)}
 #artistsPage .section .pill h2{font-size:17px}
 #av .avback{background:rgba(22,22,24,.42);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:0 4px 16px rgba(0,0,0,.16)}
 .arc .ph img{width:100%;height:100%;object-fit:cover;display:block}
@@ -713,9 +713,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
   <div class="hb" id="homeBar">
     <div class="section">
-      <div class="home-switch g">
-        <button class="topTab on" id="homeTopBtn" type="button">Home</button>
-        <button class="topTab" id="artistsTopBtn" type="button">Artists</button>
+      <div class="home-switch">
+        <button class="pill g topTab on" id="homeTopBtn" type="button">Home</button>
+        <button class="pill g topTab" id="artistsTopBtn" type="button">Artists</button>
       </div>
       <span class="status g" id="homeStatus">Discover music</span>
     </div>
@@ -1411,7 +1411,14 @@ const isLoc=()=>{const v=queue[idx];return !!(v&&v.local)};
 const canPlay=()=>isLoc()||apiReady;
 const curT=()=>isLoc()?(au.currentTime||0):(apiReady?(yt.getCurrentTime()||0):0);
 const durT=()=>isLoc()?(Number.isFinite(au.duration)?au.duration:0):(apiReady?(yt.getDuration()||0):0);
-const seekT=t=>{if(isLoc())au.currentTime=t;else yt.seekTo(t,true)};
+let pendingYTSeek=null;
+const seekT=t=>{
+  if(isLoc()){au.currentTime=t;return}
+  if(!apiReady||!yt)return;
+  const target=Math.max(0,Number(t)||0);
+  pendingYTSeek={target,until:Date.now()+9000,lastTry:0,tries:0,id:queue[idx]?.videoId||''};
+  try{yt.seekTo(target,true);pendingYTSeek.lastTry=Date.now();pendingYTSeek.tries++}catch(e){}
+};
 /* PATCH: userWant = the user wants music playing (so we can auto-resume after video / fullscreen / app switch) */
 let userWant=false;
 const pauseAny=()=>{userWant=false;try{if(isLoc())au.pause();else if(apiReady)yt.pauseVideo()}catch(e){}};
@@ -1577,7 +1584,17 @@ function setProg(p){
 function tick(){
   if(!canPlay()||seeking)return;
   try{
-    const c=curT(),d=durT();
+    let c=curT(),d=durT();
+    if(pendingYTSeek&&!isLoc()){
+      if(pendingYTSeek.id!==queue[idx]?.videoId||Date.now()>pendingYTSeek.until){pendingYTSeek=null}
+      else if(Math.abs(c-pendingYTSeek.target)<=2.5){pendingYTSeek=null}
+      else{
+        if(Date.now()-pendingYTSeek.lastTry>750&&pendingYTSeek.tries<7){
+          try{yt.seekTo(pendingYTSeek.target,true);pendingYTSeek.lastTry=Date.now();pendingYTSeek.tries++}catch(e){}
+        }
+        c=pendingYTSeek.target;
+      }
+    }
     $('cur').textContent=fmt(c);
     $('dur').textContent=fmt(d);
     if(lyOn&&lyLines)syncLy(c);
@@ -1652,7 +1669,7 @@ seek.addEventListener('pointercancel',e=>{
 seek.addEventListener('lostpointercapture',()=>{if(seeking)finishSeek()});
 
 function resetProg(){
-  seeking=false;seekPointer=null;seekTarget=0;
+  seeking=false;seekPointer=null;seekTarget=0;pendingYTSeek=null;
   seek.value=0;
   setProg(0);
   $('cur').textContent=$('dur').textContent='0:00';
@@ -3130,7 +3147,25 @@ function setArtistBlur(url){
   const bg=$('avBg');
   if(!bg||!url)return;
   bg.replaceChildren();
-  const im=document.createElement('img');im.alt='';im.src=url;im.onerror=()=>im.remove();
+  const im=document.createElement('img');im.alt='';im.crossOrigin='anonymous';
+  im.onload=()=>{
+    if(!avOpen||!avA)return;
+    let col='';
+    try{
+      const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
+      c.width=32;c.height=32;x.drawImage(im,0,0,32,32);
+      const d=x.getImageData(0,0,32,32).data;let r=0,g=0,b=0,n=0;
+      for(let i=0;i<d.length;i+=4){if(d[i+3]<100)continue;r+=d[i];g+=d[i+1];b+=d[i+2];n++}
+      if(n)col='rgb('+Math.round(r/n)+','+Math.round(g/n)+','+Math.round(b/n)+')';
+    }catch(e){}
+    if(!col){const h=arHue(avA);col=hsl2hex(h,35,20)}
+    avTheme=col;
+    $('av').style.backgroundColor=col;
+    setThemeColor(col,false);
+    const tf=$('topfade');if(tf)tf.style.setProperty('--pt',col);
+  };
+  im.onerror=()=>{im.remove();if(avA){const col=hsl2hex(arHue(avA),35,20);avTheme=col;$('av').style.backgroundColor=col;setThemeColor(col,false);const tf=$('topfade');if(tf)tf.style.setProperty('--pt',col)}};
+  im.src=url;
   bg.appendChild(im);
 }
 function arFill(el,a){
@@ -3217,7 +3252,7 @@ function openAV(a){
   $('avBg').replaceChildren();
   $('avBg').style.background='linear-gradient(180deg,hsl('+h+',35%,20%) 0,#161618 85%)';
   if(ARIMG[a.n])setArtistBlur(ARIMG[a.n]);
-  avTheme='#161618';setThemeColor(avTheme,false);
+  avTheme=hsl2hex(h,35,20);$('av').style.backgroundColor=avTheme;setThemeColor(avTheme,false);const avtf=$('topfade');if(avtf)avtf.style.setProperty('--pt',avTheme);
   avHeart();
   $('av').hidden=false;$('av').scrollTop=0;avOpen=true;
   pushLayer(()=>{if(avSkip){avSkip=false;return}closeAV()});
