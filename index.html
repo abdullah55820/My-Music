@@ -46,6 +46,13 @@ button{border:0;border-radius:999px;padding:15px 32px;font-weight:700;font-size:
 #wish{font-size:clamp(18px,4vw,23px);color:#fff2f7;margin:18px auto;max-width:560px}
 #blown{color:#ffe0a1;font:600 15px Arial,sans-serif;min-height:22px}
 #replay{margin-top:18px;background:#fff;color:#6b3157}
+.extra-wishes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:25px 0 16px}
+.wish-tile{padding:15px 9px;border-radius:18px;background:#ffffff12;border:1px solid #ffffff25;display:flex;flex-direction:column;gap:7px}
+.wish-tile span{font-size:27px}.wish-tile b{color:#ffd9a0;font:700 14px Arial,sans-serif}
+.wish-tile small{font:12px/1.4 Arial,sans-serif;color:#f5dfed}
+.final-note{margin:20px 0 5px;padding:22px 18px;border-radius:22px;background:linear-gradient(135deg,#ffffff17,#ff8fbd18);border:1px solid #ffffff25}
+.final-note p{font-size:15px}
+@media(max-width:390px){.extra-wishes{gap:6px}.wish-tile{padding:12px 5px}.wish-tile small{font-size:11px}}
 .confetti{position:fixed;top:-15px;width:9px;height:13px;z-index:5;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(800deg);opacity:.8}}
 .footer{font:11px Arial,sans-serif;color:#d9c4e2;margin-top:20px}
@@ -67,6 +74,16 @@ button{border:0;border-radius:999px;padding:15px 32px;font-weight:700;font-size:
   <div class="footer">Made with love, just for you ✨</div>
 </section>
 
+<section class="card hidden" id="surprise">
+  <span class="heart">🎁</span>
+  <div class="eyebrow">You said YES!</div>
+  <h1>Wait… one more thing! ✨</h1>
+  <p>Someone very special deserves more than just one birthday wish.</p>
+  <p style="font-size:20px;color:#ffe3a5">Are you ready for your surprise, Megla? 💝</p>
+  <button id="openGift" style="background:linear-gradient(135deg,#ffe49b,#ff9fc8);color:#55254b;margin-top:18px">Open your surprise 🎀</button>
+  <div class="footer">A little happiness is on its way…</div>
+</section>
+
 <section class="card hidden" id="birthday">
   <div class="eyebrow">Today is all about you</div>
   <h1>Happy Birthday!<span class="name">Sahinur Akter Megla</span></h1>
@@ -83,6 +100,17 @@ button{border:0;border-radius:999px;padding:15px 32px;font-weight:700;font-size:
   <div class="cake-hint">🕯️ Tap each candle flame to blow it out!</div>
   <div id="blown">Make a wish, birthday girl! 🌟</div>
   <div id="wish">May every moment of your new year sparkle with happiness. Keep smiling, keep shining! 💐</div>
+
+  <div class="extra-wishes">
+    <div class="wish-tile"><span>🌷</span><b>Love</b><small>May you always be surrounded by love.</small></div>
+    <div class="wish-tile"><span>✨</span><b>Dreams</b><small>May every beautiful dream come true.</small></div>
+    <div class="wish-tile"><span>🦋</span><b>Happiness</b><small>May your smile never fade away.</small></div>
+  </div>
+  <div class="final-note">
+    <div class="eyebrow">A little note for you</div>
+    <p>Dear Megla, today is your day. May your life be as lovely as your heart, as bright as the stars, and as sweet as this cake. Keep shining, birthday girl! 💗</p>
+    <div style="font-size:30px">💐 💖 🎀</div>
+  </div>
   <button id="replay">Celebrate again 🎉</button>
   <div class="footer">With lots of love ❤️</div>
 </section>
@@ -93,18 +121,30 @@ for(let i=0;i<75;i++){let s=document.createElement('i');s.className='star';s.sty
 const no=document.getElementById('no');
 function runAway(e){
   if(e)e.preventDefault();
-  const pad=12, maxX=Math.max(pad,window.innerWidth-no.offsetWidth-pad), maxY=Math.max(pad,window.innerHeight-no.offsetHeight-pad);
+  const pad=14;
+  const maxX=Math.max(pad,window.innerWidth-no.offsetWidth-pad);
+  const maxY=Math.max(pad,window.innerHeight-no.offsetHeight-pad);
   no.style.position='fixed';no.style.zIndex='10';
-  no.style.left=(pad+Math.random()*(maxX-pad))+'px';
-  no.style.top=(pad+Math.random()*(maxY-pad))+'px';
+  no.style.left=(pad+Math.random()*Math.max(0,maxX-pad))+'px';
+  no.style.top=(pad+Math.random()*Math.max(0,maxY-pad))+'px';
+  no.style.visibility='visible';
+  no.style.display='inline-block';
 }
 no.addEventListener('pointerenter',runAway);
 no.addEventListener('touchstart',runAway,{passive:false});
 no.addEventListener('click',runAway);
-const question=document.getElementById('question'),birthday=document.getElementById('birthday');
+const question=document.getElementById('question');
+const surprise=document.getElementById('surprise');
+const birthday=document.getElementById('birthday');
 document.getElementById('yes').addEventListener('click',()=>{
- question.classList.add('hidden');birthday.classList.remove('hidden');
- no.style.display='none';confetti(100);startMusic();
+ question.classList.add('hidden');
+ surprise.classList.remove('hidden');
+ confetti(70);startMusic();
+});
+document.getElementById('openGift').addEventListener('click',()=>{
+ surprise.classList.add('hidden');
+ birthday.classList.remove('hidden');
+ confetti(150);
 });
 function confetti(n=55){for(let i=0;i<n;i++){let c=document.createElement('i');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=['#ff75ad','#ffd66e','#fff','#a88bff','#7de5d1'][i%5];c.style.animationDuration=(3+Math.random()*4)+'s';c.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),8500)}}
 let audioCtx, musicTimer;
