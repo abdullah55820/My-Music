@@ -844,7 +844,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
       <div class="seg" data-k="anim"><button data-v="on">On</button><button data-v="off">Off</button></div>
       <div class="row"><div><b>Font</b></div></div>
       <div class="seg" data-k="font"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button></div>
-      <div class="row"><div><b>Data Saver</b> (low quality, less data)</div></div>
+      <div class="row"><div><b>Data Saver</b></div></div>
       <div class="seg" data-k="saver"><button data-v="off">Off</button><button data-v="on">On</button></div>
       <div class="row"><div><b>Tab Bar</b></div></div>
       <div class="seg" data-k="labels"><button data-v="on">Icons + Text</button><button data-v="off">Icons only</button></div>
@@ -1053,10 +1053,6 @@ addEventListener('resize',setRows);
 
 function apply(){
   const d=document.documentElement,st=d.style;
-  if(window._sv!==S.saver){
-    const first=window._sv===undefined;window._sv=S.saver;
-    if(!first)setTimeout(()=>{try{syncVideo();if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}},0);
-  }
   setRows();
 
   if(S.preset==='photo'&&!PHOTO)S.preset='auto';
@@ -1331,7 +1327,6 @@ async function loadLocal(v){
 au.addEventListener('playing',()=>{
   if(!isLoc()||isSil())return;
   errCount=0;playing=true;icons();
-  try{const cv=queue[idx];if(cv&&(!MS||!MS.metadata||MS.metadata.title!==(cv.title||'Unknown Song')))updateMedia(cv);lastPS=0;posState()}catch(e){}
   $('art').classList.remove('paused');
   startT();
 });
@@ -1372,14 +1367,7 @@ au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))on
 const PLAY='<path d="M7 4v16l13-8z"/>';
 const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
-let ytMaking=false;
-/* The YouTube player is created on demand, and removed while an offline song plays, so the phone's
-   lock screen / Control Centre only sees our own audio (otherwise it keeps showing the old YouTube song). */
-function makeYT(){
-  if(apiReady||ytMaking||!(window.YT&&YT.Player))return;
-  ytMaking=true;
-  const box=$('yt');
-  if(!$('ytp')){const d=document.createElement('div');d.id='ytp';box.appendChild(d)}
+window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('ytp',{
     /* Phones: the player always stays 1920x1080 and is only scaled with CSS.
        PC: the iframe is sized directly to the video box (no scale), so there is no seam line. */
@@ -1387,22 +1375,15 @@ function makeYT(){
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
-        apiReady=true;ytMaking=false;
+        apiReady=true;
         syncVideo();
-        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
+        if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'hd1080'})}
       },
       onStateChange:onState,
       onError:onYtError
     }
   });
-}
-window.onYouTubeIframeAPIReady=makeYT;
-function dropYT(){
-  if(!apiReady||!yt)return;
-  try{yt.stopVideo()}catch(e){}
-  try{yt.destroy()}catch(e){}
-  yt=null;apiReady=false;ytMaking=false;
-}
+};
 
 (function(){
   const s=document.createElement('script');
@@ -1418,7 +1399,7 @@ function onState(e){
     errCount=0;
     userWant=true;
     playing=true;
-    try{yt.setPlaybackQuality(ytQ())}catch(e){}
+    try{yt.setPlaybackQuality('hd1080')}catch(e){}
     kaClaim();
     icons();
     $('art').classList.remove('paused');
@@ -1796,7 +1777,6 @@ function hydrateLoc(v,im,t,a){
 
 function thumbOf(v){
   if(v.local)return ARTC[v.videoId]||fallbackArt(v);
-  if(S.saver==='on')return `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`;
   const t=v.videoThumbnails||[];
   return(t.find(x=>x.quality==='maxres')||t.find(x=>x.quality==='high')||t.find(x=>x.quality==='medium')||t[0]||{}).url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
 }
@@ -2122,18 +2102,11 @@ on('lyBtn',()=>{
 let vidMode=false,vidFS=false;
 /* Phones: the YouTube iframe is always 1920x1080; only the CSS scale changes.
    PC: the iframe simply fills the video box (no scale), which removes the horizontal seam line. */
-/* Data Saver: lowest video quality + a tiny player size (YouTube picks quality from the player size) */
-const ytQ=()=>S.saver==='on'?'tiny':'hd1080';
 function ytFrame(sc){
   const f=$('yt').querySelector('iframe');
   if(!f)return;
   if(isDesk()){
     f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:100%;height:100%;transform:none';
-    return;
-  }
-  if(S.saver==='on'){
-    const vis=sc*1920,W=vis<=260?256:480,H=Math.round(W*9/16);
-    f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:'+W+'px;height:'+H+'px;transform-origin:0 0;transform:scale('+(vis/W)+')';
     return;
   }
   f.style.cssText='position:absolute;left:0;top:0;border:0;max-width:none;width:1920px;height:1080px;transform-origin:0 0;transform:scale('+sc+')';
@@ -2164,7 +2137,7 @@ function syncVideo(){
     box.classList.remove('vid');
     box.style.left=box.style.top=box.style.width=box.style.height=box.style.right=box.style.bottom='';
     ytFrame(200/1920);
-    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     $('yfs').hidden=true;box.style.transform='';box.style.background='';box.style.borderRadius='';
     return;
   }
@@ -2182,7 +2155,7 @@ function syncVideo(){
     ytFrame(bw/1920);
     const b=$('yfs');b.hidden=false;b.classList.add('x');
     b.style.left='12px';b.style.top='calc(env(safe-area-inset-top) + 10px)';
-    try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
+    try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
     return;
   }
   box.style.transform='';box.style.background='';box.style.borderRadius='';
@@ -2199,7 +2172,7 @@ function syncVideo(){
   /* Phones: the player is laid out at a real 1920x1080 size and scaled down to the box.
      PC: the iframe is sized straight to the box. */
   ytFrame(vw/1920);
-  try{if(apiReady)yt.setPlaybackQuality(ytQ())}catch(e){}
+  try{if(apiReady)yt.setPlaybackQuality('hd1080')}catch(e){}
 }
 
 /* Video sizing only: changing video/fullscreen layout must never change playback state. */
@@ -2220,36 +2193,20 @@ try{new ResizeObserver(()=>{if(vidMode)syncVideo()}).observe($('az'))}catch(e){}
 /* The fullscreen close control only exits the fullscreen video layout.
    It does not call pauseVideo(), playVideo(), or toggle the song state. */
 
-/* instant part: title, artist and cover show at once (small cover first, sharp one when it arrives) */
-function paintInfoFast(v){
-  const id=v.videoId,pT=$('pThumb'),mT=$('mThumb');
+function paintInfo(v){
+  $('pThumb').src=$('mThumb').src=thumbOf(v);
   $('pTitle').textContent=$('mTitle').textContent=v.title||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||(v.local?'My Files':'YouTube');
-  const hi=thumbOf(v);
-  if(v.local){pT.src=mT.src=hi;return}
-  const mq=`https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
-  pT.src=mT.src=mq;
-  if(hi!==mq){
-    const im=new Image();
-    im.onload=()=>{if(queue[idx]&&queue[idx].videoId===id)pT.src=mT.src=hi};
-    im.src=hi;
-  }
-}
-function paintInfoHeavy(v){
   setPlayerBg(v);
   setTint(v);
   updateMedia(v);
-}
-function paintInfo(v){
-  paintInfoFast(v);
-  paintInfoHeavy(v);
 }
 
 function setInfo(v){
   const id=v.videoId;
   if(!v.local){fbThumb($('pThumb'),id);fbThumb($('mThumb'),id)}
   $('likeBtn').classList.toggle('liked',getLiked().some(x=>x.videoId===id));
-  paintInfoFast(v);
+  paintInfo(v);
   if(v.local&&!(id in ARTC)){
     ensureMeta(v).then(()=>{
       if(!queue[idx]||queue[idx].videoId!==id)return;
@@ -2259,6 +2216,8 @@ function setInfo(v){
       paintInfo(v);
     });
   }
+  if(lyOn)loadLyrics(v);
+  syncVideo();
 }
 
 function resetPlayerStyles(){
@@ -2288,7 +2247,6 @@ function showFull(){
 }
 
 function closePlayer(){
-  playTok++;
   mode='closed';
   userWant=false;
   vidFS=false;
@@ -2307,49 +2265,33 @@ function closePlayer(){
   resetProg();
 }
 
-let playTok=0;
 function playAt(i,list){
   if(list)queue=(list===D.home.videos||list===D.search.videos)?list:list.slice();
   const v=queue[i];
   if(!v||!v.videoId)return;
 
   idx=i;
-  playing=false;
-  const tok=++playTok;
-
-  /* 1) title + cover change instantly */
+  addHist(v);
   if(mode==='closed')showFull();
   setInfo(v);
   resetProg();
+  playing=false;
   icons();
 
-  /* 2) right after the screen has painted: start the song and do the heavier work.
-     With the screen locked / app in background the browser never runs animation frames,
-     so there the song must start immediately (lock-screen next, auto-advance). */
-  let started=false;
-  const start=()=>{
-    if(started||tok!==playTok)return;
-    started=true;
-    if(v.local){
-      pending=null;
-      msMode(true);
-      try{ka.pause()}catch(e){}
-      if(document.hidden){try{if(apiReady)yt.stopVideo()}catch(e){}}
-      else dropYT();
-      loadLocal(v);
-    }else{
-      try{au.pause()}catch(e){}
-      msMode(false);
-      if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
-      else{pending=v.videoId;makeYT()}
-    }
-    paintInfoHeavy(v);
-    if(lyOn)loadLyrics(v);
-    syncVideo();
-    setTimeout(()=>addHist(v),0);
-  };
-  if(document.hidden)start();
-  else{requestAnimationFrame(()=>setTimeout(start,0));setTimeout(start,150)}
+  if(v.local){
+    pending=null;
+    msMode(true);
+    try{ka.pause()}catch(e){}
+    if(apiReady)try{yt.stopVideo()}catch(e){}
+    loadLocal(v);
+    return;
+  }
+
+  try{au.pause()}catch(e){}
+  msMode(false);
+  if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:'hd1080'});
+  else pending=v.videoId;
+
 }
 
 const SLEEPS=[0,15,30,60];
