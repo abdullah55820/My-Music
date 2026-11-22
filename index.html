@@ -1372,7 +1372,14 @@ au.addEventListener('error',()=>{if(isLoc()&&!isSil()&&au.getAttribute('src'))on
 const PLAY='<path d="M7 4v16l13-8z"/>';
 const PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 
-window.onYouTubeIframeAPIReady=()=>{
+let ytMaking=false;
+/* The YouTube player is created on demand, and removed while an offline song plays, so the phone's
+   lock screen / Control Centre only sees our own audio (otherwise it keeps showing the old YouTube song). */
+function makeYT(){
+  if(apiReady||ytMaking||!(window.YT&&YT.Player))return;
+  ytMaking=true;
+  const box=$('yt');
+  if(!$('ytp')){const d=document.createElement('div');d.id='ytp';box.appendChild(d)}
   yt=new YT.Player('ytp',{
     /* Phones: the player always stays 1920x1080 and is only scaled with CSS.
        PC: the iframe is sized directly to the video box (no scale), so there is no seam line. */
@@ -1380,7 +1387,7 @@ window.onYouTubeIframeAPIReady=()=>{
     playerVars:{autoplay:0,controls:1,fs:1,disablekb:1,playsinline:1,rel:0},
     events:{
       onReady:()=>{
-        apiReady=true;
+        apiReady=true;ytMaking=false;
         syncVideo();
         if(pending){const id=pending;pending=null;yt.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:ytQ()})}
       },
@@ -1388,7 +1395,14 @@ window.onYouTubeIframeAPIReady=()=>{
       onError:onYtError
     }
   });
-};
+}
+window.onYouTubeIframeAPIReady=makeYT;
+function dropYT(){
+  if(!apiReady||!yt)return;
+  try{yt.stopVideo()}catch(e){}
+  try{yt.destroy()}catch(e){}
+  yt=null;apiReady=false;ytMaking=false;
+}
 
 (function(){
   const s=document.createElement('script');
@@ -2316,13 +2330,13 @@ function playAt(i,list){
       pending=null;
       msMode(true);
       try{ka.pause()}catch(e){}
-      if(apiReady)try{yt.stopVideo()}catch(e){}
+      dropYT();
       loadLocal(v);
     }else{
       try{au.pause()}catch(e){}
       msMode(false);
       if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
-      else pending=v.videoId;
+      else{pending=v.videoId;makeYT()}
     }
     paintInfoHeavy(v);
     if(lyOn)loadLyrics(v);
