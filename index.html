@@ -86,7 +86,7 @@ svg{display:block}
 .avr .a{font-size:12.5px;opacity:.6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .avr>div{min-width:0}
 .avst{padding:18px;font-size:13px;opacity:.6;text-align:center}
-.header{max-width:1050px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 4px}
+.header{max-width:1050px;margin:auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 4px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{font-size:25px;font-weight:900;letter-spacing:-1px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
 .brand span{color:var(--accent)}
 .ib{width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
@@ -97,6 +97,13 @@ svg{display:block}
 .section{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:7px 14px;border-radius:99px;min-width:0}
 .pill h2{margin:0;font-size:17px;font-weight:750;white-space:nowrap}
+.home-switch{gap:5px;padding:4px}
+.topTab{height:34px;padding:0 13px;border-radius:18px;font-size:15px;font-weight:750;color:var(--muted);white-space:nowrap}
+.topTab.on{color:var(--text);background:var(--surface-2);box-shadow:inset 0 1px 3px rgba(0,0,0,.16)}
+#artistsPage .section .pill h2{font-size:17px}
+#av .avback{background:rgba(22,22,24,.42);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:0 4px 16px rgba(0,0,0,.16)}
+.arc .ph img{width:100%;height:100%;object-fit:cover;display:block}
+
 .status{color:var(--muted);font-size:12px;padding:6px 12px;border-radius:99px;white-space:nowrap}
 .back{width:30px;height:30px;margin-left:-8px;display:grid;place-items:center;color:var(--accent)}
 .back svg{width:22px;height:22px}
@@ -703,7 +710,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div id="bgDim" aria-hidden="true"></div>
 
 <div id="topbar">
-  <header class="header"><div class="brand">SOUND<span>FLOW</span></div></header>
+  <header class="header">
+    <div class="brand">SOUND<span>FLOW</span></div>
+    <div class="home-switch g">
+      <button class="topTab on" id="homeTopBtn" type="button">Home</button>
+      <button class="topTab" id="artistsTopBtn" type="button">Artists</button>
+    </div>
+  </header>
   <div class="hb" id="homeBar">
     <div class="section">
       <span class="pill g"><h2>Home</h2></span>
@@ -792,10 +805,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <button class="nb active" data-tab="home" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
     <span>Home</span>
-  </button>
-  <button class="nb" data-tab="artists" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
-    <span>Artists</span>
   </button>
   <button class="nb" data-tab="search" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
@@ -1317,6 +1326,8 @@ const spOpen=()=>$('sp').classList.contains('open');
 function markNav(){
   const t=spOpen()?'profile':activeTab;
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  $('homeTopBtn').classList.toggle('on',t==='home');
+  $('artistsTopBtn').classList.toggle('on',t==='artists');
 }
 /* leave Settings because another tab was chosen in the bottom bar */
 function closeProfileForNav(){
@@ -1507,13 +1518,16 @@ function dropYT(){
   document.head.appendChild(s);
 })();
 
+let ytEndedId='';
 function onState(e){
   if(isLoc())return;
   const st=e.data;
   if(st===YT.PlayerState.PLAYING){
+    ytEndedId='';
     errCount=0;
     userWant=true;
     playing=true;
+    try{if(queue[idx])updateMedia(queue[idx]);if(MS)MS.playbackState='playing'}catch(e){}
     try{yt.setPlaybackQuality(ytQ())}catch(e){}
     kaClaim();
     icons();
@@ -1523,11 +1537,15 @@ function onState(e){
     /* A YouTube pause is respected. Never auto-play over an intentional pause. */
     userWant=false;
     playing=false;
+    try{if(MS)MS.playbackState='paused'}catch(e){}
     try{ka.pause()}catch(e){}
     icons();
     $('art').classList.add('paused');
     stopT();
   }else if(st===YT.PlayerState.ENDED){
+    const endedId=queue[idx]?.videoId||'';
+    if(endedId&&ytEndedId===endedId)return;
+    ytEndedId=endedId;
     playing=false;
     icons();
     stopT();
@@ -2394,6 +2412,7 @@ function playAt(i,list){
   if(!v||!v.videoId)return;
 
   idx=i;
+  ytEndedId='';
   addHist(v);
   if(mode==='closed')showFull();
   setInfo(v);
@@ -2404,6 +2423,7 @@ function playAt(i,list){
   if(v.local){
     pending=null;
     msMode(true);
+    updateMedia(v);
     try{ka.pause()}catch(e){}
     /* screen on: remove the YouTube player; screen locked: only stop it (a new player could not start in the background) */
     if(document.hidden){try{if(apiReady)yt.stopVideo()}catch(e){}}
@@ -2415,6 +2435,7 @@ function playAt(i,list){
 
   try{au.pause()}catch(e){}
   msMode(false);
+  updateMedia(v);
   if(apiReady)yt.loadVideoById({videoId:v.videoId,startSeconds:0,suggestedQuality:ytQ()});
   else{pending=v.videoId;makeYT()}
 
@@ -2615,15 +2636,23 @@ async function bestYtArt(id){
 }
 
 async function updateMedia(v){
-  if(!MS||typeof MediaMetadata==='undefined')return;
+  if(!MS||typeof MediaMetadata==='undefined'||!v)return;
   const id=v.videoId,title=v.title||'Unknown Song',artist=v.author||(v.local?'My Files':'YouTube');
-  const mk=art=>{try{MS.metadata=new MediaMetadata({title,artist,album:'SoundFlow',artwork:art})}catch(e){}};
+  const mk=art=>{
+    if(!queue[idx]||queue[idx].videoId!==id)return;
+    try{
+      MS.metadata=new MediaMetadata({title,artist,album:'SoundFlow',artwork:art});
+      MS.playbackState=playing?'playing':'paused';
+    }catch(e){}
+  };
   if(v.local){
     const u=ARTC[id]||fallbackArt(v);
     mk([{src:u,sizes:'512x512',type:(u.match(/^data:([^;]+)/)||[])[1]||'image/jpeg'}]);
     return;
   }
-  return;
+  const fallback=[{src:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',sizes:'480x360',type:'image/jpeg'}];
+  mk(fallback);
+  try{const art=await bestYtArt(id);mk(art||fallback)}catch(e){}
 }
 
 let lastPS=0;
@@ -3094,6 +3123,33 @@ function arFill(el,a){
   const h=arHue(a);
   el.textContent=initials(a.n);
   el.style.background='linear-gradient(135deg,hsl('+h+',75%,58%),hsl('+(h+45)+',70%,38%))';
+  const cached=ARIMG[a.n];
+  const applyImage=url=>{
+    if(!url||!el.isConnected)return;
+    const im=document.createElement('img');
+    im.alt=a.n;im.loading='lazy';im.referrerPolicy='no-referrer';
+    im.onerror=()=>{im.remove()};
+    im.src=url;
+    el.replaceChildren(im);
+  };
+  if(cached){applyImage(cached);return}
+  if(!navigator.onLine)return;
+  const key=a.n;
+  const save=url=>{
+    if(!url)return;
+    ARIMG[key]=url;
+    try{LS.set('sf_arimg',ARIMG)}catch(e){}
+    applyImage(url);
+  };
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(key),{headers:{accept:'application/json'}})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      const url=d&&(d.thumbnail?.source||d.originalimage?.source);
+      if(url){save(url);return}
+      return fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch='+encodeURIComponent(a.w||a.n)+'&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=512')
+        .then(r=>r.ok?r.json():null)
+        .then(x=>{const pg=x&&x.query&&x.query.pages&&Object.values(x.query.pages)[0];if(pg&&pg.thumbnail)save(pg.thumbnail.source)});
+    }).catch(()=>{});
 }
 function arCard(a){
   const c=document.createElement('article');c.className='arc g';c.tabIndex=0;
@@ -3943,6 +3999,8 @@ function setTab(t){
 
   ['home','search','library','artists'].forEach(n=>$(n+'Page').classList.toggle('active',n===t));
   document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  $('homeTopBtn').classList.toggle('on',t==='home');
+  $('artistsTopBtn').classList.toggle('on',t==='artists');
 
   window.scrollTo(0,0);
   $('homeBar').hidden=t!=='home';
@@ -3955,6 +4013,9 @@ function setTab(t){
     else keepFilling();
   }
 }
+
+$('homeTopBtn').onclick=()=>{if(activeTab!=='home')setTab('home');else window.scrollTo({top:0,behavior:'smooth'})};
+$('artistsTopBtn').onclick=()=>setTab('artists');
 
 document.querySelectorAll('.nb').forEach(b=>{
   b.onclick=()=>{
