@@ -62,9 +62,9 @@ svg{display:block}
 .arc .ph img,.avph img{width:100%;height:100%;object-fit:cover;display:block}
 .arc .n{margin-top:8px;font-size:14px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .arc .r{margin-top:1px;font-size:11.5px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#av{position:fixed;inset:0;z-index:8800;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:#161618;color:#fff}
+#av{position:fixed;inset:0;z-index:8800;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:transparent;color:#fff}
 #av[hidden]{display:none}
-.avbg{position:fixed;inset:-90px;pointer-events:none;background-size:cover;background-position:center;filter:blur(34px) saturate(1.3);-webkit-filter:blur(34px) saturate(1.3);transform:translateZ(0)}
+.avbg{position:fixed;left:-60px;right:-60px;top:-120px;bottom:-120px;z-index:8799;background-color:#161618;pointer-events:none;background-size:cover;background-position:center;filter:blur(34px) saturate(1.3);-webkit-filter:blur(34px) saturate(1.3);transform:translateZ(0)}
 .ttl{font-size:17px;font-weight:750;color:var(--muted);padding:0 7px;white-space:nowrap;transition:color .2s}
 .ttl.on{color:var(--text)}
 .tpill{padding:7px 7px}
@@ -774,8 +774,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </main>
 
+<div class="avbg" id="avBg" hidden></div>
 <div id="av" hidden>
-  <div class="avbg" id="avBg"></div>
   <div class="avin">
     <button class="avback g" id="avBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
     <div class="avph" id="avPh"></div>
@@ -3196,7 +3196,7 @@ function openAV(a){
   arPic(a).then(u=>{if(u)avPicBg(a,u)});
   avTheme=hsl2hex(h,55,30);setThemeColor(avTheme,false);
   avHeart();
-  $('av').hidden=false;$('av').scrollTop=0;avOpen=true;
+  $('avBg').hidden=false;$('av').hidden=false;$('av').scrollTop=0;avOpen=true;
   pushLayer(()=>{if(avSkip){avSkip=false;return}closeAV()});
   loadArtist();
 }
@@ -3219,7 +3219,7 @@ function closeAV(){
   avOpen=false;
   if(ART.ctl)ART.ctl.abort();
   ART.busy=false;
-  $('av').hidden=true;
+  $('av').hidden=true;$('avBg').hidden=true;
   try{syncTop()}catch(e){}
 }
 $('avBack').onclick=()=>history.back();
