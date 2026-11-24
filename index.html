@@ -685,7 +685,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 @media (orientation:portrait) and (max-width:767px){
 :root[data-pstyle=aurora] .player{color:#15151b}
 :root[data-pstyle=aurora] .pbg{filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92);-webkit-filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92)}
-:root[data-pstyle=aurora] .pshade{background:linear-gradient(180deg,rgba(255,255,255,.66) 0,rgba(255,255,255,.52) 22%,rgba(255,255,255,.4) 55%,rgba(235,235,250,.5))}
+:root[data-pstyle=aurora] .pshade{background:
+  /* top: EXACTLY the status-bar colour (--at), then it melts into the aurora. Same colour on both
+     sides of the strip, so there is no edge or line whatever the cover looks like. */
+  linear-gradient(180deg,var(--at,rgba(255,255,255,.6)) 0,var(--at,rgba(255,255,255,.6)) calc(env(safe-area-inset-top) + 26px),transparent calc(env(safe-area-inset-top) + 230px)),
+  linear-gradient(180deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.4) 40%,rgba(235,235,250,.5))}
 :root[data-pstyle=aurora] .grab span{background:rgba(20,20,30,.4)}
 :root[data-pstyle=aurora] .grab{color:#15151b}
 
@@ -2074,6 +2078,7 @@ function paintTint(col){
   st.backgroundColor=tc;
   setThemeColor(tc);
   $('player').style.backgroundColor=tc;
+  $('player').style.setProperty('--at',tc);
 
   const old=$('topfade');
   const nw=document.createElement('div');
