@@ -746,6 +746,66 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=aurora] .lyadj{color:rgba(21,21,27,.85)}
 :root[data-pstyle=aurora] .lyadj button{background:rgba(255,255,255,.55);border-color:rgba(21,21,27,.12);color:#15151b}
 }
+
+/* ---------------- AURORA HOME (phones, portrait) ---------------- */
+@property --ht{syntax:'<color>';inherits:true;initial-value:#c9c4ff}
+:root[data-pstyle=aurora]{transition:--ht 1.4s ease}
+.ahome{display:none}
+@media (orientation:portrait) and (max-width:767px){
+:root[data-pstyle=aurora]{--a-ink:#15151b;--a-ink2:rgba(21,21,27,.6);--a-card:rgba(255,255,255,.55);--a-line:rgba(255,255,255,.7);--a-chip:rgba(255,255,255,.6);--a-nav:rgba(255,255,255,.66)}
+:root[data-pstyle=aurora][data-theme=dark]{--a-ink:#fff;--a-ink2:rgba(255,255,255,.62);--a-card:rgba(255,255,255,.075);--a-line:rgba(255,255,255,.12);--a-chip:rgba(255,255,255,.1);--a-nav:rgba(34,34,44,.62)}
+
+/* background: soft colour blobs, tinted by the song that is playing */
+:root[data-pstyle=aurora] #bg{background-image:
+  radial-gradient(70% 38% at 12% 6%,color-mix(in srgb,var(--ht) 62%,#fff) 0,transparent 72%),
+  radial-gradient(58% 36% at 96% 22%,color-mix(in srgb,var(--ht) 30%,#ffd3e2) 0,transparent 72%),
+  radial-gradient(80% 44% at 18% 98%,color-mix(in srgb,var(--ht) 34%,#cfe0ff) 0,transparent 72%),
+  linear-gradient(#f7f4ff,#eff2ff)!important;background-color:#f4f2ff;filter:none;-webkit-filter:none}
+:root[data-pstyle=aurora][data-theme=dark] #bg{background-image:
+  radial-gradient(70% 38% at 12% 6%,color-mix(in srgb,var(--ht) 55%,#000) 0,transparent 72%),
+  radial-gradient(58% 36% at 96% 22%,color-mix(in srgb,var(--ht) 28%,#2a1030) 0,transparent 72%),
+  radial-gradient(80% 44% at 18% 98%,color-mix(in srgb,var(--ht) 30%,#0c1630) 0,transparent 72%),
+  linear-gradient(#0e0e14,#0b0b10)!important;background-color:#0e0e14}
+:root[data-pstyle=aurora] #bgDim{display:none}
+
+/* greeting */
+:root[data-pstyle=aurora] .ahome{display:block;padding:4px 2px 0}
+:root[data-pstyle=aurora] .agreet h2{margin:2px 0 0;font-size:30px;font-weight:850;letter-spacing:-.5px;color:var(--a-ink)}
+:root[data-pstyle=aurora] .agreet p{margin:4px 0 14px;font-size:15px;font-weight:600;color:var(--a-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-pstyle=aurora] .aagain h3{margin:2px 0 10px;font-size:16px;font-weight:800;color:var(--a-ink)}
+:root[data-pstyle=aurora] .arow{display:flex;gap:14px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px 4px;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
+:root[data-pstyle=aurora] .arow::-webkit-scrollbar{display:none}
+:root[data-pstyle=aurora] .ag{flex:0 0 auto;width:86px;text-align:center;color:var(--a-ink)}
+:root[data-pstyle=aurora] .ag img{width:86px;height:86px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 8px 20px rgba(30,30,70,.22);background:#d8d8e4}
+:root[data-pstyle=aurora] .ag span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:7px;font-size:11.5px;font-weight:650;line-height:1.3;color:var(--a-ink2)}
+:root[data-pstyle=aurora] .ag:active img{transform:scale(.95)}
+:root[data-pstyle=aurora] .ag img{transition:transform .15s}
+
+/* top: brand + tabs */
+:root[data-pstyle=aurora] .brand{color:var(--a-ink)}
+:root[data-pstyle=aurora] #tabRow .g{background:var(--a-chip);border:0;box-shadow:none}
+:root[data-pstyle=aurora] .ttl{color:var(--a-ink2)}
+:root[data-pstyle=aurora] .ttl.on{color:var(--a-ink)}
+
+/* chips: dark pill when selected */
+:root[data-pstyle=aurora] .chips .chip{background:var(--a-chip);border:0;color:var(--a-ink);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-pstyle=aurora] .chips .chip.on{background:var(--a-ink);color:var(--bg-inv,#fff)}
+:root[data-pstyle=aurora][data-theme=dark] .chips .chip.on{background:#fff;color:#15151b}
+
+/* cards */
+:root[data-pstyle=aurora] .card{background:var(--a-card);border:1px solid var(--a-line);border-radius:26px;padding:8px;box-shadow:0 10px 26px rgba(30,30,70,.1)}
+:root[data-pstyle=aurora] .card .thumb{border-radius:19px}
+:root[data-pstyle=aurora] .title{font-size:14px;font-weight:750;color:var(--a-ink);margin:10px 4px 3px}
+:root[data-pstyle=aurora] .card .sub,:root[data-pstyle=aurora] .card p{color:var(--a-ink2);margin-left:4px}
+
+/* floating glass nav + mini player */
+:root[data-pstyle=aurora] .nav.g{background:var(--a-nav);border:1px solid var(--a-line);box-shadow:0 14px 34px rgba(30,30,70,.2);backdrop-filter:blur(26px) saturate(190%);-webkit-backdrop-filter:blur(26px) saturate(190%)}
+:root[data-pstyle=aurora] .nb{color:var(--a-ink2)}
+:root[data-pstyle=aurora] .nb.active{color:var(--a-ink);background:rgba(255,255,255,.75);box-shadow:0 4px 14px rgba(30,30,70,.14)}
+:root[data-pstyle=aurora][data-theme=dark] .nb.active{background:rgba(255,255,255,.16)}
+:root[data-pstyle=aurora] .mini.g{background:var(--a-nav);border:1px solid var(--a-line);border-radius:30px;box-shadow:0 12px 30px rgba(30,30,70,.2);backdrop-filter:blur(26px) saturate(190%);-webkit-backdrop-filter:blur(26px) saturate(190%)}
+:root[data-pstyle=aurora] .mini img{border-radius:50%}
+}
 </style>
 </head>
 <body>
@@ -760,7 +820,13 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <span class="pill g tpill"><button class="ttl" data-go="artists" type="button">Artist</button></span>
   <span class="status g" id="homeStatus">Discover music</span><span class="status g" id="arStatus" hidden></span>
 </div></div></div>
-<div class="hb" id="homeBar"><div class="chips" id="chips"></div></div>
+<div class="hb" id="homeBar">
+  <div class="ahome" id="aHome">
+    <div class="agreet"><h2 id="aGreetH"></h2><p id="aGreetP"></p></div>
+    <div class="aagain" id="aAgain" hidden><h3>আবার শুনুন</h3><div class="arow" id="aRow"></div></div>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
 
 <main class="page active" id="homePage">
   <div class="wrap">
@@ -950,7 +1016,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
     <div class="sec g">
       <h3>Style</h3>
-      <div class="row"><div><b>Song Card</b> (full player design)</div></div>
+      <div class="row"><div><b>App Design</b> (home, cards, player)</div></div>
       <div class="seg" data-k="pstyle"><button data-v="apple">Apple UI</button><button data-v="aurora">Aurora UI</button></div>
       <div class="row"><div><b>Thumbnail Shape</b></div></div>
       <div class="seg" data-k="thumb"><button data-v="round">Rounded</button><button data-v="square">Square</button></div>
@@ -2486,9 +2552,52 @@ function applyPStyle(){
     if(rp.parentNode!==opts)opts.insertBefore(rp,sh.nextSibling);
   }
   waveEl=$('wave');waveFill=waveEl&&waveEl.firstChild;
+  try{if(on){buildAgain();if(queue[idx])setHomeTint(queue[idx])}else document.documentElement.style.removeProperty('--ht')}catch(e){}
   try{if(mode==='full'&&curTint)paintTint(curTint)}catch(e){}
   if(on){try{updPeeks();if(queue[idx])buildWave(queue[idx])}catch(e){}}
 }
+/* ---------- AURORA home: greeting, "listen again" row, background tint ---------- */
+function auroraGreet(){
+  const h=new Date().getHours();
+  const g=h<5?'শুভ রাত্রি':h<12?'শুভ সকাল':h<15?'শুভ দুপুর':h<18?'শুভ বিকাল':h<20?'শুভ সন্ধ্যা':'শুভ রাত্রি';
+  const t=$('aGreetH'),pp=$('aGreetP');
+  if(t&&t.textContent!==g)t.textContent=g;
+  const sub=queue[idx]&&playing?'এখন চলছে: '+(queue[idx].title||''):'আজ কী শুনতে চান?';
+  if(pp&&pp.textContent!==sub)pp.textContent=sub;
+}
+let againSig='';
+function buildAgain(){
+  if(S.pstyle!=='aurora')return;
+  auroraGreet();
+  const box=$('aAgain'),row=$('aRow');
+  if(!box||!row)return;
+  let h=[];try{h=getHist().filter(v=>v&&v.videoId&&!v.local).slice(0,12)}catch(e){}
+  const sig=h.map(v=>v.videoId).join(',');
+  box.hidden=h.length<2;
+  if(sig===againSig)return;
+  againSig=sig;
+  row.replaceChildren();
+  h.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='ag';
+    const im=document.createElement('img');im.alt='';im.loading='lazy';im.decoding='async';im.src=thumbOf(v);
+    const t=document.createElement('span');t.textContent=v.title||'';
+    b.append(im,t);
+    b.onclick=()=>playMini(i,h);
+    row.appendChild(b);
+  });
+}
+let homeTintFor='';
+function setHomeTint(v){
+  if(S.pstyle!=='aurora'||!v||!v.videoId||v.videoId===homeTintFor)return;
+  const id=v.videoId;
+  sampleTint(v).then(col=>{
+    if(!col||!queue[idx]||queue[idx].videoId!==id)return;
+    homeTintFor=id;
+    document.documentElement.style.setProperty('--ht',col);
+  }).catch(()=>{});
+}
+
 function updPeeks(){
   if(S.pstyle!=='aurora')return;
   const n=queue.length;
@@ -2588,7 +2697,7 @@ function buildWave(v){
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
-  try{updPeeks();buildWave(v)}catch(e){}
+  try{updPeeks();buildWave(v);setHomeTint(v);auroraGreet()}catch(e){}
   $('pTitle').textContent=$('mTitle').textContent=sName(v)||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||(v.local?'My Files':'YouTube');
   setPlayerBg(v);
@@ -2760,6 +2869,7 @@ function addHist(v){
   const h=getHist().filter(x=>x.videoId!==v.videoId);
   h.unshift({videoId:v.videoId,title:v.title,author:v.author,lengthSeconds:v.lengthSeconds,local:v.local||undefined});
   LS.set('sf_history',h.slice(0,50));
+  try{buildAgain()}catch(e){}
 }
 
 const getPL=()=>LS.get('sf_playlists',[]);
