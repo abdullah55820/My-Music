@@ -694,7 +694,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=aurora] .az{--d:min(78cqw,100cqh,460px);overflow:visible}
 :root[data-pstyle=aurora] .art{width:var(--d);border-radius:50%;box-shadow:0 18px 44px rgba(30,30,70,.28)}
 :root[data-pstyle=aurora] .art.paused{transform:translate3d(0,0,0) scale(.9);box-shadow:0 10px 26px rgba(30,30,70,.22)}
-:root[data-pstyle=aurora] .apk{display:block;position:absolute;top:50%;left:50%;width:var(--d);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#d8d8e4;opacity:.92;pointer-events:none;z-index:0;box-shadow:0 10px 30px rgba(30,30,70,.18)}
+:root[data-pstyle=aurora] .apk{display:block;position:absolute;top:50%;left:50%;width:var(--d);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#d8d8e4;opacity:.92;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:0;box-shadow:0 10px 30px rgba(30,30,70,.18)}
 :root[data-pstyle=aurora] .apk img{width:100%;height:100%;object-fit:cover;display:block}
 :root[data-pstyle=aurora] .apk.l{transform:translate(calc(-50% - var(--d) - 34px),-50%)}
 :root[data-pstyle=aurora] .apk.r{transform:translate(calc(-50% + var(--d) + 34px),-50%)}
@@ -710,7 +710,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 /* waveform seek bar: bars are a mask, progress is the fill; the range input stays on top */
 :root[data-pstyle=aurora] .wave{display:block;position:relative;height:48px;margin:2px 0 -48px;pointer-events:none;
   -webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  background:linear-gradient(to right,rgba(21,21,27,.78) 0,rgba(21,21,27,.78) var(--p,0%),rgba(21,21,27,.24) var(--p,0%),rgba(21,21,27,.24) 100%)}
+  background:rgba(21,21,27,.24);overflow:hidden}
+:root[data-pstyle=aurora] .wave .wf{position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(21,21,27,.78);transform-origin:0 50%;transform:scaleX(0);will-change:transform}
 :root[data-pstyle=aurora] .player input.seek{height:48px;margin:2px 0 0;position:relative;z-index:1}
 :root[data-pstyle=aurora] .seek::-webkit-slider-runnable-track{height:48px;background:transparent}
 :root[data-pstyle=aurora] .seek::-moz-range-track{height:48px;background:transparent}
@@ -866,7 +867,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.8 2.3Z"/></svg>
         </button>
       </div>
-      <div class="wave" id="wave" aria-hidden="true"></div>
+      <div class="wave" id="wave" aria-hidden="true"><i class="wf"></i></div>
       <input type="range" id="seek" class="seek" min="0" max="100" value="0" step="any">
       <div class="trow"><span id="cur">0:00</span><span id="dur">0:00</span></div>
     </div>
@@ -1448,7 +1449,7 @@ $('spBack').onclick=()=>{
 let yt=null,apiReady=false,mode='closed',queue=[],idx=-1,playing=false,timer=null,pending=null,seeking=false,errCount=0;
 let artistPlaybackName='';
 let playerDragging=false,lastCur='',lastDur='';
-var waveEl,waveFor='';   /* var: apply() may run before this line at start-up */
+var waveEl,waveFill,waveFor='';   /* var: apply() may run before this line at start-up */
 
 const seek=$('seek');
 /* ---------- LOCAL AUDIO ENGINE (My Files, works offline) ---------- */
@@ -1671,7 +1672,7 @@ const fmt=s=>{
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
   seek.style.setProperty('--p',p+'%');
-  if(waveEl)waveEl.style.setProperty('--p',p+'%');
+  if(waveFill)waveFill.style.transform='scaleX('+(p/100)+')';
 }
 
 function tick(){
@@ -1765,15 +1766,23 @@ function toggle(){
   /* update the buttons at once; YouTube confirms a moment later */
   if(playing){
     userWant=false;
-    playing=false;icons();
+    playing=false;try{icons()}catch(e){}
     $('art').classList.add('paused');
     stopT();
-    yt.pauseVideo();
+    try{yt.pauseVideo()}catch(e){}
+    /* if YouTube did not really pause (buffering, slow iframe), ask again */
+    let tries=0;
+    const chk=()=>{
+      if(playing||userWant||isLoc()||++tries>4)return;
+      try{const st=yt.getPlayerState();if(st===YT.PlayerState.PLAYING||st===YT.PlayerState.BUFFERING)yt.pauseVideo()}catch(e){}
+      setTimeout(chk,350);
+    };
+    setTimeout(chk,350);
   }else{
     userWant=true;
-    playing=true;icons();
+    playing=true;try{icons()}catch(e){}
     $('art').classList.remove('paused');
-    yt.playVideo();
+    try{yt.playVideo()}catch(e){}
   }
 }
 
@@ -2041,14 +2050,28 @@ function setPlayerBg(v){
 const tintCache={};
 let curTint='';
 
+/* Aurora: the page background is a pale veil over the cover colours, so the status bar
+   colour is the cover colour lightened the same way (no dark brown band on top). */
+function auroraTone(col){
+  if(S.pstyle!=='aurora'||!matchMedia('(orientation:portrait) and (max-width:767px)').matches)return col;
+  let m=String(col).match(/\d+(\.\d+)?/g);
+  if(!m||m.length<3){
+    const h=String(col).replace('#','');
+    if(/^[0-9a-f]{6}$/i.test(h))m=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+    else return col;
+  }
+  const k=.64,c=i=>Math.round(+m[i]*(1-k)+255*k);
+  return 'rgb('+c(0)+','+c(1)+','+c(2)+')';
+}
 function paintTint(col){
   curTint=col;
   if(mode!=='full')return;
 
   const st=document.documentElement.style;
+  const tc=auroraTone(col);
   st.backgroundImage='none';
-  st.backgroundColor=col;
-  setThemeColor(col);
+  st.backgroundColor=tc;
+  setThemeColor(tc);
   $('player').style.backgroundColor=col;
 
   const old=$('topfade');
@@ -2062,7 +2085,7 @@ function paintTint(col){
 
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(mode==='full'&&queue[idx]&&tintCache[queue[idx].videoId]===col){
-      setThemeColor(col);
+      setThemeColor(tc);
       void document.body.offsetHeight;
     }
   }));
@@ -2453,7 +2476,8 @@ function applyPStyle(){
     if(sh.parentNode!==opts)opts.insertBefore(sh,opts.firstChild);
     if(rp.parentNode!==opts)opts.insertBefore(rp,sh.nextSibling);
   }
-  waveEl=$('wave');
+  waveEl=$('wave');waveFill=waveEl&&waveEl.firstChild;
+  try{if(mode==='full'&&curTint)paintTint(curTint)}catch(e){}
   if(on){try{updPeeks();if(queue[idx])buildWave(queue[idx])}catch(e){}}
 }
 function updPeeks(){
@@ -2488,6 +2512,70 @@ function buildWave(v){
   const u='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';
   waveEl.style.webkitMaskImage=waveEl.style.maskImage=u;
 }
+
+/* Aurora: swipe the cover left / right (or tap a side cover) to change the song */
+(function(){
+  const art=$('art'),L=$('apkL'),R=$('apkR'),az=$('az');
+  let s=null,raf=0,dx=0,busy=false;
+  const portrait=()=>matchMedia('(orientation:portrait) and (max-width:767px)').matches;
+  const live=()=>S.pstyle==='aurora'&&portrait()&&mode==='full'&&queue.length>1&&idx>=0&&!az.classList.contains('lyon')&&!az.classList.contains('vid');
+  const els=[art,L,R];
+  const dist=()=>art.getBoundingClientRect().width+34;
+  const put=x=>{els.forEach(e=>{e.style.translate=x?x+'px 0':''})};
+  const clear=()=>els.forEach(e=>{e.style.transition='';e.style.translate=''});
+  function slide(dir){           /* dir: +1 next, -1 prev */
+    if(busy||!live())return;
+    busy=true;
+    const n=queue.length,target=(idx+dir+n)%n,v=queue[target];
+    els.forEach(e=>e.style.transition='translate .26s cubic-bezier(.32,.72,0,1)');
+    put(-dir*dist());
+    setTimeout(()=>{
+      /* the cover that slid into the middle is already the new song's cover: show it, then reset */
+      try{const im=$('pThumb'),u=thumbOf(v);if(im.getAttribute('src')!==u)im.src=u}catch(e){}
+      els.forEach(e=>e.style.transition='none');
+      put(0);
+      playAt(target);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{clear();busy=false}));
+    },270);
+  }
+  L.addEventListener('click',e=>{e.stopPropagation();slide(-1)});
+  R.addEventListener('click',e=>{e.stopPropagation();slide(1)});
+
+  az.addEventListener('touchstart',e=>{
+    s=null;
+    if(busy||!live()||e.touches.length!==1||e.target.closest('.lyr'))return;
+    const t=e.touches[0];s={x:t.clientX,y:t.clientY,t:Date.now(),on:false};
+  },{passive:true});
+  az.addEventListener('touchmove',e=>{
+    if(!s)return;
+    const t=e.touches[0],mx=t.clientX-s.x,my=t.clientY-s.y;
+    if(!s.on){
+      if(Math.abs(my)>10&&Math.abs(my)>Math.abs(mx)){s=null;return}      /* vertical = minimise gesture */
+      if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.2){s.on=true;els.forEach(x=>x.style.transition='none')}
+      else return;
+    }
+    dx=mx;
+    if(!raf)raf=requestAnimationFrame(()=>{raf=0;put(dx)});
+    if(e.cancelable)e.preventDefault();
+    e.stopPropagation();
+  },{passive:false});
+  function end(cancel){
+    if(!s)return;const d=s;s=null;
+    if(!d.on)return;
+    if(raf){cancelAnimationFrame(raf);raf=0}
+    const D=dist(),v=Math.abs(dx)/Math.max(1,Date.now()-d.t);
+    if(!cancel&&(Math.abs(dx)>D*.28||(v>.45&&Math.abs(dx)>40))){
+      /* continue from where the finger left it */
+      busy=false;put(dx);void art.offsetWidth;slide(dx<0?1:-1);
+    }else{
+      els.forEach(e=>e.style.transition='translate .25s cubic-bezier(.32,.72,0,1)');
+      put(0);
+      setTimeout(clear,270);
+    }
+  }
+  az.addEventListener('touchend',()=>end(false),{passive:true});
+  az.addEventListener('touchcancel',()=>end(true),{passive:true});
+})();
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
