@@ -684,9 +684,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .apk,.wave{display:none}
 @media (orientation:portrait) and (max-width:767px){
 :root[data-pstyle=aurora] .player{color:#15151b}
-:root[data-pstyle=aurora] body.fp #topfade{opacity:0!important}
 :root[data-pstyle=aurora] .pbg{filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92);-webkit-filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92)}
-:root[data-pstyle=aurora] .pshade{background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.4) 55%,rgba(235,235,250,.5))}
+:root[data-pstyle=aurora] .pshade{background:linear-gradient(180deg,rgba(255,255,255,.66) 0,rgba(255,255,255,.52) 22%,rgba(255,255,255,.4) 55%,rgba(235,235,250,.5))}
 :root[data-pstyle=aurora] .grab span{background:rgba(20,20,30,.4)}
 :root[data-pstyle=aurora] .grab{color:#15151b}
 
@@ -2060,8 +2059,10 @@ function auroraTone(col){
     if(/^[0-9a-f]{6}$/i.test(h))m=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
     else return col;
   }
-  const k=.64,c=i=>Math.round(+m[i]*(1-k)+255*k);
-  return 'rgb('+c(0)+','+c(1)+','+c(2)+')';
+  /* same treatment as the blurred background (saturate 170%, brightness 118%, then the white veil) */
+  const r=+m[0],g=+m[1],b=+m[2],L=.299*r+.587*g+.114*b,sat=x=>Math.max(0,Math.min(255,(L+(x-L)*1.7)*1.18));
+  const k=.58,c=x=>Math.round(sat(x)*(1-k)+255*k);
+  return 'rgb('+c(r)+','+c(g)+','+c(b)+')';
 }
 function paintTint(col){
   curTint=col;
@@ -2072,12 +2073,12 @@ function paintTint(col){
   st.backgroundImage='none';
   st.backgroundColor=tc;
   setThemeColor(tc);
-  $('player').style.backgroundColor=col;
+  $('player').style.backgroundColor=tc;
 
   const old=$('topfade');
   const nw=document.createElement('div');
   nw.id='topfade';
-  nw.style.setProperty('--pt',col);
+  nw.style.setProperty('--pt',tc);   /* Aurora: the top strip uses the same light tone, and fades into the background like Apple UI */
   old.after(nw);
   old.remove();
 
