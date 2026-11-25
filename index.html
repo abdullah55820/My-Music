@@ -880,7 +880,8 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 /* ---- player: exact layout of the reference (390 x 844 grid, positions in % / vw) ---- */
 .emring{display:none}
 :root[data-pstyle=ember] #player{background-image:linear-gradient(180deg,var(--at,#4f7d72) 0,color-mix(in srgb,var(--at,#4f7d72) 38%,#000) 100%)}
-:root[data-pstyle=ember] .pbg,:root[data-pstyle=ember] .pshade,:root[data-pstyle=ember] .grab{display:none}
+:root[data-pstyle=ember] .pshade,:root[data-pstyle=ember] .grab{display:none}
+:root[data-pstyle=ember] .pbg{display:block;opacity:.72;filter:blur(70px) saturate(300%) brightness(.92);-webkit-filter:blur(70px) saturate(300%) brightness(.92)}
 :root[data-pstyle=ember] .emtop{display:flex;position:absolute;left:0;right:0;top:0;z-index:5;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 8px) 12px 0;height:calc(env(safe-area-inset-top) + 56px);box-sizing:border-box}
 :root[data-pstyle=ember] .emtop button{width:44px;height:44px;display:grid;place-items:center;color:#fff;padding:0;border:0;background:none;border-radius:0}
 :root[data-pstyle=ember] .emtop svg{width:26px;height:26px}
@@ -906,10 +907,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .art img{border-radius:50%;animation:none}
 :root[data-pstyle=ember] .art::after{display:none}
 :root[data-pstyle=ember] .apk{display:none}
-:root[data-pstyle=ember] .emring{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible;touch-action:none}
+:root[data-pstyle=ember] .emring{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible;touch-action:none;pointer-events:none}
 :root[data-pstyle=ember] .az.lyon .emring,:root[data-pstyle=ember] .az.vid .emring{visibility:hidden}
 :root[data-pstyle=ember] .lyr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top) + 64px);bottom:26%;padding:8px 24px;z-index:4}
 .emring path{fill:none;stroke-linecap:round}
+.emring .rt,.emring .rp,.emring .rd{pointer-events:none}
 .emring .rt{stroke:rgba(255,255,255,.22);stroke-width:1.5}
 .emring .rp{stroke:#F3CC9E;stroke-width:2;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 2px rgba(243,204,158,.6))}
 .emring .rh{stroke:transparent;stroke-width:16;pointer-events:stroke}
@@ -921,7 +923,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .ctr>*{top:77.5%}
 :root[data-pstyle=ember] .opts>*{top:90.9%}
 :root[data-pstyle=ember] #slBtn{left:calc(50% - 39vw);width:44px;height:44px;color:rgba(255,255,255,.5)}
-:root[data-pstyle=ember] #prevBtn{left:calc(50% - 23.8vw);width:52px;height:52px;color:rgba(255,255,255,.5)}
+:root[data-pstyle=ember] #prevBtn{left:calc(50% - 23.8vw);width:52px;height:52px;color:#fff}
 :root[data-pstyle=ember] #playBtn{left:50%;width:77px;height:77px;border-radius:50%;background:#fff;color:#16201e;box-shadow:0 10px 26px rgba(0,0,0,.22)}
 :root[data-pstyle=ember] #nextBtn{left:calc(50% + 23.8vw);width:52px;height:52px;color:#fff}
 :root[data-pstyle=ember] #likeBtn{left:calc(50% + 38.7vw);width:44px;height:44px;color:#E9A86C}
@@ -2763,7 +2765,7 @@ function setHomeTint(v){
 }
 
 /* ---------- EMBER home: hero, shelves, list, header buttons ---------- */
-let emObs=null,emT=0;
+let emObs=null,emT=0,emSig='',emLast=0,emLater=0;
 function emSongs(){return [...document.querySelectorAll('#homeGrid > .card')].filter(c=>c._sfSong)}
 function emShelf(row,sec,items){
   row.replaceChildren();
@@ -2799,6 +2801,10 @@ function buildEmber(){
   }else hero.hidden=true;
   $('emT').hidden=cards.length<2;
   let h=[];try{h=getHist().filter(v=>v&&v.videoId&&!v.local).slice(0,6)}catch(e){}
+  const sig=h.map(v=>v.videoId).join(',')+'|'+S.saver,now=Date.now();
+  if(sig===emSig)return;
+  if(emSig&&now-emLast<60000){clearTimeout(emLater);emLater=setTimeout(buildEmber,60000-(now-emLast)+50);return}
+  emSig=sig;emLast=now;
   emShelf($('emRow2'),$('emS2'),h.map((v,i)=>({img:thumbOf(v),title:sName(v)||v.title||'',author:v.author||'',go:()=>playMini(i,h)})));
 }
 
@@ -2835,6 +2841,7 @@ function emRingBuild(){
   };
   sv.addEventListener('pointerdown',e=>{
     if(!canPlay())return;
+    {const r=sv.getBoundingClientRect(),d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2))/(r.width/2);if(d<.82||d>1.12)return}
     e.preventDefault();e.stopPropagation();
     seeking=true;seekPointer=e.pointerId;
     try{sv.setPointerCapture(e.pointerId)}catch(x){}
