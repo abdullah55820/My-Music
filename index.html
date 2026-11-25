@@ -935,6 +935,53 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .opts .opt.on{background:#F2F2F0;color:#0B0B0D}
 :root[data-pstyle=ember] .emfeat{aspect-ratio:4/3;margin:6px 0 22px}
 :root[data-pstyle=ember] .emfeat b{font-size:23px}
+
+/* ---- Studio player v3: round cover inside a progress ring ---- */
+.emring{display:none}
+:root[data-pstyle=ember] .pbg{opacity:0}
+:root[data-pstyle=ember] .emtop button{background:none;border-radius:0;width:48px;height:48px}
+:root[data-pstyle=ember] .emtop svg{width:26px;height:26px}
+:root[data-pstyle=ember] .emtl{display:flex}
+:root[data-pstyle=ember] .emtl b{font-size:15px;font-weight:600;color:rgba(255,255,255,.92)}
+:root[data-pstyle=ember] .pc{gap:clamp(6px,1.2vh,12px);padding-top:2px}
+:root[data-pstyle=ember] .meta{display:block;margin:6px 0 0;text-align:center}
+:root[data-pstyle=ember] .meta>div{padding:0 8px}
+:root[data-pstyle=ember] .meta h3{font-size:23px;font-weight:700;letter-spacing:-.2px;margin:0 0 4px}
+:root[data-pstyle=ember] .meta p{font-size:15px;font-weight:400;color:rgba(255,255,255,.62)}
+:root[data-pstyle=ember] .trow{justify-content:center;gap:12px;font-size:13px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:.3px;margin:2px 0 0}
+:root[data-pstyle=ember] .trow span+span{padding-left:12px;border-left:1px solid rgba(255,255,255,.3);color:#F4C896}
+:root[data-pstyle=ember] .wave,:root[data-pstyle=ember] .seek{display:none}
+:root[data-pstyle=ember] .art{position:relative;width:calc(min(100cqw,100cqh)*.77);border-radius:50%;background:#0B0B0D;box-shadow:0 18px 40px rgba(0,0,0,.35);transform:none!important}
+:root[data-pstyle=ember] .art img{border-radius:50%;animation:none}
+:root[data-pstyle=ember] .art::after{display:none}
+:root[data-pstyle=ember] .emring{display:block;position:absolute;left:50%;top:50%;width:min(100cqw,100cqh);height:min(100cqw,100cqh);transform:translate(-50%,-50%);z-index:3;overflow:visible;touch-action:none}
+:root[data-pstyle=ember] .az.lyon .emring,:root[data-pstyle=ember] .az.vid .emring{visibility:hidden}
+.emring path{fill:none;stroke-linecap:round}
+.emring .rt{stroke:rgba(255,255,255,.2);stroke-width:2.4}
+.emring .rp{stroke:#F4C896;stroke-width:3;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 3px rgba(244,200,150,.55))}
+.emring .rh{stroke:transparent;stroke-width:22;pointer-events:stroke}
+.emring .rd{fill:#F4C896;stroke:rgba(255,255,255,.25);stroke-width:2;filter:drop-shadow(0 0 4px rgba(244,200,150,.6))}
+:root[data-pstyle=ember] .ctr{justify-content:space-between;padding:0 2px}
+:root[data-pstyle=ember] .cb{width:52px;height:52px}
+:root[data-pstyle=ember] .cb svg{width:26px;height:26px;opacity:.9}
+:root[data-pstyle=ember] .cb.big{width:68px;height:68px;box-shadow:none;background:#fff;color:#111}
+:root[data-pstyle=ember] .cb.big svg{width:30px;height:30px;opacity:1}
+:root[data-pstyle=ember] .ctr .opt{width:44px;height:44px;color:rgba(255,255,255,.55)}
+:root[data-pstyle=ember] .ctr .opt svg{width:22px;height:22px}
+:root[data-pstyle=ember] .ctr .opt.on{color:#F4C896}
+:root[data-pstyle=ember] .ctr .like{position:static;margin:0;width:44px;height:44px;border-radius:0;background:none;color:rgba(255,255,255,.55)}
+:root[data-pstyle=ember] .ctr .like svg{width:25px;height:25px}
+:root[data-pstyle=ember] .ctr .like.liked{background:none;color:#F4C896}
+:root[data-pstyle=ember] .opts{background:none;border:0;padding:0 2px;margin-top:4px;justify-content:space-between}
+:root[data-pstyle=ember] .opts .opt{flex:0 0 auto;width:44px;height:44px;border-radius:0;background:none;color:rgba(255,255,255,.55)}
+:root[data-pstyle=ember] .opts .opt svg{width:22px;height:22px}
+:root[data-pstyle=ember] .opts .opt.on{background:none;color:#F4C896}
+:root[data-pstyle=ember] #shBtn{order:1}
+:root[data-pstyle=ember] #lyBtn{order:2}
+:root[data-pstyle=ember] #vdBtn{order:3}
+:root[data-pstyle=ember] #plBtn{order:4}
+:root[data-pstyle=ember] #shareBtn{order:5}
+:root[data-pstyle=ember] #rpBtn{order:6}
 }
 </style>
 </head>
@@ -1075,7 +1122,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span><svg class="garrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
   <div class="emtop" id="emTop">
     <button type="button" id="emMin" aria-label="Minimise player"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-    <div class="emtl"></div>
+    <div class="emtl"><b>Now Playing</b></div>
     <button type="button" id="emMore" aria-label="Add to playlist"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.500" r="1.800"/><circle cx="12" cy="12" r="1.800"/><circle cx="12" cy="18.500" r="1.800"/></svg></button>
   </div>
   <div class="pc">
@@ -1898,6 +1945,7 @@ const fmt=s=>{
 function setProg(p){
   p=Math.max(0,Math.min(100,p));
   seek.style.setProperty('--p',p+'%');
+  try{emRingSet(p)}catch(e){}
   if(waveFill)waveFill.style.transform='scaleX('+(p/100)+')';
 }
 
@@ -2698,7 +2746,7 @@ function applyPStyle(){
   const ctr=document.querySelector('.ctr'),opts=document.querySelector('.opts');
   const sh=$('shBtn'),rp=$('rpBtn');
   if(!ctr||!opts||!sh||!rp)return;
-  if(on){
+  if(au){
     /* shuffle + repeat move beside previous / next */
     if(sh.parentNode!==ctr)ctr.insertBefore(sh,ctr.firstChild);
     if(rp.parentNode!==ctr)ctr.appendChild(rp);
@@ -2707,6 +2755,7 @@ function applyPStyle(){
     if(rp.parentNode!==opts)opts.insertBefore(rp,sh.nextSibling);
   }
   waveEl=$('wave');waveFill=waveEl&&waveEl.firstChild;
+  try{emLayout(S.pstyle==='ember')}catch(e){}
   try{emWire();emPlace(S.pstyle==='ember');if(S.pstyle==='ember')buildEmber()}catch(e){}
   try{if(on){buildAgain()}if(au){if(queue[idx])setHomeTint(queue[idx])}else document.documentElement.style.removeProperty('--ht')}catch(e){}
   try{if(mode==='full'&&curTint)paintTint(curTint)}catch(e){}
@@ -2793,6 +2842,70 @@ function buildEmber(){
   $('emT').hidden=cards.length<2;
   let h=[];try{h=getHist().filter(v=>v&&v.videoId&&!v.local).slice(0,6)}catch(e){}
   emShelf($('emRow2'),$('emS2'),h.map((v,i)=>({img:thumbOf(v),title:sName(v)||v.title||'',author:v.author||'',go:()=>playMini(i,h)})));
+}
+
+/* ---------- STUDIO player: circular progress ring + re-ordered controls ---------- */
+const EM_R=92;
+function emRingSet(p){
+  const pr=$('emRingP'),dot=$('emRingD');if(!pr||!dot)return;
+  pr.style.strokeDashoffset=String(100-p);
+  const a=(135+270*p/100)*Math.PI/180;
+  dot.setAttribute('cx',(100+EM_R*Math.cos(a)).toFixed(2));dot.setAttribute('cy',(100+EM_R*Math.sin(a)).toFixed(2));
+}
+function emRingBuild(){
+  const az=$('az');if(!az||$('emRing'))return;
+  const ns='http://www.w3.org/2000/svg';
+  const sv=document.createElementNS(ns,'svg');sv.id='emRing';sv.setAttribute('class','emring');sv.setAttribute('viewBox','0 0 200 200');
+  const d='M34.95 165.05 A92 92 0 1 1 165.05 165.05';
+  const mk=(t,at)=>{const e=document.createElementNS(ns,t);for(const k in at)e.setAttribute(k,at[k]);sv.appendChild(e);return e};
+  mk('path',{d,class:'rt',pathLength:'100'});
+  mk('path',{d,class:'rp',id:'emRingP',pathLength:'100'});
+  mk('path',{d,class:'rh',pathLength:'100'});
+  mk('circle',{id:'emRingD',class:'rd',r:'4.6',cx:'34.95',cy:'165.05'});
+  az.appendChild(sv);
+  const pAt=e=>{
+    const r=sv.getBoundingClientRect();
+    const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+    let ang=Math.atan2(dy,dx)*180/Math.PI;if(ang<0)ang+=360;
+    let rel=(ang-135+360)%360;
+    if(rel>270)rel=rel>315?0:270;
+    return rel/270*100;
+  };
+  const upd=e=>{
+    seekTarget=pAt(e);seek.value=seekTarget;setProg(seekTarget);
+    const du=durT();if(du>0){$('cur').textContent=fmt(du*seekTarget/100);lastCur=''}
+  };
+  sv.addEventListener('pointerdown',e=>{
+    if(!canPlay())return;
+    e.preventDefault();e.stopPropagation();
+    seeking=true;seekPointer=e.pointerId;
+    try{sv.setPointerCapture(e.pointerId)}catch(x){}
+    upd(e);
+  });
+  sv.addEventListener('pointermove',e=>{if(!seeking||seekPointer!==e.pointerId)return;e.preventDefault();upd(e)});
+  const end=e=>{if(!seeking||seekPointer!==e.pointerId)return;upd(e);finishSeek()};
+  sv.addEventListener('pointerup',end);sv.addEventListener('pointercancel',end);
+  sv.addEventListener('lostpointercapture',()=>{if(seeking)finishSeek()});
+  emRingSet(parseFloat(seek.style.getPropertyValue('--p'))||0);
+}
+function emLayout(on){
+  const pc=document.querySelector('.pc'),az=$('az'),ctr=document.querySelector('.ctr'),opts=document.querySelector('.opts');
+  const meta=document.querySelector('.meta'),trow=document.querySelector('.trow'),like=$('likeBtn'),sl=$('slBtn');
+  const sh=$('shBtn'),rp=$('rpBtn'),pl=$('plBtn');
+  if(!pc||!az||!ctr||!opts||!meta||!trow||!like||!sl)return;
+  emRingBuild();
+  const wrap=seek.parentNode;
+  if(on){
+    if(meta.parentNode!==pc)pc.insertBefore(meta,az);
+    if(trow.parentNode!==pc)pc.insertBefore(trow,az);
+    if(sl.parentNode!==ctr)ctr.insertBefore(sl,ctr.firstChild);
+    if(like.parentNode!==ctr)ctr.appendChild(like);
+  }else{
+    if(meta.parentNode!==wrap)wrap.insertBefore(meta,wrap.firstChild);
+    if(like.parentNode!==meta)meta.appendChild(like);
+    if(trow.parentNode!==wrap)wrap.appendChild(trow);
+    if(sl.parentNode!==opts)opts.insertBefore(sl,pl);
+  }
 }
 function emQueue(){clearTimeout(emT);emT=setTimeout(buildEmber,160)}
 function emWire(){
