@@ -807,6 +807,9 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=aurora] .mini img{border-radius:50%}
 }
 
+
+/* Ember v2 pieces are invisible in every other design */
+.emh,.emtop,.opt .ol{display:none}
 /* =====================================================================
    EMBER UI  (Settings > App Design > Ember UI): dark, calm, cover-driven, one warm accent.
    Phones in portrait only; other layouts keep the Apple design.
@@ -871,6 +874,66 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .opts{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;gap:10px}
 :root[data-pstyle=ember] .opts .opt{flex:1;max-width:none;height:48px;border-radius:16px;background:#1A1A21;color:#D8D5DE}
 :root[data-pstyle=ember] .opts .opt.on{background:var(--accent);color:#0C0C10}
+
+/* ---------- EMBER v2: new home / list / player layout ---------- */
+:root[data-pstyle=ember] #topbar,:root[data-pstyle=ember] #tabRow,:root[data-pstyle=ember] #homeBar{display:none}
+:root[data-pstyle=ember] .wrap{padding-top:calc(env(safe-area-inset-top) + 10px)}
+:root[data-pstyle=ember] .emh{display:block}
+:root[data-pstyle=ember] .emhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 18px}
+:root[data-pstyle=ember] .emgr{display:flex;flex-direction:column;gap:2px;min-width:0}
+:root[data-pstyle=ember] .emgr span{font-size:13px;font-weight:600;color:var(--muted)}
+:root[data-pstyle=ember] .emgr b{font-size:28px;font-weight:800;letter-spacing:-.6px;line-height:1.15;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-pstyle=ember] .emhb{display:flex;gap:8px;flex:none}
+:root[data-pstyle=ember] .emhb button{width:44px;height:44px;border-radius:50%;background:#1F1F27;color:var(--text);display:grid;place-items:center;padding:0;border:0}
+:root[data-pstyle=ember] .emhb svg{width:22px;height:22px}
+:root[data-pstyle=ember] .emhero{position:relative;height:188px;border-radius:28px;overflow:hidden;background:linear-gradient(145deg,#FF6A3D 0%,#C2386B 52%,#4B2A8F 100%);color:#fff;padding:22px;box-sizing:border-box}
+:root[data-pstyle=ember] .emhr1{position:absolute;right:-50px;top:-60px;width:220px;height:220px;border-radius:50%;border:38px solid rgba(255,255,255,.13)}
+:root[data-pstyle=ember] .emhr2{position:absolute;left:120px;bottom:-80px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.12)}
+:root[data-pstyle=ember] .emht{position:relative;display:flex;flex-direction:column;gap:6px}
+:root[data-pstyle=ember] .emht small{font-size:11px;font-weight:800;letter-spacing:1.6px;opacity:.85}
+:root[data-pstyle=ember] .emht b{font-size:32px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
+:root[data-pstyle=ember] .emhero p{position:absolute;left:22px;bottom:20px;margin:0;font-size:13px;font-weight:500;opacity:.9;max-width:60%}
+:root[data-pstyle=ember] #emPlay{position:absolute;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:#0C0C10;color:#fff;display:grid;place-items:center;padding:0;border:0;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+:root[data-pstyle=ember] #emPlay svg{width:26px;height:26px}
+:root[data-pstyle=ember] #emPlay:active{transform:scale(.94)}
+:root[data-pstyle=ember] .emchips{margin:16px -16px 6px}
+:root[data-pstyle=ember] .emchips .chips{padding:0 16px 6px;margin:0}
+:root[data-pstyle=ember] .emsh{margin:14px 0 4px}
+:root[data-pstyle=ember] .emsh h3,:root[data-pstyle=ember] .emT{margin:0 0 12px;font-size:19px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+:root[data-pstyle=ember] .emT{margin:22px 0 8px}
+:root[data-pstyle=ember] .emrow{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 6px;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
+:root[data-pstyle=ember] .emrow::-webkit-scrollbar{display:none}
+:root[data-pstyle=ember] .es{flex:0 0 auto;width:138px;text-align:left;color:var(--text);padding:0;background:none;border:0;display:flex;flex-direction:column}
+:root[data-pstyle=ember] .es img{width:138px;height:138px;border-radius:22px;object-fit:cover;background:#1F1F27;display:block;transition:transform .15s}
+:root[data-pstyle=ember] .es:active img{transform:scale(.96)}
+:root[data-pstyle=ember] .es b{margin-top:9px;font-size:14px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+:root[data-pstyle=ember] .es span{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+
+/* ranked list: the rest of the songs */
+:root[data-pstyle=ember] #homeGrid{display:block;counter-reset:rk 0}
+:root[data-pstyle=ember] #homeGrid>.card:nth-child(-n+8){display:none}
+:root[data-pstyle=ember] #homeGrid>.card{display:grid;grid-template-columns:26px 54px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;align-content:center;height:70px;padding:0 4px;margin:0;border-radius:16px;counter-increment:rk}
+:root[data-pstyle=ember] #homeGrid>.card::before{content:counter(rk);grid-column:1;grid-row:1/3;font-size:14px;font-weight:700;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+:root[data-pstyle=ember] #homeGrid>.card .thumb{grid-column:2;grid-row:1/3;width:54px;height:54px;border-radius:14px}
+:root[data-pstyle=ember] #homeGrid>.card .title{grid-column:3;grid-row:1;margin:0;font-size:15px;font-weight:600;align-self:end;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-pstyle=ember] #homeGrid>.card .artist{grid-column:3;grid-row:2;margin:2px 0 0;font-size:12px;color:var(--muted);align-self:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-pstyle=ember] #homeGrid>.card:active{background:#16161C}
+
+/* player */
+:root[data-pstyle=ember] .grab{display:none}
+:root[data-pstyle=ember] .emtop{display:flex;position:relative;z-index:3;flex:none;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 6px) 8px 0;height:calc(env(safe-area-inset-top) + 54px);box-sizing:border-box}
+:root[data-pstyle=ember] .emtop button{width:48px;height:48px;display:grid;place-items:center;color:var(--text);padding:0;border:0;background:none}
+:root[data-pstyle=ember] .emtop svg{width:26px;height:26px}
+:root[data-pstyle=ember] .emtl{display:flex;flex-direction:column;align-items:center;gap:1px}
+:root[data-pstyle=ember] .emtl small{font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--muted)}
+:root[data-pstyle=ember] .emtl b{font-size:14px;font-weight:600;color:var(--text)}
+:root[data-pstyle=ember] .pc{padding-top:6px}
+:root[data-pstyle=ember] .art{box-shadow:0 26px 70px color-mix(in srgb,var(--accent) 38%,transparent),0 20px 40px rgba(0,0,0,.5)}
+:root[data-pstyle=ember] .opts{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+:root[data-pstyle=ember] .opts .opt{max-width:none;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+:root[data-pstyle=ember] .opts .opt svg{width:21px;height:21px}
+:root[data-pstyle=ember] .opt .ol{display:block;font-size:10.5px;font-weight:600;line-height:1}
+:root[data-pstyle=ember] .ctr .opt .ol{display:none}
 }
 </style>
 </head>
@@ -896,6 +959,25 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 <main class="page active" id="homePage">
   <div class="wrap">
+    <div class="emh" id="emHome">
+      <div class="emhead">
+        <div class="emgr"><span id="emG"></span><b>আজ কী শুনবেন?</b></div>
+        <div class="emhb">
+          <button type="button" id="emArt" aria-label="Artists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 20c.8-3.400 3.100-5.200 6.200-5.200s5.400 1.800 6.200 5.200"/><path d="M16 5.200a3.400 3.400 0 0 1 0 5.600M18.400 14.900c1.700.8 2.800 2.400 3.200 5.100"/></svg></button>
+          <button type="button" id="emProf" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.200-4 4.200-6 8-6s6.800 2 8 6"/></svg></button>
+        </div>
+      </div>
+      <div class="emhero" id="emHero">
+        <div class="emhr1"></div><div class="emhr2"></div>
+        <div class="emht"><small>DAILY MIX</small><b>আজকের<br>মিক্স</b></div>
+        <p>আপনার জন্য বাছাই করা গান</p>
+        <button type="button" id="emPlay" aria-label="Play daily mix"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.500v13a1 1 0 0 0 1.500.86l10.400-6.500a1 1 0 0 0 0-1.720L9.500 4.640A1 1 0 0 0 8 5.500Z"/></svg></button>
+      </div>
+      <div class="emchips" id="emChipSlot"></div>
+      <section class="emsh" id="emS1" hidden><h3>আপনার জন্য</h3><div class="emrow" id="emRow1"></div></section>
+      <section class="emsh" id="emS2" hidden><h3>আবার শুনুন</h3><div class="emrow" id="emRow2"></div></section>
+      <h3 class="emT" id="emT" hidden>এখন ট্রেন্ডিং</h3>
+    </div>
     <div class="grid" id="homeGrid"></div><div id="sentinel"></div>
   </div>
 </main>
@@ -991,6 +1073,11 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   <img class="pbg" id="pBg" alt="">
   <div class="pshade"></div>
   <button class="grab" id="minBtn" type="button" aria-label="Minimize"><span></span><svg class="garrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+  <div class="emtop" id="emTop">
+    <button type="button" id="emMin" aria-label="Minimise player"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="emtl"><small>NOW PLAYING</small><b id="emTl">আপনার জন্য</b></div>
+    <button type="button" id="emMore" aria-label="Add to playlist"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.500" r="1.800"/><circle cx="12" cy="12" r="1.800"/><circle cx="12" cy="18.500" r="1.800"/></svg></button>
+  </div>
   <div class="pc">
     <div class="az" id="az">
       <div class="art" id="art"><img id="pThumb" alt=""></div>
@@ -2619,6 +2706,7 @@ function applyPStyle(){
     if(rp.parentNode!==opts)opts.insertBefore(rp,sh.nextSibling);
   }
   waveEl=$('wave');waveFill=waveEl&&waveEl.firstChild;
+  try{emWire();emPlace(S.pstyle==='ember');if(S.pstyle==='ember')buildEmber()}catch(e){}
   try{if(on){buildAgain()}if(au){if(queue[idx])setHomeTint(queue[idx])}else document.documentElement.style.removeProperty('--ht')}catch(e){}
   try{if(mode==='full'&&curTint)paintTint(curTint)}catch(e){}
   if(au){try{updPeeks();if(queue[idx])buildWave(queue[idx])}catch(e){}}
@@ -2664,6 +2752,55 @@ function setHomeTint(v){
     homeTintFor=id;
     document.documentElement.style.setProperty('--ht',col);
   }).catch(()=>{});
+}
+
+/* ---------- EMBER home: hero, shelves, list, header buttons ---------- */
+let emObs=null,emT=0;
+function emSongs(){return [...document.querySelectorAll('#homeGrid > .card')].filter(c=>c._sfSong)}
+function emShelf(row,sec,items){
+  row.replaceChildren();
+  sec.hidden=items.length<2;
+  items.forEach(it=>{
+    const b=document.createElement('button');b.type='button';b.className='es';
+    const im=document.createElement('img');im.alt='';im.loading='lazy';im.decoding='async';im.src=it.img;
+    const t=document.createElement('b');t.textContent=it.title;
+    const a=document.createElement('span');a.textContent=it.author;
+    b.append(im,t,a);b.onclick=it.go;row.appendChild(b);
+  });
+}
+function buildEmber(){
+  if(S.pstyle!=='ember')return;
+  auroraGreet();
+  const g=$('emG');if(g)g.textContent=$('aGreetH')?$('aGreetH').textContent:'';
+  const cards=emSongs();
+  /* shelf 1: the first songs of the current list (tap = the card's own play action) */
+  emShelf($('emRow1'),$('emS1'),cards.slice(0,8).map(c=>({
+    img:(c.querySelector('img')||{}).src||'',title:c.querySelector('.title')?c.querySelector('.title').firstChild.textContent:'',
+    author:(c.querySelector('.artist')||{}).textContent||'',go:()=>c.click()
+  })));
+  $('emT').hidden=cards.length<=8;
+  /* shelf 2: listen again, from the play history */
+  let h=[];try{h=getHist().filter(v=>v&&v.videoId&&!v.local).slice(0,10)}catch(e){}
+  emShelf($('emRow2'),$('emS2'),h.map((v,i)=>({img:thumbOf(v),title:sName(v)||v.title||'',author:v.author||'',go:()=>playMini(i,h)})));
+}
+function emQueue(){clearTimeout(emT);emT=setTimeout(buildEmber,160)}
+function emWire(){
+  const q=(i,f)=>{const e=$(i);if(e&&!e._em){e._em=1;e.addEventListener('click',f)}};
+  q('emArt',()=>{const b=document.querySelector('.ttl[data-go=artists]');if(b)b.click()});
+  q('emProf',()=>{const b=document.querySelector('.nb[data-tab=profile]');if(b)b.click()});
+  q('emPlay',()=>{const c=emSongs();if(c.length)c[Math.floor(Math.random()*c.length)].click()});
+  q('emMin',()=>{const b=$('minBtn');if(b)b.click()});
+  q('emMore',()=>{const b=$('plBtn');if(b)b.click()});
+  if(!emObs){emObs=new MutationObserver(()=>{if(S.pstyle==='ember')emQueue()});emObs.observe($('homeGrid'),{childList:true})}
+  /* labels under the action buttons of the player */
+  const L={lyBtn:'Lyrics',vdBtn:'Video',slBtn:'Sleep',plBtn:'Playlist',shareBtn:'Share'};
+  Object.keys(L).forEach(id=>{const b=$(id);if(b&&!b.querySelector('.ol')){const s=document.createElement('span');s.className='ol';s.textContent=L[id];b.appendChild(s)}});
+}
+function emPlace(on){
+  const chips=$('chips'),slot=$('emChipSlot'),bar=$('homeBar');
+  if(!chips||!slot||!bar)return;
+  if(on&&chips.parentNode!==slot)slot.appendChild(chips);
+  else if(!on&&chips.parentNode!==bar)bar.appendChild(chips);
 }
 
 function updPeeks(){
@@ -2765,7 +2902,7 @@ function buildWave(v){
 
 function paintInfo(v){
   $('pThumb').src=$('mThumb').src=thumbOf(v);
-  try{updPeeks();buildWave(v);setHomeTint(v);auroraGreet()}catch(e){}
+  try{updPeeks();buildWave(v);setHomeTint(v);auroraGreet();if(S.pstyle==='ember')auroraGreet()}catch(e){}
   $('pTitle').textContent=$('mTitle').textContent=sName(v)||'Unknown Song';
   $('pArtist').textContent=$('mArtist').textContent=v.author||(v.local?'My Files':'YouTube');
   setPlayerBg(v);
