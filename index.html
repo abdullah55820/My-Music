@@ -4700,6 +4700,12 @@ const IDB={
 const idbGet=id=>IDB.tx('readonly',s=>s.get(id));
 const idbPut=(id,b)=>IDB.tx('readwrite',s=>s.put(b,id));
 const idbDel=id=>IDB.tx('readwrite',s=>s.delete(id));
+/* A song cut out of a huge zip/backup is copied into its own small blob first (one song in memory at a time),
+   so storing it never keeps the multi-GB source file busy. */
+async function ownBlob(b){
+  if(!b||b.size>157286400)return b;
+  try{return new Blob([await b.arrayBuffer()],{type:b.type||'audio/mpeg'})}catch(e){return b}
+}
 const idbHas=id=>IDB.tx('readonly',s=>s.getKey(id)).then(k=>k!==undefined&&k!==null);
 const getLoc=()=>LS.get('sf_local',[]);
 const setLoc=v=>LS.set('sf_local',v);
@@ -4775,7 +4781,7 @@ async function importFiles(files){
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     let ok=false;
     for(let t=0;t<3&&!ok;t++){
-      try{await idbPut(id,f);ok=true}
+      try{await idbPut(id,await ownBlob(f));ok=true}
       catch(err){await new Promise(r=>setTimeout(r,500*(t+1)))}
     }
     if(!ok){failed++;if(failed===1)alert('Could not save "'+f.name+'". Storage may be full.');if(failed>=3)break;continue}
@@ -5580,7 +5586,7 @@ $('bkIn').onchange=async e=>{
         }else if(h.k==='file'){
           bkInfo('Restoring song '+(files+failed+1)+(meta&&meta.local?' / '+meta.local.length:'')+'…');
           try{
-            if(!(await idbHas(h.id)))await idbPut(h.id,f.slice(pos,end,h.type||'audio/mpeg'));
+            if(!(await idbHas(h.id)))await idbPut(h.id,await ownBlob(f.slice(pos,end,h.type||'audio/mpeg')));
             okIds.add(h.id);files++;
           }catch(err){failed++}
         }else if(h.k==='art'){
