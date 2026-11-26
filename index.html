@@ -1423,6 +1423,30 @@ function setRows(){
 }
 addEventListener('resize',setRows);
 
+/* Status-bar colour for a photo background: sampled from the strip that is really visible
+   under the status bar (the photo is cropped by "cover"), so no separate dark band shows. */
+let PTC=null,PTbusy=false;
+function calcPT(){
+  if(PTbusy||!PHOTO)return;PTbusy=true;
+  const im=new Image();
+  im.onload=()=>{
+    try{
+      const W=innerWidth+120,H=innerHeight+240,iw=im.naturalWidth,ih=im.naturalHeight;
+      const sc=Math.max(W/iw,H/ih),vw=W/sc,vh=H/sc;
+      const sx=(iw-vw)/2+60/sc,sy=(ih-vh)/2+120/sc,sw=innerWidth/sc,sh=Math.max(1,110/sc);
+      const c=document.createElement('canvas');c.width=8;c.height=4;
+      const x=c.getContext('2d',{willReadFrequently:true});
+      x.drawImage(im,Math.max(0,sx),Math.max(0,sy),Math.min(sw,iw),Math.min(sh,ih),0,0,8,4);
+      const px=x.getImageData(0,0,8,4).data;let r=0,g=0,b=0,n=0;
+      for(let i=0;i<px.length;i+=4){r+=px[i];g+=px[i+1];b+=px[i+2];n++}
+      PTC=`rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
+    }catch(e){PTC=S.photoTop||'#222222'}
+    PTbusy=false;
+    if(mode!=='full')try{apply()}catch(e){}
+  };
+  im.onerror=()=>{PTbusy=false;PTC=S.photoTop||'#222222'};
+  im.src=PHOTO;
+}
 function apply(){
   const d=document.documentElement,st=d.style;
   if(window._sv!==S.saver){
@@ -1474,7 +1498,7 @@ function apply(){
   st.setProperty('--bgdim',((+S.bgDim||0)/100).toString());
 
   let bgImg,top;
-  if(isPhoto){bgImg=`url("${PHOTO}")`;top=S.photoTop||'#222222'}
+  if(isPhoto){bgImg=`url("${PHOTO}")`;top=PTC||S.photoTop||'#222222';if(!PTC)calcPT()}
   else if(solid){bgImg=`linear-gradient(${solid},${solid})`;top=solid}
   else{bgImg=pr;top=pr.match(/#[0-9a-f]{6}/i)[0]}
 
@@ -1610,7 +1634,7 @@ $('photoIn').addEventListener('change',e=>{
       return;
     }
 
-    PHOTO=data;
+    PHOTO=data;PTC=null;
     S.preset='photo';
     S.photoTop=top;
     save();apply();
