@@ -5385,6 +5385,7 @@ async function buildAudio(ids){
 }
 
 let bkQ=null;
+const BK_PART=400*1048576;
 
 function bkDownload(f){
   const a=document.createElement('a');
@@ -5403,8 +5404,18 @@ function bkLabel(q){
 /* One song per tap: the phone's save sheet only handles a single file reliably. */
 async function bkSaveOne(auto){
   const q=bkQ;
+  if(!q||q.busy)return;           /* a double tap must not save the same part twice */
+  q.busy=true;
+  try{await bkSaveOne0(auto)}finally{q.busy=false}
+}
+async function bkSaveOne0(auto){
+  const q=bkQ;
   if(!q)return;
-  const f=q.files[q.i],N=q.files.length;
+  const N=q.files.length;
+  let f=q.files[q.i];
+  if(q.make&&!f)f=q.files[q.i]=q.make(q.i);
+  try{f=await f;q.files[q.i]=f}catch(e){bkSInfo('Failed: '+((e&&e.message)||'could not pack this part.'));return}
+  const nameAt=i=>q.names?q.names[i]:(q.files[i]&&q.files[i].name)||'';
   let r='done';
   try{
     if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f]});
@@ -5419,14 +5430,15 @@ async function bkSaveOne(auto){
     if(q.i>=N){
       bkQ=null;
       $('bkGo').textContent='Save to file';
-      bkSInfo(f.name.toLowerCase().endsWith('.zip')?'Done. Open the zip in Files to get every song, or use Import songs and pick the zip.':'Done. '+N+' song(s) saved.');
+      bkSInfo(f.name.toLowerCase().endsWith('.zip')?(N>1?'Done. Use Import songs and pick all '+N+' zips together.':'Done. Open the zip in Files to get every song, or use Import songs and pick the zip.'):'Done. '+N+' song(s) saved.');
       return;
     }
+    if(q.make&&!q.files[q.i]){const pr=q.make(q.i);pr.catch(()=>{});q.files[q.i]=pr}   /* next part is packed while the save sheet is closed */
     bkLabel(q);
-    bkSInfo('Saved '+q.i+' of '+N+'. Tap "Save next" for: '+q.files[q.i].name);
+    bkSInfo('Saved '+q.i+' of '+N+'. Tap "Save next" for: '+nameAt(q.i));
   }else{
     bkLabel(q);
-    bkSInfo('Tap to save: '+f.name+' ('+(q.i+1)+' of '+N+')');
+    bkSInfo('Tap to save: '+nameAt(q.i)+' ('+(q.i+1)+' of '+N+')');
   }
 }
 
@@ -5506,10 +5518,22 @@ async function bkStart(mode){
   if(!ids.length)return;
   bkBusy=true;
   $('bkGo').disabled=true;$('bkAll').disabled=true;
-  let res=null,zip=null;
+  let res=null,zip=null,parts=null;
   try{
     res=await buildAudio(ids);
-    if(mode==='zip'&&res.count>1)zip=await buildZip(res.files);
+    if(mode==='zip'&&res.count>1){
+      /* Several smaller zips (about 400 MB each) instead of one huge file: the phone only has to hold one at a time. */
+      const groups=[];let cur=[],cs=0;
+      for(const f of res.files){
+        if(cur.length&&cs+f.size>BK_PART){groups.push(cur);cur=[];cs=0}
+        cur.push(f);cs+=f.size;
+      }
+      if(cur.length)groups.push(cur);
+      const N=groups.length;
+      const names=groups.map((g,i)=>'SoundFlow songs '+(N>1?'part '+(i+1)+' of '+N+' ':'')+'('+g.length+').zip');
+      const make=async i=>new File([await buildZip(groups[i])],names[i],{type:'application/zip'});
+      parts={N,names,make,first:await make(0),sizes:groups.map(g=>g.reduce((a,f)=>a+f.size,0))};
+    }
   }catch(e){
     bkSInfo('Failed: '+((e&&e.message)||'not enough memory. Select fewer songs.'));
     res=null;
@@ -5518,10 +5542,10 @@ async function bkStart(mode){
   $('bkAll').disabled=false;
   $('bkGo').disabled=!bkSel.size;
   if(!res)return;
-  if(zip){
-    const f=new File([zip],'SoundFlow songs '+res.count+'.zip',{type:'application/zip'});
-    bkQ={files:[f],i:0};
-    bkSInfo('Ready: one zip with '+res.count+' songs, '+fmtB(zip.size)+'.');
+  if(parts){
+    const files=new Array(parts.N);files[0]=parts.first;
+    bkQ={files,i:0,names:parts.names,make:parts.N>1?parts.make:null};
+    bkSInfo(parts.N>1?'Ready: '+res.count+' songs in '+parts.N+' zip parts, '+fmtB(res.size)+' in total. Save each part when asked.':'Ready: one zip with '+res.count+' songs, '+fmtB(parts.first.size)+'.');
   }else{
     bkQ={files:res.files,i:0};
     bkSInfo('Ready: '+res.count+' song(s), '+fmtB(res.size)+'.');
