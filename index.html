@@ -5377,7 +5377,7 @@ async function buildAudio(ids){
     let n=base,k=1;
     while(used[n.toLowerCase()])n=base+' ('+(++k)+')';
     used[n.toLowerCase()]=1;
-    files.push(new File([blob],n+'.'+ext,{type:blob.type||'audio/mpeg'}));
+    const nf=new File([blob],n+'.'+ext,{type:blob.type||'audio/mpeg'});nf._id=v.videoId;files.push(nf);
     size+=blob.size;
   }
   if(!files.length)throw new Error('No song files found.');
@@ -5431,47 +5431,72 @@ async function bkSaveOne(auto){
 }
 
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
-async function crc32Blob(blob){
-  let c=0xFFFFFFFF;
-  const CH=4*1048576;
+const CRCC=LS.get('sf_crc',{});
+async function crc32Blob(blob,key){
+  if(key&&CRCC[key]&&CRCC[key].s===blob.size)return CRCC[key].c;      /* already worked out for this song */
+  let c=0xFFFFFFFF,since=0;
+  const CH=1048576;
   for(let o=0;o<blob.size;o+=CH){
     const b=new Uint8Array(await blob.slice(o,o+CH).arrayBuffer());
     for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);
+    since+=b.length;
+    if(since>=16777216){since=0;await new Promise(r=>setTimeout(r,0))}   /* let the phone free its buffers */
   }
-  return (c^0xFFFFFFFF)>>>0;
+  c=(c^0xFFFFFFFF)>>>0;
+  if(key){CRCC[key]={s:blob.size,c};LS.set('sf_crc',CRCC)}            /* saved now, so a restart does not redo it */
+  return c;
 }
 
 /* Stored (no compression) zip: original quality kept, every song stays a separate file inside. */
 async function buildZip(files){
   const parts=[],cds=[];
-  let off=0,i=0;
+  let off=0,i=0,z64=false;
   const d=new Date();
   const dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF;
   const dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+  const M=0xFFFFFFFF;
+  let wl=null;try{if(navigator.wakeLock)wl=await navigator.wakeLock.request('screen')}catch(e){}
+  try{
   for(const f of files){
-    bkSInfo('Packing '+(++i)+' / '+files.length+'…');
-    const nm=BK_ENC.encode(f.name),crc=await crc32Blob(f),sz=f.size;
-    if(sz>=0xFFFFFFFF||off>=0xFFFFFFFF)throw new Error('Too big for one zip. Use "One by one" or select fewer songs.');
+    bkSInfo('Packing '+(++i)+' / '+files.length+'… keep this screen open');
+    const nm=BK_ENC.encode(f.name),crc=await crc32Blob(f,f._id),sz=f.size;
+    if(sz>=M)throw new Error('One song is bigger than 4 GB.');
     const lh=new Uint8Array(30),v=new DataView(lh.buffer);
     v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,0x0800,true);v.setUint16(8,0,true);
     v.setUint16(10,dt,true);v.setUint16(12,dd,true);v.setUint32(14,crc,true);v.setUint32(18,sz,true);v.setUint32(22,sz,true);
     v.setUint16(26,nm.length,true);v.setUint16(28,0,true);
     parts.push(lh,nm,f);
-    const ch=new Uint8Array(46),c=new DataView(ch.buffer);
-    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);
+    const big=off>=M,xl=big?12:0;               /* zip64: this song starts after the 4 GB mark */
+    if(big)z64=true;
+    const ch=new Uint8Array(46+xl),c=new DataView(ch.buffer);
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,big?45:20,true);c.setUint16(6,big?45:20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);
     c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);
-    c.setUint16(28,nm.length,true);c.setUint16(30,0,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);
-    c.setUint32(38,0,true);c.setUint32(42,off,true);
+    c.setUint16(28,nm.length,true);c.setUint16(30,xl,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);
+    c.setUint32(38,0,true);c.setUint32(42,big?M:off,true);
+    if(big){c.setUint16(46,1,true);c.setUint16(48,8,true);c.setBigUint64(50,BigInt(off),true)}
     cds.push(ch,nm);
     off+=30+nm.length+sz;
   }
+  }finally{try{if(wl)wl.release()}catch(e){}}
   let cdSize=0;
   cds.forEach(x=>{cdSize+=x.length});
+  const tail=[];
+  const n=files.length;
+  if(z64){
+    const e64=new Uint8Array(56),w=new DataView(e64.buffer);
+    w.setUint32(0,0x06064b50,true);w.setBigUint64(4,44n,true);w.setUint16(12,45,true);w.setUint16(14,45,true);
+    w.setUint32(16,0,true);w.setUint32(20,0,true);w.setBigUint64(24,BigInt(n),true);w.setBigUint64(32,BigInt(n),true);
+    w.setBigUint64(40,BigInt(cdSize),true);w.setBigUint64(48,BigInt(off),true);
+    const loc=new Uint8Array(20),l=new DataView(loc.buffer);
+    l.setUint32(0,0x07064b50,true);l.setUint32(4,0,true);l.setBigUint64(8,BigInt(off+cdSize),true);l.setUint32(16,1,true);
+    tail.push(e64,loc);
+  }
   const end=new Uint8Array(22),e=new DataView(end.buffer);
   e.setUint32(0,0x06054b50,true);e.setUint16(4,0,true);e.setUint16(6,0,true);
-  e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);
-  e.setUint32(12,cdSize,true);e.setUint32(16,off,true);e.setUint16(20,0,true);
-  return new Blob([...parts,...cds,end],{type:'application/zip'});
+  e.setUint16(8,z64?0xFFFF:n,true);e.setUint16(10,z64?0xFFFF:n,true);
+  e.setUint32(12,cdSize,true);e.setUint32(16,z64?M:off,true);e.setUint16(20,0,true);
+  tail.push(end);
+  return new Blob([...parts,...cds,...tail],{type:'application/zip'});
 }
 
 async function bkStart(mode){
