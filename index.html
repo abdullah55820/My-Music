@@ -1425,6 +1425,42 @@ addEventListener('resize',setRows);
 
 /* Status-bar colour for a photo background: sampled from the strip that is really visible
    under the status bar (the photo is cropped by "cover"), so no separate dark band shows. */
+const BLR={key:'',url:'',busy:false,want:''};
+function mkBlur(key){
+  BLR.want=key;if(BLR.busy)return;BLR.busy=true;
+  const im=new Image();
+  im.onload=()=>{
+    try{
+      const W=innerWidth+120,H=innerHeight+240,k=4,w=Math.round(W/k),h=Math.round(H/k);
+      const iw=im.naturalWidth,ih=im.naturalHeight,sc=Math.max(W/iw,H/ih),vw=W/sc,vh=H/sc;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const x=c.getContext('2d');
+      x.drawImage(im,(iw-vw)/2,(ih-vh)/2,vw,vh,0,0,w,h);
+      const px=Math.max(1,(+S.bgBlur)/k);
+      let out=c;
+      const c2=document.createElement('canvas');c2.width=w;c2.height=h;
+      const y=c2.getContext('2d');
+      let ok=false;try{y.filter='blur('+px+'px)';ok=(y.filter||'').indexOf('blur')>-1}catch(e){}
+      if(ok){y.drawImage(c,-px*2,-px*2,w+px*4,h+px*4);out=c2}
+      else{ /* no canvas filter: shrink and grow again, repeated */
+        let cur=c;
+        for(let i=0;i<3;i++){
+          const f=Math.max(2,px/2),t=document.createElement('canvas');t.width=Math.max(4,Math.round(w/f));t.height=Math.max(4,Math.round(h/f));
+          t.getContext('2d').drawImage(cur,0,0,t.width,t.height);
+          const u=document.createElement('canvas');u.width=w;u.height=h;
+          const g=u.getContext('2d');g.imageSmoothingEnabled=true;g.drawImage(t,0,0,w,h);cur=u;
+        }
+        out=cur;
+      }
+      BLR.url=out.toDataURL('image/jpeg',.88);BLR.key=key;
+    }catch(e){BLR.key=key;BLR.url=''}
+    BLR.busy=false;
+    if(BLR.want!==key)mkBlur(BLR.want);
+    else if(mode!=='full')try{apply()}catch(e){}
+  };
+  im.onerror=()=>{BLR.busy=false};
+  im.src=PHOTO;
+}
 let PTC=null,PTbusy=false;
 function calcPT(){
   if(PTbusy||!PHOTO)return;PTbusy=true;
@@ -1494,7 +1530,7 @@ function apply(){
   d.dataset.font=S.font;
   st.setProperty('--lyen',LYEN[S.lyEn]||LYEN.system);
   st.setProperty('--lybn',LYBN[S.lyBn]||LYBN.system);
-  st.setProperty('--bgfilter',(+S.bgBlur>0)?`blur(${+S.bgBlur}px)`:'none');
+  st.setProperty('--bgfilter','none');   /* blur is pre-baked into the image (BLR) - a CSS-blurred layer fades at its edge and showed a dark band under the status bar */
   st.setProperty('--bgdim',((+S.bgDim||0)/100).toString());
 
   let bgImg,top;
@@ -1502,6 +1538,10 @@ function apply(){
   else if(solid){bgImg=`linear-gradient(${solid},${solid})`;top=solid}
   else{bgImg=pr;top=pr.match(/#[0-9a-f]{6}/i)[0]}
 
+  if(isPhoto&&+S.bgBlur>0){
+    const key=PHOTO.length+'|'+S.bgBlur+'|'+innerWidth+'x'+innerHeight;
+    if(BLR.key===key&&BLR.url)bgImg=`url("${BLR.url}")`;else mkBlur(key);
+  }
   $('bg').style.backgroundImage=bgImg;
 
   if(mode!=='full'){
