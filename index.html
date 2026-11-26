@@ -915,6 +915,21 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
 /* ---- Aurora: minimal pass (everything except the player card) ---- */
 }
+
+/* ---- Settings: quiet, grouped list; one section open at a time ---- */
+.sec.g{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;padding:0;margin:0;border-bottom:1px solid rgba(127,127,140,.18)}
+.sec.g.fold{padding:0}
+.sec.g.fold h3{min-height:54px;padding:0 2px;font-size:16px;font-weight:600;color:var(--text)}
+.sec.g.fold h3::after{width:7px;height:7px;border-width:0 1.6px 1.6px 0;margin-right:6px;opacity:.55}
+.sec.g.fold.open h3{margin-bottom:2px}
+.sec.g.fold.open{padding-bottom:12px}
+.sec.g .row{margin:10px 2px;min-height:34px}
+.sec.g .row b{font-size:14px;font-weight:500;color:var(--text)}
+.sec.g .row b+*,.sec.g .row small{color:var(--muted)}
+.sec.g .seg{background:rgba(127,127,140,.14);border-radius:11px;padding:3px;margin:4px 2px 12px}
+.sec.g .seg button{padding:8px 4px;font-size:12.5px;font-weight:600;border-radius:8px}
+.sec.g .seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sec.g input[type=range]{max-width:48%}
 </style>
 </head>
 <body>
@@ -5927,6 +5942,18 @@ document.querySelectorAll('.spb .sec').forEach((sec,index)=>{
 })();
 
 setTimeout(()=>{try{applyPStyle()}catch(e){}},0);
+
+/* settings: fold every section except the first; tap a title to open it */
+(function(){
+  const secs=[...document.querySelectorAll('.sec.g')].filter(x=>x.querySelector(':scope>h3'));
+  secs.forEach((x,i)=>{x.classList.add('fold');if(i===0)x.classList.add('open');
+    x.querySelector(':scope>h3').addEventListener('click',()=>{
+      const o=x.classList.contains('open');
+      secs.forEach(y=>y.classList.remove('open'));
+      if(!o)x.classList.add('open');
+    });
+  });
+})();
 </script>
 </body>
 </html>
