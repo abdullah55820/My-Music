@@ -681,132 +681,75 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .sp.swiping{transition:none!important}
 
 /* =====================================================================
-   AURORA UI  (Settings > Style > Song Card). Apple UI is the default and untouched.
-   Only phones in portrait use it; landscape / desktop keep the Apple layout.
+   AURORA UI: a minimal design. Soft picture background, one column,
+   nothing but songs, a thin bar and three controls. Phones in portrait only.
    ===================================================================== */
 .apk,.wave{display:none}
+.emmenu .au-only{display:none}
 @media (orientation:portrait) and (max-width:767px){
-:root[data-pstyle=aurora] .player{color:#15151b}
-:root[data-pstyle=aurora] .pbg{filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92);-webkit-filter:blur(64px) saturate(170%) brightness(1.18) contrast(.92)}
-:root[data-pstyle=aurora] .pshade{background:
-  /* top: EXACTLY the status-bar colour (--at), then it melts into the aurora. Same colour on both
-     sides of the strip, so there is no edge or line whatever the cover looks like. */
-  linear-gradient(180deg,var(--at,rgba(255,255,255,.6)) 0,var(--at,rgba(255,255,255,.6)) calc(env(safe-area-inset-top) + 26px),transparent calc(env(safe-area-inset-top) + 230px)),
-  linear-gradient(180deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.4) 40%,rgba(235,235,250,.5))}
-:root[data-pstyle=aurora] .grab span{background:rgba(20,20,30,.4)}
-:root[data-pstyle=aurora] .grab{color:#15151b}
+:root[data-pstyle=aurora][data-theme=light]{color-scheme:light;--bg:#F6F5F2;--surface:#fff;--surface-2:#ECEBE7;--text:#151515;--muted:#8A8A8E;--au-line:rgba(0,0,0,.08)}
+:root[data-pstyle=aurora][data-theme=dark]{color-scheme:dark;--bg:#0D0D0F;--surface:#17171A;--surface-2:#1F1F23;--text:#F4F4F2;--muted:#8C8C92;--au-line:rgba(255,255,255,.1)}
+:root[data-pstyle=aurora][data-theme=light] #bg{background:radial-gradient(70% 38% at 12% 6%,#E6E2FB,transparent 70%),radial-gradient(55% 34% at 100% 42%,#FDE7D8,transparent 70%),radial-gradient(70% 40% at 15% 100%,#DDF2E9,transparent 70%),#F6F5F2!important;filter:none;-webkit-filter:none;opacity:1}
+:root[data-pstyle=aurora][data-theme=dark] #bg{background:radial-gradient(70% 38% at 12% 6%,rgba(86,72,190,.34),transparent 70%),radial-gradient(55% 34% at 100% 42%,rgba(190,86,60,.2),transparent 70%),radial-gradient(70% 40% at 15% 100%,rgba(40,150,120,.22),transparent 70%),#0D0D0F!important;filter:none;-webkit-filter:none;opacity:1}
+:root[data-pstyle=aurora] #bgDim,:root[data-pstyle=aurora] .ahome,:root[data-pstyle=aurora] #homeBar,:root[data-pstyle=aurora] .status{display:none}
+:root[data-pstyle=aurora] .brand{font-size:15px;font-weight:700;letter-spacing:3px;color:var(--text);text-shadow:none;filter:none}
+:root[data-pstyle=aurora] .brand span{color:var(--muted)}
+:root[data-pstyle=aurora] .pill.g{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;margin-right:18px}
+:root[data-pstyle=aurora] .ttl{background:none;box-shadow:none;border:0;padding:6px 0;font-size:15px;font-weight:500;color:var(--muted);border-radius:0}
+:root[data-pstyle=aurora] .ttl.on{color:var(--text);font-weight:700;background:none;box-shadow:inset 0 -2px 0 var(--text)}
+:root[data-pstyle=aurora] .card{background:none;border:0;box-shadow:none;padding:0;border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-pstyle=aurora] .card .thumb{border-radius:16px}
+:root[data-pstyle=aurora] .title{color:var(--text);font-weight:600}
+:root[data-pstyle=aurora] .card .sub,:root[data-pstyle=aurora] .card p,:root[data-pstyle=aurora] .artist{color:var(--muted)}
+:root[data-pstyle=aurora] .nav.g{left:0;right:0;width:auto;margin:0;transform:none;bottom:0;height:calc(54px + env(safe-area-inset-bottom));padding:0 10px env(safe-area-inset-bottom);border-radius:0;background:color-mix(in srgb,var(--bg) 82%,transparent);border:0;border-top:1px solid var(--au-line);box-shadow:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);gap:0;justify-content:space-around}
+:root[data-pstyle=aurora] .navblob{display:none}
+:root[data-pstyle=aurora] .nb{flex:1;height:54px;border-radius:0;background:none;box-shadow:none;color:var(--muted);position:relative}
+:root[data-pstyle=aurora] .nb span{display:none}
+:root[data-pstyle=aurora] .nb.active,:root[data-pstyle=aurora] .nav.dragging .nb.hov{background:none;box-shadow:none;color:var(--text)}
+:root[data-pstyle=aurora] .nb.active::after{content:'';position:absolute;bottom:7px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--text)}
+:root[data-pstyle=aurora] .mini.g{bottom:calc(62px + env(safe-area-inset-bottom));background:var(--surface);border:1px solid var(--au-line);border-radius:16px;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-pstyle=aurora] .mini img{border-radius:9px}
+:root[data-pstyle=aurora] .mini .mc{background:none;box-shadow:none;color:var(--text)}
+:root[data-pstyle=aurora] #player{background:var(--bg)!important;color:var(--text)}
+:root[data-pstyle=aurora] #topfade{display:none!important}
+:root[data-pstyle=aurora] .pbg{display:block;opacity:.3;filter:blur(90px) saturate(1.15);-webkit-filter:blur(90px) saturate(1.15)}
+:root[data-pstyle=aurora] .pshade,:root[data-pstyle=aurora] .grab,:root[data-pstyle=aurora] .emtl,:root[data-pstyle=aurora] .apk,:root[data-pstyle=aurora] .wave{display:none}
+:root[data-pstyle=aurora] .emtop{display:flex;position:absolute;left:0;right:0;top:0;z-index:5;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 6px) 10px 0;height:calc(env(safe-area-inset-top) + 54px);box-sizing:border-box}
+:root[data-pstyle=aurora] .emtop button{width:44px;height:44px;display:grid;place-items:center;color:var(--text);padding:0;border:0;background:none;border-radius:0}
+:root[data-pstyle=aurora] .emtop svg{width:24px;height:24px}
+:root[data-pstyle=aurora] .pc{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,2vh,22px);padding:calc(env(safe-area-inset-top) + 56px) 30px calc(env(safe-area-inset-bottom) + 34px);z-index:2}
+:root[data-pstyle=aurora] .az{flex:none;align-self:center;width:min(100%,43vh);height:min(100vw - 60px,43vh);overflow:visible}
+:root[data-pstyle=aurora] .art{width:100%;border-radius:22px;box-shadow:0 22px 50px rgba(0,0,0,.2);transform:none!important}
+:root[data-pstyle=aurora] .art img{border-radius:22px}
+:root[data-pstyle=aurora] .meta{margin:6px 0 0;text-align:left;align-items:center}
+:root[data-pstyle=aurora] .meta h3{font-size:22px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+:root[data-pstyle=aurora] .meta p{font-size:15px;font-weight:500;color:var(--muted)}
+:root[data-pstyle=aurora] .like{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--muted);width:44px;height:44px}
+:root[data-pstyle=aurora] .like.liked{color:var(--text);background:none}
+:root[data-pstyle=aurora] .seek{display:block;height:20px}
+:root[data-pstyle=aurora] .seek::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--text) 0,var(--text) var(--p),var(--au-line) var(--p),var(--au-line) 100%)}
+:root[data-pstyle=aurora] .seek::-moz-range-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--text) 0,var(--text) var(--p),var(--au-line) var(--p),var(--au-line) 100%)}
+:root[data-pstyle=aurora] .seek::-webkit-slider-thumb{width:11px;height:11px;margin-top:-4px;background:var(--text);box-shadow:none}
+:root[data-pstyle=aurora] .seek::-moz-range-thumb{width:11px;height:11px;background:var(--text);border:0;box-shadow:none}
+:root[data-pstyle=aurora] .trow{font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+:root[data-pstyle=aurora] .ctr{justify-content:center;gap:34px;margin:2px 0 0}
+:root[data-pstyle=aurora] .ctr .opt,:root[data-pstyle=aurora] .opts{display:none}
+:root[data-pstyle=aurora] .cb{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--text);width:52px;height:52px}
+:root[data-pstyle=aurora] .cb svg{width:28px;height:28px}
+:root[data-pstyle=aurora] .cb.big{width:68px;height:68px;border-radius:50%;background:var(--text);color:var(--bg)}
+:root[data-pstyle=aurora] .cb.big svg{width:28px;height:28px}
+:root[data-pstyle=aurora] .lyr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top) + 64px);bottom:calc(env(safe-area-inset-bottom) + 260px);padding:8px 28px;z-index:4}
+:root[data-pstyle=aurora] .emmenu.open{display:block;position:absolute;right:12px;top:calc(env(safe-area-inset-top) + 56px);z-index:6;min-width:180px;padding:6px;border-radius:16px;background:var(--surface);border:1px solid var(--au-line);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+:root[data-pstyle=aurora] .emmenu button{display:block;width:100%;height:44px;padding:0 14px;text-align:left;font-size:15px;font-weight:500;color:var(--text);border-radius:10px}
+:root[data-pstyle=aurora] .emmenu button:active{background:var(--surface-2)}
+:root[data-pstyle=aurora] .emmenu .au-only{display:block}
 
-/* circular cover + neighbours peeking in */
-:root[data-pstyle=aurora] .az{--d:min(78cqw,100cqh,460px);overflow:visible}
-:root[data-pstyle=aurora] .art{width:var(--d);border-radius:50%;box-shadow:0 18px 44px rgba(30,30,70,.28)}
-:root[data-pstyle=aurora] .art.paused{transform:translate3d(0,0,0) scale(.9);box-shadow:0 10px 26px rgba(30,30,70,.22)}
-:root[data-pstyle=aurora] .apk{display:block;position:absolute;top:50%;left:50%;width:var(--d);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#d8d8e4;opacity:.92;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:0;box-shadow:0 10px 30px rgba(30,30,70,.18)}
-:root[data-pstyle=aurora] .apk img{width:100%;height:100%;object-fit:cover;display:block}
-:root[data-pstyle=aurora] .apk.l{transform:translate(calc(-50% - var(--d) - 34px),-50%)}
-:root[data-pstyle=aurora] .apk.r{transform:translate(calc(-50% + var(--d) + 34px),-50%)}
-:root[data-pstyle=aurora] .az.lyon .apk,:root[data-pstyle=aurora] .az.vid .apk{display:none}
-:root[data-pstyle=aurora] .az.vid .art{border-radius:16px}
+/* ---- home: wordmark, two text tabs, songs ---- */
 
-/* title row */
-:root[data-pstyle=aurora] .meta h3{font-size:28px;font-weight:800;letter-spacing:-.4px;color:#15151b}
-:root[data-pstyle=aurora] .meta p{font-size:18px;font-weight:600;color:rgba(21,21,27,.62)}
-:root[data-pstyle=aurora] .like{color:rgba(21,21,27,.78);background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-:root[data-pstyle=aurora] .like.liked{color:#ff2d55}
+/* ---- bottom bar and mini player ---- */
 
-/* waveform seek bar: bars are a mask, progress is the fill; the range input stays on top */
-:root[data-pstyle=aurora] .wave{display:block;position:relative;height:48px;margin:2px 0 -48px;pointer-events:none;
-  -webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  background:rgba(21,21,27,.24);overflow:hidden}
-:root[data-pstyle=aurora] .wave .wf{position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(21,21,27,.78);transform-origin:0 50%;transform:scaleX(0);will-change:transform}
-:root[data-pstyle=aurora] .player input.seek{height:48px;margin:2px 0 0;position:relative;z-index:1}
-:root[data-pstyle=aurora] .seek::-webkit-slider-runnable-track{height:48px;background:transparent}
-:root[data-pstyle=aurora] .seek::-moz-range-track{height:48px;background:transparent}
-:root[data-pstyle=aurora] .seek::-webkit-slider-thumb{height:48px}
-:root[data-pstyle=aurora] .trow{color:rgba(21,21,27,.66);font-size:13px;font-weight:600}
-
-/* controls: shuffle, previous, play, next, repeat in one flat row */
-:root[data-pstyle=aurora] .ctr{justify-content:space-between;gap:0;padding:0 2px}
-:root[data-pstyle=aurora] .cb{width:56px;height:56px;color:#15151b;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-:root[data-pstyle=aurora] .cb svg{width:34px;height:34px}
-:root[data-pstyle=aurora] .cb.big{width:88px;height:88px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(30,30,70,.18)}
-:root[data-pstyle=aurora] .cb.big svg{width:52px;height:52px}
-:root[data-pstyle=aurora] .ctr .opt{flex:0 0 auto;width:48px;max-width:none;height:48px}
-:root[data-pstyle=aurora] .ctr .opt svg{width:26px;height:26px}
-
-/* bottom row: plain icons, no glass bar */
-:root[data-pstyle=aurora] .opts{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:4px 6px}
-:root[data-pstyle=aurora] .opt{color:#15151b}
-:root[data-pstyle=aurora] .opt.on{background:#15151b;color:#fff}
-:root[data-pstyle=aurora] .opt.ok{background:#30d158;color:#fff}
-:root[data-pstyle=aurora] .opt svg{width:25px;height:25px}
-
-/* lyrics in dark ink */
-:root[data-pstyle=aurora] .lyr{color:rgba(21,21,27,.42)}
-:root[data-pstyle=aurora] .lyr .now{color:#15151b}
-:root[data-pstyle=aurora] .lyadj{color:rgba(21,21,27,.85)}
-:root[data-pstyle=aurora] .lyadj button{background:rgba(255,255,255,.55);border-color:rgba(21,21,27,.12);color:#15151b}
+/* ---- player ---- */
 }
-
-/* ---------------- AURORA HOME (phones, portrait) ---------------- */
-@property --ht{syntax:'<color>';inherits:true;initial-value:#c9c4ff}
-:root[data-pstyle=aurora]{transition:--ht 1.4s ease}
-.ahome{display:none}
-@media (orientation:portrait) and (max-width:767px){
-:root[data-pstyle=aurora]{--a-ink:#15151b;--a-ink2:rgba(21,21,27,.6);--a-card:rgba(255,255,255,.55);--a-line:rgba(255,255,255,.7);--a-chip:rgba(255,255,255,.6);--a-nav:rgba(255,255,255,.66)}
-:root[data-pstyle=aurora][data-theme=dark]{--a-ink:#fff;--a-ink2:rgba(255,255,255,.62);--a-card:rgba(255,255,255,.075);--a-line:rgba(255,255,255,.12);--a-chip:rgba(255,255,255,.1);--a-nav:rgba(34,34,44,.62)}
-
-/* background: soft colour blobs, tinted by the song that is playing */
-:root[data-pstyle=aurora] #bg{background-image:
-  radial-gradient(70% 38% at 12% 6%,color-mix(in srgb,var(--ht) 62%,#fff) 0,transparent 72%),
-  radial-gradient(58% 36% at 96% 22%,color-mix(in srgb,var(--ht) 30%,#ffd3e2) 0,transparent 72%),
-  radial-gradient(80% 44% at 18% 98%,color-mix(in srgb,var(--ht) 34%,#cfe0ff) 0,transparent 72%),
-  linear-gradient(#f7f4ff,#eff2ff)!important;background-color:#f4f2ff;filter:none;-webkit-filter:none}
-:root[data-pstyle=aurora][data-theme=dark] #bg{background-image:
-  radial-gradient(70% 38% at 12% 6%,color-mix(in srgb,var(--ht) 55%,#000) 0,transparent 72%),
-  radial-gradient(58% 36% at 96% 22%,color-mix(in srgb,var(--ht) 28%,#2a1030) 0,transparent 72%),
-  radial-gradient(80% 44% at 18% 98%,color-mix(in srgb,var(--ht) 30%,#0c1630) 0,transparent 72%),
-  linear-gradient(#0e0e14,#0b0b10)!important;background-color:#0e0e14}
-:root[data-pstyle=aurora] #bgDim{display:none}
-
-/* greeting */
-:root[data-pstyle=aurora] .ahome{display:block;padding:4px 2px 0}
-:root[data-pstyle=aurora] .agreet h2{margin:2px 0 0;font-size:30px;font-weight:850;letter-spacing:-.5px;color:var(--a-ink)}
-:root[data-pstyle=aurora] .agreet p{margin:4px 0 14px;font-size:15px;font-weight:600;color:var(--a-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-:root[data-pstyle=aurora] .aagain h3{margin:2px 0 10px;font-size:16px;font-weight:800;color:var(--a-ink)}
-:root[data-pstyle=aurora] .arow{display:flex;gap:14px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px 4px;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
-:root[data-pstyle=aurora] .arow::-webkit-scrollbar{display:none}
-:root[data-pstyle=aurora] .ag{flex:0 0 auto;width:86px;text-align:center;color:var(--a-ink)}
-:root[data-pstyle=aurora] .ag img{width:86px;height:86px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 8px 20px rgba(30,30,70,.22);background:#d8d8e4}
-:root[data-pstyle=aurora] .ag span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:7px;font-size:11.5px;font-weight:650;line-height:1.3;color:var(--a-ink2)}
-:root[data-pstyle=aurora] .ag:active img{transform:scale(.95)}
-:root[data-pstyle=aurora] .ag img{transition:transform .15s}
-
-/* top: brand + tabs */
-:root[data-pstyle=aurora] .brand{color:var(--a-ink)}
-:root[data-pstyle=aurora] #tabRow .g{background:var(--a-chip);border:0;box-shadow:none}
-:root[data-pstyle=aurora] .ttl{color:var(--a-ink2)}
-:root[data-pstyle=aurora] .ttl.on{color:var(--a-ink)}
-
-/* chips: dark pill when selected */
-:root[data-pstyle=aurora] .chips .chip{background:var(--a-chip);border:0;color:var(--a-ink);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-:root[data-pstyle=aurora] .chips .chip.on{background:var(--a-ink);color:var(--bg-inv,#fff)}
-:root[data-pstyle=aurora][data-theme=dark] .chips .chip.on{background:#fff;color:#15151b}
-
-/* cards */
-:root[data-pstyle=aurora] .card{background:var(--a-card);border:1px solid var(--a-line);border-radius:26px;padding:8px;box-shadow:0 10px 26px rgba(30,30,70,.1)}
-:root[data-pstyle=aurora] .card .thumb{border-radius:19px}
-:root[data-pstyle=aurora] .title{font-size:14px;font-weight:750;color:var(--a-ink);margin:10px 4px 3px}
-:root[data-pstyle=aurora] .card .sub,:root[data-pstyle=aurora] .card p{color:var(--a-ink2);margin-left:4px}
-
-/* floating glass nav + mini player */
-:root[data-pstyle=aurora] .nav.g{background:var(--a-nav);border:1px solid var(--a-line);box-shadow:0 14px 34px rgba(30,30,70,.2);backdrop-filter:blur(26px) saturate(190%);-webkit-backdrop-filter:blur(26px) saturate(190%)}
-:root[data-pstyle=aurora] .nb{color:var(--a-ink2)}
-:root[data-pstyle=aurora] .nb.active{color:var(--a-ink);background:rgba(255,255,255,.75);box-shadow:0 4px 14px rgba(30,30,70,.14)}
-:root[data-pstyle=aurora][data-theme=dark] .nb.active{background:rgba(255,255,255,.16)}
-:root[data-pstyle=aurora] .mini.g{background:var(--a-nav);border:1px solid var(--a-line);border-radius:30px;box-shadow:0 12px 30px rgba(30,30,70,.2);backdrop-filter:blur(26px) saturate(190%);-webkit-backdrop-filter:blur(26px) saturate(190%)}
-:root[data-pstyle=aurora] .mini img{border-radius:50%}
-}
-
 
 /* Studio pieces are invisible in every other design */
 .emh,.emtop,.opt .ol{display:none}
@@ -891,6 +834,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 .emmenu{display:none}
 :root[data-pstyle=ember] .emmenu.open{display:block;position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 58px);z-index:6;min-width:150px;padding:6px;border-radius:16px;background:rgba(18,22,22,.94);box-shadow:0 14px 34px rgba(0,0,0,.5)}
 :root[data-pstyle=ember] .emmenu button{display:block;width:100%;height:44px;padding:0 14px;text-align:left;font-size:15px;font-weight:500;color:#fff;border-radius:10px}
+:root[data-pstyle=ember] .emmenu .au-only{display:none!important}
 :root[data-pstyle=ember] .emmenu button:active{background:rgba(255,255,255,.1)}
 
 :root[data-pstyle=ember] .pc{position:absolute;inset:0;padding:0;margin:0;display:block;z-index:2}
@@ -943,27 +887,6 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .lyadj{bottom:calc(env(safe-area-inset-bottom) + 4px)}
 
 /* ---- Aurora: minimal pass (everything except the player card) ---- */
-:root[data-pstyle=aurora] .agreet h2{font-size:26px;font-weight:700;letter-spacing:-.4px}
-:root[data-pstyle=aurora] .agreet p{font-size:14px;font-weight:500;margin:3px 0 16px}
-:root[data-pstyle=aurora] .agreet p:empty{display:none}
-:root[data-pstyle=aurora] .agreet h2{margin-bottom:14px}
-:root[data-pstyle=aurora] .agreet p:not(:empty){margin-top:3px}
-:root[data-pstyle=aurora] .aagain h3{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--a-ink2);margin:0 0 12px}
-:root[data-pstyle=aurora] .ag img{border-radius:16px;box-shadow:none}
-:root[data-pstyle=aurora] .ag span{font-weight:500}
-:root[data-pstyle=aurora] .chips .chip{background:transparent;border:1px solid var(--a-line);font-weight:600}
-:root[data-pstyle=aurora] .chips .chip.on{background:var(--a-ink);border-color:var(--a-ink)}
-:root[data-pstyle=aurora] .card{background:none;border:0;box-shadow:none;padding:0;border-radius:0}
-:root[data-pstyle=aurora] .card .thumb{border-radius:14px}
-:root[data-pstyle=aurora] .nav.g{box-shadow:none;border:1px solid var(--a-line)}
-:root[data-pstyle=aurora] .nb.active{background:rgba(127,127,150,.16);box-shadow:none}
-:root[data-pstyle=aurora] .mini.g{border-radius:18px;box-shadow:none;border:1px solid var(--a-line)}
-:root[data-pstyle=aurora] .mini img{border-radius:10px}
-:root[data-pstyle=aurora] .brand{text-shadow:none;filter:none;font-size:20px;font-weight:800}
-:root[data-pstyle=aurora] .pill.g,:root[data-pstyle=aurora] .status.g{box-shadow:none;background:transparent;border:0}
-:root[data-pstyle=aurora] .ttl{background:none;box-shadow:none;font-weight:600;color:var(--a-ink2)}
-:root[data-pstyle=aurora] .ttl.on{color:var(--a-ink);font-weight:800;background:none;box-shadow:none}
-:root[data-pstyle=aurora] .status.g{color:var(--a-ink2);font-weight:500}
 }
 </style>
 </head>
@@ -1106,7 +1029,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
     <button type="button" id="emMin" aria-label="Minimise player"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     <div class="emtl"><b>Now Playing</b></div>
     <button type="button" id="emMore" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></svg></button>
-  <div class="emmenu" id="emMenu"><button type="button" data-t="vdBtn">Video</button><button type="button" data-t="shareBtn">Share</button></div>
+  <div class="emmenu" id="emMenu"><button type="button" class="au-only" data-t="lyBtn">Lyrics</button><button type="button" data-t="vdBtn">Video</button><button type="button" class="au-only" data-t="slBtn">Sleep timer</button><button type="button" class="au-only" data-t="plBtn">Add to playlist</button><button type="button" data-t="shareBtn">Share</button><button type="button" class="au-only" data-t="shBtn" id="emMShuf">Shuffle</button><button type="button" class="au-only" data-t="rpBtn" id="emMRep">Repeat</button></div>
   </div>
   <div class="pc">
     <div class="az" id="az">
@@ -2311,6 +2234,7 @@ let curTint='';
    colour is the cover colour lightened the same way (no dark brown band on top). */
 function auroraTone(col){
   if(S.pstyle!=='aurora'||!matchMedia('(orientation:portrait) and (max-width:767px)').matches)return col;
+  return document.documentElement.dataset.theme==='dark'?'#0D0D0F':'#F6F5F2';   /* the minimal design keeps one calm colour */
   let m=String(col).match(/\d+(\.\d+)?/g);
   if(!m||m.length<3){
     const h=String(col).replace('#','');
@@ -2778,7 +2702,7 @@ function buildAgain(){
 }
 let homeTintFor='';
 function setHomeTint(v){
-  if(S.pstyle!=='aurora'||!v||!v.videoId||v.videoId===homeTintFor)return;
+  return;
   const id=v.videoId;
   sampleTint(v).then(col=>{
     if(!col||!queue[idx]||queue[idx].videoId!==id)return;
@@ -2906,7 +2830,7 @@ function emWire(){
   q('emProf',()=>{const b=document.querySelector('.nb[data-tab=profile]');if(b)b.click()});
   q('emFilt',()=>{const sl=$('emChipSlot');const o=sl.classList.toggle('open');$('emFilt').classList.toggle('on',o)});
   q('emMin',()=>{const b=$('minBtn');if(b)b.click()});
-  q('emMore',e=>{e&&e.stopPropagation&&e.stopPropagation();$('emMenu').classList.toggle('open')});
+  q('emMore',e=>{e&&e.stopPropagation&&e.stopPropagation();try{const on=id=>{const b=$(id);return b&&(b.classList.contains('on')||b.getAttribute('aria-pressed')==='true')};$('emMShuf').textContent='Shuffle'+(on('shBtn')?' · on':'');$('emMRep').textContent='Repeat'+(on('rpBtn')?' · on':'')}catch(x){}$('emMenu').classList.toggle('open')});
   document.querySelectorAll('#emMenu button').forEach(b=>{if(b._w)return;b._w=1;b.addEventListener('click',e=>{e.stopPropagation();$('emMenu').classList.remove('open');const t=$(b.dataset.t);if(t)t.click()})});
   if(!document._emMenuW){document._emMenuW=1;document.addEventListener('click',()=>{const m=$('emMenu');if(m)m.classList.remove('open')})}
   if(!emObs){emObs=new MutationObserver(()=>{if(S.pstyle==='ember')emQueue()});emObs.observe($('homeGrid'),{childList:true})}
@@ -2959,7 +2883,7 @@ function buildWave(v){
   const art=$('art'),L=$('apkL'),R=$('apkR'),az=$('az');
   let s=null,raf=0,dx=0,busy=false;
   const portrait=()=>matchMedia('(orientation:portrait) and (max-width:767px)').matches;
-  const live=()=>S.pstyle==='aurora'&&portrait()&&mode==='full'&&queue.length>1&&idx>=0&&!az.classList.contains('lyon')&&!az.classList.contains('vid');
+  const live=()=>false&&portrait()&&mode==='full'&&queue.length>1&&idx>=0&&!az.classList.contains('lyon')&&!az.classList.contains('vid');
   const els=[art,L,R];
   const dist=()=>art.getBoundingClientRect().width+34;
   const put=x=>{els.forEach(e=>{e.style.translate=x?x+'px 0':''})};
