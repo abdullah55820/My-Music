@@ -941,6 +941,29 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 :root[data-pstyle=ember] .opts .opt svg,:root[data-pstyle=ember] #slBtn svg{width:22px;height:22px}
 :root[data-pstyle=ember] #likeBtn svg{width:24px;height:24px}
 :root[data-pstyle=ember] .lyadj{bottom:calc(env(safe-area-inset-bottom) + 4px)}
+
+/* ---- Aurora: minimal pass (everything except the player card) ---- */
+:root[data-pstyle=aurora] .agreet h2{font-size:26px;font-weight:700;letter-spacing:-.4px}
+:root[data-pstyle=aurora] .agreet p{font-size:14px;font-weight:500;margin:3px 0 16px}
+:root[data-pstyle=aurora] .agreet p:empty{display:none}
+:root[data-pstyle=aurora] .agreet h2{margin-bottom:14px}
+:root[data-pstyle=aurora] .agreet p:not(:empty){margin-top:3px}
+:root[data-pstyle=aurora] .aagain h3{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--a-ink2);margin:0 0 12px}
+:root[data-pstyle=aurora] .ag img{border-radius:16px;box-shadow:none}
+:root[data-pstyle=aurora] .ag span{font-weight:500}
+:root[data-pstyle=aurora] .chips .chip{background:transparent;border:1px solid var(--a-line);font-weight:600}
+:root[data-pstyle=aurora] .chips .chip.on{background:var(--a-ink);border-color:var(--a-ink)}
+:root[data-pstyle=aurora] .card{background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+:root[data-pstyle=aurora] .card .thumb{border-radius:14px}
+:root[data-pstyle=aurora] .nav.g{box-shadow:none;border:1px solid var(--a-line)}
+:root[data-pstyle=aurora] .nb.active{background:rgba(127,127,150,.16);box-shadow:none}
+:root[data-pstyle=aurora] .mini.g{border-radius:18px;box-shadow:none;border:1px solid var(--a-line)}
+:root[data-pstyle=aurora] .mini img{border-radius:10px}
+:root[data-pstyle=aurora] .brand{text-shadow:none;filter:none;font-size:20px;font-weight:800}
+:root[data-pstyle=aurora] .pill.g,:root[data-pstyle=aurora] .status.g{box-shadow:none;background:transparent;border:0}
+:root[data-pstyle=aurora] .ttl{background:none;box-shadow:none;font-weight:600;color:var(--a-ink2)}
+:root[data-pstyle=aurora] .ttl.on{color:var(--a-ink);font-weight:800;background:none;box-shadow:none}
+:root[data-pstyle=aurora] .status.g{color:var(--a-ink2);font-weight:500}
 }
 </style>
 </head>
@@ -959,7 +982,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 <div class="hb" id="homeBar">
   <div class="ahome" id="aHome">
     <div class="agreet"><h2 id="aGreetH"></h2><p id="aGreetP"></p></div>
-    <div class="aagain" id="aAgain" hidden><h3>আবার শুনুন</h3><div class="arow" id="aRow"></div></div>
+    <div class="aagain" id="aAgain" hidden><h3>Recently played</h3><div class="arow" id="aRow"></div></div>
   </div>
   <div class="chips" id="chips"></div>
 </div>
@@ -1192,7 +1215,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
 
     <div class="sec g">
       <h3>Lyrics Style</h3>
-      <div class="lyprev">Sample lyrics line<br>আমি তোমায় ভালোবাসি</div>
+      <div class="lyprev">Sample lyrics line<br>Your lyrics will look like this</div>
       <div class="row"><div><b>English Font</b></div></div>
       <div class="seg wrap" data-k="lyEn"><button data-v="system">System</button><button data-v="serif">Serif</button><button data-v="mono">Mono</button><button data-v="rounded">Rounded</button><button data-v="script">Script</button></div>
       <div class="row"><div><b>Bangla Font</b></div></div>
@@ -2725,10 +2748,10 @@ function applyPStyle(){
 function auroraGreet(){
   const em=S.pstyle==='ember';
   const h=new Date().getHours();
-  const g=h<5?'শুভ রাত্রি':h<12?'শুভ সকাল':h<15?'শুভ দুপুর':h<18?'শুভ বিকাল':h<20?'শুভ সন্ধ্যা':'শুভ রাত্রি';
+  const g=h<5?'Good night':h<12?'Good morning':h<18?'Good afternoon':h<21?'Good evening':'Good night';
   const t=$('aGreetH'),pp=$('aGreetP');
   if(t&&t.textContent!==g)t.textContent=g;
-  const sub=em?'আজ কী শুনবেন?':queue[idx]&&playing?'এখন চলছে: '+(queue[idx].title||''):'আজ কী শুনতে চান?';
+  const sub=em?'':queue[idx]&&playing?'Now playing · '+(queue[idx].title||''):'';
   if(pp&&pp.textContent!==sub)pp.textContent=sub;
 }
 let againSig='';
