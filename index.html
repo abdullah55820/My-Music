@@ -4700,6 +4700,7 @@ const IDB={
 const idbGet=id=>IDB.tx('readonly',s=>s.get(id));
 const idbPut=(id,b)=>IDB.tx('readwrite',s=>s.put(b,id));
 const idbDel=id=>IDB.tx('readwrite',s=>s.delete(id));
+const idbHas=id=>IDB.tx('readonly',s=>s.getKey(id)).then(k=>k!==undefined&&k!==null);
 const getLoc=()=>LS.get('sf_local',[]);
 const setLoc=v=>LS.set('sf_local',v);
 
@@ -4723,8 +4724,17 @@ async function unzipStored(f){
   while(pos+30<=size){
     const h=new DataView(await f.slice(pos,pos+30).arrayBuffer());
     if(h.getUint32(0,true)!==0x04034b50)break;
-    const flags=h.getUint16(6,true),method=h.getUint16(8,true),csz=h.getUint32(18,true),nl=h.getUint16(26,true),el=h.getUint16(28,true);
+    const flags=h.getUint16(6,true),method=h.getUint16(8,true),nl=h.getUint16(26,true),el=h.getUint16(28,true);
+    let csz=h.getUint32(18,true);
     if((flags&8)||method!==0)throw new Error('This zip is compressed. Open it in Files first, then import the songs.');
+    if(csz===0xFFFFFFFF&&el>=4){            /* zip64: the real sizes sit in the extra field */
+      const ex=new DataView(await f.slice(pos+30+nl,pos+30+nl+el).arrayBuffer());
+      for(let o=0;o+4<=ex.byteLength;){
+        const id=ex.getUint16(o,true),len=ex.getUint16(o+2,true);
+        if(id===1&&len>=16){csz=Number(ex.getBigUint64(o+12,true));break}
+        o+=4+len;
+      }
+    }
     const name=dec.decode(new Uint8Array(await f.slice(pos+30,pos+30+nl).arrayBuffer())).split('/').pop();
     const ds=pos+30+nl+el;
     const ext=(name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'';
@@ -4745,23 +4755,43 @@ async function importFiles(files){
   files=flat;
   if(!files.length)return;
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(err){}
+  /* Big imports (several GB): keep the screen awake, save after every song, and skip songs that are
+     already stored, so if the phone ever restarts the app, picking the same files again just continues. */
+  let wl=null;try{if(navigator.wakeLock)wl=await navigator.wakeLock.request('screen')}catch(err){}
+  const reWake=()=>{if(!document.hidden&&wl&&wl.released)navigator.wakeLock.request('screen').then(x=>{wl=x}).catch(()=>{})};
+  document.addEventListener('visibilitychange',reWake);
   const list=getLoc();
-  let added=0,tot=files.length;
-  for(const f of files){
-    if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name))continue;
-    bkInfo('Adding '+(added+1)+' / '+tot+'…');
+  const have=new Set(list.map(v=>v.fsig).filter(Boolean));
+  const audio=files.filter(f=>f.type.startsWith('audio/')||/\.(mp3|m4a|aac|wav|flac|ogg|opus)$/i.test(f.name));
+  const tot=audio.length,totB=audio.reduce((a,f)=>a+f.size,0);
+  let added=0,skipped=0,failed=0,doneB=0,n=0;
+  const gb=b=>(b/1073741824).toFixed(b>=1073741824?2:3);
+  const mb=b=>b>=1073741824?gb(b)+' GB':Math.round(b/1048576)+' MB';
+  for(const f of audio){
+    n++;
+    const sig=f.name+'|'+f.size;
+    if(have.has(sig)){skipped++;doneB+=f.size;continue}
+    bkInfo('Adding '+n+' / '+tot+' · '+mb(doneB)+' of '+mb(totB)+(skipped?' · '+skipped+' already there':'')+'… keep this screen open');
     const id='local_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    try{await idbPut(id,f)}catch(err){alert('Could not save "'+f.name+'". Storage may be full.');continue}
-    list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true,ext:((f.name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'').toLowerCase()});
-    added++;
-    if(added%5===0)setLoc(list);
-    await new Promise(r=>setTimeout(r,0));
+    let ok=false;
+    for(let t=0;t<3&&!ok;t++){
+      try{await idbPut(id,f);ok=true}
+      catch(err){await new Promise(r=>setTimeout(r,500*(t+1)))}
+    }
+    if(!ok){failed++;if(failed===1)alert('Could not save "'+f.name+'". Storage may be full.');if(failed>=3)break;continue}
+    list.unshift({videoId:id,title:f.name.replace(/\.[^.]+$/,''),author:'My Files',lengthSeconds:0,local:true,fsig:sig,ext:((f.name.match(/\.([A-Za-z0-9]+)$/)||[])[1]||'').toLowerCase()});
+    have.add(sig);
+    setLoc(list);                  /* saved after every song */
+    added++;doneB+=f.size;
+    await new Promise(r=>setTimeout(r,f.size>20971520?60:8));   /* let the phone breathe between songs */
   }
+  document.removeEventListener('visibilitychange',reWake);
+  try{if(wl)wl.release()}catch(err){}
   setLoc(list);
   renderLib();
   refreshStorage();
   if(offMode)renderOfflineHome();
-  bkInfo(added?(added+' song(s) added to Library → My Files.'):'No audio files were added.');
+  bkInfo((added?added+' song(s) added':'No new songs added')+(skipped?', '+skipped+' were already stored':'')+(failed?', '+failed+' could not be saved (storage full?)':'')+'.');
 }
 $('locIn').onchange=e=>{const files=[...(e.target.files||[])];e.target.value='';importFiles(files)};
 
@@ -5550,7 +5580,7 @@ $('bkIn').onchange=async e=>{
         }else if(h.k==='file'){
           bkInfo('Restoring song '+(files+failed+1)+(meta&&meta.local?' / '+meta.local.length:'')+'…');
           try{
-            await idbPut(h.id,f.slice(pos,end,h.type||'audio/mpeg'));
+            if(!(await idbHas(h.id)))await idbPut(h.id,f.slice(pos,end,h.type||'audio/mpeg'));
             okIds.add(h.id);files++;
           }catch(err){failed++}
         }else if(h.k==='art'){
