@@ -1445,13 +1445,13 @@ function mkBlur(key){
   const im=new Image();
   im.onload=()=>{
     try{
-      const W=innerWidth+120,H=innerHeight+240,k=4,w=Math.round(W/k),h=Math.round(H/k);
+      const W=innerWidth+120,H=innerHeight+240,k=2,w=Math.round(W/k),h=Math.round(H/k);
       const iw=im.naturalWidth,ih=im.naturalHeight,sc=Math.max(W/iw,H/ih),vw=W/sc,vh=H/sc;
       const c=document.createElement('canvas');c.width=w;c.height=h;
       const x=c.getContext('2d');
       x.drawImage(im,(iw-vw)/2,(ih-vh)/2,vw,vh,0,0,w,h);
       /* own gaussian-like blur (3 box passes, edges clamped): looks the same on every device, no canvas-filter support needed */
-      const id=x.getImageData(0,0,w,h),d=id.data,rad=Math.max(1,Math.round((+S.bgBlur)/k*0.9));
+      const id=x.getImageData(0,0,w,h),d=id.data,rad=Math.max(1,Math.round((+S.bgBlur)/k));
       const tmp=new Uint8ClampedArray(d.length);
       const pass=(src,dst,hor)=>{
         const n=hor?w:h,m=hor?h:w,st=hor?4:w*4,ln=hor?w*4:4,win=rad*2+1;
