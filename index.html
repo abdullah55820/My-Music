@@ -1552,7 +1552,19 @@ function apply(){
     st.backgroundSize='cover';
     st.backgroundPosition='center';
     st.backgroundRepeat='no-repeat';
-    lastTop=topDim;lastDark=dark;
+    /* Aurora / Studio draw their own page background: the area under the status bar (html + theme-color) must be that exact background, not the Apple preset colour */
+    let tcol=topDim;
+    if(d.dataset.pstyle==='aurora'){
+      tcol=dark?'#0D0D0F':'#F6F5F2';
+      st.backgroundColor=tcol;
+      st.backgroundImage=dark
+        ?'radial-gradient(70% 38% at 12% 6%,rgba(86,72,190,.34),transparent 70%),radial-gradient(55% 34% at 100% 42%,rgba(190,86,60,.2),transparent 70%),radial-gradient(70% 40% at 15% 100%,rgba(40,150,120,.22),transparent 70%)'
+        :'radial-gradient(70% 38% at 12% 6%,#E6E2FB,transparent 70%),radial-gradient(55% 34% at 100% 42%,#FDE7D8,transparent 70%),radial-gradient(70% 40% at 15% 100%,#DDF2E9,transparent 70%)';
+    }else if(d.dataset.pstyle==='ember'){
+      tcol='#0B0B0D';
+      st.backgroundColor=tcol;st.backgroundImage='none';
+    }
+    lastTop=tcol;lastDark=dark;
     syncTop();
   }
 
