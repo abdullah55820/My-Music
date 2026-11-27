@@ -3810,7 +3810,8 @@ const CHIPS=[
 let chip=0;
 const TREND_G=5; /* Trending group: only shown in the Trending chip, never in All */
 const NEPALI_G=[15,16,17];
-const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G&&i!==FORYOU&&!NEPALI_G.includes(i));
+const ALL_SKIP=[2,3,4,14]; /* Punjabi, South Indian, Pakistani, Speed Records: own chips only, never in All */
+const activeGroups=()=>CHIPS[chip][1]?CHIPS[chip][1].map(i=>GROUPS[i]):GROUPS.filter((g,i)=>i!==TREND_G&&i!==FORYOU&&!NEPALI_G.includes(i)&&!ALL_SKIP.includes(i));
 
 /* "All" must stay Hindi / Bangla / Punjabi / South / Pakistani / label songs only:
    no Nepali (Nepali chip only), no viral / trending clips, no English-language songs. */
@@ -3819,6 +3820,9 @@ const EN_LABEL=/\b(vevo|atlantic records|republic records|warner (records|music)
 function notForAll(v){
   const t=String((v&&v.title)||''),a=String((v&&v.author)||''),all=t+' '+a;
   if(/nepali|nepal\b|नेपाली|नेपाल/i.test(all))return true;
+  /* All = Hindi + Bangla only: drop Punjabi / South Indian / Pakistani / other regional songs */
+  if(/punjabi|panjabi|tamil|telugu|malayalam|kannada|bhojpuri|haryanvi|marathi|gujarati|rajasthani|odia|assamese|pakistani|coke studio|\bsouth\b|speed records|aditya music|lahari|think music|mango music|sun tv|ks makhan|diljit|sidhu moose|karan aujla|ap dhillon|\bpunjab/i.test(all))return true;
+  if(/[\u0a00-\u0aff\u0b00-\u0d7f]/.test(all))return true;
   if(/\b(viral|trending|tiktok|reels?|shorts?|vlog|challenge)\b/i.test(t))return true;
   if(EN_LABEL.test(all))return true;
   const w=t.toLowerCase().replace(/\(.*?\)|\[.*?\]/g,' ').replace(/[^a-z\u0980-\u09ff\u0900-\u097f' ]/g,' ').split(/\s+/).filter(x=>x.length>0);
