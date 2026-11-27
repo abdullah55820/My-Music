@@ -74,6 +74,9 @@ svg{display:block}
 .arc .r{margin-top:1px;font-size:11.5px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #av{position:fixed;inset:0;z-index:8800;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:transparent;color:#fff}
 #av[hidden]{display:none}
+#avSolid{position:fixed;inset:0;z-index:8798;background:#161618;pointer-events:none}
+#avSolid[hidden]{display:none}
+html.avlock,html.avlock body{overflow:hidden;overscroll-behavior:none}
 .avbg{position:fixed;left:-60px;right:-60px;top:-120px;bottom:-120px;z-index:8799;background-color:#161618;pointer-events:none;background-size:cover;background-position:center;filter:blur(34px) saturate(1.3);-webkit-filter:blur(34px) saturate(1.3);transform:translateZ(0)}
 .ttl{font-size:17px;font-weight:750;color:var(--muted);padding:0 7px;white-space:nowrap;transition:color .2s}
 .ttl.on{color:var(--text)}
@@ -1058,6 +1061,7 @@ input[type=range]{width:140px;accent-color:var(--accent)}
   </div>
 </main>
 
+<div id="avSolid" hidden></div>
 <div class="avbg" id="avBg" hidden></div>
 <div id="av" hidden>
   <div class="avin">
@@ -3930,14 +3934,11 @@ const ARTISTS=[
  {n:'Coke Studio Pakistani',r:'Music Show',w:'Coke Studio Pakistan',q:['Coke Studio Pakistan','Coke Studio Pakistan songs','Coke Studio Pakistan season','Coke Studio Pakistan hits']},
  {n:'Shreya Ghoshal',r:'Singer',w:'Shreya Ghoshal singer',q:['Shreya Ghoshal songs', 'Shreya Ghoshal hits', 'Shreya Ghoshal hindi songs', 'Shreya Ghoshal new song']},
  {n:'Neha Kakkar',r:'Singer',w:'Neha Kakkar singer',q:['Neha Kakkar songs', 'Neha Kakkar hits', 'Neha Kakkar hindi songs', 'Neha Kakkar new song']},
- {n:'Kumar Sanu',r:'Singer',w:'Kumar Sanu singer',q:['Kumar Sanu songs', 'Kumar Sanu hits', 'Kumar Sanu hindi songs', 'Kumar Sanu new song']},
  {n:'Udit Narayan',r:'Singer',w:'Udit Narayan singer',q:['Udit Narayan songs', 'Udit Narayan hits', 'Udit Narayan hindi songs', 'Udit Narayan new song']},
- {n:'Alka Yagnik',r:'Singer',w:'Alka Yagnik singer',q:['Alka Yagnik songs', 'Alka Yagnik hits', 'Alka Yagnik hindi songs', 'Alka Yagnik new song']},
  {n:'KK',r:'Singer',w:'KK Indian singer',q:['KK songs', 'KK hits', 'KK hindi songs', 'KK new song']},
  {n:'Mohit Chauhan',r:'Singer',w:'Mohit Chauhan singer',q:['Mohit Chauhan songs', 'Mohit Chauhan hits', 'Mohit Chauhan hindi songs', 'Mohit Chauhan new song']},
  {n:'B Praak',r:'Singer · Composer',w:'B Praak singer',q:['B Praak songs', 'B Praak hits', 'B Praak hindi songs', 'B Praak new song']},
  {n:'Vishal Mishra',r:'Singer · Composer',w:'Vishal Mishra singer',q:['Vishal Mishra songs', 'Vishal Mishra hits', 'Vishal Mishra hindi songs', 'Vishal Mishra new song']},
- {n:'Papon',r:'Singer',w:'Papon singer',q:['Papon songs', 'Papon hits', 'Papon hindi songs', 'Papon new song']},
  {n:'Shaan',r:'Singer',w:'Shaan Indian singer',q:['Shaan songs', 'Shaan hits', 'Shaan hindi songs', 'Shaan new song']},
  {n:'Pritam',r:'Composer',w:'Pritam Chakraborty composer',q:['Pritam songs', 'Pritam hits', 'Pritam hindi songs', 'Pritam new song']},
  {n:'Anupam Roy',r:'Singer · Composer',w:'Anupam Roy singer',q:['Anupam Roy songs', 'Anupam Roy hits', 'Anupam Roy bangla songs', 'Anupam Roy new song']},
@@ -3945,9 +3946,9 @@ const ARTISTS=[
  {n:'Tahsan',r:'Singer',w:'Tahsan Rahman Khan singer',q:['Tahsan songs', 'Tahsan hits', 'Tahsan bangla songs', 'Tahsan new song']},
  {n:'Ayub Bachchu',r:'Singer · Musician',w:'Ayub Bachchu singer',q:['Ayub Bachchu songs', 'Ayub Bachchu hits', 'Ayub Bachchu bangla songs', 'Ayub Bachchu new song']},
  {n:'James',r:'Singer · Musician',w:'James Bangladeshi singer Nagar Baul',q:['James songs', 'James hits', 'James bangla songs', 'James new song']},
- {n:'Shafin Ahmed',r:'Singer · Musician',w:'Shafin Ahmed singer',q:['Shafin Ahmed songs', 'Shafin Ahmed hits', 'Shafin Ahmed bangla songs', 'Shafin Ahmed new song']},
  {n:'Kazi Shuvo',r:'Singer · Composer',w:'Kazi Shuvo singer',q:['Kazi Shuvo songs', 'Kazi Shuvo hits', 'Kazi Shuvo bangla songs', 'Kazi Shuvo new song']},
- {n:'Ahmed Hasan Sunny',r:'Singer · Composer',w:'Ahmed Hasan Sunny singer',q:['Ahmed Hasan Sunny songs', 'Ahmed Hasan Sunny hits', 'Ahmed Hasan Sunny bangla songs', 'Ahmed Hasan Sunny new song']}
+ {n:'Hridoy Khan',r:'Singer',w:'Hridoy Khan singer',q:['Hridoy Khan songs','Hridoy Khan bangla songs','Hridoy Khan hits','Hridoy Khan new song']},
+ {n:'Islamic',r:'Waz · Gojol · Hamd Naat',w:'',q:['Bangla gojol','Bangla islamic gojol new','Bangla waz mahfil','Bangla islamic song hamd naat','Kalarab shilpigosthi gojol','Bangla waz new']}
 ];
 const getFavArt=()=>LS.get('sf_fav_art',[]);
 let avOpen=false,avSkip=false,avA=null,avTheme='',avReturnTab='artists';
@@ -4087,7 +4088,7 @@ function openAV(a){
   avTheme=ARCOL[a.n]||hsl2hex(h,55,30);avTint(avTheme);
   avHeart();
   avBusy=false;avResetSwipe();
-  $('avBg').hidden=false;$('av').hidden=false;$('av').scrollTop=cached?cached.scroll:0;avOpen=true;
+  $('avBg').hidden=false;$('avSolid').hidden=false;document.documentElement.classList.add('avlock');$('av').hidden=false;$('av').scrollTop=cached?cached.scroll:0;avOpen=true;
   avPlayEnter();
   pushLayer(()=>{if(avSkip){avSkip=false;return}closeAV()});
   if(cached){
@@ -4163,7 +4164,7 @@ function closeAV(){
   avOpen=false;
   if(ART.ctl)ART.ctl.abort();
   ART.busy=false;
-  $('av').hidden=true;$('avBg').hidden=true;
+  $('av').hidden=true;$('avBg').hidden=true;$('avSolid').hidden=true;document.documentElement.classList.remove('avlock');
   avResetSwipe();
   document.body.classList.remove('avo');avCol='';
   /* BACK-FLASH FIX: no full apply() here (it re-set the whole background and restyled the app
@@ -4174,7 +4175,7 @@ function closeAV(){
 
 /* ---- smooth back: button + finger swipe slide the artist page away, then pop the history ---- */
 let avBusy=false;
-const avEls=()=>[$('av'),$('avBg')];
+const avEls=()=>[$('av'),$('avBg'),$('avSolid')];
 function avPlayEnter(){
   if(document.documentElement.dataset.anim==='off')return;
   avEls().forEach(e=>{
@@ -4208,7 +4209,7 @@ $('avBack').onclick=()=>avGoBack(0);
 (function(){
   const av=$('av'),bg=$('avBg');
   let s=null,raf=0,cx=0;
-  const paint=()=>{raf=0;const t='translate3d('+cx+'px,0,0)';av.style.transform=t;bg.style.transform=t};
+  const paint=()=>{raf=0;const t='translate3d('+cx+'px,0,0)';av.style.transform=t;bg.style.transform=t;$('avSolid').style.transform=t};
   const bad='input,textarea,[contenteditable=true]';
   av.addEventListener('touchstart',e=>{
     s=null;
